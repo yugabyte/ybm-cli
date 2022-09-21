@@ -12,7 +12,7 @@ import (
 )
 
 // clustersCmd represents the clusters command
-var clusterCmd = &cobra.Command{
+var getClusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "Get clusters in YugabyteDB Managed",
 	Long:  `Get clusters in YugabyteDB Managed`,
@@ -31,7 +31,7 @@ var clusterCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(clusterCmd)
+	getCmd.AddCommand(getClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
