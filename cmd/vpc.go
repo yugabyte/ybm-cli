@@ -93,15 +93,6 @@ var createVpcCmd = &cobra.Command{
 		}
 		vpcRequest := *openapi.NewSingleTenantVpcRequest(vpcSpec)
 
-		// fmt.Fprintln(os.Stderr, "vpcName ", vpcName)
-		// fmt.Fprintln(os.Stderr, "cloud ", openapi.CloudEnum(cloud))
-		// fmt.Fprintln(os.Stderr, "globalCidrRange ", globalCidrRange)
-		// fmt.Fprintln(os.Stderr, "createRegions ", createRegions)
-		// fmt.Fprintln(os.Stderr, "createCIDRs ", createCidrs)
-		// fmt.Fprintln(os.Stderr, "vpcRequest ", vpcRequest)
-
-		// os.Exit(1)
-
 		apiClient, _ := getApiClient(context.Background())
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
