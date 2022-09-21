@@ -16,10 +16,10 @@ import (
 var clustersCmd = &cobra.Command{
 	Use:   "clusters",
 	Short: "List clusters in YugabyteDB Managed",
-	Long:  "List clusters in YugabyteDB Managed",
+	Long:  `List clusters in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
 		configuration := ybmclient.NewConfiguration()
-		// Configure the client
+		//Configure the client
 
 		configuration.Host = os.Getenv("YBM_HOST")
 		configuration.Scheme = "https"
@@ -28,7 +28,7 @@ var clustersCmd = &cobra.Command{
 		apiKey := os.Getenv("YBM_API_KEY")
 		apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(clustersCmd.Context(), apiClient, accountID)
+		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		resp, r, err := apiClient.ClusterApi.ListClusters(context.Background(), accountID, projectID).Execute()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.ListClusters``: %v\n", err)
