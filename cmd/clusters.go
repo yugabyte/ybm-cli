@@ -25,7 +25,8 @@ var clustersCmd = &cobra.Command{
 		configuration.Scheme = "https"
 		apiClient := ybmclient.NewAPIClient(configuration)
 		// authorize user with api key
-		apiKey := os.Getenv("YBM_API_KEY")
+		apiKeyBytes, _ := os.ReadFile("credentials")
+		apiKey := string(apiKeyBytes)
 		apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)

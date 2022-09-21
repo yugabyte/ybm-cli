@@ -4,7 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 
@@ -15,12 +14,12 @@ import (
 var configureCmd = &cobra.Command{
 	Use:   "configure",
 	Short: "Configure ybm CLI",
-	Long:  `Configure the ybm CLI through this command by providing the API Key.`,
+	Long:  "Configure the ybm CLI through this command by providing the API Key.",
 	Run: func(cmd *cobra.Command, args []string) {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Enter APIKey: ")
-		apiKey, _ := reader.ReadString('\n')
-		os.Setenv("YBM_API_KEY", apiKey)
+		fmt.Print("Enter API Key: ")
+		var apiKey string
+		fmt.Scanln(&apiKey)
+		os.WriteFile("credentials", []byte(apiKey), 0644)
 	},
 }
 
