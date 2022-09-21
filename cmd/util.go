@@ -2,10 +2,41 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"net/http/httputil"
+	"os"
 
+	"github.com/hokaccha/go-prettyjson"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
+
+func prettyPrintJson(data interface{}) {
+	//b, _ := json.MarshalIndent(data, "", "  ")
+	b, _ := prettyjson.Marshal(data)
+	fmt.Println(string(b))
+}
+
+func getHostOrDefault(ctx context.Context) string {
+	host := os.Getenv("YBM_HOST")
+	if host == "" {
+		host = "devcloud.yugabyte.com"
+	}
+	return host
+}
+
+func getApiClient(ctx context.Context) (*ybmclient.APIClient, error) {
+	configuration := ybmclient.NewConfiguration()
+	//Configure the client
+
+	configuration.Host = getHostOrDefault(ctx)
+	configuration.Scheme = "https"
+	apiClient := ybmclient.NewAPIClient(configuration)
+	// authorize user with api key
+	apiKeyBytes, _ := os.ReadFile("credentials")
+	apiKey := string(apiKeyBytes)
+	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
+	return apiClient, nil
+}
 
 func getAccountID(ctx context.Context, apiClient *ybmclient.APIClient) (accountId string, accountIdOK bool, errorMessage string) {
 	accountResp, resp, err := apiClient.AccountApi.ListAccounts(ctx).Execute()

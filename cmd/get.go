@@ -7,18 +7,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List resources in YB Managed",
-	Long:  "List resources in YB Managed",
+// getCmd represents the list command
+var getCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Get resources in YB Managed",
+	Long:  "Get resources in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		//fmt.Println("list called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(getCmd)
 
 	// Here you will define your flags and configuration settings.
 

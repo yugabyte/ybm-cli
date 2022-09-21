@@ -9,25 +9,15 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 // clustersCmd represents the clusters command
-var clustersCmd = &cobra.Command{
-	Use:   "clusters",
-	Short: "List clusters in YugabyteDB Managed",
-	Long:  `List clusters in YugabyteDB Managed`,
+var clusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "Get clusters in YugabyteDB Managed",
+	Long:  `Get clusters in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		configuration := ybmclient.NewConfiguration()
-		//Configure the client
-
-		configuration.Host = os.Getenv("YBM_HOST")
-		configuration.Scheme = "https"
-		apiClient := ybmclient.NewAPIClient(configuration)
-		// authorize user with api key
-		apiKeyBytes, _ := os.ReadFile("credentials")
-		apiKey := string(apiKeyBytes)
-		apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
+		apiClient, _ := getApiClient(context.Background())
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		resp, r, err := apiClient.ClusterApi.ListClusters(context.Background(), accountID, projectID).Execute()
@@ -36,12 +26,12 @@ var clustersCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 		}
 		// response from `ListClusters`: ClusterListResponse
-		fmt.Fprintf(os.Stdout, "Response from `ClusterApi.ListClusters`: %v\n", resp)
+		prettyPrintJson(resp)
 	},
 }
 
 func init() {
-	listCmd.AddCommand(clustersCmd)
+	getCmd.AddCommand(clusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
