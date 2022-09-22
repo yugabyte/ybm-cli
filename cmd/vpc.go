@@ -12,23 +12,27 @@ import (
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
+func getVpcByName(apiClient openapi.APIClient, accountID string, projectID string, name string) openapi.ApiListSingleTenantVpcsRequest {
+	vpcListRequest := apiClient.NetworkApi.ListSingleTenantVpcs(context.Background(), accountID, projectID)
+	if name != "" {
+		vpcListRequest = vpcListRequest.Name(name)
+	}
+
+	return vpcListRequest
+}
+
 // vpcCmd represents the vpc command
 var getVpcCmd = &cobra.Command{
 	Use:   "vpc",
 	Short: "Get VPCs in YugabyteDB Managed",
 	Long:  "Get VPCs in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
+		vpcName, _ := cmd.Flags().GetString("name")
 
 		apiClient, _ := getApiClient(context.Background())
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-		vpcListRequest := apiClient.NetworkApi.ListSingleTenantVpcs(context.Background(), accountID, projectID)
-
-		// if user filters by name, add it to the request
-		vpcName, _ := cmd.Flags().GetString("name")
-		if vpcName != "" {
-			vpcListRequest = vpcListRequest.Name(vpcName)
-		}
+		vpcListRequest := getVpcByName(*apiClient, accountID, projectID, vpcName)
 		resp, r, err := vpcListRequest.Execute()
 
 		if err != nil {
