@@ -163,7 +163,6 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 		}
 		clusterInfo.SetClusterTier(ybmclient.ClusterTier(clusterTier))
 	}
-
 	if totalNodes != 0 {
 		clusterInfo.SetNumNodes(int32(totalNodes))
 	}
