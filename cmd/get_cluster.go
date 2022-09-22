@@ -33,6 +33,7 @@ var getClusterCmd = &cobra.Command{
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.ListClusters``: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			return
 		}
 		// response from `ListClusters`: ClusterListResponse
 		prettyPrintJson(resp)

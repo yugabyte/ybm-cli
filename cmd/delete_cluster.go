@@ -27,6 +27,7 @@ var deleteClusterCmd = &cobra.Command{
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.ListClusters``: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			return
 		}
 
 		fmt.Fprintf(os.Stdout, "The cluster %v is scheduled for deletion\n", clusterName)

@@ -106,6 +106,7 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
+	fmt.Println(regionInfoList)
 	for _, regionInfo := range regionInfoList {
 		numNodes, _ := strconv.ParseInt(regionInfo["num_nodes"], 10, 32)
 		regionNodes := int32(numNodes)
@@ -147,7 +148,7 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 	// For the default tier which is FREE, isProduction has to be false
 	isProduction := false
 
-	clusterName, _ := cmd.Flags().GetString("cluster_name")
+	clusterName, _ := cmd.Flags().GetString("cluster-name")
 	cloudInfo := *ybmclient.NewCloudInfoWithDefaults()
 	if cmd.Flags().Changed("cloud-type") {
 		cloudType, _ := cmd.Flags().GetString("cloud-type")
@@ -165,6 +166,7 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 		}
 		clusterInfo.SetClusterTier(ybmclient.ClusterTier(clusterTier))
 	}
+
 	if totalNodes != 0 {
 		clusterInfo.SetNumNodes(int32(totalNodes))
 	}
@@ -173,6 +175,7 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 		clusterInfo.SetFaultTolerance(ybmclient.ClusterFaultTolerance(faultTolerance))
 	}
 	clusterInfo.SetIsProduction(isProduction)
+	clusterInfo.SetNodeInfo(*ybmclient.NewClusterNodeInfoWithDefaults())
 
 	if cmd.Flags().Changed("node-config") {
 		nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
@@ -180,27 +183,31 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 
 		clusterInfo.NodeInfo.SetNumCores(int32(numCores))
 
-		cloud := string(cloudInfo.GetCode())
-		region := cloudInfo.GetRegion()
-		tier := string(clusterInfo.GetClusterTier())
-
-		memoryMb, memoryOK, message = getMemoryFromInstanceType(ctx, apiClient, accountId, cloud, tier, region, int32(numCores))
-		if !memoryOK {
-			return nil, false, message
-		}
-		clusterInfo.NodeInfo.SetMemoryMb(memoryMb)
-
-		// Computing the default disk size if it is not provided
 		if diskSize, ok := nodeConfig["disk_size_gb"]; ok {
 			diskSizeGb = int32(diskSize)
-		} else {
-			diskSizeGb, diskSizeOK, message = getDiskSizeFromInstanceType(ctx, apiClient, accountId, cloud, tier, region, int32(numCores))
-			if !diskSizeOK {
-				return nil, false, message
-			}
 		}
-		clusterInfo.NodeInfo.SetDiskSizeGb(diskSizeGb)
+
 	}
+
+	cloud := string(cloudInfo.GetCode())
+	region = cloudInfo.GetRegion()
+	tier := string(clusterInfo.GetClusterTier())
+	numCores := clusterInfo.NodeInfo.GetNumCores()
+
+	memoryMb, memoryOK, message = getMemoryFromInstanceType(ctx, apiClient, accountId, cloud, tier, region, int32(numCores))
+	if !memoryOK {
+		return nil, false, message
+	}
+	clusterInfo.NodeInfo.SetMemoryMb(memoryMb)
+
+	// Computing the default disk size if it is not provided
+	if diskSizeGb == 0 {
+		diskSizeGb, diskSizeOK, message = getDiskSizeFromInstanceType(ctx, apiClient, accountId, cloud, tier, region, int32(numCores))
+		if !diskSizeOK {
+			return nil, false, message
+		}
+	}
+	clusterInfo.NodeInfo.SetDiskSizeGb(diskSizeGb)
 
 	if cmd.Flags().Changed("cluster-type") {
 		clusterType, _ := cmd.Flags().GetString("cluster-type")

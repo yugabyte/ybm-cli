@@ -29,11 +29,30 @@ var createClusterCmd = &cobra.Command{
 		username := credentials["username"]
 		password := credentials["password"]
 		regionInfoList := []map[string]string{}
-		regionInfo, _ := cmd.Flags().GetStringToString("node-config")
-		regionInfoList = append(regionInfoList, regionInfo)
+		if cmd.Flags().Changed("region-info") {
+			regionInfo, _ := cmd.Flags().GetStringToString("region-info")
+			if _, ok := regionInfo["region"]; !ok {
+				fmt.Fprintf(os.Stderr, "Region not specified in region info\n")
+				return
+			}
+			if _, ok := regionInfo["num_nodes"]; !ok {
+				fmt.Fprintf(os.Stderr, "Number of nodes not specified in region info\n")
+				return
+			}
+			regionInfoList = append(regionInfoList, regionInfo)
+		}
+
+		if cmd.Flags().Changed("node-config") {
+			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
+			if _, ok := nodeConfig["num_cores"]; !ok {
+				fmt.Fprintf(os.Stderr, "Number of cores not specified in node config\n")
+				return
+			}
+		}
+
 		clusterSpec, clusterOK, errMsg := createClusterSpec(context.Background(), apiClient, cmd, accountID, regionInfoList)
 		if !clusterOK {
-			fmt.Fprintf(os.Stderr, "Error while creating cluster spec: %v", errMsg)
+			fmt.Fprintf(os.Stderr, "Error while creating cluster spec: %v\n", errMsg)
 			return
 		}
 
