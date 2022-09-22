@@ -28,14 +28,14 @@ var createClusterCmd = &cobra.Command{
 
 		username := credentials["username"]
 		password := credentials["password"]
-
-		clusterSpec := ybmclient.NewClusterSpecWithDefaults()
-		clusterSpec.SetName(clusterName)
-		clusterSpec.SetCloudInfo(*ybmclient.NewCloudInfoWithDefaults())
-		clusterSpec.SetClusterInfo(*ybmclient.NewClusterInfoWithDefaults())
-		clusterSpec.ClusterInfo.SetNodeInfo(*ybmclient.NewClusterNodeInfoWithDefaults())
-		clusterSpec.SetNetworkInfo(*ybmclient.NewNetworkingWithDefaults())
-		clusterSpec.SetSoftwareInfo(*ybmclient.NewSoftwareInfoWithDefaults())
+		regionInfoList := []map[string]string{}
+		regionInfo, _ := cmd.Flags().GetStringToString("node-config")
+		regionInfoList = append(regionInfoList, regionInfo)
+		clusterSpec, clusterOK, errMsg := createClusterSpec(context.Background(), apiClient, cmd, accountID, regionInfoList)
+		if !clusterOK {
+			fmt.Fprintf(os.Stderr, "Error while creating cluster spec: %v", errMsg)
+			return
+		}
 
 		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentials()
 		dbCredentials.Ycql = ybmclient.NewDBCredentials(username, password)
@@ -66,14 +66,20 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	createClusterCmd.Flags().String("cluster-name", "", "Name of the cluster")
+	createClusterCmd.Flags().String("cluster-name", "", "Name of the cluster.")
 	createClusterCmd.MarkFlagRequired("cluster-name")
-	createClusterCmd.Flags().StringToString("credentials", nil, "Credentials to login to the cluster")
+	createClusterCmd.Flags().StringToString("credentials", nil, `Credentials to login to the cluster. Please provide key value pairs
+	username=<user-name>,password=<password>.`)
 	createClusterCmd.MarkFlagRequired("credentials")
-	createClusterCmd.Flags().String("cloud-type", "", "The cloud provider where database needs to be deployed. AWS or GCP")
-	createClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED")
-	createClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes")
-	createClusterCmd.Flags().StringToString("region-info", nil, "Region information for the cluster")
-	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID")
+
+	createClusterCmd.Flags().String("cloud-type", "", "The cloud provider where database needs to be deployed. AWS or GCP.")
+	createClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
+	createClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes.")
+	createClusterCmd.Flags().StringToString("region-info", nil, `Region information for the cluster. Please provide key value pairs
+	region=<region-name>,num_nodes=<number-of-nodes>,vpc_id=<vpc-id> as the value. region and num_nodes are mandatory, vpc_id is optional.`)
+	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
+	createClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
+	createClusterCmd.Flags().StringSlice("allow-lists", nil, "The allow lists to be associated with the cluster. Pleave provide the CIDR list.")
+	createClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
 
 }
