@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -15,6 +16,15 @@ import (
 var nalName string
 var nalDescription string
 var nalIpAddrs []string
+
+func findNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (ybmclient.NetworkAllowListData, error) {
+	for _, allowList := range nals {
+		if allowList.Spec.Name == nalName {
+			return allowList, nil
+		}
+	}
+	return ybmclient.NetworkAllowListData{}, errors.New("Unable to find NetworkAllowList " + name)
+}
 
 var getNetworkAllowListCmd = &cobra.Command{
 	Use:   "network_allow_list",
@@ -33,13 +43,14 @@ var getNetworkAllowListCmd = &cobra.Command{
 		}
 
 		if cmd.Flags().Changed("name") {
-			for _, allowList := range resp.Data {
-				if allowList.Spec.Name == nalName {
-					prettyPrintJson(allowList)
-					return
-				}
+			allowList, findErr := findNetworkAllowList(resp.Data, nalName)
+
+			if findErr != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", findErr)
+				return
 			}
-			fmt.Fprintf(os.Stderr, "NetworkAllowList <%s> does not exist \n", nalName)
+
+			prettyPrintJson(allowList)
 			return
 		}
 
@@ -88,21 +99,15 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", readResponse)
 			return
 		}
-		var allowListID string
 
-		for _, allowList := range readResp.Data {
-			if allowList.Spec.Name == nalName {
-				allowListID = allowList.Info.Id
-				break
-			}
-		}
+		allowList, findErr := findNetworkAllowList(readResp.Data, nalName)
 
-		if allowListID == "" {
-			fmt.Fprintf(os.Stderr, "NetworkAllowList <%s> does not exist \n", nalName)
+		if findErr != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", findErr)
 			return
 		}
 
-		r, err := apiClient.NetworkApi.DeleteNetworkAllowList(context.Background(), accountID, projectID, allowListID).Execute()
+		r, err := apiClient.NetworkApi.DeleteNetworkAllowList(context.Background(), accountID, projectID, allowList.Info.Id).Execute()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.DeleteNetworkAllowList``: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
