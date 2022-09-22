@@ -104,6 +104,7 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
+	fmt.Println(regionInfoList)
 	for _, regionInfo := range regionInfoList {
 		numNodes, _ := strconv.ParseInt(regionInfo["num_nodes"], 10, 32)
 		regionNodes := int32(numNodes)
@@ -163,6 +164,7 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 		}
 		clusterInfo.SetClusterTier(ybmclient.ClusterTier(clusterTier))
 	}
+
 	if totalNodes != 0 {
 		clusterInfo.SetNumNodes(int32(totalNodes))
 	}
