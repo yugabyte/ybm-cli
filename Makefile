@@ -22,4 +22,3 @@ release:
 
 clean:
 	rm -rf ybm
-	rm -rf credentials

@@ -9,10 +9,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-func getVpcByName(apiClient openapi.APIClient, accountID string, projectID string, name string) openapi.ApiListSingleTenantVpcsRequest {
+func getVpcByName(apiClient ybmclient.APIClient, accountID string, projectID string, name string) ybmclient.ApiListSingleTenantVpcsRequest {
 	vpcListRequest := apiClient.NetworkApi.ListSingleTenantVpcs(context.Background(), accountID, projectID)
 	if name != "" {
 		vpcListRequest = vpcListRequest.Name(name)
@@ -74,12 +74,12 @@ var createVpcCmd = &cobra.Command{
 
 		// If non-global CIDR, validate that there are different regions specified
 		regionMap := map[string]int{}
-		vpcRegionSpec := []openapi.VpcRegionSpec{}
+		vpcRegionSpec := []ybmclient.VpcRegionSpec{}
 
 		if cmd.Flags().Changed("cidr") {
 			for index, region := range createRegions {
 				cidr := createCidrs[index]
-				spec := *openapi.NewVpcRegionSpecWithDefaults()
+				spec := *ybmclient.NewVpcRegionSpecWithDefaults()
 				regionMap[region] = index
 				spec.SetRegion(region)
 				spec.SetCidr(cidr)
@@ -91,11 +91,11 @@ var createVpcCmd = &cobra.Command{
 			}
 		}
 
-		vpcSpec := *openapi.NewSingleTenantVpcSpec(vpcName, openapi.CloudEnum(cloud), vpcRegionSpec)
+		vpcSpec := *ybmclient.NewSingleTenantVpcSpec(vpcName, ybmclient.CloudEnum(cloud), vpcRegionSpec)
 		if cmd.Flags().Changed("global-cidr") {
 			vpcSpec.SetParentCidr(globalCidrRange)
 		}
-		vpcRequest := *openapi.NewSingleTenantVpcRequest(vpcSpec)
+		vpcRequest := *ybmclient.NewSingleTenantVpcRequest(vpcSpec)
 
 		apiClient, _ := getApiClient(context.Background())
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
