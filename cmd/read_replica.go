@@ -115,7 +115,7 @@ var createReadReplicaCmd = &cobra.Command{
 	},
 }
 
-var editReadReplicaCmd = &cobra.Command{
+var updateReadReplicaCmd = &cobra.Command{
 	Use:   "read_replica",
 	Short: "Edit read replica in YugabyteDB Managed",
 	Long:  "Edit read replica in YugabyteDB Managed",
@@ -169,10 +169,10 @@ func init() {
 	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
 	createCmd.AddCommand(createReadReplicaCmd)
 
-	editReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "The name of the cluster")
-	editReadReplicaCmd.MarkFlagRequired("cluster")
-	editReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
-	editCmd.AddCommand(editReadReplicaCmd)
+	updateReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "The name of the cluster")
+	updateReadReplicaCmd.MarkFlagRequired("cluster")
+	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
+	updateCmd.AddCommand(updateReadReplicaCmd)
 
 	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "The name of the cluster")
 	deleteReadReplicaCmd.MarkFlagRequired("cluster")
