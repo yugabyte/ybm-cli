@@ -98,7 +98,6 @@ func init() {
 	region=<region-name>,num_nodes=<number-of-nodes>,vpc_id=<vpc-id> as the value. region and num_nodes are mandatory, vpc_id is optional.`)
 	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
-	createClusterCmd.Flags().StringSlice("allow-lists", nil, "The allow lists to be associated with the cluster. Pleave provide the CIDR list.")
 	createClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
 
 }

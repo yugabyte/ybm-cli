@@ -106,7 +106,6 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
-	fmt.Println(regionInfoList)
 	for _, regionInfo := range regionInfoList {
 		numNodes, _ := strconv.ParseInt(regionInfo["num_nodes"], 10, 32)
 		regionNodes := int32(numNodes)
@@ -296,4 +295,17 @@ func getDiskSizeFromInstanceType(ctx context.Context, apiClient *ybmclient.APICl
 	}
 
 	return 0, false, "Node with the given number of CPU cores doesn't exist in the given region."
+}
+
+func getTrackName(ctx context.Context, apiClient *ybmclient.APIClient, accountId string, trackId string) (trackName string, trackNameOK bool, errorMessage string) {
+
+	trackNameResp, resp, err := apiClient.SoftwareReleaseApi.GetTrack(ctx, accountId, trackId).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		return "", false, string(b)
+	}
+	trackData := trackNameResp.GetData()
+	trackName = trackData.Spec.GetName()
+
+	return trackName, true, ""
 }
