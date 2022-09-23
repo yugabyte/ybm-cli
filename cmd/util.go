@@ -41,17 +41,15 @@ func getApiClient(ctx context.Context) (*ybmclient.APIClient, error) {
 }
 
 func getClusterID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string, projectId string, clusterName string) (clusterId string, clusterIdOk bool, errorMessage string) {
-	clusterResp, resp, err := apiClient.ClusterApi.ListClusters(ctx, accountId, projectId).Execute()
+	clusterResp, resp, err := apiClient.ClusterApi.ListClusters(ctx, accountId, projectId).Name(clusterName).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		return "", false, string(b)
 	}
 	clusterData := clusterResp.GetData()
 
-	for _, cluster := range clusterData {
-		if cluster.Spec.GetName() == clusterName {
-			return cluster.Info.GetId(), true, ""
-		}
+	if len(clusterData) != 0 {
+		clusterData[0].Info.GetId()
 	}
 
 	return "", false, "Couldn't find any cluster with the given name"
