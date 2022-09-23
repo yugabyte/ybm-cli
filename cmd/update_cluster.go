@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -139,13 +140,28 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 		cmd.Flag("database-track").Changed = true
 	}
 	if !cmd.Flags().Changed("node-config") {
-		nodeConfig := "num_cores=2"
+		nodeConfig := ""
+		if diskSizeGb, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskSizeGbOk(); ok {
+			nodeConfig += "disk_size_gb=" + strconv.Itoa(int(*diskSizeGb))
+		}
+		if numCores, ok := originalSpec.ClusterInfo.NodeInfo.GetNumCoresOk(); ok {
+			nodeConfig += ",num_cores=" + strconv.Itoa(int(*numCores))
+		}
 		cmd.Flag("node-config").Value.Set(nodeConfig)
 		cmd.Flag("node-config").Changed = true
 
 	}
 	if !cmd.Flags().Changed("region-info") {
-		regionInfo := "region=us-west1,num_nodes=1"
+		regionInfo := ""
+		if region, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.CloudInfo.GetRegionOk(); ok {
+			regionInfo += "region=" + *region
+		}
+		if numNodes, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetNumNodesOk(); ok {
+			regionInfo += ",num_nodes=" + strconv.Itoa(int(*numNodes))
+		}
+		if vpcID, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetVpcIdOk(); ok {
+			regionInfo += ",vpc_id=" + *vpcID
+		}
 		cmd.Flag("region-info").Value.Set(regionInfo)
 		cmd.Flag("region-info").Changed = true
 	}
