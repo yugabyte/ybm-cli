@@ -7,26 +7,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pauseCmd represents the list command
-var pauseCmd = &cobra.Command{
-	Use:   "pause",
-	Short: "Pause resources in YB Managed",
-	Long:  "Pause resources in YB Managed",
+// resumeCmd represents the list command
+var resumeCmd = &cobra.Command{
+	Use:   "resume",
+	Short: "Resume resources in YB Managed",
+	Long:  "Resume resources in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		//fmt.Println("pause called")
+		//fmt.Println("pause called")s
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(pauseCmd)
+	rootCmd.AddCommand(resumeCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// pauseCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// resumeCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// pauseCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// resumeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

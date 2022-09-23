@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pauseClusterCmd represents the cluster command
-var pauseClusterCmd = &cobra.Command{
+// resumeClusterCmd represents the cluster command
+var resumeClusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "Pause clusters in YugabyteDB Managed",
 	Long:  "Pause clusters in YugabyteDB Managed",
@@ -27,28 +27,28 @@ var pauseClusterCmd = &cobra.Command{
 			return
 		}
 
-		_, _, err := apiClient.ClusterApi.PauseCluster(context.Background(), accountID, projectID, clusterID).Execute()
+		_, _, err := apiClient.ClusterApi.ResumeCluster(context.Background(), accountID, projectID, clusterID).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while pausing the cluster %v: %v\n", clusterName, err.Error())
+			fmt.Fprintf(os.Stderr, "Error while resuming the cluster %v\n", clusterName)
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "The cluster %v is being paused\n", clusterName)
+		fmt.Fprintf(os.Stdout, "The cluster %v is being resumed\n", clusterName)
 	},
 }
 
 func init() {
-	pauseCmd.AddCommand(pauseClusterCmd)
+	resumeCmd.AddCommand(resumeClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// pauseClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// resumeClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// pauseClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	pauseClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be paused")
-	pauseClusterCmd.MarkFlagRequired("cluster-name")
+	// resumeClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	resumeClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be resumed")
+	resumeClusterCmd.MarkFlagRequired("cluster-name")
 }
