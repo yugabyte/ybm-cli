@@ -12,7 +12,7 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-func getVpcByName(apiClient openapi.APIClient, accountID string, projectID string, name string) openapi.ApiListSingleTenantVpcsRequest {
+func getVpcByName(apiClient ybmclient.APIClient, accountID string, projectID string, name string) ybmclient.ApiListSingleTenantVpcsRequest {
 	vpcListRequest := apiClient.NetworkApi.ListSingleTenantVpcs(context.Background(), accountID, projectID)
 	if name != "" {
 		vpcListRequest = vpcListRequest.Name(name)

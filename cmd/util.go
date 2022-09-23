@@ -49,7 +49,7 @@ func getClusterID(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 	clusterData := clusterResp.GetData()
 
 	if len(clusterData) != 0 {
-		clusterData[0].Info.GetId()
+		return clusterData[0].Info.GetId(), true, ""
 	}
 
 	return "", false, "Couldn't find any cluster with the given name"
