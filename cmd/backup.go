@@ -55,8 +55,13 @@ var createBackupCmd = &cobra.Command{
 
 		createBackupSpec := *ybmclient.NewBackupSpecWithDefaults()
 		createBackupSpec.SetClusterId(clusterID)
+		// Set default retention period to 1 day
+		retentionPeriod := int32(1)
 		if cmd.Flags().Changed("retention-period") {
-			retentionPeriod, _ := cmd.Flags().GetInt32("retention-period")
+			retentionPeriod, _ = cmd.Flags().GetInt32("retention-period")
+			createBackupSpec.SetRetentionPeriodInDays(retentionPeriod)
+		} else {
+
 			createBackupSpec.SetRetentionPeriodInDays(retentionPeriod)
 		}
 		if cmd.Flags().Changed("description") {
@@ -70,6 +75,7 @@ var createBackupCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", response)
 		}
 		fmt.Fprint(os.Stdout, "The backup for cluster %v is being created\n", clusterName)
+
 		prettyPrintJson(backupResp)
 	},
 }
