@@ -60,14 +60,13 @@ var restoreBackupCmd = &cobra.Command{
 		restoreSpec.SetBackupId(backupID)
 		restoreSpec.SetClusterId(clusterID)
 
-		resp, r, err := apiClient.BackupApi.RestoreBackup(context.Background(), accountID, projectID).RestoreSpec(*restoreSpec).Execute()
+		_, r, err := apiClient.BackupApi.RestoreBackup(context.Background(), accountID, projectID).RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `BackupApi.RestoreBackup``: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 			return
 		}
-
-		prettyPrintJson(resp)
+		fmt.Fprintf(os.Stdout, "The backup %v is being restored onto the cluster %v\n", backupID, clusterName)
 	},
 }
 
@@ -107,7 +106,7 @@ var createBackupCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Error when calling `BackupApi.CreateBackup``: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", response)
 		}
-		fmt.Fprint(os.Stdout, "The backup for cluster %v is being created\n", clusterName)
+		fmt.Fprintf(os.Stdout, "The backup for cluster %v is being created\n", clusterName)
 
 		prettyPrintJson(backupResp)
 	},

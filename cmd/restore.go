@@ -9,7 +9,7 @@ import (
 
 // restoreCmd represents the list command
 var restoreCmd = &cobra.Command{
-	Use:   "get",
+	Use:   "restore",
 	Short: "Restore resources in YB Managed",
 	Long:  "Restore resources in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
