@@ -38,6 +38,39 @@ var getBackupCmd = &cobra.Command{
 	},
 }
 
+var restoreBackupCmd = &cobra.Command{
+	Use:   "backup",
+	Short: "Restore backups in YugabyteDB Managed",
+	Long:  "Restore backups in YugabyteDB Managed",
+	Run: func(cmd *cobra.Command, args []string) {
+
+		apiClient, _ := getApiClient(context.Background())
+		accountID, _, _ := getAccountID(context.Background(), apiClient)
+		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+
+		backupID, _ := cmd.Flags().GetString("backup-id")
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, clusterIDOK, errMsg := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
+		if !clusterIDOK {
+			fmt.Fprintf(os.Stderr, "Error when fetching cluster ID: %v\n", errMsg)
+			return
+		}
+
+		restoreSpec := ybmclient.NewRestoreSpec()
+		restoreSpec.SetBackupId(backupID)
+		restoreSpec.SetClusterId(clusterID)
+
+		resp, r, err := apiClient.BackupApi.RestoreBackup(context.Background(), accountID, projectID).RestoreSpec(*restoreSpec).Execute()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error when calling `BackupApi.RestoreBackup``: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			return
+		}
+
+		prettyPrintJson(resp)
+	},
+}
+
 var createBackupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Create backup in YugabyteDB Managed",
@@ -107,11 +140,17 @@ func init() {
 	getCmd.AddCommand(getBackupCmd)
 	getBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to fetch backups")
 
+	restoreCmd.AddCommand(restoreBackupCmd)
+	restoreBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to restore backups")
+	restoreBackupCmd.MarkFlagRequired("cluster-name")
+	restoreBackupCmd.Flags().String("backup-id", "", "ID of the backup to be restored")
+	restoreBackupCmd.MarkFlagRequired("backup-id")
+
 	createCmd.AddCommand(createBackupCmd)
-	createVpcPeeringCmd.Flags().String("cluster-name", "", "Name for the cluster")
-	createVpcPeeringCmd.MarkFlagRequired("name")
-	createVpcPeeringCmd.Flags().Int32("retention-period", 0, "Retention period of the backup")
-	createVpcPeeringCmd.Flags().String("description", "", "Description of the backup")
+	createBackupCmd.Flags().String("cluster-name", "", "Name for the cluster")
+	createBackupCmd.MarkFlagRequired("name")
+	createBackupCmd.Flags().Int32("retention-period", 0, "Retention period of the backup")
+	createBackupCmd.Flags().String("description", "", "Description of the backup")
 
 	deleteCmd.AddCommand(deleteBackupCmd)
 	deleteBackupCmd.Flags().String("backup-id", "", "The backup ID")
