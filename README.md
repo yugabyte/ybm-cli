@@ -6,13 +6,13 @@ A CLI implementation for YB Managed.
 ### Cluster
 Minimal Required Configurations
 ```sh
-./ybm create cluster 
+ybm create cluster 
     --cluster-name=test-cluster
     --credentials=username=anonymous,password=password123
 ```
 All possibilities
 ```sh
-./ybm create cluster 
+ybm create cluster 
     --cluster-name=test-cluster
     --credentials=username=anonymous,password=password123
     --cloud-type=[AWS or GCP]
@@ -25,7 +25,7 @@ All possibilities
 ```
 
 ### Network Allow List
-```
+```sh
 ybm create network-allow-list 
      --name=admins
      --description="admin allow list"
@@ -33,21 +33,21 @@ ybm create network-allow-list
 ```
 
 ### Read Replica
-```
+```sh
 ybm create read-replica
      --replica=num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>
 ```
 Additional replica can becreated by repeating the `replica` flag but each replic must be in a distinct region. 
 
 ### VPC
-```
+```sh
 ybm create vpc
     --name=demo-vpc
     --cloud=GCP
     --global-cidr=10.0.0.0/18
 ```
 
-```
+```sh
 ybm create vpc
     --name=demo-vpc
     --cloud=GCP
@@ -57,7 +57,7 @@ ybm create vpc
 
 
 ### VPC Peering
-```
+```sh
 ybm create vpc
     --name=demo-peer
     --vpc-name=demo-vpc
