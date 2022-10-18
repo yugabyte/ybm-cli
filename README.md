@@ -67,3 +67,25 @@ ybm create vpc
     --region=us-west1
     --cidr=10.0.0.0/18
 ```
+
+## Developer Workflow
+- `cd ~/code`
+- `git clone git@github.com:yugabyte/yugabyte-cloud.git`
+- `cd yugabyte-cloud/apiserver`
+- `git checkout -b sample-api`
+-  Develop a new API - Sample PR: https://github.com/yugabyte/yugabyte-cloud/pull/7078/files
+- `sbt cleanCloud`
+- `sbt compileCloud` - This will generate the go client
+- `cd ..`
+- `git clone git@github.com:yugabyte/yugabytedb-managed-go-client-internal.git`
+- `cd yugabytedb-managed-go-client-internal`
+- `git checkout -b client-with-sample-api`
+- `cp -r ~/code/yugabyte-cloud/apiserver/openapi-clients/clients/public/go/generated/ .` - Copy the go public client to the `client-with-sample-api` branch in `yugabytedb-managed-go-client-internal` repository
+- Set the module name in go.mod file name so that the first line of the file looks like `module github.com/yugabyte/yugabytedb-managed-go-client-internal`
+- `git push origin client-with-sample-api` - Sample PR: https://github.com/yugabyte/yugabytedb-managed-go-client-internal/pull/1/files
+- `cd ..`
+- `git clone git@github.com:yugabyte/ybm-cli.git`
+- `go get github.com/yugabyte/yugabytedb-managed-go-client-internal@client-with-sample-api` - Notice the branch name after `@`
+- `Make the changes to the ybm cli utlizing the internal go client` - Sample PR: 
+- `make build`
+
