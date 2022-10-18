@@ -3,14 +3,14 @@ module github.com/yugabyte/ybm-cli
 go 1.19
 
 require (
+	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f
 	github.com/spf13/cobra v1.5.0
-	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20220919082546-08c2a34c32f4
+	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20221018202914-9c176e4ea750
 )
 
 require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect

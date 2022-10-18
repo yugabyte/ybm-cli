@@ -31,7 +31,7 @@ func getApiClient(ctx context.Context) (*ybmclient.APIClient, error) {
 	//Configure the client
 
 	configuration.Host = getHostOrDefault(ctx)
-	configuration.Scheme = "https"
+	configuration.Scheme = "http" // To test on local developer environment
 	apiClient := ybmclient.NewAPIClient(configuration)
 	// authorize user with api key
 	apiKeyBytes, _ := os.ReadFile("credentials")
