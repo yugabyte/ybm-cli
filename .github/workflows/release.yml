@@ -25,3 +25,6 @@ jobs:
         with:
           version: latest
           args: release --rm-dist
+        env:
+          # GitHub sets this automatically
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
