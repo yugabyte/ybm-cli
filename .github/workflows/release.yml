@@ -26,17 +26,15 @@ jobs:
           echo '${{ secrets.GO_CLIENT_SECRET }}' > ~/.ssh/id_ed25519
           sudo chmod 0400 ~/.ssh/id_ed25519
           git config --global url."git@github.com:".insteadOf https://github.com/
-       -
+      -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3.0.0
         with:
           version: latest
           args: release --rm-dist
         env:
-          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - 
         name: Clean upSSH key
         run: |
           sudo rm -rf ~/.ssh/id_ed25519
-     
