@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f
 	github.com/spf13/cobra v1.5.0
-	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20221122025339-08b14f4a4e58
+	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20221123192635-e31a4eda7543
 )
 
 require (
