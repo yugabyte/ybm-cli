@@ -93,3 +93,5 @@ ybm create vpc
 - `make build`
 - `./ybm greet`
 
+## Update CLI
+- make update-cli
