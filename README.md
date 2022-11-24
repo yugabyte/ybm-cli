@@ -68,6 +68,37 @@ ybm create vpc
     --cidr=10.0.0.0/18
 ```
 
+### CDC Sink
+
+```sh
+ybm create cdc_sink 
+    --name=sink-2 
+    --hostname=kafka.self.us 
+    --auth-type=BASIC 
+    --cdc-sink-type=KAFKA 
+    --username=something 
+    --password=something
+```
+
+```sh
+./ybm get cdc_sink 
+    --name=sink-2
+```
+
+```sh
+./ybm update cdc_sink 
+    --name=sink-2 
+    --new-name=new-sink-2
+```
+
+```sh
+./ybm delete cdc_sink 
+    --name=sink-2 
+```
+
+
+
+
 ## Developer Workflow
 - `cd ~/code`
 - `git clone git@github.com:yugabyte/yugabyte-cloud.git`

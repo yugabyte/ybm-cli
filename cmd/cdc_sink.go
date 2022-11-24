@@ -151,7 +151,7 @@ var deleteCdcSinkCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", resp)
 			return
 		}
-
+		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully")
 		prettyPrintJson(resp)
 	},
 }
