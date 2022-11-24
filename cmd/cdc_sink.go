@@ -170,9 +170,9 @@ func init() {
 
 	updateCmd.AddCommand(editCdcSinkCmd)
 	editCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
-	editCdcSinkCmd.Flags().String("cluster", "", "Name of the Cluster")
-	editCdcSinkCmd.Flags().String("new-name", "", "Updated name of the CDC Sink")
-	editCdcSinkCmd.Flags().StringArray("tables", []string{}, "Tables the Cdc Sink will listen to")
+	editCdcSinkCmd.Flags().String("new-name", "", "Name of the new CDC Sink")
+	editCdcSinkCmd.Flags().String("username", "", "Username of the CDC Sink")
+	editCdcSinkCmd.Flags().String("password", "", "Password of the CDC Sink")
 
 	deleteCmd.AddCommand(deleteCdcSinkCmd)
 	deleteCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
