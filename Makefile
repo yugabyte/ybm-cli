@@ -1,6 +1,6 @@
 VERSION=0.1.0
 BINARY=ybm
-
+export GOPRIVATE := github.com/yugabyte
 default: build
 
 build:
@@ -21,7 +21,6 @@ release:
 	GOOS=windows GOARCH=amd64 go build -ldflags="-X 'main.version=v${VERSION}'" -o ./bin/${BINARY}_${VERSION}_windows_amd64
 
 update-cli:
-	export GOPRIVATE=github.com/yugabyte
 	go get github.com/yugabyte/yugabytedb-managed-go-client-internal
 	go mod tidy
 
