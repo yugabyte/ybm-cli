@@ -90,6 +90,21 @@ func getProjectID(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 	return projectId, true, ""
 }
 
+func getCdcSinkID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string, cdcSinkName string) (sinkId string, sinkIdOk bool, errorMessage string) {
+	sinkResp, resp, err := apiClient.CdcApi.ListCdcSinks(ctx, accountId).Name(cdcSinkName).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		return "", false, string(b)
+	}
+	sinkData := sinkResp.GetData()
+
+	if len(sinkData) != 0 {
+		return sinkData[0].Info.GetId(), true, ""
+	}
+
+	return "", false, "Couldn't find any cdcSink with the given name"
+}
+
 func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd *cobra.Command, accountId string, regionInfoList []map[string]string) (clusterSpec *ybmclient.ClusterSpec, clusterSpecOK bool, errorMessage string) {
 
 	var diskSizeGb int32
