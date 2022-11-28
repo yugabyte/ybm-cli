@@ -96,6 +96,7 @@ func getCdcSinkID(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 		b, _ := httputil.DumpResponse(resp, true)
 		return "", false, string(b)
 	}
+
 	sinkData := sinkResp.GetData()
 
 	if len(sinkData) != 0 {
@@ -103,6 +104,21 @@ func getCdcSinkID(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 	}
 
 	return "", false, "Couldn't find any cdcSink with the given name"
+}
+
+func getCdcStreamID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string, cdcStreamName string) (streamId string, streamIdOk bool, errorMessage string) {
+	streamResp, resp, err := apiClient.CdcApi.ListCdcStreamsForAccount(ctx, accountId).Name(cdcStreamName).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		return "", false, string(b)
+	}
+	streamData := streamResp.GetData()
+
+	if len(streamData) != 0 {
+		return streamData[0].Info.GetId(), true, ""
+	}
+
+	return "", false, "Couldn't find any cdcStream with the given name"
 }
 
 func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd *cobra.Command, accountId string, regionInfoList []map[string]string) (clusterSpec *ybmclient.ClusterSpec, clusterSpecOK bool, errorMessage string) {
