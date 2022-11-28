@@ -55,7 +55,8 @@ var createCdcStreamCmd = &cobra.Command{
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
-		sinkId, _ := cmd.Flags().GetString("cdc-sink-id")
+		cdcSinkName, _ := cmd.Flags().GetString("sink")
+		sinkId, _, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
 		namespace, _ := cmd.Flags().GetString("namespace")
 		dbName, _ := cmd.Flags().GetString("db-name")
 		tables, _ := cmd.Flags().GetStringArray("tables")
@@ -161,7 +162,7 @@ func init() {
 	createCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
 	createCdcStreamCmd.Flags().String("cluster", "", "Name of the Cluster")
 	createCdcStreamCmd.Flags().StringArray("tables", []string{}, "Database tables the Cdc Stream will listen to")
-	createCdcStreamCmd.Flags().String("cdc-sink-id", "", "Destination sink for the CDC Stream")
+	createCdcStreamCmd.Flags().String("sink", "", "Destination sink for the CDC Stream")
 	createCdcStreamCmd.Flags().String("namespace", "", "Namespace that the Cdc Stream will listen to")
 	createCdcStreamCmd.Flags().String("db-name", "", "Database that the Cdc Stream will listen to")
 
