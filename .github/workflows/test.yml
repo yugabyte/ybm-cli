@@ -29,4 +29,4 @@ jobs:
           git config --global url."git@github.com:".insteadOf https://github.com/
           make build
           make clean
-        name: Build provider
+        name: Build CLI
