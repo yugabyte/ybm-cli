@@ -1,4 +1,4 @@
-name: YB Manged Terraform Provider Tests
+name: YB Manged CLI Build
 
 on:
   push:
