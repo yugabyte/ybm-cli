@@ -1,6 +1,23 @@
 # ybm-cli
 A CLI implementation for YB Managed.
 
+# Configuration
+This CLI support 3 possibles configurations: 
+* Passing values as flags 
+  ```shell
+  ybm --apikey AWERDFSSS --host cloud.yugabyte.com get cluster
+  ```
+* Using a configuration file called `.ybm-cli.yaml` under your `$HOME` directory.
+  You can use the command `ybm configure` to help to setup the file
+
+* Using environment variables
+ ```shell
+ export YBM_APIKEY=AWERDFSSS
+ export YBM_HOST=cloud.yugabyte.com
+ ybm get cluster
+ ```
+
+
 ## Sample Create Commands:
 
 ### Cluster

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http/httputil"
-	"os"
 	"strconv"
 
 	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -18,24 +18,15 @@ func prettyPrintJson(data interface{}) {
 	fmt.Println(string(b))
 }
 
-func getHostOrDefault(ctx context.Context) string {
-	host := os.Getenv("YBM_HOST")
-	if host == "" {
-		host = "devcloud.yugabyte.com"
-	}
-	return host
-}
-
-func getApiClient(ctx context.Context) (*ybmclient.APIClient, error) {
+func getApiClient(ctx context.Context, cmd *cobra.Command) (*ybmclient.APIClient, error) {
 	configuration := ybmclient.NewConfiguration()
 	//Configure the client
 
-	configuration.Host = getHostOrDefault(ctx)
-	configuration.Scheme = "https"
+	configuration.Host = viper.GetString("host")
+	fmt.Println(viper.GetString("host"))
 	apiClient := ybmclient.NewAPIClient(configuration)
-	// authorize user with api key
-	apiKeyBytes, _ := os.ReadFile("credentials")
-	apiKey := string(apiKeyBytes)
+	apiKey := viper.GetString("apiKey")
+	fmt.Println(apiKey)
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	return apiClient, nil
 }

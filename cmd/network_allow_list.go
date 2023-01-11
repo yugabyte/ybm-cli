@@ -31,7 +31,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 	Short: "Get network allow list in YugabyteDB Managed",
 	Long:  `Get network allow list in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 
@@ -63,7 +63,7 @@ var createNetworkAllowListCmd = &cobra.Command{
 	Short: "Create network allow lists in YugabyteDB Managed",
 	Long:  `Create network allow lists in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 
@@ -88,7 +88,7 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 	Short: "Delete network allow list from YugabyteDB Managed",
 	Long:  `Delete network allow list from YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 

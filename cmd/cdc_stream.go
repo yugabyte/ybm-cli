@@ -17,7 +17,7 @@ var getCdcStreamCmd = &cobra.Command{
 	Short: "Get CDC Stream in YugabyteDB Managed",
 	Long:  `Get CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 
@@ -48,7 +48,7 @@ var createCdcStreamCmd = &cobra.Command{
 	Short: "Create CDC Stream in YugabyteDB Managed",
 	Long:  `Create CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterName, _ := cmd.Flags().GetString("cluster")
@@ -87,7 +87,7 @@ var editCdcStreamCmd = &cobra.Command{
 	Short: "Edit CDC Stream in YugabyteDB Managed",
 	Long:  `Edit CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 
@@ -128,7 +128,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 	Short: "Delete CDC Stream in YugabyteDB Managed",
 	Long:  `Delete CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 
