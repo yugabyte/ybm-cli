@@ -54,24 +54,27 @@ var createCdcStreamCmd = &cobra.Command{
 		clusterName, _ := cmd.Flags().GetString("cluster")
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
 
+		// TODO: handle failures in the above
+		fmt.Fprintf(os.Stderr, "accountID: %v, projectID: %v, clusterID: %v", accountID, projectID, clusterID)
+
 		cdcStreamName, _ := cmd.Flags().GetString("name")
 		cdcSinkName, _ := cmd.Flags().GetString("sink")
 		sinkId, _, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
-		namespace, _ := cmd.Flags().GetString("namespace")
 		dbName, _ := cmd.Flags().GetString("db-name")
 		tables, _ := cmd.Flags().GetStringArray("tables")
+		snapshotExistingData, _ := cmd.Flags().GetBool("snapshot-existing-data")
+		kafkaPrefix, _ := cmd.Flags().GetString("kafka-prefix")
 
 		cdcStreamSpec := ybmclient.CdcStreamSpec{
-			Name:      cdcStreamName,
-			CdcSinkId: sinkId,
-			Namespace: namespace,
-			DbName:    dbName,
-			Tables:    tables,
+			Name:                 cdcStreamName,
+			CdcSinkId:            sinkId,
+			DbName:               dbName,
+			Tables:               tables,
+			SnapshotExistingData: &snapshotExistingData,
+			KafkaPrefix:          &kafkaPrefix,
 		}
 
-		createClusterRequest := ybmclient.NewCreateCdcStreamRequest(cdcStreamSpec, true)
-
-		resp, r, err := apiClient.CdcApi.CreateCdcStream(context.Background(), accountID, projectID, clusterID).CreateCdcStreamRequest(*createClusterRequest).Execute()
+		resp, r, err := apiClient.CdcApi.CreateCdcStream(context.Background(), accountID, projectID, clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.CreateCdcStream``: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -163,8 +166,9 @@ func init() {
 	createCdcStreamCmd.Flags().String("cluster", "", "Name of the Cluster")
 	createCdcStreamCmd.Flags().StringArray("tables", []string{}, "Database tables the Cdc Stream will listen to")
 	createCdcStreamCmd.Flags().String("sink", "", "Destination sink for the CDC Stream")
-	createCdcStreamCmd.Flags().String("namespace", "", "Namespace that the Cdc Stream will listen to")
 	createCdcStreamCmd.Flags().String("db-name", "", "Database that the Cdc Stream will listen to")
+	createCdcStreamCmd.Flags().String("snapshot-existing-data", "", "Whether to snapshot the existing data in the database")
+	createCdcStreamCmd.Flags().String("kafka-prefix", "", "A prefix for the Kafka topics")
 
 	updateCmd.AddCommand(editCdcStreamCmd)
 	editCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
