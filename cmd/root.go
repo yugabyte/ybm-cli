@@ -39,6 +39,7 @@ func Execute() {
 
 func setDefaults() {
 	viper.SetDefault("host", "devcloud.yugabyte.com")
+
 }
 
 func init() {
@@ -50,6 +51,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ybm-cli.yaml)")
 	rootCmd.PersistentFlags().StringP("host", "", "", "YBM Api hostname")
 	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YBM Api Key")
+
+	//Bind peristents flags to viper
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("apiKey", rootCmd.PersistentFlags().Lookup("apiKey"))
 
