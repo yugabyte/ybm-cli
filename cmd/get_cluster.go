@@ -17,7 +17,7 @@ var getClusterCmd = &cobra.Command{
 	Short: "Get clusters in YugabyteDB Managed",
 	Long:  "Get clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterListRequest := apiClient.ClusterApi.ListClusters(context.Background(), accountID, projectID)

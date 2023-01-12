@@ -17,7 +17,7 @@ var pauseClusterCmd = &cobra.Command{
 	Short: "Pause clusters in YugabyteDB Managed",
 	Long:  "Pause clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterName, _ := cmd.Flags().GetString("cluster-name")

@@ -15,7 +15,7 @@ var getBackupCmd = &cobra.Command{
 	Long:  "Get backups in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		listBackupRequest := apiClient.BackupApi.ListBackups(context.Background(), accountID, projectID)
@@ -44,7 +44,7 @@ var restoreBackupCmd = &cobra.Command{
 	Long:  "Restore backups in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 
@@ -75,7 +75,7 @@ var createBackupCmd = &cobra.Command{
 	Short: "Create backup in YugabyteDB Managed",
 	Long:  "Create backup in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -119,7 +119,7 @@ var deleteBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		backupID, _ := cmd.Flags().GetString("backup-id")
 
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 

@@ -22,7 +22,7 @@ var updateClusterCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		apiClient, _ := getApiClient(ctx)
+		apiClient, _ := getApiClient(ctx, cmd)
 		accountID, _, _ := getAccountID(ctx, apiClient)
 		projectID, _, _ := getProjectID(ctx, apiClient, accountID)
 

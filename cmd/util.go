@@ -3,12 +3,17 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -17,29 +22,49 @@ func prettyPrintJson(data interface{}) {
 	b, _ := prettyjson.Marshal(data)
 	fmt.Println(string(b))
 }
+func getErrorMessage(response *http.Response, err error) string {
+	errMsg := err.Error()
+	if response != nil {
+		request, dumpErr := httputil.DumpRequest(response.Request, true)
+		if dumpErr != nil {
+			additional := "Error while dumping request: " + dumpErr.Error()
+			errMsg = errMsg + "\n\n\nDump error:" + additional
+		} else {
+			reqString := string(request)
+			// Replace the Authorization Bearer header with obfuscated value
+			re := regexp.MustCompile(`eyJ(.*)`)
+			reqString = re.ReplaceAllString(reqString, `***`)
+			errMsg = errMsg + "\n\nAPI Request:\n" + reqString
+		}
 
-func getHostOrDefault(ctx context.Context) string {
-	host := os.Getenv("YBM_HOST")
-	if host == "" {
-		host = "devcloud.yugabyte.com"
+		response, dumpErr := httputil.DumpResponse(response, true)
+		if dumpErr != nil {
+			additional := "Error while dumping response: " + dumpErr.Error()
+			errMsg = errMsg + "\n\n\nDump error:" + additional
+		} else {
+			errMsg = errMsg + "\n\nAPI Response:\n" + string(response)
+		}
 	}
-	return host
+	return errMsg
 }
 
-func getApiClient(ctx context.Context) (*ybmclient.APIClient, error) {
+func getApiClient(ctx context.Context, cmd *cobra.Command) (*ybmclient.APIClient, error) {
 	configuration := ybmclient.NewConfiguration()
 	//Configure the client
 
-	configuration.Host = getHostOrDefault(ctx)
-	configuration.Scheme = "https"
+	url, err := parseURL(viper.GetString("host"))
+	if err != nil {
+		fmt.Fprintln(os.Stdout, err.Error())
+		os.Exit(1)
+	}
+
+	configuration.Host = url.Host
+	configuration.Scheme = url.Scheme
 	apiClient := ybmclient.NewAPIClient(configuration)
-	// authorize user with api key
-	apiKeyBytes, _ := os.ReadFile("credentials")
-	apiKey := string(apiKeyBytes)
+	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	return apiClient, nil
 }
-
 func getClusterID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string, projectId string, clusterName string) (clusterId string, clusterIdOk bool, errorMessage string) {
 	clusterResp, resp, err := apiClient.ClusterApi.ListClusters(ctx, accountId, projectId).Name(clusterName).Execute()
 	if err != nil {
@@ -58,8 +83,14 @@ func getClusterID(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 func getAccountID(ctx context.Context, apiClient *ybmclient.APIClient) (accountId string, accountIdOK bool, errorMessage string) {
 	accountResp, resp, err := apiClient.AccountApi.ListAccounts(ctx).Execute()
 	if err != nil {
-		b, _ := httputil.DumpResponse(resp, true)
-		return "", false, string(b)
+		errMsg := getErrorMessage(resp, err)
+		if strings.Contains(err.Error(), "is not a valid") {
+			fmt.Print("The deserialization of the response failed due to following error. "+
+				"Skipping as this should not impact the functionality of the provider.",
+				map[string]interface{}{"errMsg": err.Error()})
+		} else {
+			return "", false, errMsg
+		}
 	}
 	accountData := accountResp.GetData()
 	if len(accountData) == 0 {
@@ -75,8 +106,14 @@ func getAccountID(ctx context.Context, apiClient *ybmclient.APIClient) (accountI
 func getProjectID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string) (projectId string, projectIdOK bool, errorMessage string) {
 	projectResp, resp, err := apiClient.ProjectApi.ListProjects(ctx, accountId).Execute()
 	if err != nil {
-		b, _ := httputil.DumpResponse(resp, true)
-		return "", false, string(b)
+		errMsg := getErrorMessage(resp, err)
+		if strings.Contains(err.Error(), "is not a valid") {
+			fmt.Print("The deserialization of the response failed due to following error. "+
+				"Skipping as this should not impact the functionality of the provider.",
+				map[string]interface{}{"errMsg": err.Error()})
+		} else {
+			return "", false, errMsg
+		}
 	}
 	projectData := projectResp.GetData()
 	if len(projectData) == 0 {
@@ -241,7 +278,6 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 		clusterType, _ := cmd.Flags().GetString("cluster-type")
 		clusterInfo.SetClusterType(ybmclient.ClusterType(clusterType))
 	}
-	networking := *ybmclient.NewNetworkingWithDefaults()
 
 	// Compute track ID for database version
 	softwareInfo := *ybmclient.NewSoftwareInfoWithDefaults()
@@ -256,9 +292,7 @@ func createClusterSpec(ctx context.Context, apiClient *ybmclient.APIClient, cmd 
 
 	clusterSpec = ybmclient.NewClusterSpec(
 		clusterName,
-		cloudInfo,
 		clusterInfo,
-		networking,
 		softwareInfo)
 	if regionInfoProvided {
 		clusterSpec.SetClusterRegionInfo(clusterRegionInfo)
@@ -337,4 +371,14 @@ func getTrackName(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 	trackName = trackData.Spec.GetName()
 
 	return trackName, true, ""
+}
+func parseURL(host string) (*url.URL, error) {
+	endpoint, err := url.Parse(host)
+	if err != nil {
+		return nil, fmt.Errorf("Could not parse ybm server url (%s): %w", host, err)
+	}
+	if endpoint.Scheme == "" {
+		endpoint.Scheme = "https"
+	}
+	return endpoint, err
 }
