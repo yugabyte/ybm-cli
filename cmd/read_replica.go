@@ -78,7 +78,7 @@ var getReadReplicaCmd = &cobra.Command{
 	Short: "Get read replica in YugabyteDB Managed",
 	Long:  "Get read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
@@ -98,7 +98,7 @@ var createReadReplicaCmd = &cobra.Command{
 	Short: "Create read replica in YugabyteDB Managed",
 	Long:  "Create read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
@@ -120,7 +120,7 @@ var updateReadReplicaCmd = &cobra.Command{
 	Short: "Edit read replica in YugabyteDB Managed",
 	Long:  "Edit read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
@@ -142,7 +142,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 	Short: "Delete read replica from YugabyteDB Managed",
 	Long:  "Delete read replica from YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background())
+		apiClient, _ := getApiClient(context.Background(), cmd)
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
