@@ -9,6 +9,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
 // getClusterCmd represents the cluster command
@@ -35,8 +37,16 @@ var getClusterCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 			return
 		}
+
+		clustersCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+
+		formatter.ClusterWrite(clustersCtx, resp.GetData())
+
 		// response from `ListClusters`: ClusterListResponse
-		prettyPrintJson(resp)
+		//prettyPrintJson(resp)
 	},
 }
 

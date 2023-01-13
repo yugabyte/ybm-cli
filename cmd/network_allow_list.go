@@ -10,6 +10,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -35,6 +37,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 		accountID, _, _ := getAccountID(context.Background(), apiClient)
 		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
 
+		var respFilter []ybmclient.NetworkAllowListData
 		// No option to filter by name :(
 		resp, r, err := apiClient.NetworkApi.ListNetworkAllowLists(context.Background(), accountID, projectID).Execute()
 		if err != nil {
@@ -42,6 +45,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 		}
 
+		respFilter = resp.GetData()
 		if cmd.Flags().Changed("name") {
 			allowList, findErr := findNetworkAllowList(resp.Data, nalName)
 
@@ -50,11 +54,15 @@ var getNetworkAllowListCmd = &cobra.Command{
 				return
 			}
 
-			prettyPrintJson(allowList)
-			return
+			respFilter = []ybmclient.NetworkAllowListData{allowList}
 		}
 
-		prettyPrintJson(resp)
+		nalCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewNetworkAllowListFormat(viper.GetString("output")),
+		}
+
+		formatter.NetworkAllowListWrite(nalCtx, respFilter)
 	},
 }
 
