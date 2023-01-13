@@ -1,0 +1,3 @@
+Licenses:
+* Making sure we are ok for internal/formatter/{tabwriter|templates}
+* tabwriter, template, formatter coming/inspire by https://github.com/docker/cli/tree/master/cli/command/formatter

@@ -85,7 +85,7 @@ func getAccountID(ctx context.Context, apiClient *ybmclient.APIClient) (accountI
 	if err != nil {
 		errMsg := getErrorMessage(resp, err)
 		if strings.Contains(err.Error(), "is not a valid") {
-			fmt.Print("The deserialization of the response failed due to following error. "+
+			fmt.Println("The deserialization of the response failed due to following error. "+
 				"Skipping as this should not impact the functionality of the provider.",
 				map[string]interface{}{"errMsg": err.Error()})
 		} else {
@@ -108,7 +108,7 @@ func getProjectID(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 	if err != nil {
 		errMsg := getErrorMessage(resp, err)
 		if strings.Contains(err.Error(), "is not a valid") {
-			fmt.Print("The deserialization of the response failed due to following error. "+
+			fmt.Println("The deserialization of the response failed due to following error. "+
 				"Skipping as this should not impact the functionality of the provider.",
 				map[string]interface{}{"errMsg": err.Error()})
 		} else {

@@ -39,7 +39,7 @@ func Execute() {
 
 func setDefaults() {
 	viper.SetDefault("host", "devcloud.yugabyte.com")
-
+	viper.SetDefault("output", "table")
 }
 
 func init() {
@@ -51,10 +51,12 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ybm-cli.yaml)")
 	rootCmd.PersistentFlags().StringP("host", "", "", "YBM Api hostname")
 	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YBM Api Key")
+	rootCmd.PersistentFlags().StringP("output", "o", "", "Select the desired output format (table, json, pretty). Default to table")
 
 	//Bind peristents flags to viper
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("apiKey", rootCmd.PersistentFlags().Lookup("apiKey"))
+	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
