@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	defaultClusterListing = "table {{.Name}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultClusterListing = "table {{.Name}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
 	nameHeader            = "Name"
+	regionsHeader         = "Regions"
 	numNodesHeader        = "Nodes"
 	nodeInfoHeader        = "Node_Spec"
 )
@@ -49,6 +50,7 @@ func NewClusterContext() *ClusterContext {
 	clusterCtx := ClusterContext{}
 	clusterCtx.Header = SubHeaderContext{
 		"Name":      nameHeader,
+		"Regions":   regionsHeader,
 		"Nodes":     numNodesHeader,
 		"NodesSpec": nodeInfoHeader,
 	}
@@ -57,6 +59,10 @@ func NewClusterContext() *ClusterContext {
 
 func (c *ClusterContext) Name() string {
 	return c.c.Spec.Name
+}
+
+func (c *ClusterContext) Regions() string {
+	return c.c.GetSpec().CloudInfo.Region
 }
 
 func (c *ClusterContext) NodesSpec() string {
