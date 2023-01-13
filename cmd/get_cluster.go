@@ -5,9 +5,9 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
@@ -19,9 +19,8 @@ var getClusterCmd = &cobra.Command{
 	Short: "Get clusters in YugabyteDB Managed",
 	Long:  "Get clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiClientAccountIDProjectID(context.Background(), cmd)
+
 		clusterListRequest := apiClient.ClusterApi.ListClusters(context.Background(), accountID, projectID)
 
 		// if user filters by name, add it to the request
@@ -33,8 +32,8 @@ var getClusterCmd = &cobra.Command{
 		resp, r, err := clusterListRequest.Execute()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.ListClusters``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
@@ -44,9 +43,6 @@ var getClusterCmd = &cobra.Command{
 		}
 
 		formatter.ClusterWrite(clustersCtx, resp.GetData())
-
-		// response from `ListClusters`: ClusterListResponse
-		//prettyPrintJson(resp)
 	},
 }
 

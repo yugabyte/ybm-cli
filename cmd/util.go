@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/hokaccha/go-prettyjson"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -54,7 +55,7 @@ func getApiClient(ctx context.Context, cmd *cobra.Command) (*ybmclient.APIClient
 
 	url, err := parseURL(viper.GetString("host"))
 	if err != nil {
-		fmt.Fprintln(os.Stdout, err.Error())
+		logrus.Error(err)
 		os.Exit(1)
 	}
 
@@ -381,4 +382,26 @@ func parseURL(host string) (*url.URL, error) {
 		endpoint.Scheme = "https"
 	}
 	return endpoint, err
+}
+
+// getApiClientAccountIDProjectID
+// This is small wrapper around others functions
+func getApiClientAccountIDProjectID(ctx context.Context, cmd *cobra.Command) (apiClient *ybmclient.APIClient, accountID string, projectID string) {
+	apiClient, err := getApiClient(context.Background(), cmd)
+	if err != nil {
+		logrus.Errorf("Unable to initiate ApiClient: %v", err)
+		os.Exit(1)
+	}
+	accountID, _, errMessage := getAccountID(context.Background(), apiClient)
+	if len(errMessage) > 0 {
+		logrus.Error(errMessage)
+		os.Exit(1)
+	}
+	projectID, _, errMessage = getProjectID(context.Background(), apiClient, accountID)
+	if len(errMessage) > 0 {
+		logrus.Error(errMessage)
+		os.Exit(1)
+	}
+
+	return apiClient, accountID, projectID
 }
