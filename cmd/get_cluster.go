@@ -4,12 +4,12 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
@@ -19,9 +19,13 @@ var getClusterCmd = &cobra.Command{
 	Short: "Get clusters in YugabyteDB Managed",
 	Long:  "Get clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiClientAccountIDProjectID(context.Background(), cmd)
-
-		clusterListRequest := apiClient.ClusterApi.ListClusters(context.Background(), accountID, projectID)
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterListRequest := authApi.ListClusters()
 
 		// if user filters by name, add it to the request
 		clusterName, _ := cmd.Flags().GetString("cluster-name")

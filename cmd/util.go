@@ -3,18 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"os"
-	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/hokaccha/go-prettyjson"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -23,49 +19,7 @@ func prettyPrintJson(data interface{}) {
 	b, _ := prettyjson.Marshal(data)
 	fmt.Println(string(b))
 }
-func getErrorMessage(response *http.Response, err error) string {
-	errMsg := err.Error()
-	if response != nil {
-		request, dumpErr := httputil.DumpRequest(response.Request, true)
-		if dumpErr != nil {
-			additional := "Error while dumping request: " + dumpErr.Error()
-			errMsg = errMsg + "\n\n\nDump error:" + additional
-		} else {
-			reqString := string(request)
-			// Replace the Authorization Bearer header with obfuscated value
-			re := regexp.MustCompile(`eyJ(.*)`)
-			reqString = re.ReplaceAllString(reqString, `***`)
-			errMsg = errMsg + "\n\nAPI Request:\n" + reqString
-		}
 
-		response, dumpErr := httputil.DumpResponse(response, true)
-		if dumpErr != nil {
-			additional := "Error while dumping response: " + dumpErr.Error()
-			errMsg = errMsg + "\n\n\nDump error:" + additional
-		} else {
-			errMsg = errMsg + "\n\nAPI Response:\n" + string(response)
-		}
-	}
-	return errMsg
-}
-
-func getApiClient(ctx context.Context, cmd *cobra.Command) (*ybmclient.APIClient, error) {
-	configuration := ybmclient.NewConfiguration()
-	//Configure the client
-
-	url, err := parseURL(viper.GetString("host"))
-	if err != nil {
-		logrus.Error(err)
-		os.Exit(1)
-	}
-
-	configuration.Host = url.Host
-	configuration.Scheme = url.Scheme
-	apiClient := ybmclient.NewAPIClient(configuration)
-	apiKey := viper.GetString("apiKey")
-	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
-	return apiClient, nil
-}
 func getClusterID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string, projectId string, clusterName string) (clusterId string, clusterIdOk bool, errorMessage string) {
 	clusterResp, resp, err := apiClient.ClusterApi.ListClusters(ctx, accountId, projectId).Name(clusterName).Execute()
 	if err != nil {
@@ -79,53 +33,6 @@ func getClusterID(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 	}
 
 	return "", false, "Couldn't find any cluster with the given name"
-}
-
-func getAccountID(ctx context.Context, apiClient *ybmclient.APIClient) (accountId string, accountIdOK bool, errorMessage string) {
-	accountResp, resp, err := apiClient.AccountApi.ListAccounts(ctx).Execute()
-	if err != nil {
-		errMsg := getErrorMessage(resp, err)
-		if strings.Contains(err.Error(), "is not a valid") {
-			fmt.Println("The deserialization of the response failed due to following error. "+
-				"Skipping as this should not impact the functionality of the provider.",
-				map[string]interface{}{"errMsg": err.Error()})
-		} else {
-			return "", false, errMsg
-		}
-	}
-	accountData := accountResp.GetData()
-	if len(accountData) == 0 {
-		return "", false, "The user is not associated with any accounts."
-	}
-	if len(accountData) > 1 {
-		return "", false, "The user is associated with multiple accounts, please provide an account ID."
-	}
-	accountId = accountData[0].Info.Id
-	return accountId, true, ""
-}
-
-func getProjectID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string) (projectId string, projectIdOK bool, errorMessage string) {
-	projectResp, resp, err := apiClient.ProjectApi.ListProjects(ctx, accountId).Execute()
-	if err != nil {
-		errMsg := getErrorMessage(resp, err)
-		if strings.Contains(err.Error(), "is not a valid") {
-			fmt.Println("The deserialization of the response failed due to following error. "+
-				"Skipping as this should not impact the functionality of the provider.",
-				map[string]interface{}{"errMsg": err.Error()})
-		} else {
-			return "", false, errMsg
-		}
-	}
-	projectData := projectResp.GetData()
-	if len(projectData) == 0 {
-		return "", false, "The account is not associated with any projects."
-	}
-	if len(projectData) > 1 {
-		return "", false, "The account is associated with multiple projects, please provide a project ID."
-	}
-
-	projectId = projectData[0].Id
-	return projectId, true, ""
 }
 
 func getCdcSinkID(ctx context.Context, apiClient *ybmclient.APIClient, accountId string, cdcSinkName string) (sinkId string, sinkIdOk bool, errorMessage string) {
@@ -373,35 +280,17 @@ func getTrackName(ctx context.Context, apiClient *ybmclient.APIClient, accountId
 
 	return trackName, true, ""
 }
-func parseURL(host string) (*url.URL, error) {
-	endpoint, err := url.Parse(host)
-	if err != nil {
-		return nil, fmt.Errorf("Could not parse ybm server url (%s): %w", host, err)
-	}
-	if endpoint.Scheme == "" {
-		endpoint.Scheme = "https"
-	}
-	return endpoint, err
-}
 
-// getApiClientAccountIDProjectID
-// This is small wrapper around others functions
-func getApiClientAccountIDProjectID(ctx context.Context, cmd *cobra.Command) (apiClient *ybmclient.APIClient, accountID string, projectID string) {
-	apiClient, err := getApiClient(context.Background(), cmd)
+// getApiRequestInfo
+// This is small wrapper around new authApi client
+// Should disappear once every will properly use AuthAPI
+func getApiRequestInfo(providedAccountID string, providedProjectID string) (apiClient *ybmclient.APIClient, accountID string, projectID string) {
+	authApi, err := ybmAuthClient.NewAuthApiClient()
 	if err != nil {
-		logrus.Errorf("Unable to initiate ApiClient: %v", err)
+		logrus.Errorf("could not initiate api client: ", err.Error())
 		os.Exit(1)
 	}
-	accountID, _, errMessage := getAccountID(context.Background(), apiClient)
-	if len(errMessage) > 0 {
-		logrus.Error(errMessage)
-		os.Exit(1)
-	}
-	projectID, _, errMessage = getProjectID(context.Background(), apiClient, accountID)
-	if len(errMessage) > 0 {
-		logrus.Error(errMessage)
-		os.Exit(1)
-	}
+	authApi.GetInfo(providedAccountID, providedProjectID)
 
-	return apiClient, accountID, projectID
+	return authApi.ApiClient, authApi.AccountID, authApi.ProjectID
 }

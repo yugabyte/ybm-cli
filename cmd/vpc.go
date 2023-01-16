@@ -29,9 +29,7 @@ var getVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcName, _ := cmd.Flags().GetString("name")
 
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 		vpcListRequest := getVpcByName(*apiClient, accountID, projectID, vpcName)
 		resp, r, err := vpcListRequest.Execute()
 
@@ -97,9 +95,7 @@ var createVpcCmd = &cobra.Command{
 		}
 		vpcRequest := *ybmclient.NewSingleTenantVpcRequest(vpcSpec)
 
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 		resp, response, err := apiClient.NetworkApi.CreateVpc(context.Background(), accountID, projectID).SingleTenantVpcRequest(vpcRequest).Execute()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.CreateVpc``: %v\n", err)
@@ -117,9 +113,7 @@ var deleteVpcCmd = &cobra.Command{
 	Long:  "Delete a VPC in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcName, _ := cmd.Flags().GetString("name")
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 
 		readResp, readResponse, readErr := apiClient.NetworkApi.ListSingleTenantVpcs(context.Background(), accountID, projectID).Name(vpcName).Execute()
 		if readErr != nil {

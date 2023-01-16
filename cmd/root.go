@@ -56,7 +56,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YBM Api Key")
 	rootCmd.PersistentFlags().StringP("output", "o", "", "Select the desired output format (table, json, pretty). Default to table")
 	rootCmd.PersistentFlags().StringP("logLevel", "l", "", "Select the desired log level format(info). Default to info")
-	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Use debug mode, same as --logLevel debug")
+	rootCmd.PersistentFlags().Bool("debug", false, "Use debug mode, same as --logLevel debug")
 
 	//Bind peristents flags to viper
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))

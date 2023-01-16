@@ -17,9 +17,7 @@ var deleteClusterCmd = &cobra.Command{
 	Short: "Delete cluster in YugabyteDB Managed",
 	Long:  "Delete cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterID, clusterIDOK, errMsg := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
 		if !clusterIDOK {

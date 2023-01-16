@@ -28,9 +28,7 @@ var getVpcPeeringCmd = &cobra.Command{
 	Long:  "Get VPC peerings in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 		resp, r, err := apiClient.NetworkApi.ListVpcPeerings(context.Background(), accountID, projectID).Execute()
 
 		if err != nil {
@@ -85,9 +83,7 @@ var createVpcPeeringCmd = &cobra.Command{
 			applicationVPCSpec.SetCidr(cidr)
 		}
 
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 
 		// check ybVpcName exists
 		vpcListRequest := getVpcByName(*apiClient, accountID, projectID, ybVpcName)
@@ -121,9 +117,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
 
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 
 		resp, r, err := apiClient.NetworkApi.ListVpcPeerings(context.Background(), accountID, projectID).Execute()
 
