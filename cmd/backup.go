@@ -5,7 +5,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -35,7 +37,12 @@ var getBackupCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
-		prettyPrintJson(resp)
+		backupsCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewBackupFormat(viper.GetString("output")),
+		}
+
+		formatter.BackupWrite(backupsCtx, resp.GetData())
 	},
 }
 
@@ -116,7 +123,12 @@ var createBackupCmd = &cobra.Command{
 		}
 		logrus.Infof("The backup for cluster %v is being created\n", clusterName)
 
-		prettyPrintJson(backupResp)
+		backupsCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewBackupFormat(viper.GetString("output")),
+		}
+
+		formatter.BackupWrite(backupsCtx, []ybmclient.BackupData{backupResp.GetData()})
 	},
 }
 
