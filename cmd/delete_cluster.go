@@ -4,11 +4,11 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 )
 
 // deleteClusterCmd represents the cluster command
@@ -17,21 +17,27 @@ var deleteClusterCmd = &cobra.Command{
 	Short: "Delete cluster in YugabyteDB Managed",
 	Long:  "Delete cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, clusterIDOK, errMsg := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-		if !clusterIDOK {
-			fmt.Fprintf(os.Stderr, "Error when fetching cluster ID: %v\n", errMsg)
-			return
-		}
-		r, err := apiClient.ClusterApi.DeleteCluster(context.Background(), accountID, projectID, clusterID).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.ListClusters``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "The cluster %v is scheduled for deletion\n", clusterName)
+		r, err := authApi.DeleteCluster(clusterID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `ClusterApi.DeleteCluster`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
+		}
+
+		logrus.Infof("The cluster %v is scheduled for deletion", clusterName)
 
 	},
 }

@@ -24,6 +24,7 @@ var getBackupCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 		listBackupRequest := authApi.ListBackups()
 		if cmd.Flags().Changed("cluster-name") {
+			clusterName, _ := cmd.Flags().GetString("cluster-name")
 			clusterID, err := authApi.GetClusterID(clusterName)
 			if err != nil {
 				logrus.Error(err)

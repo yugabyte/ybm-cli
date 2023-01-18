@@ -140,6 +140,10 @@ func (a *AuthApiClient) ListClusters() openapi.ApiListClustersRequest {
 	return a.ApiClient.ClusterApi.ListClusters(a.ctx, a.AccountID, a.ProjectID)
 }
 
+func (a *AuthApiClient) DeleteCluster(clusterId string) openapi.ApiDeleteClusterRequest {
+	return a.ApiClient.ClusterApi.DeleteCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) CreateNetworkAllowList() openapi.ApiCreateNetworkAllowListRequest {
 	return a.ApiClient.NetworkApi.CreateNetworkAllowList(a.ctx, a.AccountID, a.ProjectID)
 }
