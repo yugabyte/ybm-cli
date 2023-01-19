@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -48,22 +49,38 @@ func parseReplicaOpts(replicaOpts []string) []ybmclient.ReadReplicaSpec {
 			n, _ := strconv.Atoi(val)
 			switch key {
 			case "num_cores":
-				spec.NodeInfo.NumCores = int32(n)
+				//Avoid potential integer overflow see gosec
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.NodeInfo.NumCores = int32(n)
+				}
 			case "memory_mb":
-				spec.NodeInfo.MemoryMb = int32(n)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.NodeInfo.MemoryMb = int32(n)
+				}
 			case "disk_size_gb":
-				spec.NodeInfo.DiskSizeGb = int32(n)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.NodeInfo.DiskSizeGb = int32(n)
+				}
 			case "code":
 				spec.PlacementInfo.CloudInfo.Code = ybmclient.CloudEnum(val)
 			case "region":
 				spec.PlacementInfo.CloudInfo.Region = val
 			case "num_nodes":
-				spec.PlacementInfo.NumNodes = int32(n)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.PlacementInfo.NumNodes = int32(n)
+				}
 			case "vpc_id":
 				spec.PlacementInfo.VpcId = *ybmclient.NewNullableString(&val)
 			case "num_replicas":
-				numReplicas := int32(n)
-				spec.PlacementInfo.NumReplicas = *ybmclient.NewNullableInt32(&numReplicas)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					numReplicas := int32(n)
+					spec.PlacementInfo.NumReplicas = *ybmclient.NewNullableInt32(&numReplicas)
+				}
 			case "multi_zone":
 				isMultiZone, _ := strconv.ParseBool(val)
 				spec.PlacementInfo.MultiZone = *ybmclient.NewNullableBool(&isMultiZone)
