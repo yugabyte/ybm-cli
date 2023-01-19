@@ -144,6 +144,49 @@ func (a *AuthApiClient) DeleteCluster(clusterId string) openapi.ApiDeleteCluster
 	return a.ApiClient.ClusterApi.DeleteCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) PauseCluster(clusterId string) openapi.ApiPauseClusterRequest {
+	return a.ApiClient.ClusterApi.PauseCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) ResumeCluster(clusterId string) openapi.ApiResumeClusterRequest {
+	return a.ApiClient.ClusterApi.ResumeCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) CreateReadReplica(clusterId string) openapi.ApiCreateReadReplicaRequest {
+	return a.ApiClient.ReadReplicaApi.CreateReadReplica(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) ListReadReplicas(clusterId string) openapi.ApiListReadReplicasRequest {
+	return a.ApiClient.ReadReplicaApi.ListReadReplicas(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) ListSingleTenantVpcs() openapi.ApiListSingleTenantVpcsRequest {
+	return a.ApiClient.NetworkApi.ListSingleTenantVpcs(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) ListSingleTenantVpcsByName(name string) openapi.ApiListSingleTenantVpcsRequest {
+	if name == "" {
+		return a.ListSingleTenantVpcs()
+	}
+	return a.ListSingleTenantVpcs().Name(name)
+}
+
+func (a *AuthApiClient) DeleteVpc(vpcId string) openapi.ApiDeleteVpcRequest {
+	return a.ApiClient.NetworkApi.DeleteVpc(a.ctx, a.AccountID, a.ProjectID, vpcId)
+}
+
+func (a *AuthApiClient) CreateVpcPeering() openapi.ApiCreateVpcPeeringRequest {
+	return a.ApiClient.NetworkApi.CreateVpcPeering(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) ListVpcPeerings() openapi.ApiListVpcPeeringsRequest {
+	return a.ApiClient.NetworkApi.ListVpcPeerings(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) DeleteVpcPeering(vpcPeeringId string) openapi.ApiDeleteVpcPeeringRequest {
+	return a.ApiClient.NetworkApi.DeleteVpcPeering(a.ctx, a.AccountID, a.ProjectID, vpcPeeringId)
+}
+
 func (a *AuthApiClient) CreateNetworkAllowList() openapi.ApiCreateNetworkAllowListRequest {
 	return a.ApiClient.NetworkApi.CreateNetworkAllowList(a.ctx, a.AccountID, a.ProjectID)
 }

@@ -12,12 +12,8 @@ import (
 
 const (
 	defaultClusterListing = "table {{.Name}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
-	nameHeader            = "Name"
-	regionsHeader         = "Regions"
 	numNodesHeader        = "Nodes"
 	nodeInfoHeader        = "Total Res.(Vcpu/Mem/Disk)"
-	softwareVersionHeader = "Version"
-	stateHeader           = "State"
 	healthStateHeader     = "Health"
 )
 

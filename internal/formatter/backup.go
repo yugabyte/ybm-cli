@@ -9,15 +9,12 @@ import (
 )
 
 const (
-	defaultBackupListing      = "table {{.CreatedOn}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.Description}}\t{{.BackupState}}\t{{.BackupType}}\t{{.RetainInDays}}"
-	backupIdCreateOnHeader    = "Created On"
-	backupIdDescriptionHeader = "Description"
-	backupIdExpireOnHeader    = "Expire On"
-	backupIdHeader            = "Backup ID"
-	backupStateHeader         = "State"
-	backupTypeHeader          = "Type"
-	clusterNameHeader         = "Cluster"
-	retainInDaysHeader        = "Retains(day)"
+	defaultBackupListing   = "table {{.CreatedOn}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.Description}}\t{{.BackupState}}\t{{.BackupType}}\t{{.RetainInDays}}"
+	backupIdCreateOnHeader = "Created On"
+	backupIdExpireOnHeader = "Expire On"
+	backupIdHeader         = "Backup ID"
+	backupTypeHeader       = "Type"
+	retainInDaysHeader     = "Retains(day)"
 )
 
 type BackupContext struct {
@@ -55,11 +52,11 @@ func NewBackupContext() *BackupContext {
 	BackupCtx := BackupContext{}
 	BackupCtx.Header = SubHeaderContext{
 		"BackupId":     backupIdHeader,
-		"BackupState":  backupStateHeader,
+		"BackupState":  stateHeader,
 		"BackupType":   backupTypeHeader,
-		"ClusterName":  clusterNameHeader,
+		"ClusterName":  clustersHeader,
 		"CreatedOn":    backupIdCreateOnHeader,
-		"Description":  backupIdDescriptionHeader,
+		"Description":  descriptionHeader,
 		"ExpireOn":     backupIdExpireOnHeader,
 		"RetainInDays": retainInDaysHeader,
 	}
@@ -91,7 +88,6 @@ func (c *BackupContext) Description() string {
 		return *v
 	}
 	return ""
-
 }
 
 func (c *BackupContext) BackupId() string {

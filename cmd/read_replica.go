@@ -10,7 +10,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -78,15 +80,23 @@ var getReadReplicaCmd = &cobra.Command{
 	Short: "Get read replica in YugabyteDB Managed",
 	Long:  "Get read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
-		resp, r, err := apiClient.ReadReplicaApi.ListReadReplicas(context.Background(), accountID, projectID, clusterID).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ReadReplicaApi.ListReadReplicas`: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
 		}
-
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+		resp, r, err := authApi.ListReadReplicas(clusterID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
+		}
 		prettyPrintJson(resp)
 	},
 }
@@ -96,15 +106,24 @@ var createReadReplicaCmd = &cobra.Command{
 	Short: "Create read replica in YugabyteDB Managed",
 	Long:  "Create read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 		readReplicaSpecs := parseReplicaOpts(allReplicaOpt)
 
-		resp, r, err := apiClient.ReadReplicaApi.CreateReadReplica(context.Background(), accountID, projectID, clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
+		resp, r, err := authApi.CreateReadReplica(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ReadReplicaApi.CreateReadReplica``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ReadReplicaApi.CreateReadReplica`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
 		}
 
 		prettyPrintJson(resp)

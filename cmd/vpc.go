@@ -8,18 +8,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
-
-func getVpcByName(apiClient ybmclient.APIClient, accountID string, projectID string, name string) ybmclient.ApiListSingleTenantVpcsRequest {
-	vpcListRequest := apiClient.NetworkApi.ListSingleTenantVpcs(context.Background(), accountID, projectID)
-	if name != "" {
-		vpcListRequest = vpcListRequest.Name(name)
-	}
-
-	return vpcListRequest
-}
 
 // vpcCmd represents the vpc command
 var getVpcCmd = &cobra.Command{
@@ -27,18 +22,29 @@ var getVpcCmd = &cobra.Command{
 	Short: "Get VPCs in YugabyteDB Managed",
 	Long:  "Get VPCs in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		vpcName, _ := cmd.Flags().GetString("name")
 
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-		vpcListRequest := getVpcByName(*apiClient, accountID, projectID, vpcName)
+		vpcListRequest := authApi.ListSingleTenantVpcsByName(vpcName)
 		resp, r, err := vpcListRequest.Execute()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.ListVpcs``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
 		}
 		// response from `ListClusters`: ClusterListResponse
-		prettyPrintJson(resp)
+		vpcCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewVPCFormat(viper.GetString("output")),
+		}
+
+		formatter.VPCWrite(vpcCtx, resp.GetData())
 	},
 }
 
@@ -112,30 +118,38 @@ var deleteVpcCmd = &cobra.Command{
 	Short: "Delete a VPC in YugabyteDB Managed",
 	Long:  "Delete a VPC in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		vpcName, _ := cmd.Flags().GetString("name")
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-
-		readResp, readResponse, readErr := apiClient.NetworkApi.ListSingleTenantVpcs(context.Background(), accountID, projectID).Name(vpcName).Execute()
-		if readErr != nil {
-			fmt.Fprintf(os.Stderr, "Unable to find VPC with name %v. Error when calling `NetworkApi.ListSingleTenantVpcs``: %v\n", vpcName, readErr)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", readResponse)
+		if vpcName == "" {
+			logrus.Error("name field is required")
+			os.Exit(1)
+		}
+		vpcListRequest := authApi.ListSingleTenantVpcsByName(vpcName)
+		readResp, r, err := vpcListRequest.Execute()
+		if err != nil {
+			logrus.Errorf("Unable to find VPC with name %v. Error when calling `NetworkApi.ListSingleTenantVpcs``: %v\n", vpcName, err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 		respData := readResp.Data
 		if len(respData) == 0 {
-			fmt.Fprintf(os.Stderr, "Unable to find VPC with name %v. Error when calling `NetworkApi.ListSingleTenantVpcs``: %v\n", vpcName, readErr)
+			logrus.Errorf("Unable to find VPC with name %v.", vpcName)
 			return
 		}
 		vpcId := respData[0].Info.Id
 
-		resp, err := apiClient.NetworkApi.DeleteVpc(context.Background(), accountID, projectID, vpcId).Execute()
+		_, err = authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.DeleteVpc``: %v\n", err)
+			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc``: %v\n", err)
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "VPC %v was queued for termination.\n", vpcName)
-		prettyPrintJson(resp)
+		logrus.Infof("VPC %s was queued for termination", vpcName)
 	},
 }
 
