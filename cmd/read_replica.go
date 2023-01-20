@@ -6,11 +6,14 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -46,22 +49,38 @@ func parseReplicaOpts(replicaOpts []string) []ybmclient.ReadReplicaSpec {
 			n, _ := strconv.Atoi(val)
 			switch key {
 			case "num_cores":
-				spec.NodeInfo.NumCores = int32(n)
+				//Avoid potential integer overflow see gosec
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.NodeInfo.NumCores = int32(n)
+				}
 			case "memory_mb":
-				spec.NodeInfo.MemoryMb = int32(n)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.NodeInfo.MemoryMb = int32(n)
+				}
 			case "disk_size_gb":
-				spec.NodeInfo.DiskSizeGb = int32(n)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.NodeInfo.DiskSizeGb = int32(n)
+				}
 			case "code":
 				spec.PlacementInfo.CloudInfo.Code = ybmclient.CloudEnum(val)
 			case "region":
 				spec.PlacementInfo.CloudInfo.Region = val
 			case "num_nodes":
-				spec.PlacementInfo.NumNodes = int32(n)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					spec.PlacementInfo.NumNodes = int32(n)
+				}
 			case "vpc_id":
 				spec.PlacementInfo.VpcId = *ybmclient.NewNullableString(&val)
 			case "num_replicas":
-				numReplicas := int32(n)
-				spec.PlacementInfo.NumReplicas = *ybmclient.NewNullableInt32(&numReplicas)
+				if n > 0 && n <= math.MaxInt32 {
+					/* #nosec G109 */
+					numReplicas := int32(n)
+					spec.PlacementInfo.NumReplicas = *ybmclient.NewNullableInt32(&numReplicas)
+				}
 			case "multi_zone":
 				isMultiZone, _ := strconv.ParseBool(val)
 				spec.PlacementInfo.MultiZone = *ybmclient.NewNullableBool(&isMultiZone)
@@ -78,17 +97,23 @@ var getReadReplicaCmd = &cobra.Command{
 	Short: "Get read replica in YugabyteDB Managed",
 	Long:  "Get read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
-		resp, r, err := apiClient.ReadReplicaApi.ListReadReplicas(context.Background(), accountID, projectID, clusterID).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ReadReplicaApi.ListReadReplicas`: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
 		}
-
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+		resp, r, err := authApi.ListReadReplicas(clusterID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
+		}
 		prettyPrintJson(resp)
 	},
 }
@@ -98,17 +123,24 @@ var createReadReplicaCmd = &cobra.Command{
 	Short: "Create read replica in YugabyteDB Managed",
 	Long:  "Create read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 		readReplicaSpecs := parseReplicaOpts(allReplicaOpt)
 
-		resp, r, err := apiClient.ReadReplicaApi.CreateReadReplica(context.Background(), accountID, projectID, clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
+		resp, r, err := authApi.CreateReadReplica(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ReadReplicaApi.CreateReadReplica``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ReadReplicaApi.CreateReadReplica`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
 		}
 
 		prettyPrintJson(resp)
@@ -120,9 +152,7 @@ var updateReadReplicaCmd = &cobra.Command{
 	Short: "Edit read replica in YugabyteDB Managed",
 	Long:  "Edit read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
 
 		readReplicaSpecs := parseReplicaOpts(allReplicaOpt)
@@ -142,9 +172,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 	Short: "Delete read replica from YugabyteDB Managed",
 	Long:  "Delete read replica from YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
 
 		r, err := apiClient.ReadReplicaApi.DeleteReadReplica(context.Background(), accountID, projectID, clusterID).Execute()

@@ -1,11 +1,13 @@
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -14,27 +16,34 @@ var getBackupCmd = &cobra.Command{
 	Short: "Get backups in YugabyteDB Managed",
 	Long:  "Get backups in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-		listBackupRequest := apiClient.BackupApi.ListBackups(context.Background(), accountID, projectID)
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		listBackupRequest := authApi.ListBackups()
 		if cmd.Flags().Changed("cluster-name") {
-			clusterID, clusterIDOK, errMsg := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-			if !clusterIDOK {
-				fmt.Fprintf(os.Stderr, "Error when fetching cluster ID: %v\n", errMsg)
+			clusterName, _ := cmd.Flags().GetString("cluster-name")
+			clusterID, err := authApi.GetClusterID(clusterName)
+			if err != nil {
+				logrus.Error(err)
 				return
 			}
 			listBackupRequest = listBackupRequest.ClusterId(clusterID)
 		}
 		resp, r, err := listBackupRequest.Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `BackupApi.ListBackups``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `BackupApi.ListBackups`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
+		backupsCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewBackupFormat(viper.GetString("output")),
+		}
 
-		prettyPrintJson(resp)
+		formatter.BackupWrite(backupsCtx, resp.GetData())
 	},
 }
 
@@ -43,16 +52,18 @@ var restoreBackupCmd = &cobra.Command{
 	Short: "Restore backups in YugabyteDB Managed",
 	Long:  "Restore backups in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 
 		backupID, _ := cmd.Flags().GetString("backup-id")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, clusterIDOK, errMsg := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-		if !clusterIDOK {
-			fmt.Fprintf(os.Stderr, "Error when fetching cluster ID: %v\n", errMsg)
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
 			return
 		}
 
@@ -60,13 +71,13 @@ var restoreBackupCmd = &cobra.Command{
 		restoreSpec.SetBackupId(backupID)
 		restoreSpec.SetClusterId(clusterID)
 
-		_, r, err := apiClient.BackupApi.RestoreBackup(context.Background(), accountID, projectID).RestoreSpec(*restoreSpec).Execute()
+		_, r, err := authApi.RestoreBackup().RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `BackupApi.RestoreBackup``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `BackupApi.RestoreBackup``: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
-		fmt.Fprintf(os.Stdout, "The backup %v is being restored onto the cluster %v\n", backupID, clusterName)
+		logrus.Infof("The backup %v is being restored onto the cluster %v\n", backupID, clusterName)
 	},
 }
 
@@ -75,13 +86,16 @@ var createBackupCmd = &cobra.Command{
 	Short: "Create backup in YugabyteDB Managed",
 	Long:  "Create backup in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, clusterIDOK, errMsg := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-		if !clusterIDOK {
-			fmt.Fprintf(os.Stderr, "Error when fetching cluster ID: %v\n", errMsg)
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
 			return
 		}
 
@@ -101,14 +115,21 @@ var createBackupCmd = &cobra.Command{
 			createBackupSpec.SetDescription(description)
 		}
 
-		backupResp, response, err := apiClient.BackupApi.CreateBackup(context.Background(), accountID, projectID).BackupSpec(createBackupSpec).Execute()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `BackupApi.CreateBackup``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", response)
-		}
-		fmt.Fprintf(os.Stdout, "The backup for cluster %v is being created\n", clusterName)
+		backupResp, response, err := authApi.CreateBackup().BackupSpec(createBackupSpec).Execute()
 
-		prettyPrintJson(backupResp)
+		if err != nil {
+			logrus.Errorf("Error when calling `BackupApi.CreateBackup``: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", response)
+			return
+		}
+		logrus.Infof("The backup for cluster %v is being created\n", clusterName)
+
+		backupsCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewBackupFormat(viper.GetString("output")),
+		}
+
+		formatter.BackupWrite(backupsCtx, []ybmclient.BackupData{backupResp.GetData()})
 	},
 }
 
@@ -119,19 +140,21 @@ var deleteBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		backupID, _ := cmd.Flags().GetString("backup-id")
 
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-
-		r, err := apiClient.BackupApi.DeleteBackup(context.Background(), accountID, projectID, backupID).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		response, err := authApi.DeleteBackup(backupID).Execute()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `BackupApi.DeleteBackup``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `BackupApi.DeleteBackup``: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", response)
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "Backup %v was queued for deletion.\n", backupID)
+		logrus.Infof("Backup %v was queued for deletion.\n", backupID)
 	},
 }
 

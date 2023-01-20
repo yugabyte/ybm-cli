@@ -4,11 +4,11 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 )
 
 // pauseClusterCmd represents the cluster command
@@ -17,23 +17,26 @@ var pauseClusterCmd = &cobra.Command{
 	Short: "Pause clusters in YugabyteDB Managed",
 	Long:  "Pause clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, clusterIDOK, errMsg := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-		if !clusterIDOK {
-			fmt.Fprintf(os.Stderr, "Error when fetching cluster ID: %v\n", errMsg)
-			return
-		}
-
-		_, _, err := apiClient.ClusterApi.PauseCluster(context.Background(), accountID, projectID, clusterID).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while pausing the cluster %v: %v\n", clusterName, err.Error())
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+		_, r, err := authApi.PauseCluster(clusterID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "The cluster %v is being paused\n", clusterName)
+		logrus.Infof("The cluster %v is being paused", clusterName)
 	},
 }
 
