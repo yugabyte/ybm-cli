@@ -9,9 +9,7 @@ import (
 
 const (
 	defaultNalListing      = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}\t{{.Clusters}}"
-	clustersHeader         = "Clusters"
 	networkAllowListHeader = "Allow List"
-	descriptionHeader      = "Description"
 )
 
 type NetworkAllowListContext struct {

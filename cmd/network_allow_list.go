@@ -4,13 +4,13 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -33,24 +33,28 @@ var getNetworkAllowListCmd = &cobra.Command{
 	Short: "Get network allow list in YugabyteDB Managed",
 	Long:  `Get network allow list in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 
 		var respFilter []ybmclient.NetworkAllowListData
 		// No option to filter by name :(
-		resp, r, err := apiClient.NetworkApi.ListNetworkAllowLists(context.Background(), accountID, projectID).Execute()
+		resp, r, err := authApi.ListNetworkAllowLists().Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.ListNetworkAllowLists`: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
 		}
 
 		respFilter = resp.GetData()
 		if cmd.Flags().Changed("name") {
-			allowList, findErr := findNetworkAllowList(resp.Data, nalName)
+			allowList, err := findNetworkAllowList(resp.Data, nalName)
 
-			if findErr != nil {
-				fmt.Fprintf(os.Stderr, "Error: %s\n", findErr)
+			if err != nil {
+				logrus.Error(err)
 				return
 			}
 
@@ -71,23 +75,32 @@ var createNetworkAllowListCmd = &cobra.Command{
 	Short: "Create network allow lists in YugabyteDB Managed",
 	Long:  `Create network allow lists in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		nalSpec := ybmclient.NetworkAllowListSpec{
 			Name:        nalName,
 			Description: nalDescription,
 			AllowList:   nalIpAddrs,
 		}
 
-		resp, r, err := apiClient.NetworkApi.CreateNetworkAllowList(context.Background(), accountID, projectID).NetworkAllowListSpec(nalSpec).Execute()
+		resp, r, err := authApi.CreateNetworkAllowList().NetworkAllowListSpec(nalSpec).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.CreateNetworkAllowList``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
 		}
 
-		prettyPrintJson(resp)
+		nalCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewNetworkAllowListFormat(viper.GetString("output")),
+		}
+		respFilter := []ybmclient.NetworkAllowListData{resp.GetData()}
+
+		formatter.NetworkAllowListWrite(nalCtx, respFilter)
 	},
 }
 
@@ -96,32 +109,33 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 	Short: "Delete network allow list from YugabyteDB Managed",
 	Long:  `Delete network allow list from YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-
-		readResp, readResponse, readErr := apiClient.NetworkApi.ListNetworkAllowLists(context.Background(), accountID, projectID).Execute()
-
-		if readErr != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.ListNetworkAllowLists`: %v\n", readErr)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", readResponse)
-			return
-		}
-
-		allowList, findErr := findNetworkAllowList(readResp.Data, nalName)
-
-		if findErr != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", findErr)
-			return
-		}
-
-		r, err := apiClient.NetworkApi.DeleteNetworkAllowList(context.Background(), accountID, projectID, allowList.Info.Id).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.DeleteNetworkAllowList``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+
+		resp, r, err := authApi.ListNetworkAllowLists().Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
 		}
 
-		fmt.Fprintf(os.Stdout, "Success: NetworkAllosList <%s> deleted\n", nalName)
+		allowList, err := findNetworkAllowList(resp.Data, nalName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+
+		r, err = authApi.DeleteNetworkAllowList(allowList.Info.Id).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `NetworkApi.DeleteNetworkAllowList`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
+		}
+		logrus.Infof("Success: NetworkAllowList <%s> deleted\n", nalName)
 	},
 }
 

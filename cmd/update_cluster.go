@@ -19,12 +19,8 @@ var updateClusterCmd = &cobra.Command{
 	Short: "Update a cluster in YB Managed",
 	Long:  "Update a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		ctx := context.Background()
-
-		apiClient, _ := getApiClient(ctx, cmd)
-		accountID, _, _ := getAccountID(ctx, apiClient)
-		projectID, _, _ := getProjectID(ctx, apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 

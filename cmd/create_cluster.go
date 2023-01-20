@@ -19,9 +19,7 @@ var createClusterCmd = &cobra.Command{
 	Long:  "Create a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
+		apiClient, accountID, projectID := getApiRequestInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		credentials, _ := cmd.Flags().GetStringToString("credentials")

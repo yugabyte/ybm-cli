@@ -4,12 +4,12 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
@@ -19,10 +19,13 @@ var getClusterCmd = &cobra.Command{
 	Short: "Get clusters in YugabyteDB Managed",
 	Long:  "Get clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
-		projectID, _, _ := getProjectID(context.Background(), apiClient, accountID)
-		clusterListRequest := apiClient.ClusterApi.ListClusters(context.Background(), accountID, projectID)
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterListRequest := authApi.ListClusters()
 
 		// if user filters by name, add it to the request
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -33,8 +36,8 @@ var getClusterCmd = &cobra.Command{
 		resp, r, err := clusterListRequest.Execute()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.ListClusters``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
@@ -44,9 +47,6 @@ var getClusterCmd = &cobra.Command{
 		}
 
 		formatter.ClusterWrite(clustersCtx, resp.GetData())
-
-		// response from `ListClusters`: ClusterListResponse
-		//prettyPrintJson(resp)
 	},
 }
 

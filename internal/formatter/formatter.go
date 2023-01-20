@@ -21,6 +21,15 @@ const (
 	DefaultQuietFormat = "{{.ID}}"
 	jsonFormat         = "{{json .}}"
 	prettyFormat       = "{{. | toPrettyJson}}"
+
+	// default header use accross multiple formatter
+	clustersHeader        = "Clusters"
+	descriptionHeader     = "Description"
+	nameHeader            = "Name"
+	regionsHeader         = "Regions"
+	softwareVersionHeader = "Version"
+	stateHeader           = "State"
+	providerHeader        = "Provider"
 )
 
 // Format is the format string rendered using the Context

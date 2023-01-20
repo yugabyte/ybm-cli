@@ -17,8 +17,7 @@ var getCdcSinkCmd = &cobra.Command{
 	Short: "Get CDC Sink in YugabyteDB Managed",
 	Long:  `Get CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
+		apiClient, accountID, _ := getApiRequestInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 		cdcSinkID, cdcSinkIDOk, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
@@ -44,8 +43,7 @@ var createCdcSinkCmd = &cobra.Command{
 	Short: "Create CDC Sink in YugabyteDB Managed",
 	Long:  `Create CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
+		apiClient, accountID, _ := getApiRequestInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 		sinkType, _ := cmd.Flags().GetString("cdc-sink-type")
@@ -86,8 +84,7 @@ var editCdcSinkCmd = &cobra.Command{
 	Short: "Edit CDC Sink in YugabyteDB Managed",
 	Long:  `Edit CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
+		apiClient, accountID, _ := getApiRequestInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 
@@ -135,8 +132,7 @@ var deleteCdcSinkCmd = &cobra.Command{
 	Short: "Delete CDC Sink in YugabyteDB Managed",
 	Long:  `Delete CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, _ := getApiClient(context.Background(), cmd)
-		accountID, _, _ := getAccountID(context.Background(), apiClient)
+		apiClient, accountID, _ := getApiRequestInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 		cdcSinkID, cdcSinkIDOk, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
