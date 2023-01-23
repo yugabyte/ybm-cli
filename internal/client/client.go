@@ -22,7 +22,7 @@ import (
 var cliVersion = "v0.1.0"
 
 type AuthApiClient struct {
-	ApiClient *ybmclient.APIClient
+	ApiClient *openapi.APIClient
 	AccountID string
 	ProjectID string
 	ctx       context.Context
@@ -34,7 +34,7 @@ func SetVersion(version string) {
 
 // NewAuthClient function is returning a new AuthApiClient Client
 func NewAuthApiClient() (*AuthApiClient, error) {
-	configuration := ybmclient.NewConfiguration()
+	configuration := openapi.NewConfiguration()
 	//Configure the client
 
 	url, err := parseURL(viper.GetString("host"))
@@ -45,7 +45,7 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 
 	configuration.Host = url.Host
 	configuration.Scheme = url.Scheme
-	apiClient := ybmclient.NewAPIClient(configuration)
+	apiClient := openapi.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
@@ -284,7 +284,6 @@ func (a *AuthApiClient) GetClusterID(clusterName string) (string, error) {
 
 	return "", fmt.Errorf("could no get cluster data for cluster name: %s", clusterName)
 }
-
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {
 	return a.ApiClient.ClusterApi.CreateCluster(a.ctx, a.AccountID, a.ProjectID)
