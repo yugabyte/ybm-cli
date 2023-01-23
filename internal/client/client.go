@@ -22,7 +22,7 @@ import (
 var cliVersion = "v0.1.0"
 
 type AuthApiClient struct {
-	ApiClient *openapi.APIClient
+	ApiClient *ybmclient.APIClient
 	AccountID string
 	ProjectID string
 	ctx       context.Context
@@ -34,7 +34,7 @@ func SetVersion(version string) {
 
 // NewAuthClient function is returning a new AuthApiClient Client
 func NewAuthApiClient() (*AuthApiClient, error) {
-	configuration := openapi.NewConfiguration()
+	configuration := ybmclient.NewConfiguration()
 	//Configure the client
 
 	url, err := parseURL(viper.GetString("host"))
@@ -45,7 +45,7 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 
 	configuration.Host = url.Host
 	configuration.Scheme = url.Scheme
-	apiClient := openapi.NewAPIClient(configuration)
+	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
@@ -140,7 +140,12 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		info := *ybmclient.NewClusterRegionInfo(
 			*ybmclient.NewPlacementInfo(cloudInfo, int32(regionNodes)),
 		)
-		if vpcID, ok := regionInfo["vpc_id"]; ok {
+		if vpcName, ok := regionInfo["vpc"]; ok {
+			vpcID, err := a.GetVpcIdByName(vpcName)
+			if err != nil {
+				logrus.Error(err)
+				return nil, err
+			}
 			info.PlacementInfo.SetVpcId(vpcID)
 		}
 		if cmd.Flags().Changed("cluster-type") {
@@ -346,6 +351,36 @@ func (a *AuthApiClient) ListSingleTenantVpcsByName(name string) ybmclient.ApiLis
 
 func (a *AuthApiClient) DeleteVpc(vpcId string) ybmclient.ApiDeleteVpcRequest {
 	return a.ApiClient.NetworkApi.DeleteVpc(a.ctx, a.AccountID, a.ProjectID, vpcId)
+}
+
+func (a *AuthApiClient) GetVpcIdByName(vpcName string) (string, error) {
+	vpcResp, resp, err := a.ApiClient.NetworkApi.ListSingleTenantVpcs(a.ctx, a.AccountID, a.ProjectID).Name(vpcName).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return "", fmt.Errorf("could not find vpc id with name: %s", vpcName)
+	}
+	vpcData := vpcResp.GetData()
+
+	if len(vpcData) != 0 {
+		return vpcData[0].Info.GetId(), nil
+	}
+
+	return "", fmt.Errorf("could no get vpc data for vpc name: %s", vpcName)
+}
+
+func (a *AuthApiClient) GetVpc(vpcId string) ybmclient.ApiGetSingleTenantVpcRequest {
+	return a.ApiClient.NetworkApi.GetSingleTenantVpc(a.ctx, a.AccountID, a.ProjectID, vpcId)
+}
+
+func (a *AuthApiClient) GetVpcNameById(vpcId string) (string, error) {
+	vpcNameResp, resp, err := a.GetVpc(vpcId).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		return "", err
+	}
+	return vpcNameResp.GetData().Spec.Name, nil
 }
 
 func (a *AuthApiClient) CreateVpcPeering() ybmclient.ApiCreateVpcPeeringRequest {
