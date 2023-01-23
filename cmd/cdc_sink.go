@@ -4,11 +4,12 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -17,20 +18,24 @@ var getCdcSinkCmd = &cobra.Command{
 	Short: "Get CDC Sink in YugabyteDB Managed",
 	Long:  `Get CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, _ := getApiRequestInfo("", "")
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
-		cdcSinkID, cdcSinkIDOk, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
-
-		if !cdcSinkIDOk {
-			fmt.Fprintf(os.Stderr, "No Cdc Sink named `%s` found\n", cdcSinkName)
+		cdcSinkID, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
+		if err != nil {
+			logrus.Errorf("No Cdc Sink named `%s` found: %v", cdcSinkName, err)
 			return
 		}
 
-		resp, r, err := apiClient.CdcApi.GetCdcSink(context.Background(), accountID, cdcSinkID).Execute()
+		resp, r, err := authApi.GetCdcSink(cdcSinkID).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.GetCdcSink``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.GetCdcSink`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
@@ -43,7 +48,12 @@ var createCdcSinkCmd = &cobra.Command{
 	Short: "Create CDC Sink in YugabyteDB Managed",
 	Long:  `Create CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, _ := getApiRequestInfo("", "")
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 		sinkType, _ := cmd.Flags().GetString("cdc-sink-type")
@@ -68,10 +78,10 @@ var createCdcSinkCmd = &cobra.Command{
 
 		createSinkRequest := ybmclient.NewCreateCdcSinkRequest(cdcSinkSpec, *cdcSinkAuthSpec)
 
-		resp, r, err := apiClient.CdcApi.CreateCdcSink(context.Background(), accountID).CreateCdcSinkRequest(*createSinkRequest).Execute()
+		resp, r, err := authApi.CreateCdcSink().CreateCdcSinkRequest(*createSinkRequest).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.CreateCdcSink``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.CreateeCdcSink`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
@@ -84,13 +94,18 @@ var editCdcSinkCmd = &cobra.Command{
 	Short: "Edit CDC Sink in YugabyteDB Managed",
 	Long:  `Edit CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, _ := getApiRequestInfo("", "")
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 
-		cdcSinkID, cdcSinkIDOk, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
-		if !cdcSinkIDOk {
-			fmt.Fprintf(os.Stderr, "No Cdc Sink named `%s` found\n", cdcSinkName)
+		cdcSinkID, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
+		if err != nil {
+			logrus.Errorf("No Cdc Sink named `%s` found: %v", cdcSinkName, err)
 			return
 		}
 
@@ -116,10 +131,10 @@ var editCdcSinkCmd = &cobra.Command{
 			editCdcSinkRequest.Auth.SetPassword(updatedPassword)
 		}
 
-		resp, r, err := apiClient.CdcApi.EditCdcSink(context.Background(), accountID, cdcSinkID).EditCdcSinkRequest(*editCdcSinkRequest).Execute()
+		resp, r, err := authApi.EditCdcSink(cdcSinkID).EditCdcSinkRequest(*editCdcSinkRequest).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.EditCdcSink`: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.EditCdcSink`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
@@ -132,21 +147,28 @@ var deleteCdcSinkCmd = &cobra.Command{
 	Short: "Delete CDC Sink in YugabyteDB Managed",
 	Long:  `Delete CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, _ := getApiRequestInfo("", "")
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 
 		cdcSinkName, _ := cmd.Flags().GetString("name")
-		cdcSinkID, cdcSinkIDOk, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
-		if !cdcSinkIDOk {
-			fmt.Fprintf(os.Stderr, "No Cdc Sink named `%s` found\n", cdcSinkName)
+
+		cdcSinkID, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
+		if err != nil {
+			logrus.Errorf("No Cdc Sink named `%s` found: %v", cdcSinkName, err)
 			return
 		}
 
-		resp, err := apiClient.CdcApi.DeleteCdcSink(context.Background(), accountID, cdcSinkID).Execute()
+		resp, err := authApi.DeleteCdcSink(cdcSinkID).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.DeleteCdcSink`: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", resp)
+			logrus.Errorf("Error when calling `CdcApi.DeleteeCdcSink`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", resp)
 			return
 		}
+
 		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully")
 		prettyPrintJson(resp)
 	},

@@ -8,17 +8,18 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
-	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 // AuthApiClient is a auth YBM Client
 type AuthApiClient struct {
-	ApiClient *ybmclient.APIClient
+	ApiClient *openapi.APIClient
 	AccountID string
 	ProjectID string
 	ctx       context.Context
@@ -26,7 +27,7 @@ type AuthApiClient struct {
 
 // NewAuthClient function is returning a new AuthApiClient Client
 func NewAuthApiClient() (*AuthApiClient, error) {
-	configuration := ybmclient.NewConfiguration()
+	configuration := openapi.NewConfiguration()
 	//Configure the client
 
 	url, err := parseURL(viper.GetString("host"))
@@ -37,7 +38,7 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 
 	configuration.Host = url.Host
 	configuration.Scheme = url.Scheme
-	apiClient := ybmclient.NewAPIClient(configuration)
+	apiClient := openapi.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	return &AuthApiClient{
@@ -106,6 +107,145 @@ func (a *AuthApiClient) GetProjectID(projectID string, providedAccountID string)
 	return projectData[0].Id, nil
 }
 
+func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string) (*openapi.ClusterSpec, error) {
+
+	var diskSizeGb int32
+	var memoryMb int32
+	var trackId string
+	var trackName string
+	var regionInfoProvided bool
+
+	clusterRegionInfo := []openapi.ClusterRegionInfo{}
+	totalNodes := 0
+	for _, regionInfo := range regionInfoList {
+		numNodes, _ := strconv.ParseInt(regionInfo["num_nodes"], 10, 32)
+		regionNodes := int32(numNodes)
+		region := regionInfo["region"]
+		totalNodes += int(regionNodes)
+		cloudInfo := *openapi.NewCloudInfoWithDefaults()
+		cloudInfo.SetRegion(region)
+		if cmd.Flags().Changed("cloud-type") {
+			cloudType, _ := cmd.Flags().GetString("cloud-type")
+			cloudInfo.SetCode(openapi.CloudEnum(cloudType))
+		}
+		info := *openapi.NewClusterRegionInfo(
+			*openapi.NewPlacementInfo(cloudInfo, int32(regionNodes)),
+		)
+		if vpcID, ok := regionInfo["vpc_id"]; ok {
+			info.PlacementInfo.SetVpcId(vpcID)
+		}
+		if cmd.Flags().Changed("cluster-type") {
+			clusterType, _ := cmd.Flags().GetString("cluster-type")
+			if clusterType == "GEO_PARTITIONED" {
+				info.PlacementInfo.SetMultiZone(true)
+			}
+		}
+		info.SetIsDefault(false)
+		clusterRegionInfo = append(clusterRegionInfo, info)
+	}
+
+	// This is to populate region in top level cloud info
+	region := ""
+	regionCount := len(clusterRegionInfo)
+	if regionCount > 0 {
+		regionInfoProvided = true
+		region = clusterRegionInfo[0].PlacementInfo.CloudInfo.Region
+		if regionCount == 1 {
+			clusterRegionInfo[0].SetIsDefault(true)
+		}
+	}
+
+	// For the default tier which is FREE, isProduction has to be false
+	isProduction := false
+
+	clusterName, _ := cmd.Flags().GetString("cluster-name")
+	cloudInfo := *openapi.NewCloudInfoWithDefaults()
+	if cmd.Flags().Changed("cloud-type") {
+		cloudType, _ := cmd.Flags().GetString("cloud-type")
+		cloudInfo.SetCode(openapi.CloudEnum(cloudType))
+	}
+	if regionInfoProvided {
+		cloudInfo.SetRegion(region)
+	}
+
+	clusterInfo := *openapi.NewClusterInfoWithDefaults()
+	if cmd.Flags().Changed("cluster-tier") {
+		clusterTier, _ := cmd.Flags().GetString("cluster-tier")
+		if clusterTier == "PAID" {
+			isProduction = true
+		}
+		clusterInfo.SetClusterTier(openapi.ClusterTier(clusterTier))
+	}
+
+	if totalNodes != 0 {
+		clusterInfo.SetNumNodes(int32(totalNodes))
+	}
+	if cmd.Flags().Changed("fault-tolerance") {
+		faultTolerance, _ := cmd.Flags().GetString("fault-tolerance")
+		clusterInfo.SetFaultTolerance(openapi.ClusterFaultTolerance(faultTolerance))
+	}
+	clusterInfo.SetIsProduction(isProduction)
+	clusterInfo.SetNodeInfo(*openapi.NewClusterNodeInfoWithDefaults())
+
+	if cmd.Flags().Changed("node-config") {
+		nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
+		numCores := nodeConfig["num_cores"]
+
+		clusterInfo.NodeInfo.SetNumCores(int32(numCores))
+
+		if diskSize, ok := nodeConfig["disk_size_gb"]; ok {
+			diskSizeGb = int32(diskSize)
+		}
+
+	}
+
+	cloud := string(cloudInfo.GetCode())
+	region = cloudInfo.GetRegion()
+	tier := string(clusterInfo.GetClusterTier())
+	numCores := clusterInfo.NodeInfo.GetNumCores()
+
+	memoryMb, err := a.GetFromInstanceType("memory", cloud, tier, region, int32(numCores))
+	if err != nil {
+		return nil, err
+	}
+	clusterInfo.NodeInfo.SetMemoryMb(memoryMb)
+
+	// Computing the default disk size if it is not provided
+	if diskSizeGb == 0 {
+		diskSizeGb, err = a.GetFromInstanceType("disk", cloud, tier, region, int32(numCores))
+		if err != nil {
+			return nil, err
+		}
+	}
+	clusterInfo.NodeInfo.SetDiskSizeGb(diskSizeGb)
+
+	if cmd.Flags().Changed("cluster-type") {
+		clusterType, _ := cmd.Flags().GetString("cluster-type")
+		clusterInfo.SetClusterType(openapi.ClusterType(clusterType))
+	}
+
+	// Compute track ID for database version
+	softwareInfo := *openapi.NewSoftwareInfoWithDefaults()
+	if cmd.Flags().Changed("database-track") {
+		trackName, _ = cmd.Flags().GetString("database-track")
+		trackId, err = a.GetTrackIdByName(trackName)
+		if err != nil {
+			return nil, err
+		}
+		softwareInfo.SetTrackId(trackId)
+	}
+
+	clusterSpec := openapi.NewClusterSpec(
+		clusterName,
+		clusterInfo,
+		softwareInfo)
+	if regionInfoProvided {
+		clusterSpec.SetClusterRegionInfo(clusterRegionInfo)
+	}
+
+	return clusterSpec, nil
+}
+
 func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID string) {
 	var err error
 	a.AccountID, err = a.GetAccountID(providedAccountID)
@@ -136,6 +276,18 @@ func (a *AuthApiClient) GetClusterID(clusterName string) (string, error) {
 	return "", fmt.Errorf("could no get cluster data for cluster name: %s", clusterName)
 }
 
+func (a *AuthApiClient) CreateCluster() openapi.ApiCreateClusterRequest {
+	return a.ApiClient.ClusterApi.CreateCluster(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) GetCluster(clusterId string) openapi.ApiGetClusterRequest {
+	return a.ApiClient.ClusterApi.GetCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) EditCluster(clusterId string) openapi.ApiEditClusterRequest {
+	return a.ApiClient.ClusterApi.EditCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) ListClusters() openapi.ApiListClustersRequest {
 	return a.ApiClient.ClusterApi.ListClusters(a.ctx, a.AccountID, a.ProjectID)
 }
@@ -156,10 +308,21 @@ func (a *AuthApiClient) CreateReadReplica(clusterId string) openapi.ApiCreateRea
 	return a.ApiClient.ReadReplicaApi.CreateReadReplica(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) EditReadReplicas(clusterId string) openapi.ApiEditReadReplicasRequest {
+	return a.ApiClient.ReadReplicaApi.EditReadReplicas(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) ListReadReplicas(clusterId string) openapi.ApiListReadReplicasRequest {
 	return a.ApiClient.ReadReplicaApi.ListReadReplicas(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) DeleteReadReplica(clusterId string) openapi.ApiDeleteReadReplicaRequest {
+	return a.ApiClient.ReadReplicaApi.DeleteReadReplica(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) CreateVpc() openapi.ApiCreateVpcRequest {
+	return a.ApiClient.NetworkApi.CreateVpc(a.ctx, a.AccountID, a.ProjectID)
+}
 func (a *AuthApiClient) ListSingleTenantVpcs() openapi.ApiListSingleTenantVpcsRequest {
 	return a.ApiClient.NetworkApi.ListSingleTenantVpcs(a.ctx, a.AccountID, a.ProjectID)
 }
@@ -211,6 +374,151 @@ func (a *AuthApiClient) CreateBackup() openapi.ApiCreateBackupRequest {
 
 func (a *AuthApiClient) DeleteBackup(backupId string) openapi.ApiDeleteBackupRequest {
 	return a.ApiClient.BackupApi.DeleteBackup(a.ctx, a.AccountID, a.ProjectID, backupId)
+}
+
+func (a *AuthApiClient) GetTrack(trackId string) openapi.ApiGetTrackRequest {
+	return a.ApiClient.SoftwareReleaseApi.GetTrack(a.ctx, a.AccountID, trackId)
+}
+
+func (a *AuthApiClient) ListTracks() openapi.ApiListTracksRequest {
+	return a.ApiClient.SoftwareReleaseApi.ListTracks(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) GetTrackNameById(trackId string) (string, error) {
+	trackNameResp, resp, err := a.GetTrack(trackId).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		return "", err
+	}
+
+	return trackNameResp.GetData().Spec.GetName(), nil
+
+}
+
+func (a *AuthApiClient) GetTrackIdByName(trackName string) (string, error) {
+	tracksNameResp, resp, err := a.ListTracks().Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		return "", err
+	}
+
+	for _, track := range tracksNameResp.GetData() {
+		if track.Spec.GetName() == trackName {
+			return track.Info.GetId(), nil
+		}
+	}
+	return "", fmt.Errorf("the database version doesn't exist")
+
+}
+func (a *AuthApiClient) CreateCdcStream(clusterId string) openapi.ApiCreateCdcStreamRequest {
+	return a.ApiClient.CdcApi.CreateCdcStream(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) DeleteCdcStream(cdcStreamId string, clusterId string) openapi.ApiDeleteCdcStreamRequest {
+	return a.ApiClient.CdcApi.DeleteCdcStream(a.ctx, a.AccountID, a.ProjectID, clusterId, cdcStreamId)
+}
+
+func (a *AuthApiClient) EditCdcStream(cdcStreamId string, clusterId string) openapi.ApiEditCdcStreamRequest {
+	return a.ApiClient.CdcApi.EditCdcStream(a.ctx, a.AccountID, a.ProjectID, clusterId, cdcStreamId)
+}
+
+func (a *AuthApiClient) ListCdcStreamsForAccount() openapi.ApiListCdcStreamsForAccountRequest {
+	return a.ApiClient.CdcApi.ListCdcStreamsForAccount(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) GetCdcStream(cdcStreamId string, clusterId string) openapi.ApiGetCdcStreamRequest {
+	return a.ApiClient.CdcApi.GetCdcStream(a.ctx, a.AccountID, a.ProjectID, clusterId, cdcStreamId)
+}
+
+func (a *AuthApiClient) GetCdcStreamIDByStreamName(cdcStreamName string) (string, error) {
+	streamResp, resp, err := a.ListCdcStreamsForAccount().Name(cdcStreamName).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		return "", err
+	}
+	streamData := streamResp.GetData()
+
+	if len(streamData) != 0 {
+		return streamData[0].Info.GetId(), nil
+	}
+
+	return "", fmt.Errorf("couldn't find any cdcStream with the given name")
+}
+
+func (a *AuthApiClient) GetSupportedInstanceTypes(cloud string, tier string, region string, numCores int32) openapi.ApiGetSupportedInstanceTypesRequest {
+	return a.ApiClient.ClusterApi.GetSupportedInstanceTypes(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Region(region)
+}
+func (a *AuthApiClient) GetFromInstanceType(resource string, cloud string, tier string, region string, numCores int32) (int32, error) {
+	instanceResp, resp, err := a.GetSupportedInstanceTypes(cloud, tier, region, numCores).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		return 0, err
+	}
+	instanceData := instanceResp.GetData()
+	nodeConfigList, ok := instanceData[region]
+	if !ok || len(nodeConfigList) == 0 {
+		return 0, fmt.Errorf("no instances configured for the given region")
+	}
+
+	return getFromNodeConfig(resource, numCores, nodeConfigList)
+
+}
+
+func (a *AuthApiClient) CreateCdcSink() openapi.ApiCreateCdcSinkRequest {
+	return a.ApiClient.CdcApi.CreateCdcSink(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) DeleteCdcSink(cdcSinkId string) openapi.ApiDeleteCdcSinkRequest {
+	return a.ApiClient.CdcApi.DeleteCdcSink(a.ctx, a.AccountID, cdcSinkId)
+}
+
+func (a *AuthApiClient) EditCdcSink(cdcSinkId string) openapi.ApiEditCdcSinkRequest {
+	return a.ApiClient.CdcApi.EditCdcSink(a.ctx, a.AccountID, cdcSinkId)
+}
+
+func (a *AuthApiClient) GetCdcSink(cdcSinkId string) openapi.ApiGetCdcSinkRequest {
+	return a.ApiClient.CdcApi.GetCdcSink(a.ctx, a.AccountID, cdcSinkId)
+}
+
+func (a *AuthApiClient) ListCdcSinks() openapi.ApiListCdcSinksRequest {
+	return a.ApiClient.CdcApi.ListCdcSinks(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) GetCdcSinkIDBySinkName(cdcSinkName string) (string, error) {
+	sinkResp, resp, err := a.ListCdcSinks().Name(cdcSinkName).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		return "", err
+	}
+
+	sinkData := sinkResp.GetData()
+
+	if len(sinkData) != 0 {
+		return sinkData[0].Info.GetId(), nil
+	}
+
+	return "", fmt.Errorf("couldn't find any cdcSink with the given name")
+}
+
+func getFromNodeConfig(resource string, numCores int32, nodeConfigList []openapi.NodeConfigurationResponseItem) (int32, error) {
+	resourceValue := int32(0)
+	for _, nodeConfig := range nodeConfigList {
+		if nodeConfig.GetNumCores() == numCores {
+			switch resource {
+			case "disk":
+				resourceValue = nodeConfig.GetIncludedDiskSizeGb()
+			case "memory":
+				resourceValue = nodeConfig.GetMemoryMb()
+			}
+			return resourceValue, nil
+		}
+	}
+	return 0, fmt.Errorf("node with the given number of CPU cores doesn't exist in the given region")
 }
 
 func parseURL(host string) (*url.URL, error) {
