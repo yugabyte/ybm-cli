@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 type VPCContext struct {
 	HeaderContext
 	Context
-	c openapi.SingleTenantVpcDataResponse
+	c ybmclient.SingleTenantVpcDataResponse
 }
 
 func NewVPCFormat(source string) Format {
@@ -31,7 +31,7 @@ func NewVPCFormat(source string) Format {
 }
 
 // VPCWrite renders the context for a list of containers
-func VPCWrite(ctx Context, VPCs []openapi.SingleTenantVpcDataResponse) error {
+func VPCWrite(ctx Context, VPCs []ybmclient.SingleTenantVpcDataResponse) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, VPC := range VPCs {
 			err := format(&VPCContext{c: VPC})

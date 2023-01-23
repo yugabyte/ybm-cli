@@ -12,16 +12,22 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 // AuthApiClient is a auth YBM Client
+
+var cliVersion = "v0.1.0"
+
 type AuthApiClient struct {
 	ApiClient *ybmclient.APIClient
 	AccountID string
 	ProjectID string
 	ctx       context.Context
+}
+
+func SetVersion(version string) {
+	cliVersion = version
 }
 
 // NewAuthClient function is returning a new AuthApiClient Client
@@ -40,6 +46,8 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
+	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
+
 	return &AuthApiClient{
 		apiClient,
 		"",
@@ -136,80 +144,80 @@ func (a *AuthApiClient) GetClusterID(clusterName string) (string, error) {
 	return "", fmt.Errorf("could no get cluster data for cluster name: %s", clusterName)
 }
 
-func (a *AuthApiClient) ListClusters() openapi.ApiListClustersRequest {
+func (a *AuthApiClient) ListClusters() ybmclient.ApiListClustersRequest {
 	return a.ApiClient.ClusterApi.ListClusters(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) DeleteCluster(clusterId string) openapi.ApiDeleteClusterRequest {
+func (a *AuthApiClient) DeleteCluster(clusterId string) ybmclient.ApiDeleteClusterRequest {
 	return a.ApiClient.ClusterApi.DeleteCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) PauseCluster(clusterId string) openapi.ApiPauseClusterRequest {
+func (a *AuthApiClient) PauseCluster(clusterId string) ybmclient.ApiPauseClusterRequest {
 	return a.ApiClient.ClusterApi.PauseCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) ResumeCluster(clusterId string) openapi.ApiResumeClusterRequest {
+func (a *AuthApiClient) ResumeCluster(clusterId string) ybmclient.ApiResumeClusterRequest {
 	return a.ApiClient.ClusterApi.ResumeCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) CreateReadReplica(clusterId string) openapi.ApiCreateReadReplicaRequest {
+func (a *AuthApiClient) CreateReadReplica(clusterId string) ybmclient.ApiCreateReadReplicaRequest {
 	return a.ApiClient.ReadReplicaApi.CreateReadReplica(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) ListReadReplicas(clusterId string) openapi.ApiListReadReplicasRequest {
+func (a *AuthApiClient) ListReadReplicas(clusterId string) ybmclient.ApiListReadReplicasRequest {
 	return a.ApiClient.ReadReplicaApi.ListReadReplicas(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) ListSingleTenantVpcs() openapi.ApiListSingleTenantVpcsRequest {
+func (a *AuthApiClient) ListSingleTenantVpcs() ybmclient.ApiListSingleTenantVpcsRequest {
 	return a.ApiClient.NetworkApi.ListSingleTenantVpcs(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) ListSingleTenantVpcsByName(name string) openapi.ApiListSingleTenantVpcsRequest {
+func (a *AuthApiClient) ListSingleTenantVpcsByName(name string) ybmclient.ApiListSingleTenantVpcsRequest {
 	if name == "" {
 		return a.ListSingleTenantVpcs()
 	}
 	return a.ListSingleTenantVpcs().Name(name)
 }
 
-func (a *AuthApiClient) DeleteVpc(vpcId string) openapi.ApiDeleteVpcRequest {
+func (a *AuthApiClient) DeleteVpc(vpcId string) ybmclient.ApiDeleteVpcRequest {
 	return a.ApiClient.NetworkApi.DeleteVpc(a.ctx, a.AccountID, a.ProjectID, vpcId)
 }
 
-func (a *AuthApiClient) CreateVpcPeering() openapi.ApiCreateVpcPeeringRequest {
+func (a *AuthApiClient) CreateVpcPeering() ybmclient.ApiCreateVpcPeeringRequest {
 	return a.ApiClient.NetworkApi.CreateVpcPeering(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) ListVpcPeerings() openapi.ApiListVpcPeeringsRequest {
+func (a *AuthApiClient) ListVpcPeerings() ybmclient.ApiListVpcPeeringsRequest {
 	return a.ApiClient.NetworkApi.ListVpcPeerings(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) DeleteVpcPeering(vpcPeeringId string) openapi.ApiDeleteVpcPeeringRequest {
+func (a *AuthApiClient) DeleteVpcPeering(vpcPeeringId string) ybmclient.ApiDeleteVpcPeeringRequest {
 	return a.ApiClient.NetworkApi.DeleteVpcPeering(a.ctx, a.AccountID, a.ProjectID, vpcPeeringId)
 }
 
-func (a *AuthApiClient) CreateNetworkAllowList() openapi.ApiCreateNetworkAllowListRequest {
+func (a *AuthApiClient) CreateNetworkAllowList() ybmclient.ApiCreateNetworkAllowListRequest {
 	return a.ApiClient.NetworkApi.CreateNetworkAllowList(a.ctx, a.AccountID, a.ProjectID)
 }
-func (a *AuthApiClient) DeleteNetworkAllowList(allowListId string) openapi.ApiDeleteNetworkAllowListRequest {
+func (a *AuthApiClient) DeleteNetworkAllowList(allowListId string) ybmclient.ApiDeleteNetworkAllowListRequest {
 	return a.ApiClient.NetworkApi.DeleteNetworkAllowList(a.ctx, a.AccountID, a.ProjectID, allowListId)
 }
-func (a *AuthApiClient) ListNetworkAllowLists() openapi.ApiListNetworkAllowListsRequest {
+func (a *AuthApiClient) ListNetworkAllowLists() ybmclient.ApiListNetworkAllowListsRequest {
 	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) ListBackups() openapi.ApiListBackupsRequest {
+func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
 	return a.ApiClient.BackupApi.ListBackups(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) RestoreBackup() openapi.ApiRestoreBackupRequest {
+func (a *AuthApiClient) RestoreBackup() ybmclient.ApiRestoreBackupRequest {
 	return a.ApiClient.BackupApi.RestoreBackup(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) CreateBackup() openapi.ApiCreateBackupRequest {
+func (a *AuthApiClient) CreateBackup() ybmclient.ApiCreateBackupRequest {
 	return a.ApiClient.BackupApi.CreateBackup(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) DeleteBackup(backupId string) openapi.ApiDeleteBackupRequest {
+func (a *AuthApiClient) DeleteBackup(backupId string) ybmclient.ApiDeleteBackupRequest {
 	return a.ApiClient.BackupApi.DeleteBackup(a.ctx, a.AccountID, a.ProjectID, backupId)
 }
 
