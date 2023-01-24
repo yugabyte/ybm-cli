@@ -4,11 +4,11 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -17,26 +17,32 @@ var getCdcStreamCmd = &cobra.Command{
 	Short: "Get CDC Stream in YugabyteDB Managed",
 	Long:  `Get CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
-		cdcStreamID, cdcStreamIDOk, _ := getCdcStreamID(context.Background(), apiClient, accountID, cdcStreamName)
-
-		if !cdcStreamIDOk {
-			fmt.Fprintf(os.Stderr, "No Cdc Stream named `%s` found\n", cdcStreamName)
-			return
-		}
-
-		resp, r, err := apiClient.CdcApi.GetCdcStream(context.Background(), accountID, projectID, clusterID, cdcStreamID).Execute()
+		cdcStreamID, err := authApi.GetCdcStreamIDByStreamName(cdcStreamName)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.GetCdcStream``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when getting StreamId with the name %s: %v", cdcStreamName, err)
 			return
 		}
 
+		resp, r, err := authApi.GetCdcStream(clusterID, cdcStreamID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
+		}
 		prettyPrintJson(resp)
 	},
 }
@@ -46,16 +52,23 @@ var createCdcStreamCmd = &cobra.Command{
 	Short: "Create CDC Stream in YugabyteDB Managed",
 	Long:  `Create CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
-		// TODO: handle failures in the above
-		fmt.Fprintf(os.Stderr, "accountID: %v, projectID: %v, clusterID: %v", accountID, projectID, clusterID)
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
 		cdcSinkName, _ := cmd.Flags().GetString("sink")
-		sinkId, _, _ := getCdcSinkID(context.Background(), apiClient, accountID, cdcSinkName)
+		sinkId, _ := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
+
 		dbName, _ := cmd.Flags().GetString("db-name")
 		tables, _ := cmd.Flags().GetStringArray("tables")
 		snapshotExistingData, _ := cmd.Flags().GetBool("snapshot-existing-data")
@@ -70,10 +83,10 @@ var createCdcStreamCmd = &cobra.Command{
 			KafkaPrefix:          &kafkaPrefix,
 		}
 
-		resp, r, err := apiClient.CdcApi.CreateCdcStream(context.Background(), accountID, projectID, clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
+		resp, r, err := authApi.CreateCdcStream(clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.CreateCdcStream``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.CreateCdcStream`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
@@ -86,15 +99,23 @@ var editCdcStreamCmd = &cobra.Command{
 	Short: "Edit CDC Stream in YugabyteDB Managed",
 	Long:  `Edit CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
-		cdcStreamID, cdcStreamIDOk, _ := getCdcStreamID(context.Background(), apiClient, accountID, cdcStreamName)
-		if !cdcStreamIDOk {
-			fmt.Fprintf(os.Stderr, "No Cdc Stream named `%s` found\n", cdcStreamName)
+		cdcStreamID, err := authApi.GetCdcStreamIDByStreamName(cdcStreamName)
+		if err != nil {
+			logrus.Errorf("Error when getting StreamId with the name %s: %v", cdcStreamName, err)
 			return
 		}
 
@@ -109,10 +130,10 @@ var editCdcStreamCmd = &cobra.Command{
 			editCdcStreamRequest.SetTables(tables)
 		}
 
-		resp, r, err := apiClient.CdcApi.EditCdcStream(context.Background(), accountID, projectID, clusterID, cdcStreamID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
+		resp, r, err := authApi.EditCdcStream(clusterID, cdcStreamID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.EditCdcStream`: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.EditCdcStream`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
@@ -125,22 +146,29 @@ var deleteCdcStreamCmd = &cobra.Command{
 	Short: "Delete CDC Stream in YugabyteDB Managed",
 	Long:  `Delete CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
-		cdcStreamName, _ := cmd.Flags().GetString("name")
-		cdcStreamID, cdcStreamIDOk, _ := getCdcStreamID(context.Background(), apiClient, accountID, cdcStreamName)
-		if !cdcStreamIDOk {
-			fmt.Fprintf(os.Stderr, "No Cdc Stream named `%s` found\n", cdcStreamName)
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
 			return
 		}
 
-		resp, err := apiClient.CdcApi.DeleteCdcStream(context.Background(), accountID, projectID, clusterID, cdcStreamID).Execute()
+		cdcStreamName, _ := cmd.Flags().GetString("name")
+		cdcStreamID, err := authApi.GetCdcStreamIDByStreamName(cdcStreamName)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `CdcApi.DeleteCdcStream`: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", resp)
+			logrus.Errorf("Error when getting StreamId with the name %s: %v", cdcStreamName, err)
+			return
+		}
+		resp, err := authApi.DeleteCdcStream(clusterID, cdcStreamID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `CdcApi.DeleteCdcStream`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", resp)
 			return
 		}
 

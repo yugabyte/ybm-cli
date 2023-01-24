@@ -4,7 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 
@@ -101,11 +100,16 @@ var createVpcCmd = &cobra.Command{
 		}
 		vpcRequest := *ybmclient.NewSingleTenantVpcRequest(vpcSpec)
 
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-		resp, response, err := apiClient.NetworkApi.CreateVpc(context.Background(), accountID, projectID).SingleTenantVpcRequest(vpcRequest).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `NetworkApi.CreateVpc``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", response)
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		resp, r, err := authApi.CreateVpc().SingleTenantVpcRequest(vpcRequest).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `NetworkApi.CreateVpc`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 

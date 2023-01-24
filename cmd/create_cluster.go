@@ -4,11 +4,12 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -18,8 +19,12 @@ var createClusterCmd = &cobra.Command{
 	Short: "Create a cluster in YB Managed",
 	Long:  "Create a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		credentials, _ := cmd.Flags().GetStringToString("credentials")
@@ -48,9 +53,9 @@ var createClusterCmd = &cobra.Command{
 			}
 		}
 
-		clusterSpec, clusterOK, errMsg := createClusterSpec(context.Background(), apiClient, cmd, accountID, regionInfoList)
-		if !clusterOK {
-			fmt.Fprintf(os.Stderr, "Error while creating cluster spec: %v\n", errMsg)
+		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoList)
+		if err != nil {
+			logrus.Error("Error while creating cluster spec: %v\n", err)
 			return
 		}
 
@@ -60,7 +65,7 @@ var createClusterCmd = &cobra.Command{
 
 		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec, *dbCredentials)
 
-		resp, r, err := apiClient.ClusterApi.CreateCluster(context.Background(), accountID, projectID).CreateClusterRequest(*createClusterRequest).Execute()
+		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.CreateCluster``: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
