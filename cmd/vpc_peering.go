@@ -69,7 +69,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		appProject, _ := cmd.Flags().GetString("project")
 		appVpcName, _ := cmd.Flags().GetString("app-vpc")
 
-		applicationVPCSpec := *ybmclient.NewCustomerVpcSpec(appVpcId, appProject, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
+		applicationVPCSpec := *ybmclient.NewCustomerVpcSpec(appVpcName, appProject, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
 
 		// Validations
 		if appCloud == "AWS" {
