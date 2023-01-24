@@ -4,12 +4,12 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"os"
 	"strconv"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -19,29 +19,30 @@ var updateClusterCmd = &cobra.Command{
 	Short: "Update a cluster in YB Managed",
 	Long:  "Update a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-
-		clusterID, clusterIDOK, errMsg := getClusterID(ctx, apiClient, accountID, projectID, clusterName)
-		if !clusterIDOK {
-			fmt.Fprintf(os.Stderr, "Error while fetching cluster ID: %v\n", errMsg)
-			return
-		}
-
-		resp, r, err := apiClient.ClusterApi.GetCluster(ctx, accountID, projectID, clusterID).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.GetCluster``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
 			return
 		}
+		resp, r, err := authApi.GetCluster(clusterID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `ClusterApi.GetCluster`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
+		}
+
 		originalSpec := resp.Data.GetSpec()
 		trackID := originalSpec.SoftwareInfo.GetTrackId()
-		trackName, trackNameOK, errMsg := getTrackName(ctx, apiClient, accountID, trackID)
-		if !trackNameOK {
-			fmt.Fprintf(os.Stderr, "Error when calling `getTrackName``: %v\n", errMsg)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+		trackName, err := authApi.GetTrackNameById(trackID)
+		if err != nil {
+			logrus.Errorf("Error when calling `getTrackName`: %v\n", err)
 			return
 		}
 		populateFlags(cmd, originalSpec, trackName)
@@ -51,11 +52,11 @@ var updateClusterCmd = &cobra.Command{
 		if cmd.Flags().Changed("region-info") {
 			regionInfo, _ := cmd.Flags().GetStringToString("region-info")
 			if _, ok := regionInfo["region"]; !ok {
-				fmt.Fprintf(os.Stderr, "Region not specified in region info\n")
+				logrus.Error("Region not specified in region info\n")
 				return
 			}
 			if _, ok := regionInfo["num_nodes"]; !ok {
-				fmt.Fprintf(os.Stderr, "Number of nodes not specified in region info\n")
+				logrus.Error("Number of nodes not specified in region info\n")
 				return
 			}
 			regionInfoList = append(regionInfoList, regionInfo)
@@ -64,29 +65,29 @@ var updateClusterCmd = &cobra.Command{
 		if cmd.Flags().Changed("node-config") {
 			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
 			if _, ok := nodeConfig["num_cores"]; !ok {
-				fmt.Fprintf(os.Stderr, "Number of cores not specified in node config\n")
+				logrus.Error("Number of cores not specified in node config\n")
 				return
 			}
 		}
 
-		clusterSpec, clusterOK, errMsg := createClusterSpec(ctx, apiClient, cmd, accountID, regionInfoList)
-		if !clusterOK {
-			fmt.Fprintf(os.Stderr, "Error while creating cluster spec: %v\n", errMsg)
+		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoList)
+		if err != nil {
+			logrus.Error("Error while creating cluster spec: %v\n", err)
 			return
 		}
 
 		clusterVersion := originalSpec.ClusterInfo.GetVersion()
 		clusterSpec.ClusterInfo.SetVersion(clusterVersion)
 
-		resp, r, err = apiClient.ClusterApi.EditCluster(ctx, accountID, projectID, clusterID).ClusterSpec(*clusterSpec).Execute()
+		resp, r, err = authApi.EditCluster(clusterID).ClusterSpec(*clusterSpec).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.UpdateCluster``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ClusterApi.UpdateCluster`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 		// response from `CreateCluster`: ClusterResponse
-		fmt.Fprintf(os.Stdout, "Response from `ClusterApi.UpdateCluster`: %v\n", resp)
-		fmt.Fprintf(os.Stdout, "The cluster %v is being updated\n", clusterName)
+		//	log.Infof("Response from `ClusterApi.UpdateCluster`: %v\n", resp)
+		logrus.Infof("The cluster %v is being updated\n", clusterName)
 	},
 }
 

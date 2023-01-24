@@ -4,8 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"math"
 	"os"
 	"strconv"
@@ -19,7 +17,6 @@ import (
 
 var clusterName string
 var allReplicaOpt []string
-var test map[string]string
 
 // Parse array of read replica string to string params
 func parseReplicaOpts(replicaOpts []string) []ybmclient.ReadReplicaSpec {
@@ -152,15 +149,24 @@ var updateReadReplicaCmd = &cobra.Command{
 	Short: "Edit read replica in YugabyteDB Managed",
 	Long:  "Edit read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 		readReplicaSpecs := parseReplicaOpts(allReplicaOpt)
 
-		resp, r, err := apiClient.ReadReplicaApi.EditReadReplicas(context.Background(), accountID, projectID, clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
+		resp, r, err := authApi.EditReadReplicas(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ReadReplicaApi.EditReadReplicas``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ReadReplicaApi.EditReadReplicas`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
 		}
 
 		prettyPrintJson(resp)
@@ -172,16 +178,25 @@ var deleteReadReplicaCmd = &cobra.Command{
 	Short: "Delete read replica from YugabyteDB Managed",
 	Long:  "Delete read replica from YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, accountID, projectID := getApiRequestInfo("", "")
-		clusterID, _, _ := getClusterID(context.Background(), apiClient, accountID, projectID, clusterName)
-
-		r, err := apiClient.ReadReplicaApi.DeleteReadReplica(context.Background(), accountID, projectID, clusterID).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ReadReplicaApi.DeleteReadReplica``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			logrus.Errorf("could not initiate api client: ", err.Error())
+			os.Exit(1)
 		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterID(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+		r, err := authApi.DeleteReadReplica(clusterID).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
+			return
+		}
+		logrus.Infof("Success: deleted all read replicas deleted for cluster: %v\n", clusterName)
 
-		fmt.Fprintf(os.Stdout, "Success: deleted all read replicas deleted for cluster: %v\n", clusterName)
 	},
 }
 
