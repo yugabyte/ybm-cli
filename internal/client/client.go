@@ -18,11 +18,18 @@ import (
 )
 
 // AuthApiClient is a auth YBM Client
+
+var cliVersion = "v0.1.0"
+
 type AuthApiClient struct {
 	ApiClient *ybmclient.APIClient
 	AccountID string
 	ProjectID string
 	ctx       context.Context
+}
+
+func SetVersion(version string) {
+	cliVersion = version
 }
 
 // NewAuthClient function is returning a new AuthApiClient Client
@@ -41,6 +48,8 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
+	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
+
 	return &AuthApiClient{
 		apiClient,
 		"",
@@ -276,6 +285,7 @@ func (a *AuthApiClient) GetClusterID(clusterName string) (string, error) {
 	return "", fmt.Errorf("could no get cluster data for cluster name: %s", clusterName)
 }
 
+
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {
 	return a.ApiClient.ClusterApi.CreateCluster(a.ctx, a.AccountID, a.ProjectID)
 }
@@ -323,6 +333,7 @@ func (a *AuthApiClient) DeleteReadReplica(clusterId string) ybmclient.ApiDeleteR
 func (a *AuthApiClient) CreateVpc() ybmclient.ApiCreateVpcRequest {
 	return a.ApiClient.NetworkApi.CreateVpc(a.ctx, a.AccountID, a.ProjectID)
 }
+
 func (a *AuthApiClient) ListSingleTenantVpcs() ybmclient.ApiListSingleTenantVpcsRequest {
 	return a.ApiClient.NetworkApi.ListSingleTenantVpcs(a.ctx, a.AccountID, a.ProjectID)
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/enescakir/emoji"
 	"github.com/inhies/go-bytesize"
 	"github.com/sirupsen/logrus"
-	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 type ClusterContext struct {
 	HeaderContext
 	Context
-	c openapi.ClusterData
+	c ybmclient.ClusterData
 }
 
 func NewClusterFormat(source string) Format {
@@ -34,7 +34,7 @@ func NewClusterFormat(source string) Format {
 }
 
 // ClusterWrite renders the context for a list of containers
-func ClusterWrite(ctx Context, clusters []openapi.ClusterData) error {
+func ClusterWrite(ctx Context, clusters []ybmclient.ClusterData) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, cluster := range clusters {
 			err := format(&ClusterContext{c: cluster})
@@ -112,15 +112,15 @@ func (c *ClusterContext) totalResource(resource int32) int32 {
 
 // clusterHealthStateToEmoji return emoji based on cluster health state
 // See http://www.unicode.org/emoji/charts/emoji-list.html#1f49a
-func clusterHealthStateToEmoji(state openapi.ClusterHealthState) string {
+func clusterHealthStateToEmoji(state ybmclient.ClusterHealthState) string {
 	switch state {
-	case openapi.CLUSTERHEALTHSTATE_HEALTHY:
+	case ybmclient.CLUSTERHEALTHSTATE_HEALTHY:
 		return emoji.GreenHeart.String()
-	case openapi.CLUSTERHEALTHSTATE_NEEDS_ATTENTION:
+	case ybmclient.CLUSTERHEALTHSTATE_NEEDS_ATTENTION:
 		return emoji.Warning.String()
-	case openapi.CLUSTERHEALTHSTATE_UNHEALTHY:
+	case ybmclient.CLUSTERHEALTHSTATE_UNHEALTHY:
 		return emoji.Collision.String()
-	case openapi.CLUSTERHEALTHSTATE_UNKNOWN:
+	case ybmclient.CLUSTERHEALTHSTATE_UNKNOWN:
 		return emoji.QuestionMark.String()
 	default:
 		return ""

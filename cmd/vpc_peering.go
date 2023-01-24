@@ -11,16 +11,16 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
-	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-func findVpcPeering(vpcPeerings []openapi.VpcPeeringData, name string) (openapi.VpcPeeringData, error) {
+func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmclient.VpcPeeringData, error) {
 	for _, vpcPeering := range vpcPeerings {
 		if vpcPeering.Spec.Name == name {
 			return vpcPeering, nil
 		}
 	}
-	return openapi.VpcPeeringData{}, errors.New("Unable to find VpcPeering " + name)
+	return ybmclient.VpcPeeringData{}, errors.New("Unable to find VpcPeering " + name)
 }
 
 var getVpcPeeringCmd = &cobra.Command{
@@ -69,7 +69,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		appProject, _ := cmd.Flags().GetString("project")
 		appVpcId, _ := cmd.Flags().GetString("vpc-id")
 
-		applicationVPCSpec := *openapi.NewCustomerVpcSpec(appVpcId, appProject, *openapi.NewVpcCloudInfo(openapi.CloudEnum(appCloud)))
+		applicationVPCSpec := *ybmclient.NewCustomerVpcSpec(appVpcId, appProject, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
 
 		// Validations
 		if appCloud == "AWS" {
@@ -109,7 +109,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		}
 		ybVpcId := resp.Data[0].Info.Id
 
-		vpcPeeringSpec := *openapi.NewVpcPeeringSpec(ybVpcId, vpcPeeringName, applicationVPCSpec)
+		vpcPeeringSpec := *ybmclient.NewVpcPeeringSpec(ybVpcId, vpcPeeringName, applicationVPCSpec)
 		vpcPeeringResp, response, err := authApi.CreateVpcPeering().VpcPeeringSpec(vpcPeeringSpec).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `NetworkApi.CreateVpcPeering``: %v\n", err)
