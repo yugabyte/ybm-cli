@@ -358,7 +358,7 @@ func (a *AuthApiClient) GetVpcIdByName(vpcName string) (string, error) {
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(string(b))
-		return "", fmt.Errorf("could not find vpc id with name: %s", vpcName)
+		return "", err
 	}
 	vpcData := vpcResp.GetData()
 
