@@ -98,7 +98,7 @@ func init() {
 	createClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	createClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes.")
 	createClusterCmd.Flags().StringToString("region-info", nil, `Region information for the cluster. Please provide key value pairs
-	region=<region-name>,num_nodes=<number-of-nodes>,vpc_id=<vpc-id> as the value. region and num_nodes are mandatory, vpc_id is optional.`)
+	region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num_nodes are mandatory, vpc is optional.`)
 	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
 	createClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
