@@ -24,7 +24,7 @@ var pauseClusterCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return

@@ -26,7 +26,7 @@ var updateClusterCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
