@@ -45,7 +45,16 @@ var updateClusterCmd = &cobra.Command{
 			logrus.Errorf("Error when calling `getTrackName`: %v\n", err)
 			return
 		}
-		populateFlags(cmd, originalSpec, trackName)
+		vpcName := ""
+		if vpcID, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetVpcIdOk(); ok {
+			vpcName, err = authApi.GetVpcNameById(*vpcID)
+			if err != nil {
+				logrus.Errorf("Error when calling `getVpcName`: %v\n", err)
+				return
+			}
+		}
+
+		populateFlags(cmd, originalSpec, trackName, vpcName)
 
 		regionInfoList := []map[string]string{}
 
@@ -108,14 +117,14 @@ func init() {
 	updateClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes.")
 	updateClusterCmd.Flags().StringToString("region-info", nil, `Region information for the cluster. Please provide key value pairs
-	region=<region-name>,num_nodes=<number-of-nodes>,vpc_id=<vpc-id> as the value. region and num_nodes are mandatory, vpc_id is optional.`)
+	region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num_nodes are mandatory, vpc is optional.`)
 	updateClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
 	updateClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
 
 }
 
-func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, trackName string) {
+func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, trackName string, vpcName string) {
 	if !cmd.Flags().Changed("cloud-type") {
 		cmd.Flag("cloud-type").Value.Set(string(originalSpec.CloudInfo.GetCode()))
 		cmd.Flag("cloud-type").Changed = true
@@ -156,8 +165,8 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 		if numNodes, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetNumNodesOk(); ok {
 			regionInfo += ",num_nodes=" + strconv.Itoa(int(*numNodes))
 		}
-		if vpcID, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetVpcIdOk(); ok {
-			regionInfo += ",vpc_id=" + *vpcID
+		if vpcName != "" {
+			regionInfo += ",vpc=" + vpcName
 		}
 		cmd.Flag("region-info").Value.Set(regionInfo)
 		cmd.Flag("region-info").Changed = true

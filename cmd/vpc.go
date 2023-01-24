@@ -133,20 +133,11 @@ var deleteVpcCmd = &cobra.Command{
 			logrus.Error("name field is required")
 			os.Exit(1)
 		}
-		vpcListRequest := authApi.ListSingleTenantVpcsByName(vpcName)
-		readResp, r, err := vpcListRequest.Execute()
+		vpcId, err := authApi.GetVpcIdByName(vpcName)
 		if err != nil {
-			logrus.Errorf("Unable to find VPC with name %v. Error when calling `NetworkApi.ListSingleTenantVpcs``: %v\n", vpcName, err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("could not fetch VPC ID: ", err.Error())
 			return
 		}
-		respData := readResp.Data
-		if len(respData) == 0 {
-			logrus.Errorf("Unable to find VPC with name %v.", vpcName)
-			return
-		}
-		vpcId := respData[0].Info.Id
-
 		_, err = authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc``: %v\n", err)
