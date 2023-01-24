@@ -354,7 +354,7 @@ func (a *AuthApiClient) DeleteVpc(vpcId string) ybmclient.ApiDeleteVpcRequest {
 }
 
 func (a *AuthApiClient) GetVpcIdByName(vpcName string) (string, error) {
-	vpcResp, resp, err := a.ApiClient.NetworkApi.ListSingleTenantVpcs(a.ctx, a.AccountID, a.ProjectID).Name(vpcName).Execute()
+	vpcResp, resp, err := a.ListSingleTenantVpcs().Name(vpcName).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(string(b))
@@ -369,12 +369,12 @@ func (a *AuthApiClient) GetVpcIdByName(vpcName string) (string, error) {
 	return "", fmt.Errorf("could no get vpc data for vpc name: %s", vpcName)
 }
 
-func (a *AuthApiClient) GetVpc(vpcId string) ybmclient.ApiGetSingleTenantVpcRequest {
+func (a *AuthApiClient) GetSingleTenantVpc(vpcId string) ybmclient.ApiGetSingleTenantVpcRequest {
 	return a.ApiClient.NetworkApi.GetSingleTenantVpc(a.ctx, a.AccountID, a.ProjectID, vpcId)
 }
 
 func (a *AuthApiClient) GetVpcNameById(vpcId string) (string, error) {
-	vpcNameResp, resp, err := a.GetVpc(vpcId).Execute()
+	vpcNameResp, resp, err := a.GetSingleTenantVpc(vpcId).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(b)
