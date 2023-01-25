@@ -8,7 +8,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
 var getCloudRegionsCmd = &cobra.Command{
@@ -23,21 +25,28 @@ var getCloudRegionsCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		cloudType, _ := cmd.Flags().GetString("cloud-type")
-		cloudRegionsResp, resp, err := authApi.GetSupportedCloudRegions().Cloud(cloudType).Execute()
+		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
+		cloudRegionsResp, resp, err := authApi.GetSupportedCloudRegions().Cloud(cloudProvider).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `ClusterApi.GetSupportedCloudRegions`: %v\n", err)
 			logrus.Debugf("Full HTTP response: %v\n", resp)
 			return
 		}
 
-		prettyPrintJson(cloudRegionsResp)
+		cloudRegionData := cloudRegionsResp.GetData()
+
+		cloudRegionCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewCloudRegionFormat(viper.GetString("output")),
+		}
+
+		formatter.CloudRegionWrite(cloudRegionCtx, cloudRegionData)
 	},
 }
 
 func init() {
 	getCmd.AddCommand(getCloudRegionsCmd)
-	getCloudRegionsCmd.Flags().String("cloud-type", "", "The cloud provider for which the regions have to be fetched. AWS or GCP.")
-	getCloudRegionsCmd.MarkFlagRequired("cloud-type")
+	getCloudRegionsCmd.Flags().String("cloud-provider", "", "The cloud provider for which the regions have to be fetched. AWS or GCP.")
+	getCloudRegionsCmd.MarkFlagRequired("cloud-provider")
 
 }
