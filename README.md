@@ -38,7 +38,7 @@ ybm create cluster
     --cloud-type=[AWS or GCP]
     --cluster-type=[SYNCHRONOUS or GEO_PARTITIONED]
     --node-config=num_cores=2
-    --region-info=region=<region-name>,num_nodes=<number-of-nodes>,vpc_id=<vpc-id>
+    --region-info=region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name>
     --cluster-tier=[FREE or PAID]
     --fault-tolerance=[NONE or ZONE or Region]
     --database-track=[STABLE or PREVIEW]
@@ -55,7 +55,7 @@ ybm create network-allow-list
 ### Read Replica
 ```sh
 ybm create read-replica
-     --replica=num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>
+     --replica=num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc=<vpc_name>,num_replicas=<num_replicas>,multi_zone=<multi_zone>
 ```
 Additional replica can becreated by repeating the `replica` flag but each replic must be in a distinct region. 
 
@@ -78,12 +78,12 @@ ybm create vpc
 
 ### VPC Peering
 ```sh
-ybm create vpc
+ybm create vpc-peering
     --name=demo-peer
     --vpc-name=demo-vpc
     --cloud=GCP
     --project=project
-    --vpc-id=10.0.0.0/12
+    --vpc=vpc-name
     --region=us-west1
     --cidr=10.0.0.0/18
 ```

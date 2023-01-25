@@ -64,12 +64,12 @@ var createVpcPeeringCmd = &cobra.Command{
 	Long:  "Create VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
-		ybVpcName, _ := cmd.Flags().GetString("vpc-name")
+		ybVpcName, _ := cmd.Flags().GetString("yb-vpc")
 		appCloud, _ := cmd.Flags().GetString("cloud")
 		appProject, _ := cmd.Flags().GetString("project")
-		appVpcId, _ := cmd.Flags().GetString("vpc-id")
+		appVpcName, _ := cmd.Flags().GetString("app-vpc")
 
-		applicationVPCSpec := *ybmclient.NewCustomerVpcSpec(appVpcId, appProject, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
+		applicationVPCSpec := *ybmclient.NewCustomerVpcSpec(appVpcName, appProject, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
 
 		// Validations
 		if appCloud == "AWS" {
@@ -95,19 +95,11 @@ var createVpcPeeringCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		vpcListRequest := authApi.ListSingleTenantVpcsByName(ybVpcName)
-		resp, r, err := vpcListRequest.Execute()
+		ybVpcId, err := authApi.GetVpcIdByName(ybVpcName)
 		if err != nil {
-			logrus.Errorf("Unable to find VPC with name %v. Error when calling `NetworkApi.ListSingleTenantVpcs``: %v\n", ybVpcName, err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Unable to find VPC with name %v. Error: %v\n", ybVpcName, err)
 			return
 		}
-
-		if resp.Data == nil || len(resp.Data) == 0 {
-			logrus.Errorf("Error: VPC %s not found\n", ybVpcName)
-			return
-		}
-		ybVpcId := resp.Data[0].Info.Id
 
 		vpcPeeringSpec := *ybmclient.NewVpcPeeringSpec(ybVpcId, vpcPeeringName, applicationVPCSpec)
 		vpcPeeringResp, response, err := authApi.CreateVpcPeering().VpcPeeringSpec(vpcPeeringSpec).Execute()
@@ -168,14 +160,14 @@ func init() {
 	createCmd.AddCommand(createVpcPeeringCmd)
 	createVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
 	createVpcPeeringCmd.MarkFlagRequired("name")
-	createVpcPeeringCmd.Flags().String("vpc-name", "", "Name of the VPC to peer")
-	createVpcPeeringCmd.MarkFlagRequired("vpc-name")
+	createVpcPeeringCmd.Flags().String("yb-vpc", "", "Name of the YugabyteDB VPC to peer")
+	createVpcPeeringCmd.MarkFlagRequired("yb-vpc")
 	createVpcPeeringCmd.Flags().String("cloud", "", "Cloud of the VPC with which to peer")
 	createVpcPeeringCmd.MarkFlagRequired("cloud")
 	createVpcPeeringCmd.Flags().String("project", "", "Project of the VPC with which to peer")
 	createVpcPeeringCmd.MarkFlagRequired("project")
-	createVpcPeeringCmd.Flags().String("vpc-id", "", "ID of the VPC with which to peer")
-	createVpcPeeringCmd.MarkFlagRequired("vpc-id")
+	createVpcPeeringCmd.Flags().String("app-vpc", "", "Name of the application VPC with which to peer")
+	createVpcPeeringCmd.MarkFlagRequired("app-vpc")
 	createVpcPeeringCmd.Flags().String("region", "", "Region of the VPC with which to peer")
 	createVpcPeeringCmd.Flags().String("cidr", "", "CIDR of the VPC with which to peer")
 

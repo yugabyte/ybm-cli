@@ -19,7 +19,7 @@ var clusterName string
 var allReplicaOpt []string
 
 // Parse array of read replica string to string params
-func parseReplicaOpts(replicaOpts []string) []ybmclient.ReadReplicaSpec {
+func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string) ([]ybmclient.ReadReplicaSpec, error) {
 	readReplicaSpecs := []ybmclient.ReadReplicaSpec{}
 
 	for _, replicaOpt := range replicaOpts {
@@ -70,8 +70,14 @@ func parseReplicaOpts(replicaOpts []string) []ybmclient.ReadReplicaSpec {
 					/* #nosec G109 */
 					spec.PlacementInfo.NumNodes = int32(n)
 				}
-			case "vpc_id":
-				spec.PlacementInfo.VpcId = *ybmclient.NewNullableString(&val)
+			case "vpc":
+				vpcName := val
+				vpcID, err := authApi.GetVpcIdByName(vpcName)
+				if err != nil {
+					logrus.Error(err)
+					return nil, err
+				}
+				spec.PlacementInfo.VpcId = *ybmclient.NewNullableString(&vpcID)
 			case "num_replicas":
 				if n > 0 && n <= math.MaxInt32 {
 					/* #nosec G109 */
@@ -86,7 +92,7 @@ func parseReplicaOpts(replicaOpts []string) []ybmclient.ReadReplicaSpec {
 		}
 		readReplicaSpecs = append(readReplicaSpecs, spec)
 	}
-	return readReplicaSpecs
+	return readReplicaSpecs, nil
 }
 
 var getReadReplicaCmd = &cobra.Command{
@@ -131,7 +137,11 @@ var createReadReplicaCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
-		readReplicaSpecs := parseReplicaOpts(allReplicaOpt)
+		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt)
+		if err != nil {
+			logrus.Errorf("Error while parsing read replica options: %v\n", err)
+			return
+		}
 
 		resp, r, err := authApi.CreateReadReplica(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
@@ -160,7 +170,11 @@ var updateReadReplicaCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
-		readReplicaSpecs := parseReplicaOpts(allReplicaOpt)
+		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt)
+		if err != nil {
+			logrus.Errorf("Error while parsing read replica options: %v\n", err)
+			return
+		}
 
 		resp, r, err := authApi.EditReadReplicas(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
