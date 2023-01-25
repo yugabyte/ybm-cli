@@ -58,12 +58,20 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	}, nil
 }
 
+func (a *AuthApiClient) ListAccounts() ybmclient.ApiListAccountsRequest {
+	return a.ApiClient.AccountApi.ListAccounts(a.ctx)
+}
+
+func (a *AuthApiClient) ListProjects() ybmclient.ApiListProjectsRequest {
+	return a.ApiClient.ProjectApi.ListProjects(a.ctx, a.AccountID)
+}
+
 func (a *AuthApiClient) GetAccountID(accountID string) (string, error) {
 	//If an account ID is provided then we use this one
 	if len(accountID) > 0 {
 		return accountID, nil
 	}
-	accountResp, resp, err := a.ApiClient.AccountApi.ListAccounts(a.ctx).Execute()
+	accountResp, resp, err := a.ListAccounts().Execute()
 	if err != nil {
 		errMsg := getErrorMessage(resp, err)
 		if strings.Contains(err.Error(), "is not a valid") {
@@ -84,17 +92,13 @@ func (a *AuthApiClient) GetAccountID(accountID string) (string, error) {
 	return accountData[0].Info.Id, nil
 }
 
-func (a *AuthApiClient) GetProjectID(projectID string, providedAccountID string) (string, error) {
+func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 	// If a projectID is specified then we use this one.
 	if len(projectID) > 0 {
 		return projectID, nil
 	}
-	accountId, err := a.GetAccountID(providedAccountID)
-	if err != nil {
-		return "", err
-	}
 
-	projectResp, resp, err := a.ApiClient.ProjectApi.ListProjects(a.ctx, accountId).Execute()
+	projectResp, resp, err := a.ListProjects().Execute()
 	if err != nil {
 		errMsg := getErrorMessage(resp, err)
 		if strings.Contains(err.Error(), "is not a valid") {
@@ -267,19 +271,19 @@ func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID stri
 		logrus.Errorf("could not initiate api client: ", err.Error())
 		os.Exit(1)
 	}
-	a.ProjectID, err = a.GetProjectID(providedProjectID, a.AccountID)
+	a.ProjectID, err = a.GetProjectID(providedProjectID)
 	if err != nil {
 		logrus.Errorf("could not initiate api client: ", err.Error())
 		os.Exit(1)
 	}
 }
 
-func (a *AuthApiClient) GetClusterID(clusterName string) (string, error) {
-	clusterResp, resp, err := a.ApiClient.ClusterApi.ListClusters(a.ctx, a.AccountID, a.ProjectID).Name(clusterName).Execute()
+func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
+	clusterResp, resp, err := a.ListClusters().Name(clusterName).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(string(b))
-		return "", fmt.Errorf("could not find cluster id with name: %s", clusterName)
+		return "", err
 	}
 	clusterData := clusterResp.GetData()
 
