@@ -45,7 +45,7 @@ func InstanceTypeWrite(ctx Context, instanceTypes []ybmclient.NodeConfigurationR
 	return ctx.Write(NewInstanceTypeContext(), render)
 }
 
-// NewCloudRegionContext creates a new context for rendering cloud regions
+// NewInstanceTypeContext creates a new context for rendering cloud regions
 func NewInstanceTypeContext() *InstanceTypeContext {
 	instanceTypeCtx := InstanceTypeContext{}
 	instanceTypeCtx.Header = SubHeaderContext{
