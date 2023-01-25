@@ -27,7 +27,7 @@ require (
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/enescakir/emoji v1.0.0
-	github.com/fatih/color v1.14.1 // indirect
+	github.com/fatih/color v1.14.1
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
