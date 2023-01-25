@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -47,7 +48,7 @@ var getVpcPeeringCmd = &cobra.Command{
 		if vpcPeeringName != "" {
 			vpcPeering, findErr := findVpcPeering(resp.Data, vpcPeeringName)
 			if findErr != nil {
-				fmt.Fprintf(os.Stderr, "Error: %s\n", findErr)
+				logrus.Errorf("Error: %s\n", findErr)
 				return
 			}
 			prettyPrintJson(vpcPeering)
@@ -148,8 +149,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 			logrus.Errorf("Full HTTP response: %v\n", response)
 			return
 		}
-
-		logrus.Infof("VPC-peering %v was queued for termination.\n", vpcPeeringName)
+		fmt.Printf("VPC-peering %s was queued for termination.\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 	},
 }
 

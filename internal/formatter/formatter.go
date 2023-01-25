@@ -6,7 +6,9 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"github.com/yugabyte/ybm-cli/internal/formatter/tabwriter"
 	"github.com/yugabyte/ybm-cli/internal/formatter/templates"
 )
@@ -30,6 +32,9 @@ const (
 	softwareVersionHeader = "Version"
 	stateHeader           = "State"
 	providerHeader        = "Provider"
+
+	GREEN_COLOR = "green"
+	RED_COLOR   = "red"
 )
 
 // Format is the format string rendered using the Context
@@ -140,4 +145,20 @@ func (c *Context) Write(sub SubContext, f SubFormat) error {
 
 	c.postFormat(tmpl, sub)
 	return nil
+}
+
+// Colorize the message accoring the colors var
+func Colorize(message string, colors string) string {
+	//If Colors is disable return the message as it is.
+	if viper.GetBool("no-color") {
+		color.NoColor = true
+	}
+	switch colors {
+	case GREEN_COLOR:
+		return color.GreenString(message)
+	case RED_COLOR:
+		return color.RedString(message)
+	default:
+		return message
+	}
 }

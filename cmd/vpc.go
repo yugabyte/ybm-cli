@@ -112,8 +112,15 @@ var createVpcCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
+		vpcCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewVPCFormat(viper.GetString("output")),
+		}
 
-		prettyPrintJson(resp)
+		formatter.VPCWrite(vpcCtx, []ybmclient.SingleTenantVpcDataResponse{resp.GetData()})
+
+		fmt.Printf("The VPC %s is being created\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
+
 	},
 }
 
@@ -138,13 +145,15 @@ var deleteVpcCmd = &cobra.Command{
 			logrus.Errorf("could not fetch VPC ID: ", err.Error())
 			return
 		}
-		_, err = authApi.DeleteVpc(vpcId).Execute()
+		r, err := authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc``: %v\n", err)
+			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
-		logrus.Infof("VPC %s was queued for termination", vpcName)
+		fmt.Printf("The VPC %s is being deleted\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
+
 	},
 }
 

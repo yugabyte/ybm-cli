@@ -45,7 +45,6 @@ var getClusterCmd = &cobra.Command{
 			Output: os.Stdout,
 			Format: formatter.NewClusterFormat(viper.GetString("output")),
 		}
-
 		formatter.ClusterWrite(clustersCtx, resp.GetData())
 	},
 }

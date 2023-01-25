@@ -13,7 +13,7 @@ var getCmd = &cobra.Command{
 	Short: "Get resources in YB Managed",
 	Long:  "Get resources in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		//fmt.Println("list called")
+		cmd.Help()
 	},
 }
 

@@ -9,7 +9,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -35,11 +37,11 @@ var createClusterCmd = &cobra.Command{
 		if cmd.Flags().Changed("region-info") {
 			regionInfo, _ := cmd.Flags().GetStringToString("region-info")
 			if _, ok := regionInfo["region"]; !ok {
-				fmt.Fprintf(os.Stderr, "Region not specified in region info\n")
+				logrus.Errorln("Region not specified in region info")
 				return
 			}
 			if _, ok := regionInfo["num_nodes"]; !ok {
-				fmt.Fprintf(os.Stderr, "Number of nodes not specified in region info\n")
+				logrus.Errorln("Number of nodes not specified in region info")
 				return
 			}
 			regionInfoList = append(regionInfoList, regionInfo)
@@ -48,14 +50,14 @@ var createClusterCmd = &cobra.Command{
 		if cmd.Flags().Changed("node-config") {
 			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
 			if _, ok := nodeConfig["num_cores"]; !ok {
-				fmt.Fprintf(os.Stderr, "Number of cores not specified in node config\n")
+				logrus.Errorln("Number of cores not specified in node config")
 				return
 			}
 		}
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoList)
 		if err != nil {
-			logrus.Error("Error while creating cluster spec: %v\n", err)
+			logrus.Errorf("Error while creating cluster spec: %v\n", err)
 			return
 		}
 
@@ -71,9 +73,15 @@ var createClusterCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 			return
 		}
-		// response from `CreateCluster`: ClusterResponse
-		fmt.Fprintf(os.Stdout, "Response from `ClusterApi.CreateCluster`: %v\n", resp)
-		fmt.Fprintf(os.Stdout, "The cluster %v is being creted\n", clusterName)
+
+		clustersCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+
+		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
+
+		fmt.Printf("The cluster %s is being created\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
