@@ -25,7 +25,7 @@ var getBackupCmd = &cobra.Command{
 		listBackupRequest := authApi.ListBackups()
 		if cmd.Flags().Changed("cluster-name") {
 			clusterName, _ := cmd.Flags().GetString("cluster-name")
-			clusterID, err := authApi.GetClusterID(clusterName)
+			clusterID, err := authApi.GetClusterIdByName(clusterName)
 			if err != nil {
 				logrus.Error(err)
 				return
@@ -61,7 +61,7 @@ var restoreBackupCmd = &cobra.Command{
 
 		backupID, _ := cmd.Flags().GetString("backup-id")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -93,7 +93,7 @@ var createBackupCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return

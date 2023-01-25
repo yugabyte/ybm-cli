@@ -106,7 +106,7 @@ var getReadReplicaCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -132,7 +132,7 @@ var createReadReplicaCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -165,7 +165,7 @@ var updateReadReplicaCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -198,7 +198,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -215,22 +215,23 @@ var deleteReadReplicaCmd = &cobra.Command{
 }
 
 func init() {
-
-	getReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "The name of the cluster")
-	getReadReplicaCmd.MarkFlagRequired("cluster")
+	getReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	getReadReplicaCmd.MarkFlagRequired("cluster-name")
+	getReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
 	getCmd.AddCommand(getReadReplicaCmd)
 
-	createReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "The name of the cluster")
-	createReadReplicaCmd.MarkFlagRequired("cluster")
-	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc=<vpc_name>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
+	createReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	createReadReplicaCmd.MarkFlagRequired("cluster-name")
+	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
 	createCmd.AddCommand(createReadReplicaCmd)
 
-	updateReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "The name of the cluster")
-	updateReadReplicaCmd.MarkFlagRequired("cluster")
-	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc=<vpc_name>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
+	updateReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	updateReadReplicaCmd.MarkFlagRequired("cluster-name")
+	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
 	updateCmd.AddCommand(updateReadReplicaCmd)
 
-	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "The name of the cluster")
-	deleteReadReplicaCmd.MarkFlagRequired("cluster")
+	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	deleteReadReplicaCmd.MarkFlagRequired("cluster-name")
+	deleteReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc_id=<vpc_id>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
 	deleteCmd.AddCommand(deleteReadReplicaCmd)
 }

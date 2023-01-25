@@ -23,8 +23,8 @@ var getCdcStreamCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -58,8 +58,8 @@ var createCdcStreamCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -105,8 +105,8 @@ var editCdcStreamCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -152,8 +152,8 @@ var deleteCdcStreamCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-		clusterName, _ := cmd.Flags().GetString("cluster")
-		clusterID, err := authApi.GetClusterID(clusterName)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Error(err)
 			return
@@ -179,11 +179,11 @@ var deleteCdcStreamCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getCdcStreamCmd)
 	getCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	getCdcStreamCmd.Flags().String("cluster", "", "Name of the Cluster")
+	getCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 
 	createCmd.AddCommand(createCdcStreamCmd)
 	createCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	createCdcStreamCmd.Flags().String("cluster", "", "Name of the Cluster")
+	createCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 	createCdcStreamCmd.Flags().StringArray("tables", []string{}, "Database tables the Cdc Stream will listen to")
 	createCdcStreamCmd.Flags().String("sink", "", "Destination sink for the CDC Stream")
 	createCdcStreamCmd.Flags().String("db-name", "", "Database that the Cdc Stream will listen to")
@@ -192,12 +192,12 @@ func init() {
 
 	updateCmd.AddCommand(editCdcStreamCmd)
 	editCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	editCdcStreamCmd.Flags().String("cluster", "", "Name of the Cluster")
+	editCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 	editCdcStreamCmd.Flags().String("new-name", "", "Updated name of the CDC Stream")
 	editCdcStreamCmd.Flags().StringArray("tables", []string{}, "Tables the Cdc Stream will listen to")
 
 	deleteCmd.AddCommand(deleteCdcStreamCmd)
 	deleteCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	deleteCdcStreamCmd.Flags().String("cluster", "", "Name of the Cluster")
+	deleteCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 
 }
