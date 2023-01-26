@@ -497,11 +497,11 @@ func (a *AuthApiClient) GetCdcStreamIDByStreamName(cdcStreamName string) (string
 	return "", fmt.Errorf("couldn't find any cdcStream with the given name")
 }
 
-func (a *AuthApiClient) GetSupportedInstanceTypes(cloud string, tier string, region string, numCores int32) ybmclient.ApiGetSupportedInstanceTypesRequest {
+func (a *AuthApiClient) GetSupportedInstanceTypes(cloud string, tier string, region string) ybmclient.ApiGetSupportedInstanceTypesRequest {
 	return a.ApiClient.ClusterApi.GetSupportedInstanceTypes(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Region(region)
 }
 func (a *AuthApiClient) GetFromInstanceType(resource string, cloud string, tier string, region string, numCores int32) (int32, error) {
-	instanceResp, resp, err := a.GetSupportedInstanceTypes(cloud, tier, region, numCores).Execute()
+	instanceResp, resp, err := a.GetSupportedInstanceTypes(cloud, tier, region).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(b)
@@ -552,6 +552,10 @@ func (a *AuthApiClient) GetCdcSinkIDBySinkName(cdcSinkName string) (string, erro
 	}
 
 	return "", fmt.Errorf("couldn't find any cdcSink with the given name")
+}
+
+func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsRequest {
+	return a.ApiClient.ClusterApi.GetSupportedCloudRegions(a.ctx)
 }
 
 func getFromNodeConfig(resource string, numCores int32, nodeConfigList []ybmclient.NodeConfigurationResponseItem) (int32, error) {
