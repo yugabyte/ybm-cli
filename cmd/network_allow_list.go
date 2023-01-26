@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -101,6 +102,8 @@ var createNetworkAllowListCmd = &cobra.Command{
 		respFilter := []ybmclient.NetworkAllowListData{resp.GetData()}
 
 		formatter.NetworkAllowListWrite(nalCtx, respFilter)
+
+		fmt.Printf("NetworkAllowList %s successful created\n", formatter.Colorize(nalName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -135,7 +138,7 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
-		logrus.Infof("Success: NetworkAllowList <%s> deleted\n", nalName)
+		fmt.Printf("NetworkAllowList %s successfully deleted\n", formatter.Colorize(nalName, formatter.GREEN_COLOR))
 	},
 }
 

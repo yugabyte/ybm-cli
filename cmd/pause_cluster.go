@@ -4,11 +4,15 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 // pauseClusterCmd represents the cluster command
@@ -29,14 +33,20 @@ var pauseClusterCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
-		_, r, err := authApi.PauseCluster(clusterID).Execute()
+		resp, r, err := authApi.PauseCluster(clusterID).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %v\n", err)
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
+		clustersCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
 
-		logrus.Infof("The cluster %v is being paused", clusterName)
+		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
+
+		fmt.Printf("The cluster %s is being paused\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 

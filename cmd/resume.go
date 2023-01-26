@@ -13,7 +13,7 @@ var resumeCmd = &cobra.Command{
 	Short: "Resume resources in YB Managed",
 	Long:  "Resume resources in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		//fmt.Println("pause called")s
+		cmd.Help()
 	},
 }
 

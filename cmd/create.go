@@ -4,8 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +13,7 @@ var createCmd = &cobra.Command{
 	Short: "Create a resource in YB Managed",
 	Long:  "Create a resource in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("create called")
+		cmd.Help()
 	},
 }
 

@@ -4,12 +4,15 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -94,9 +97,14 @@ var updateClusterCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
-		// response from `CreateCluster`: ClusterResponse
-		//	log.Infof("Response from `ClusterApi.UpdateCluster`: %v\n", resp)
-		logrus.Infof("The cluster %v is being updated\n", clusterName)
+		clustersCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+
+		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
+
+		fmt.Printf("The cluster %s is being updated\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 

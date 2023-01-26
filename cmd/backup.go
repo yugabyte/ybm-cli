@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -77,7 +78,7 @@ var restoreBackupCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
-		logrus.Infof("The backup %v is being restored onto the cluster %v\n", backupID, clusterName)
+		fmt.Printf("The backup %v is being restored onto the cluster %v\n", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -122,7 +123,6 @@ var createBackupCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v\n", response)
 			return
 		}
-		logrus.Infof("The backup for cluster %v is being created\n", clusterName)
 
 		backupsCtx := formatter.Context{
 			Output: os.Stdout,
@@ -130,6 +130,8 @@ var createBackupCmd = &cobra.Command{
 		}
 
 		formatter.BackupWrite(backupsCtx, []ybmclient.BackupData{backupResp.GetData()})
+
+		fmt.Printf("The backup for cluster %s is being created\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -154,7 +156,7 @@ var deleteBackupCmd = &cobra.Command{
 			return
 		}
 
-		logrus.Infof("Backup %v was queued for deletion.\n", backupID)
+		fmt.Printf("Backup %s was queued for deletion.", formatter.Colorize(backupID, formatter.GREEN_COLOR))
 	},
 }
 

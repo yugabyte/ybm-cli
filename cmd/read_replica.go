@@ -4,6 +4,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"math"
 	"os"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -209,7 +211,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
-		logrus.Infof("Success: deleted all read replicas deleted for cluster: %v\n", clusterName)
+		fmt.Printf("All read replica sucessfully deleted for cluster %s \n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 	},
 }

@@ -4,11 +4,13 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
 // deleteClusterCmd represents the cluster command
@@ -37,7 +39,7 @@ var deleteClusterCmd = &cobra.Command{
 			return
 		}
 
-		logrus.Infof("The cluster %v is scheduled for deletion", clusterName)
+		fmt.Printf("The cluster %s is scheduled for deletion", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 	},
 }
