@@ -4,8 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +13,7 @@ var deleteCmd = &cobra.Command{
 	Short: "Delete a resource in YugabyteDB Managed",
 	Long:  "Delete a resource in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("delete called")
+		cmd.Help()
 	},
 }
 

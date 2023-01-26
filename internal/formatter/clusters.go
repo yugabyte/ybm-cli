@@ -112,8 +112,8 @@ func (c *ClusterContext) totalResource(resource int32) int32 {
 
 // clusterHealthStateToEmoji return emoji based on cluster health state
 // See http://www.unicode.org/emoji/charts/emoji-list.html#1f49a
-func clusterHealthStateToEmoji(state ybmclient.ClusterHealthState) string {
-	switch state {
+func clusterHealthStateToEmoji(healthState ybmclient.ClusterHealthState) string {
+	switch healthState {
 	case ybmclient.CLUSTERHEALTHSTATE_HEALTHY:
 		return emoji.GreenHeart.String()
 	case ybmclient.CLUSTERHEALTHSTATE_NEEDS_ATTENTION:

@@ -43,6 +43,7 @@ func setDefaults() {
 	viper.SetDefault("output", "table")
 	viper.SetDefault("logLevel", "info")
 	viper.SetDefault("debug", false)
+	viper.SetDefault("no-color", false)
 }
 
 func init() {
@@ -57,6 +58,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("output", "o", "", "Select the desired output format (table, json, pretty). Default to table")
 	rootCmd.PersistentFlags().StringP("logLevel", "l", "", "Select the desired log level format(info). Default to info")
 	rootCmd.PersistentFlags().Bool("debug", false, "Use debug mode, same as --logLevel debug")
+	rootCmd.PersistentFlags().Bool("no-color", false, "Disable colors in output , default to false")
 
 	//Bind peristents flags to viper
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
@@ -64,6 +66,7 @@ func init() {
 	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 	viper.BindPFlag("logLevel", rootCmd.PersistentFlags().Lookup("logLevel"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
+	viper.BindPFlag("no-color", rootCmd.PersistentFlags().Lookup("no-color"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -91,7 +94,8 @@ func initConfig() {
 	viper.SetEnvPrefix("ybm")
 	//Read all enviromnent variable that match YBM_ENVNAME
 	viper.AutomaticEnv() // read in environment variables that match
-
+	//Set Logrus formatter options
+	log.SetFormatter()
 	// Set log level
 	log.SetLogLevel(viper.GetString("logLevel"), viper.GetBool("debug"))
 	// If a config file is found, read it in.

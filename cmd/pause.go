@@ -13,7 +13,7 @@ var pauseCmd = &cobra.Command{
 	Short: "Pause resources in YB Managed",
 	Long:  "Pause resources in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		//fmt.Println("pause called")
+		cmd.Help()
 	},
 }
 

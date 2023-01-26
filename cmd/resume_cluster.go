@@ -4,11 +4,15 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 // resumeClusterCmd represents the cluster command
@@ -29,14 +33,21 @@ var resumeClusterCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
-		_, r, err := authApi.ResumeCluster(clusterID).Execute()
+		resp, r, err := authApi.ResumeCluster(clusterID).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `ClusterApi.ResumeCluster`: %v\n", err)
 			logrus.Debugf("Full HTTP response: %v\n", r)
 			return
 		}
 
-		logrus.Infof("The cluster %v is being resumed", clusterName)
+		clustersCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+
+		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
+
+		fmt.Printf("The cluster %s is being resumed\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
