@@ -80,23 +80,23 @@ var createVpcPeeringCmd = &cobra.Command{
 		if appCloud == "AWS" {
 			appAccountID, _ := cmd.Flags().GetString("app-vpc-account-id")
 			if appAccountID == "" {
-				logrus.Errorf("Could not create VPC peering: ", "app-vpc-account-id is required for AWS.")
+				logrus.Error("Could not create VPC peering: app-vpc-account-id is required for AWS.")
 				return
 			}
 			appVpcID, _ := cmd.Flags().GetString("app-vpc-id")
 			if appVpcID == "" {
-				logrus.Errorf("Could not create VPC peering: ", "app-vpc-id is required for AWS.")
+				logrus.Error("Could not create VPC peering: app-vpc-id is required for AWS.")
 				return
 			}
 			appVpcRegion, _ := cmd.Flags().GetString("app-vpc-region")
 			if appVpcRegion == "" {
-				logrus.Errorf("Could not create VPC peering: ", "app-vpc-region is required for AWS.")
+				logrus.Error("Could not create VPC peering: app-vpc-region is required for AWS.")
 				return
 			}
 
 			appVpcCidr, _ := cmd.Flags().GetString("app-vpc-cidr")
 			if appVpcCidr == "" {
-				logrus.Errorf("Could not create VPC peering: ", "app-vpc-cidr is required for AWS.")
+				logrus.Error("Could not create VPC peering: app-vpc-cidr is required for AWS.")
 				return
 			}
 			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcID, appAccountID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
@@ -106,12 +106,12 @@ var createVpcPeeringCmd = &cobra.Command{
 		} else if appCloud == "GCP" {
 			appProjectID, _ := cmd.Flags().GetString("app-vpc-project-id")
 			if appProjectID == "" {
-				logrus.Errorf("Could not create VPC peering: ", "app-vpc-project-id is required for GCP.")
+				logrus.Errorf("Could not create VPC peering: app-vpc-project-id is required for GCP.")
 				return
 			}
 			appVpcName, _ := cmd.Flags().GetString("app-vpc-name")
 			if appVpcName == "" {
-				logrus.Errorf("Could not create VPC peering: ", "app-vpc-name is required for GCP.")
+				logrus.Errorf("Could not create VPC peering: app-vpc-name is required for GCP.")
 				return
 			}
 
@@ -124,7 +124,7 @@ var createVpcPeeringCmd = &cobra.Command{
 			}
 
 		} else {
-			logrus.Errorf("Could not create VPC peering: ", "The cloud provider must be either GCP or AWS.")
+			logrus.Error("Could not create VPC peering: The cloud provider must be either GCP or AWS.")
 			return
 		}
 
