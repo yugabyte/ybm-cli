@@ -303,6 +303,17 @@ func (a *AuthApiClient) GetCluster(clusterId string) ybmclient.ApiGetClusterRequ
 	return a.ApiClient.ClusterApi.GetCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) GetClusterCloudById(clusterId string) (ybmclient.CloudEnum, error) {
+	clusterResp, resp, err := a.GetCluster(clusterId).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return "", err
+	}
+	clusterCloud := clusterResp.Data.Spec.CloudInfo.GetCode()
+	return clusterCloud, nil
+}
+
 func (a *AuthApiClient) EditCluster(clusterId string) ybmclient.ApiEditClusterRequest {
 	return a.ApiClient.ClusterApi.EditCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }

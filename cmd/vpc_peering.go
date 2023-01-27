@@ -6,6 +6,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"net/http/httputil"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -138,6 +139,19 @@ var createVpcPeeringCmd = &cobra.Command{
 		ybVpcId, err := authApi.GetVpcIdByName(ybVpcName)
 		if err != nil {
 			logrus.Errorf("Unable to find VPC with name %v. Error: %v", ybVpcName, err)
+			return
+		}
+
+		ybVpcResp, resp, err := authApi.GetSingleTenantVpc(ybVpcId).Execute()
+		if err != nil {
+			b, _ := httputil.DumpResponse(resp, true)
+			logrus.Debug(b)
+			return
+		}
+		ybVpcCloud := string(ybVpcResp.Data.Spec.GetCloud())
+
+		if appCloud != ybVpcCloud {
+			logrus.Error("The Yugabyte DB VPC and application VPC must be in the same cloud.")
 			return
 		}
 
