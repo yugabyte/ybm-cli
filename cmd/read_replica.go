@@ -115,7 +115,7 @@ var getReadReplicaCmd = &cobra.Command{
 		}
 		resp, r, err := authApi.ListReadReplicas(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %v", err)
+			logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -147,7 +147,7 @@ var createReadReplicaCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateReadReplica(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.CreateReadReplica`: %v", err)
+			logrus.Errorf("Error when calling `ReadReplicaApi.CreateReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -180,7 +180,7 @@ var updateReadReplicaCmd = &cobra.Command{
 
 		resp, r, err := authApi.EditReadReplicas(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.EditReadReplicas`: %v", err)
+			logrus.Errorf("Error when calling `ReadReplicaApi.EditReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -207,7 +207,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 		}
 		r, err := authApi.DeleteReadReplica(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %v", err)
+			logrus.Errorf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}

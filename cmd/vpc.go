@@ -33,7 +33,7 @@ var getVpcCmd = &cobra.Command{
 		resp, r, err := vpcListRequest.Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %v", err)
+			logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -108,7 +108,7 @@ var createVpcCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 		resp, r, err := authApi.CreateVpc().SingleTenantVpcRequest(vpcRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.CreateVpc`: %v", err)
+			logrus.Errorf("Error when calling `NetworkApi.CreateVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -147,7 +147,7 @@ var deleteVpcCmd = &cobra.Command{
 		}
 		r, err := authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc``: %v", err)
+			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}

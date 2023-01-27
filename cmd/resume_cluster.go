@@ -35,7 +35,7 @@ var resumeClusterCmd = &cobra.Command{
 		}
 		resp, r, err := authApi.ResumeCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.ResumeCluster`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.ResumeCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
