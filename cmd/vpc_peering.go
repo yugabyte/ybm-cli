@@ -146,6 +146,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		if err != nil {
 			b, _ := httputil.DumpResponse(resp, true)
 			logrus.Debug(b)
+			logrus.Error("Error when calling `GetSingleTenantVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
 		ybVpcCloud := string(ybVpcResp.Data.Spec.GetCloud())
