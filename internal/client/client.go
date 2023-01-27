@@ -410,6 +410,11 @@ func (a *AuthApiClient) ListNetworkAllowLists() ybmclient.ApiListNetworkAllowLis
 	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID)
 }
 
+func (a *AuthApiClient) EditClusterNetworkAllowLists(clusterId string, allowListId string) ybmclient.ApiEditClusterNetworkAllowListsRequest {
+	allowListIDs := []string{allowListId}
+	return a.ApiClient.ClusterApi.EditClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId).RequestBody(allowListIDs)
+}
+
 func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
 	return a.ApiClient.BackupApi.ListBackups(a.ctx, a.AccountID, a.ProjectID)
 }

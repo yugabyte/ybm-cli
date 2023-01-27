@@ -142,6 +142,62 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 	},
 }
 
+var assignNetworkAllowListCmd = &cobra.Command{
+	Use:   "network_allow_list",
+	Short: "Assign network allow list to a cluster",
+	Long:  `Assign network allow list to a cluster`,
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: %s", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+
+		resp, r, err := authApi.ListNetworkAllowLists().Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Debugf("Full HTTP response: %v", r)
+			return
+		}
+
+		allowList, err := findNetworkAllowList(resp.Data, nalName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterID, err := authApi.GetClusterIdByName(clusterName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+
+		resp, r, err = authApi.EditClusterNetworkAllowLists(clusterID, allowList.Info.Id).Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `ClusterApi.EditClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Debugf("Full HTTP response: %v", r)
+			return
+		}
+
+		resp, r, err = authApi.ListNetworkAllowLists().Execute()
+		if err != nil {
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Debugf("Full HTTP response: %v", r)
+			return
+		}
+
+		allowList, err = findNetworkAllowList(resp.Data, nalName)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+
+		fmt.Printf("NetworkAllowList %s successfully assigned to cluster %s\n", formatter.Colorize(nalName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+	},
+}
+
 func init() {
 	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
 	getCmd.AddCommand(getNetworkAllowListCmd)
@@ -156,4 +212,10 @@ func init() {
 	deleteNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
 	deleteNetworkAllowListCmd.MarkFlagRequired("name")
 	deleteCmd.AddCommand(deleteNetworkAllowListCmd)
+
+	assignNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
+	assignNetworkAllowListCmd.MarkFlagRequired("name")
+	assignNetworkAllowListCmd.Flags().String("cluster-name", "", "The name of the cluster")
+	assignNetworkAllowListCmd.MarkFlagRequired("cluster-name")
+	assignCmd.AddCommand(assignNetworkAllowListCmd)
 }
