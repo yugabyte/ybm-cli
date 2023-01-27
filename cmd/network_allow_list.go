@@ -45,7 +45,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 		// No option to filter by name :(
 		resp, r, err := authApi.ListNetworkAllowLists().Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %v", err)
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -90,7 +90,7 @@ var createNetworkAllowListCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateNetworkAllowList().NetworkAllowListSpec(nalSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %v", err)
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -121,7 +121,7 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 
 		resp, r, err := authApi.ListNetworkAllowLists().Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %v", err)
+			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -134,7 +134,7 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 
 		r, err = authApi.DeleteNetworkAllowList(allowList.Info.Id).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.DeleteNetworkAllowList`: %v", err)
+			logrus.Errorf("Error when calling `NetworkApi.DeleteNetworkAllowList`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}

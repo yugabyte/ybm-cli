@@ -35,7 +35,7 @@ var getBackupCmd = &cobra.Command{
 		}
 		resp, r, err := listBackupRequest.Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.ListBackups`: %v", err)
+			logrus.Errorf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -74,7 +74,7 @@ var restoreBackupCmd = &cobra.Command{
 
 		_, r, err := authApi.RestoreBackup().RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.RestoreBackup``: %v", err)
+			logrus.Errorf("Error when calling `BackupApi.RestoreBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -119,7 +119,7 @@ var createBackupCmd = &cobra.Command{
 		backupResp, response, err := authApi.CreateBackup().BackupSpec(createBackupSpec).Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.CreateBackup``: %v", err)
+			logrus.Errorf("Error when calling `BackupApi.CreateBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", response)
 			return
 		}
@@ -151,7 +151,7 @@ var deleteBackupCmd = &cobra.Command{
 		response, err := authApi.DeleteBackup(backupID).Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.DeleteBackup``: %v", err)
+			logrus.Errorf("Error when calling `BackupApi.DeleteBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", response)
 			return
 		}

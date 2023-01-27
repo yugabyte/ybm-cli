@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -572,6 +573,32 @@ func getFromNodeConfig(resource string, numCores int32, nodeConfigList []ybmclie
 		}
 	}
 	return 0, fmt.Errorf("node with the given number of CPU cores doesn't exist in the given region")
+}
+
+// Utils functions
+
+// GetApiErrorDetails will return the api Error message if present
+// If not present will return the original err.Error()
+func GetApiErrorDetails(err error) string {
+	switch castedError := err.(type) {
+	case ybmclient.GenericOpenAPIError:
+		if v := getAPIError(castedError.Body()); v != nil {
+			if d, ok := v.GetErrorOk(); ok {
+				return fmt.Sprintf("%s-%s", err.Error(), d.GetDetail())
+			}
+		}
+	}
+	return err.Error()
+
+}
+
+func getAPIError(b []byte) *ybmclient.ApiError {
+	apiError := ybmclient.NewApiErrorWithDefaults()
+	err := json.Unmarshal(b, &apiError)
+	if err != nil {
+		return nil
+	}
+	return apiError
 }
 
 func parseURL(host string) (*url.URL, error) {

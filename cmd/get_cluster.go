@@ -36,7 +36,7 @@ var getClusterCmd = &cobra.Command{
 		resp, r, err := clusterListRequest.Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
