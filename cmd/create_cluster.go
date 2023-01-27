@@ -23,7 +23,7 @@ var createClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -57,7 +57,7 @@ var createClusterCmd = &cobra.Command{
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoList)
 		if err != nil {
-			logrus.Errorf("Error while creating cluster spec: %v\n", err)
+			logrus.Errorf("Error while creating cluster spec: %v", err)
 			return
 		}
 
@@ -69,8 +69,8 @@ var createClusterCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.CreateCluster``: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.CreateCluster``: %v", err)
+			fmt.Fprintf(os.Stderr, "Full HTTP response: %v", r)
 			return
 		}
 

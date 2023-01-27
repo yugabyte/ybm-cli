@@ -23,7 +23,7 @@ var pauseClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -35,8 +35,8 @@ var pauseClusterCmd = &cobra.Command{
 		}
 		resp, r, err := authApi.PauseCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		clustersCtx := formatter.Context{

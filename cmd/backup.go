@@ -19,7 +19,7 @@ var getBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -35,8 +35,8 @@ var getBackupCmd = &cobra.Command{
 		}
 		resp, r, err := listBackupRequest.Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.ListBackups`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `BackupApi.ListBackups`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		backupsCtx := formatter.Context{
@@ -55,7 +55,7 @@ var restoreBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -74,11 +74,11 @@ var restoreBackupCmd = &cobra.Command{
 
 		_, r, err := authApi.RestoreBackup().RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.RestoreBackup``: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `BackupApi.RestoreBackup``: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		fmt.Printf("The backup %v is being restored onto the cluster %v\n", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("The backup %v is being restored onto the cluster %v", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -89,7 +89,7 @@ var createBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -119,8 +119,8 @@ var createBackupCmd = &cobra.Command{
 		backupResp, response, err := authApi.CreateBackup().BackupSpec(createBackupSpec).Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.CreateBackup``: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", response)
+			logrus.Errorf("Error when calling `BackupApi.CreateBackup``: %v", err)
+			logrus.Debugf("Full HTTP response: %v", response)
 			return
 		}
 
@@ -144,15 +144,15 @@ var deleteBackupCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
 		response, err := authApi.DeleteBackup(backupID).Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.DeleteBackup``: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", response)
+			logrus.Errorf("Error when calling `BackupApi.DeleteBackup``: %v", err)
+			logrus.Debugf("Full HTTP response: %v", response)
 			return
 		}
 

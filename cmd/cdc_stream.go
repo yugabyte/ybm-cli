@@ -19,7 +19,7 @@ var getCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -39,8 +39,8 @@ var getCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.GetCdcStream(clusterID, cdcStreamID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		prettyPrintJson(resp)
@@ -54,7 +54,7 @@ var createCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -85,8 +85,8 @@ var createCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateCdcStream(clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.CreateCdcStream`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.CreateCdcStream`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -101,7 +101,7 @@ var editCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -132,8 +132,8 @@ var editCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.EditCdcStream(clusterID, cdcStreamID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.EditCdcStream`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.EditCdcStream`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -148,7 +148,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -167,8 +167,8 @@ var deleteCdcStreamCmd = &cobra.Command{
 		}
 		resp, err := authApi.DeleteCdcStream(clusterID, cdcStreamID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.DeleteCdcStream`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", resp)
+			logrus.Errorf("Error when calling `CdcApi.DeleteCdcStream`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", resp)
 			return
 		}
 

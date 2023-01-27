@@ -32,11 +32,11 @@ var configureCmd = &cobra.Command{
 				//Try to create the file
 				err = viper.SafeWriteConfig()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error when writing new config file: %v\n", err)
+					fmt.Fprintf(os.Stderr, "Error when writing new config file: %v", err)
 
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "Error when writing config file: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Error when writing config file: %v", err)
 				return
 			}
 		}
