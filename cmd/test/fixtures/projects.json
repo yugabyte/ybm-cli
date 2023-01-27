@@ -1,0 +1,25 @@
+{
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "next": null,
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects"
+        }
+    },
+    "data": [
+        {
+            "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e",
+            "info": {
+                "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e"
+            },
+            "metadata": {
+                "created_on": "2022-03-11T07:19:48.072Z",
+                "updated_on": "2022-03-11T07:19:48.072Z"
+            },
+            "name": "default",
+            "spec": {
+                "name": "default"
+            }
+        }
+    ]
+}

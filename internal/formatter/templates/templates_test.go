@@ -20,9 +20,8 @@ func TestParseJSONFunctions(t *testing.T) {
 }
 
 func TestParseStringFunctions(t *testing.T) {
-	tm, err := Parse(`{{join (split . ":") "/"}}`)
+	tm, err := Parse(`{{join "/" (splitList ":" .) }}`)
 	assert.NilError(t, err)
-
 	var b bytes.Buffer
 	assert.NilError(t, tm.Execute(&b, "text:with:colon"))
 	want := "text/with/colon"

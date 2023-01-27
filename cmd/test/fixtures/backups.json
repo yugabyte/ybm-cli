@@ -1,0 +1,40 @@
+{
+    "data": [
+        {
+            "spec": {
+                "cluster_id": "6c7389b5-dbfa-4b79-a129-7afcbdd87f42",
+                "retention_period_in_days": 25,
+                "description": "scdasfdadfasdsad"
+            },
+            "info": {
+                "id": "7d08a5c3-8097-48f0-8019-da236e876ab9",
+                "cluster_name": "proficient-parrotfish",
+                "state": "SUCCEEDED",
+                "action_type": "MANUAL",
+                "keyspace_info": [
+                    {
+                        "table_type": "YSQL",
+                        "keyspaces": [
+                            "yugabyte"
+                        ]
+                    }
+                ],
+                "size_in_bytes": 50397,
+                "deleted_on": "2023-02-11T08:33:18.699Z",
+                "completed_on": "2023-01-17T08:33:18.699Z",
+                "tablespaces": [],
+                "metadata": {
+                    "created_on": "2023-01-17T08:31:35.818Z",
+                    "updated_on": "2023-01-17T08:31:35.818Z"
+                }
+            }
+        }
+    ],
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backups",
+            "next": null
+        }
+    }
+}
