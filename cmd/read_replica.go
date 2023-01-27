@@ -4,7 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"os"
@@ -21,27 +20,56 @@ import (
 var clusterName string
 var allReplicaOpt []string
 
+func getDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmclient.ReadReplicaSpec {
+	n := int32(1)
+	numReplicas := ybmclient.NewNullableInt32(&n)
+	spec := ybmclient.ReadReplicaSpec{
+		NodeInfo: ybmclient.ClusterNodeInfo{
+			NumCores: 2,
+		},
+		PlacementInfo: ybmclient.PlacementInfo{
+			CloudInfo: ybmclient.CloudInfo{
+				Code:   primaryClusterCloud,
+				Region: "us-west2",
+			},
+			VpcId:       *ybmclient.NewNullableString(&vpcId),
+			NumNodes:    1,
+			NumReplicas: *numReplicas,
+		},
+	}
+
+	return spec
+}
+
+func setMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.ReadReplicaSpec) error {
+	cloud := string(spec.PlacementInfo.CloudInfo.Code)
+	tier := "PAID"
+	region := spec.PlacementInfo.CloudInfo.Region
+	numCores := spec.NodeInfo.NumCores
+	memoryMb, err := authApi.GetFromInstanceType("memory", cloud, tier, region, numCores)
+	if err != nil {
+		return err
+	}
+	spec.NodeInfo.MemoryMb = memoryMb
+	if spec.NodeInfo.DiskSizeGb == 0 {
+		diskSizeGb, err := authApi.GetFromInstanceType("disk", cloud, tier, region, numCores)
+		if err != nil {
+			return err
+		}
+		spec.NodeInfo.DiskSizeGb = diskSizeGb
+	}
+	return nil
+}
+
 // Parse array of read replica string to string params
-func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string, primaryClusterCloud ybmclient.CloudEnum) ([]ybmclient.ReadReplicaSpec, error) {
+func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string, primaryClusterCloud ybmclient.CloudEnum, vpcId string) ([]ybmclient.ReadReplicaSpec, error) {
 	readReplicaSpecs := []ybmclient.ReadReplicaSpec{}
 
+	defaultSpec := getDefaultSpec(primaryClusterCloud, vpcId)
+
 	for _, replicaOpt := range replicaOpts {
-		// Default Values
-		n := int32(1)
-		numReplicas := ybmclient.NewNullableInt32(&n)
-		spec := ybmclient.ReadReplicaSpec{
-			NodeInfo: ybmclient.ClusterNodeInfo{
-				NumCores: 2,
-			},
-			PlacementInfo: ybmclient.PlacementInfo{
-				CloudInfo: ybmclient.CloudInfo{
-					Code:   primaryClusterCloud,
-					Region: "us-west-2",
-				},
-				NumNodes:    1,
-				NumReplicas: *numReplicas,
-			},
-		}
+
+		spec := getDefaultSpec(primaryClusterCloud, vpcId)
 
 		for _, subOpt := range strings.Split(replicaOpt, ",") {
 			kvp := strings.Split(subOpt, "=")
@@ -62,9 +90,7 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 				}
 			case "code":
 				if string(primaryClusterCloud) != val {
-					err := errors.New("all the read replicas must be in the same cloud provider as the primary cluster")
-					logrus.Error(err)
-					return nil, err
+					return nil, fmt.Errorf("all the read replicas must be in the same cloud provider as the primary cluster")
 				}
 				spec.PlacementInfo.CloudInfo.Code = ybmclient.CloudEnum(val)
 			case "region":
@@ -78,7 +104,6 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 				vpcName := val
 				vpcID, err := authApi.GetVpcIdByName(vpcName)
 				if err != nil {
-					logrus.Error(err)
 					return nil, err
 				}
 				spec.PlacementInfo.VpcId = *ybmclient.NewNullableString(&vpcID)
@@ -94,26 +119,19 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 			}
 
 		}
-		cloud := string(spec.PlacementInfo.CloudInfo.Code)
-		tier := "PAID"
-		region := spec.PlacementInfo.CloudInfo.Region
-		numCores := spec.NodeInfo.NumCores
-		memoryMb, err := authApi.GetFromInstanceType("memory", cloud, tier, region, numCores)
-		if err != nil {
-			logrus.Error(err)
+		if err := setMemoryAndDisk(authApi, &spec); err != nil {
 			return nil, err
-		}
-		spec.NodeInfo.MemoryMb = memoryMb
-		if spec.NodeInfo.DiskSizeGb == 0 {
-			diskSizeGb, err := authApi.GetFromInstanceType("disk", cloud, tier, region, numCores)
-			if err != nil {
-				logrus.Error(err)
-				return nil, err
-			}
-			spec.NodeInfo.DiskSizeGb = diskSizeGb
 		}
 		readReplicaSpecs = append(readReplicaSpecs, spec)
 	}
+
+	if len(readReplicaSpecs) == 0 {
+		if err := setMemoryAndDisk(authApi, &defaultSpec); err != nil {
+			return nil, err
+		}
+		readReplicaSpecs = append(readReplicaSpecs, defaultSpec)
+	}
+
 	return readReplicaSpecs, nil
 }
 
@@ -159,15 +177,26 @@ var createReadReplicaCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
-		primaryClusterCloud, err := authApi.GetClusterCloudById(clusterID)
+
+		vpcId, err := authApi.GetClusterVpcById(clusterID)
 		if err != nil {
-			logrus.Errorf("Error while fetching the cloud provider of the primary cluster: %v\n", err)
+			logrus.Errorf("Error while fetching the VPC ID of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+			return
+		}
+		if vpcId == "" {
+			logrus.Error("The cluster must be deployed in a dedicated VPC to create read replicas")
 			return
 		}
 
-		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud)
+		primaryClusterCloud, err := authApi.GetClusterCloudById(clusterID)
 		if err != nil {
-			logrus.Errorf("Error while parsing read replica options: %v", err)
+			logrus.Errorf("Error while fetching the cloud provider of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+			return
+		}
+
+		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud, vpcId)
+		if err != nil {
+			logrus.Errorf("Error while parsing read replica options: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
 
@@ -198,14 +227,23 @@ var updateReadReplicaCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
-		primaryClusterCloud, err := authApi.GetClusterCloudById(clusterID)
+		vpcId, err := authApi.GetClusterVpcById(clusterID)
 		if err != nil {
-			logrus.Errorf("Error while fetching the cloud provider of the primary cluster: %v\n", err)
+			logrus.Errorf("Error while fetching the VPC ID of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
-		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud)
+		if vpcId == "" {
+			logrus.Error("The cluster must be deployed in a dedicated VPC to create read replicacs")
+			return
+		}
+		primaryClusterCloud, err := authApi.GetClusterCloudById(clusterID)
 		if err != nil {
-			logrus.Errorf("Error while parsing read replica options: %v", err)
+			logrus.Errorf("Error while fetching the cloud provider of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+			return
+		}
+		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud, vpcId)
+		if err != nil {
+			logrus.Errorf("Error while parsing read replica options: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
 

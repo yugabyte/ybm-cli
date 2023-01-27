@@ -303,6 +303,17 @@ func (a *AuthApiClient) GetCluster(clusterId string) ybmclient.ApiGetClusterRequ
 	return a.ApiClient.ClusterApi.GetCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) GetClusterVpcById(clusterId string) (string, error) {
+	clusterResp, resp, err := a.GetCluster(clusterId).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return "", err
+	}
+	vpcId := clusterResp.Data.Spec.NetworkInfo.GetSingleTenantVpcId()
+	return vpcId, nil
+}
+
 func (a *AuthApiClient) GetClusterCloudById(clusterId string) (ybmclient.CloudEnum, error) {
 	clusterResp, resp, err := a.GetCluster(clusterId).Execute()
 	if err != nil {
