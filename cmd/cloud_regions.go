@@ -28,7 +28,7 @@ var getCloudRegionsCmd = &cobra.Command{
 		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
 		cloudRegionsResp, resp, err := authApi.GetSupportedCloudRegions().Cloud(cloudProvider).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.GetSupportedCloudRegions`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.GetSupportedCloudRegions`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", resp)
 			return
 		}

@@ -31,7 +31,7 @@ var getInstanceTypesCmd = &cobra.Command{
 		showDisabled, _ := cmd.Flags().GetBool("show-disabled")
 		instanceTypesResp, resp, err := authApi.GetSupportedInstanceTypes(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.GetSupportedInstanceTypes`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.GetSupportedInstanceTypes`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", resp)
 			return
 		}

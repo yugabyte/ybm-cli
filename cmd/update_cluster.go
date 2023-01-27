@@ -36,7 +36,7 @@ var updateClusterCmd = &cobra.Command{
 		}
 		resp, r, err := authApi.GetCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.GetCluster`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.GetCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -45,14 +45,14 @@ var updateClusterCmd = &cobra.Command{
 		trackID := originalSpec.SoftwareInfo.GetTrackId()
 		trackName, err := authApi.GetTrackNameById(trackID)
 		if err != nil {
-			logrus.Errorf("Error when calling `getTrackName`: %v", err)
+			logrus.Errorf("Error when calling `getTrackName`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
 		vpcName := ""
 		if vpcID, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetVpcIdOk(); ok {
 			vpcName, err = authApi.GetVpcNameById(*vpcID)
 			if err != nil {
-				logrus.Errorf("Error when calling `getVpcName`: %v", err)
+				logrus.Errorf("Error when calling `getVpcName`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				return
 			}
 		}
@@ -93,7 +93,7 @@ var updateClusterCmd = &cobra.Command{
 
 		resp, r, err = authApi.EditCluster(clusterID).ClusterSpec(*clusterSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.UpdateCluster`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.UpdateCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}

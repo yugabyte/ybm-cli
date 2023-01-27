@@ -34,7 +34,7 @@ var deleteClusterCmd = &cobra.Command{
 
 		r, err := authApi.DeleteCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.DeleteCluster`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.DeleteCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}

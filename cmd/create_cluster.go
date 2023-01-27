@@ -69,7 +69,7 @@ var createClusterCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.CreateCluster``: %v", err)
+			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.CreateCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v", r)
 			return
 		}

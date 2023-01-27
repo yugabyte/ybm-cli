@@ -35,7 +35,7 @@ var pauseClusterCmd = &cobra.Command{
 		}
 		resp, r, err := authApi.PauseCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %v", err)
+			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}

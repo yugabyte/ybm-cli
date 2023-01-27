@@ -39,7 +39,7 @@ var getCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.GetCdcStream(clusterID, cdcStreamID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %v", err)
+			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -85,7 +85,7 @@ var createCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateCdcStream(clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.CreateCdcStream`: %v", err)
+			logrus.Errorf("Error when calling `CdcApi.CreateCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -132,7 +132,7 @@ var editCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.EditCdcStream(clusterID, cdcStreamID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.EditCdcStream`: %v", err)
+			logrus.Errorf("Error when calling `CdcApi.EditCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
@@ -167,7 +167,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 		}
 		resp, err := authApi.DeleteCdcStream(clusterID, cdcStreamID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.DeleteCdcStream`: %v", err)
+			logrus.Errorf("Error when calling `CdcApi.DeleteCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", resp)
 			return
 		}
