@@ -584,7 +584,7 @@ func GetApiErrorDetails(err error) string {
 	case ybmclient.GenericOpenAPIError:
 		if v := getAPIError(castedError.Body()); v != nil {
 			if d, ok := v.GetErrorOk(); ok {
-				return d.GetDetail()
+				return fmt.Sprintf("%s-%s", err.Error(), d.GetDetail())
 			}
 		}
 	}
