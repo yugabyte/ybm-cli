@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cluster
 
 import (
 	"fmt"
@@ -15,9 +15,9 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-// resumeClusterCmd represents the cluster command
-var resumeClusterCmd = &cobra.Command{
-	Use:   "cluster",
+// pauseClusterCmd represents the cluster command
+var pauseClusterCmd = &cobra.Command{
+	Use:   "pause",
 	Short: "Pause clusters in YugabyteDB Managed",
 	Long:  "Pause clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -33,13 +33,12 @@ var resumeClusterCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
-		resp, r, err := authApi.ResumeCluster(clusterID).Execute()
+		resp, r, err := authApi.PauseCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.ResumeCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-
 		clustersCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewClusterFormat(viper.GetString("output")),
@@ -47,22 +46,22 @@ var resumeClusterCmd = &cobra.Command{
 
 		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
 
-		fmt.Printf("The cluster %s is being resumed\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("The cluster %s is being paused\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
 func init() {
-	resumeCmd.AddCommand(resumeClusterCmd)
+	ClusterCmd.AddCommand(pauseClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// resumeClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// pauseClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// resumeClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	resumeClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be resumed")
-	resumeClusterCmd.MarkFlagRequired("cluster-name")
+	// pauseClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	pauseClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be paused")
+	pauseClusterCmd.MarkFlagRequired("cluster-name")
 }

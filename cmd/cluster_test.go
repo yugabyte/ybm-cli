@@ -60,7 +60,7 @@ var _ = Describe("Cluster", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "pause", "cluster", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "pause", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -77,7 +77,7 @@ var _ = Describe("Cluster", func() {
 						ghttp.RespondWithJSONEncodedPtr(&status, responseError),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "pause", "cluster", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "pause", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -95,7 +95,7 @@ var _ = Describe("Cluster", func() {
 						ghttp.RespondWithJSONEncodedPtr(&status, responseError),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "pause", "cluster", "--cluster-name", "stunnin-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "pause", "--cluster-name", "stunnin-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -147,7 +147,7 @@ var _ = Describe("Cluster", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "resume", "cluster", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "resume", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -164,7 +164,7 @@ var _ = Describe("Cluster", func() {
 						ghttp.RespondWithJSONEncodedPtr(&status, responseError),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "resume", "cluster", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "resume", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -182,7 +182,7 @@ var _ = Describe("Cluster", func() {
 						ghttp.RespondWithJSONEncodedPtr(&status, responseError),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "pause", "cluster", "--cluster-name", "stunnin-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "pause", "--cluster-name", "stunnin-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -225,7 +225,7 @@ var _ = Describe("Cluster", func() {
 						ghttp.VerifyFormKV("name", "test"),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "get", "cluster", "--cluster-name", "test")
+				cmd := exec.Command(compiledCLIPath, "cluster", "get", "--cluster-name", "test")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
