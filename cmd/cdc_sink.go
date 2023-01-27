@@ -20,7 +20,7 @@ var getCdcSinkCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -34,8 +34,8 @@ var getCdcSinkCmd = &cobra.Command{
 
 		resp, r, err := authApi.GetCdcSink(cdcSinkID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.GetCdcSink`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.GetCdcSink`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -50,7 +50,7 @@ var createCdcSinkCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -80,8 +80,8 @@ var createCdcSinkCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateCdcSink().CreateCdcSinkRequest(*createSinkRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.CreateeCdcSink`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.CreateeCdcSink`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -96,7 +96,7 @@ var editCdcSinkCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -133,8 +133,8 @@ var editCdcSinkCmd = &cobra.Command{
 
 		resp, r, err := authApi.EditCdcSink(cdcSinkID).EditCdcSinkRequest(*editCdcSinkRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.EditCdcSink`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `CdcApi.EditCdcSink`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -149,7 +149,7 @@ var deleteCdcSinkCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -164,8 +164,8 @@ var deleteCdcSinkCmd = &cobra.Command{
 
 		resp, err := authApi.DeleteCdcSink(cdcSinkID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.DeleteeCdcSink`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", resp)
+			logrus.Errorf("Error when calling `CdcApi.DeleteeCdcSink`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", resp)
 			return
 		}
 

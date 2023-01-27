@@ -104,7 +104,7 @@ var getReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -115,8 +115,8 @@ var getReadReplicaCmd = &cobra.Command{
 		}
 		resp, r, err := authApi.ListReadReplicas(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		prettyPrintJson(resp)
@@ -130,7 +130,7 @@ var createReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -141,14 +141,14 @@ var createReadReplicaCmd = &cobra.Command{
 		}
 		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt)
 		if err != nil {
-			logrus.Errorf("Error while parsing read replica options: %v\n", err)
+			logrus.Errorf("Error while parsing read replica options: %v", err)
 			return
 		}
 
 		resp, r, err := authApi.CreateReadReplica(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.CreateReadReplica`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ReadReplicaApi.CreateReadReplica`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -163,7 +163,7 @@ var updateReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -174,14 +174,14 @@ var updateReadReplicaCmd = &cobra.Command{
 		}
 		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt)
 		if err != nil {
-			logrus.Errorf("Error while parsing read replica options: %v\n", err)
+			logrus.Errorf("Error while parsing read replica options: %v", err)
 			return
 		}
 
 		resp, r, err := authApi.EditReadReplicas(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.EditReadReplicas`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ReadReplicaApi.EditReadReplicas`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -196,7 +196,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -207,8 +207,8 @@ var deleteReadReplicaCmd = &cobra.Command{
 		}
 		r, err := authApi.DeleteReadReplica(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		fmt.Printf("All read replica sucessfully deleted for cluster %s \n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))

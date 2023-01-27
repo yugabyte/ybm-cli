@@ -27,6 +27,7 @@ jobs:
           eval `ssh-agent -s`
           ssh-add - <<< '${{ secrets.GO_CLIENT_SECRET }}'
           git config --global url."git@github.com:".insteadOf https://github.com/
+          make vet
           make build
           make clean
         name: Build CLI

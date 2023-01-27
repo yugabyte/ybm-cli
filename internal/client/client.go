@@ -268,12 +268,12 @@ func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID stri
 	var err error
 	a.AccountID, err = a.GetAccountID(providedAccountID)
 	if err != nil {
-		logrus.Errorf("could not initiate api client: ", err.Error())
+		logrus.Errorf("could not initiate api client: %s", err.Error())
 		os.Exit(1)
 	}
 	a.ProjectID, err = a.GetProjectID(providedProjectID)
 	if err != nil {
-		logrus.Errorf("could not initiate api client: ", err.Error())
+		logrus.Errorf("could not initiate api client: %s", err.Error())
 		os.Exit(1)
 	}
 }
