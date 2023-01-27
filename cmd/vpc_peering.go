@@ -10,6 +10,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -25,7 +26,7 @@ func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmcli
 }
 
 var getVpcPeeringCmd = &cobra.Command{
-	Use:   "vpc-peering",
+	Use:   "vpc_peering",
 	Short: "Get VPC peerings in YugabyteDB Managed",
 	Long:  "Get VPC peerings in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,6 +44,11 @@ var getVpcPeeringCmd = &cobra.Command{
 			return
 		}
 
+		vpcPeeringCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewVPCPeeringFormat(viper.GetString("output")),
+		}
+
 		// if user filters by name, add it to the request
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
 		if vpcPeeringName != "" {
@@ -51,44 +57,77 @@ var getVpcPeeringCmd = &cobra.Command{
 				logrus.Errorf("Error: %s\n", findErr)
 				return
 			}
-			prettyPrintJson(vpcPeering)
+			formatter.VPCPeeringWrite(vpcPeeringCtx, []ybmclient.VpcPeeringData{vpcPeering})
 			return
 		}
 
-		prettyPrintJson(resp)
+		formatter.VPCPeeringWrite(vpcPeeringCtx, resp.GetData())
 	},
 }
 
 var createVpcPeeringCmd = &cobra.Command{
-	Use:   "vpc-peering",
+	Use:   "vpc_peering",
 	Short: "Create VPC peering in YugabyteDB Managed",
 	Long:  "Create VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
-		ybVpcName, _ := cmd.Flags().GetString("yb-vpc")
-		appCloud, _ := cmd.Flags().GetString("cloud")
-		appProject, _ := cmd.Flags().GetString("project")
-		appVpcName, _ := cmd.Flags().GetString("app-vpc")
+		ybVpcName, _ := cmd.Flags().GetString("yb-vpc-name")
+		appCloud, _ := cmd.Flags().GetString("cloud-provider")
 
-		applicationVPCSpec := *ybmclient.NewCustomerVpcSpec(appVpcName, appProject, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
+		var applicationVPCSpec *ybmclient.CustomerVpcSpec
 
-		// Validations
+		// Validating and keeping the flow similar to the UI flow
 		if appCloud == "AWS" {
-			region, _ := cmd.Flags().GetString("region")
-			if region == "" {
-				fmt.Fprintf(os.Stderr, "Error: region is required for AWS\n")
+			appAccountID, _ := cmd.Flags().GetString("app-vpc-account-id")
+			if appAccountID == "" {
+				logrus.Errorf("Could not create VPC peering: ", "app-vpc-account-id is required for AWS.")
+				return
+			}
+			appVpcID, _ := cmd.Flags().GetString("app-vpc-id")
+			if appVpcID == "" {
+				logrus.Errorf("Could not create VPC peering: ", "app-vpc-id is required for AWS.")
+				return
+			}
+			appVpcRegion, _ := cmd.Flags().GetString("app-vpc-region")
+			if appVpcRegion == "" {
+				logrus.Errorf("Could not create VPC peering: ", "app-vpc-region is required for AWS.")
 				return
 			}
 
-			cidr, _ := cmd.Flags().GetString("cidr")
-			if cidr == "" {
-				fmt.Fprintf(os.Stderr, "Error: cidr is required for AWS\n")
+			appVpcCidr, _ := cmd.Flags().GetString("app-vpc-cidr")
+			if appVpcCidr == "" {
+				logrus.Errorf("Could not create VPC peering: ", "app-vpc-cidr is required for AWS.")
+				return
+			}
+			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcID, appAccountID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
+			applicationVPCSpec.CloudInfo.SetRegion(appVpcRegion)
+			applicationVPCSpec.SetCidr(appVpcCidr)
+
+		} else if appCloud == "GCP" {
+			appProjectID, _ := cmd.Flags().GetString("app-vpc-project-id")
+			if appProjectID == "" {
+				logrus.Errorf("Could not create VPC peering: ", "app-vpc-project-id is required for GCP.")
+				return
+			}
+			appVpcName, _ := cmd.Flags().GetString("app-vpc-name")
+			if appVpcName == "" {
+				logrus.Errorf("Could not create VPC peering: ", "app-vpc-name is required for GCP.")
 				return
 			}
 
-			applicationVPCSpec.CloudInfo.SetRegion(region)
-			applicationVPCSpec.SetCidr(cidr)
+			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcName, appProjectID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
+
+			// app vpc cidr is optional for GCP
+			appVpcCidr, _ := cmd.Flags().GetString("app-vpc-cidr")
+			if appVpcCidr != "" {
+				applicationVPCSpec.SetCidr(appVpcCidr)
+			}
+
+		} else {
+			logrus.Errorf("Could not create VPC peering: ", "The cloud provider must be either GCP or AWS.")
+			return
 		}
+
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Errorf("could not initiate api client: ", err.Error())
@@ -102,7 +141,7 @@ var createVpcPeeringCmd = &cobra.Command{
 			return
 		}
 
-		vpcPeeringSpec := *ybmclient.NewVpcPeeringSpec(ybVpcId, vpcPeeringName, applicationVPCSpec)
+		vpcPeeringSpec := *ybmclient.NewVpcPeeringSpec(ybVpcId, vpcPeeringName, *applicationVPCSpec)
 		vpcPeeringResp, response, err := authApi.CreateVpcPeering().VpcPeeringSpec(vpcPeeringSpec).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `NetworkApi.CreateVpcPeering``: %v\n", err)
@@ -110,12 +149,19 @@ var createVpcPeeringCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(vpcPeeringResp)
+		vpcPeeringCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewVPCPeeringFormat(viper.GetString("output")),
+		}
+
+		formatter.VPCPeeringWrite(vpcPeeringCtx, []ybmclient.VpcPeeringData{vpcPeeringResp.GetData()})
+
+		fmt.Printf("The VPC Peering %s is being created\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 	},
 }
 
 var deleteVpcPeeringCmd = &cobra.Command{
-	Use:   "vpc-peering",
+	Use:   "vpc_peering",
 	Short: "Delete VPC peering in YugabyteDB Managed",
 	Long:  "Delete VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -149,7 +195,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 			logrus.Errorf("Full HTTP response: %v\n", response)
 			return
 		}
-		fmt.Printf("VPC-peering %s was queued for termination.\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
+		fmt.Printf("VPC peering %s was queued for termination.\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -160,17 +206,18 @@ func init() {
 	createCmd.AddCommand(createVpcPeeringCmd)
 	createVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
 	createVpcPeeringCmd.MarkFlagRequired("name")
-	createVpcPeeringCmd.Flags().String("yb-vpc", "", "Name of the YugabyteDB VPC to peer")
-	createVpcPeeringCmd.MarkFlagRequired("yb-vpc")
-	createVpcPeeringCmd.Flags().String("cloud", "", "Cloud of the VPC with which to peer")
-	createVpcPeeringCmd.MarkFlagRequired("cloud")
-	createVpcPeeringCmd.Flags().String("project", "", "Project of the VPC with which to peer")
-	createVpcPeeringCmd.MarkFlagRequired("project")
-	createVpcPeeringCmd.Flags().String("app-vpc", "", "Name of the application VPC with which to peer")
-	createVpcPeeringCmd.MarkFlagRequired("app-vpc")
-	createVpcPeeringCmd.Flags().String("region", "", "Region of the VPC with which to peer")
-	createVpcPeeringCmd.Flags().String("cidr", "", "CIDR of the VPC with which to peer")
+	createVpcPeeringCmd.Flags().String("yb-vpc-name", "", "Name of the YugabyteDB Managed VPC.")
+	createVpcPeeringCmd.MarkFlagRequired("yb-vpc-name")
+	createVpcPeeringCmd.Flags().String("cloud-provider", "", "Cloud of the VPC with which to peer. AWS or GCP.")
+	createVpcPeeringCmd.MarkFlagRequired("cloud-provider")
+	createVpcPeeringCmd.Flags().String("app-vpc-name", "", "Name of the application VPC. Required for GCP. Not applicable for AWS.")
+	createVpcPeeringCmd.Flags().String("app-vpc-project-id", "", "Project ID of the application VPC. Required for GCP. Not applicable for AWS.")
+	createVpcPeeringCmd.Flags().String("app-vpc-cidr", "", "CIDR of the application VPC. Required for AWS. Optional for GCP.")
+	createVpcPeeringCmd.Flags().String("app-vpc-account-id", "", "Account ID of the application VPC. Required for AWS. Not applicable for GCP.")
+	createVpcPeeringCmd.Flags().String("app-vpc-id", "", "ID of the application VPC. Required for AWS. Not applicable for GCP.")
+	createVpcPeeringCmd.Flags().String("app-vpc-region", "", "Region of the application VPC. Required for AWS. Not applicable for GCP.")
 
 	deleteCmd.AddCommand(deleteVpcPeeringCmd)
 	deleteVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
+	deleteVpcPeeringCmd.MarkFlagRequired("name")
 }
