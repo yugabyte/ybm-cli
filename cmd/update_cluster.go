@@ -25,7 +25,7 @@ var updateClusterCmd = &cobra.Command{
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -36,8 +36,8 @@ var updateClusterCmd = &cobra.Command{
 		}
 		resp, r, err := authApi.GetCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.GetCluster`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ClusterApi.GetCluster`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -45,14 +45,14 @@ var updateClusterCmd = &cobra.Command{
 		trackID := originalSpec.SoftwareInfo.GetTrackId()
 		trackName, err := authApi.GetTrackNameById(trackID)
 		if err != nil {
-			logrus.Errorf("Error when calling `getTrackName`: %v\n", err)
+			logrus.Errorf("Error when calling `getTrackName`: %v", err)
 			return
 		}
 		vpcName := ""
 		if vpcID, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetVpcIdOk(); ok {
 			vpcName, err = authApi.GetVpcNameById(*vpcID)
 			if err != nil {
-				logrus.Errorf("Error when calling `getVpcName`: %v\n", err)
+				logrus.Errorf("Error when calling `getVpcName`: %v", err)
 				return
 			}
 		}
@@ -84,7 +84,7 @@ var updateClusterCmd = &cobra.Command{
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoList)
 		if err != nil {
-			logrus.Error("Error while creating cluster spec: %v\n", err)
+			logrus.Errorf("Error while creating cluster spec: %v", err)
 			return
 		}
 
@@ -93,8 +93,8 @@ var updateClusterCmd = &cobra.Command{
 
 		resp, r, err = authApi.EditCluster(clusterID).ClusterSpec(*clusterSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.UpdateCluster`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `ClusterApi.UpdateCluster`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		clustersCtx := formatter.Context{

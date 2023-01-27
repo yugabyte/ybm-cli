@@ -100,7 +100,7 @@ func initConfig() {
 	log.SetLogLevel(viper.GetString("logLevel"), viper.GetBool("debug"))
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		logrus.Debugf("Using config file:", viper.ConfigFileUsed())
+		logrus.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
 
 }

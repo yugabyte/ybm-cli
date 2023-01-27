@@ -23,7 +23,7 @@ var getVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -33,8 +33,8 @@ var getVpcCmd = &cobra.Command{
 		resp, r, err := vpcListRequest.Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		// response from `ListClusters`: ClusterListResponse
@@ -102,14 +102,14 @@ var createVpcCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
 		resp, r, err := authApi.CreateVpc().SingleTenantVpcRequest(vpcRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.CreateVpc`: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.CreateVpc`: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 		vpcCtx := formatter.Context{
@@ -131,7 +131,7 @@ var deleteVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
@@ -142,13 +142,13 @@ var deleteVpcCmd = &cobra.Command{
 		}
 		vpcId, err := authApi.GetVpcIdByName(vpcName)
 		if err != nil {
-			logrus.Errorf("could not fetch VPC ID: ", err.Error())
+			logrus.Errorf("could not fetch VPC ID: %s", err.Error())
 			return
 		}
 		r, err := authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc``: %v\n", err)
-			logrus.Debugf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc``: %v", err)
+			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 

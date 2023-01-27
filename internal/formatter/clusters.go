@@ -132,7 +132,7 @@ func convertMbtoGb(sizeInMB int32) string {
 	b, err := bytesize.Parse(fmt.Sprintf("%d MB", sizeInMB))
 
 	if err != nil {
-		logrus.Errorf("could not parse size: ", err)
+		logrus.Errorf("could not parse size: %v", err)
 		return ""
 	}
 	return b.Format("%.0f", "GB", false)

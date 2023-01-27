@@ -32,15 +32,15 @@ var getVpcPeeringCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
 		resp, r, err := authApi.ListVpcPeerings().Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings``: %v\n", err)
-			logrus.Errorf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings``: %v", err)
+			logrus.Errorf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -130,22 +130,22 @@ var createVpcPeeringCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
 
 		ybVpcId, err := authApi.GetVpcIdByName(ybVpcName)
 		if err != nil {
-			logrus.Errorf("Unable to find VPC with name %v. Error: %v\n", ybVpcName, err)
+			logrus.Errorf("Unable to find VPC with name %v. Error: %v", ybVpcName, err)
 			return
 		}
 
 		vpcPeeringSpec := *ybmclient.NewVpcPeeringSpec(ybVpcId, vpcPeeringName, *applicationVPCSpec)
 		vpcPeeringResp, response, err := authApi.CreateVpcPeering().VpcPeeringSpec(vpcPeeringSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.CreateVpcPeering``: %v\n", err)
-			logrus.Errorf("Full HTTP response: %v\n", response)
+			logrus.Errorf("Error when calling `NetworkApi.CreateVpcPeering``: %v", err)
+			logrus.Errorf("Full HTTP response: %v", response)
 			return
 		}
 
@@ -169,15 +169,15 @@ var deleteVpcPeeringCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: ", err.Error())
+			logrus.Errorf("could not initiate api client: %s", err.Error())
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
 		resp, r, err := authApi.ListVpcPeerings().Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings``: %v\n", err)
-			logrus.Errorf("Full HTTP response: %v\n", r)
+			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings``: %v", err)
+			logrus.Errorf("Full HTTP response: %v", r)
 			return
 		}
 
@@ -191,8 +191,8 @@ var deleteVpcPeeringCmd = &cobra.Command{
 
 		response, err := authApi.DeleteVpcPeering(vpcPeeringId).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings``: %v\n", err)
-			logrus.Errorf("Full HTTP response: %v\n", response)
+			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings``: %v", err)
+			logrus.Errorf("Full HTTP response: %v", response)
 			return
 		}
 		fmt.Printf("VPC peering %s was queued for termination.\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))

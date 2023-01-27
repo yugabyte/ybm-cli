@@ -3,6 +3,9 @@ BINARY=ybm
 export GOPRIVATE := github.com/yugabyte
 default: build
 
+vet:
+	go vet ./...
+
 build:
 	go build -ldflags="-X 'main.version=v${VERSION}'" -o ${BINARY}
 
