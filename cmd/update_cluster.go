@@ -23,6 +23,7 @@ var updateClusterCmd = &cobra.Command{
 	Short: "Update a cluster in YB Managed",
 	Long:  "Update a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
+
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -55,10 +56,15 @@ var updateClusterCmd = &cobra.Command{
 		regionInfoMapList := []map[string]string{}
 		if cmd.Flags().Changed("region-info") {
 			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
+			regionInfoList = strings.Split(regionInfoList[0], "|")
 			for _, regionInfoString := range regionInfoList {
 				regionInfoMap := map[string]string{}
 				for _, regionInfo := range strings.Split(regionInfoString, ",") {
 					kvp := strings.Split(regionInfo, "=")
+					if len(kvp) != 2 {
+						logrus.Errorln("Incorrect format in region info")
+						return
+					}
 					key := kvp[0]
 					val := kvp[1]
 					switch key {
@@ -181,17 +187,20 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 		cmd.Flag("node-config").Changed = true
 
 	}
-	regionInfoList := []string{}
+	regionInfoList := ""
+	numRegions := len(originalSpec.ClusterRegionInfo)
 	if !cmd.Flags().Changed("region-info") {
-		for _, clusterRegionInfo := range originalSpec.ClusterRegionInfo {
+		for index, clusterRegionInfo := range originalSpec.ClusterRegionInfo {
 			regionInfo := ""
-			if region, ok := clusterRegionInfo.PlacementInfo.CloudInfo.GetRegionOk(); ok {
+			if region, ok := clusterRegionInfo.PlacementInfo.CloudInfo.GetRegionOk(); ok && region != nil {
 				regionInfo += "region=" + *region
 			}
-			if numNodes, ok := clusterRegionInfo.PlacementInfo.GetNumNodesOk(); ok {
+			//logrus.Errorln(clusterRegionInfo.PlacementInfo.GetNumNodes())
+			if numNodes, ok := clusterRegionInfo.PlacementInfo.GetNumNodesOk(); ok && numNodes != nil {
 				regionInfo += ",num_nodes=" + strconv.Itoa(int(*numNodes))
 			}
-			if vpcID, ok := clusterRegionInfo.PlacementInfo.GetVpcIdOk(); ok {
+
+			if vpcID, ok := clusterRegionInfo.PlacementInfo.GetVpcIdOk(); ok && vpcID != nil {
 				vpcName, err := authApi.GetVpcNameById(*vpcID)
 				if err != nil {
 					logrus.Errorf("Error when calling `getVpcName`: %s", ybmAuthClient.GetApiErrorDetails(err))
@@ -199,10 +208,12 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 				}
 				regionInfo += ",vpc=" + vpcName
 			}
-			regionInfoList = append(regionInfoList, regionInfo)
+			regionInfoList += regionInfo
+			if index < numRegions-1 {
+				regionInfoList += "|"
+			}
 		}
-
-		cmd.Flags().StringArray("region-info", regionInfoList, `Region information for the cluster.`)
+		cmd.Flag("region-info").Value.Set(regionInfoList)
 		cmd.Flag("region-info").Changed = true
 
 	}

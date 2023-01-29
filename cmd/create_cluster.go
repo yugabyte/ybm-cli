@@ -41,6 +41,10 @@ var createClusterCmd = &cobra.Command{
 				regionInfoMap := map[string]string{}
 				for _, regionInfo := range strings.Split(regionInfoString, ",") {
 					kvp := strings.Split(regionInfo, "=")
+					if len(kvp) != 2 {
+						logrus.Errorln("Incorrect format in region info")
+						return
+					}
 					key := kvp[0]
 					val := kvp[1]
 					switch key {
