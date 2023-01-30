@@ -11,6 +11,7 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -52,9 +53,9 @@ var _ = Describe("Backup", func() {
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(
+			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(
 				`Created On         Expire On          Clusters                Description        State       Type      Retains\(day\)
-2023-01-17,17:31   2023-01-17,17:31   proficient-parrotfish   scdasfdadfasdsad   SUCCEEDED   MANUAL    25`))
+%s   %s   proficient-parrotfish   scdasfdadfasdsad   SUCCEEDED   MANUAL    25`, formatter.FormatDate("2023-01-17T08:31:35.818Z"), formatter.FormatDate("2023-01-17T08:31:35.818Z"))))
 			session.Kill()
 		})
 
