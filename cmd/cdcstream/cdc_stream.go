@@ -1,34 +1,32 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cdcstream
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
-	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-func printCdcStreamOutput(resp ybmclient.CDCStreamResponse) {
-	cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
-	cdcStreamCtx := formatter.Context{
-		Output: os.Stdout,
-		Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
-	}
-
-	formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
+var CDCStreamCmd = &cobra.Command{
+	Use:   "cdc_stream",
+	Short: "cdc_stream",
+	Long:  "CDC stream commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
 }
 
 var getCdcStreamCmd = &cobra.Command{
-	Use:   "cdc_stream",
+	Use:   "get",
 	Short: "Get CDC Stream in YugabyteDB Managed",
-	Long:  `Get CDC Stream in YugabyteDB Managed`,
+	Long:  "Get CDC Stream in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -56,14 +54,12 @@ var getCdcStreamCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-
-		printCdcStreamOutput(resp)
-
+		prettyPrintJson(resp)
 	},
 }
 
 var createCdcStreamCmd = &cobra.Command{
-	Use:   "cdc_stream",
+	Use:   "create",
 	Short: "Create CDC Stream in YugabyteDB Managed",
 	Long:  `Create CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -105,14 +101,14 @@ var createCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		printCdcStreamOutput(resp)
+		prettyPrintJson(resp)
 	},
 }
 
 var editCdcStreamCmd = &cobra.Command{
-	Use:   "cdc_stream",
-	Short: "Edit CDC Stream in YugabyteDB Managed",
-	Long:  `Edit CDC Stream in YugabyteDB Managed`,
+	Use:   "update",
+	Short: "Update CDC Stream in YugabyteDB Managed",
+	Long:  "Update CDC Stream in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -152,12 +148,12 @@ var editCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		printCdcStreamOutput(resp)
+		prettyPrintJson(resp)
 	},
 }
 
 var deleteCdcStreamCmd = &cobra.Command{
-	Use:   "cdc_stream",
+	Use:   "delete",
 	Short: "Delete CDC Stream in YugabyteDB Managed",
 	Long:  `Delete CDC Stream in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -187,16 +183,16 @@ var deleteCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "CDC stream deleted successfully\n")
+		prettyPrintJson(resp)
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getCdcStreamCmd)
+	CDCStreamCmd.AddCommand(getCdcStreamCmd)
 	getCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
 	getCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 
-	createCmd.AddCommand(createCdcStreamCmd)
+	CDCStreamCmd.AddCommand(createCdcStreamCmd)
 	createCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
 	createCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 	createCdcStreamCmd.Flags().StringArray("tables", []string{}, "Database tables the Cdc Stream will listen to")
@@ -205,14 +201,21 @@ func init() {
 	createCdcStreamCmd.Flags().String("snapshot-existing-data", "", "Whether to snapshot the existing data in the database")
 	createCdcStreamCmd.Flags().String("kafka-prefix", "", "A prefix for the Kafka topics")
 
-	updateCmd.AddCommand(editCdcStreamCmd)
+	CDCStreamCmd.AddCommand(editCdcStreamCmd)
 	editCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
 	editCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 	editCdcStreamCmd.Flags().String("new-name", "", "Updated name of the CDC Stream")
 	editCdcStreamCmd.Flags().StringArray("tables", []string{}, "Tables the Cdc Stream will listen to")
 
-	deleteCmd.AddCommand(deleteCdcStreamCmd)
+	CDCStreamCmd.AddCommand(deleteCdcStreamCmd)
 	deleteCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
 	deleteCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
 
+}
+
+// temporary
+func prettyPrintJson(data interface{}) {
+	//b, _ := json.MarshalIndent(data, "", "  ")
+	b, _ := prettyjson.Marshal(data)
+	fmt.Println(string(b))
 }

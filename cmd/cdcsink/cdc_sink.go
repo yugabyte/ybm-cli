@@ -1,33 +1,30 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cdcsink
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
-	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-func printCdcSinkOutput(resp ybmclient.CDCSinkResponse) {
-	cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
-	cdcSinkCtx := formatter.Context{
-		Output: os.Stdout,
-		Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
-	}
-
-	formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
-
+var CDCSinkCmd = &cobra.Command{
+	Use:   "cdc_sink",
+	Short: "cdc_sink",
+	Long:  "Cdc Sink commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
 }
 
 var getCdcSinkCmd = &cobra.Command{
-	Use:   "cdc_sink",
+	Use:   "get",
 	Short: "Get CDC Sink in YugabyteDB Managed",
 	Long:  `Get CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -37,6 +34,7 @@ var getCdcSinkCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
+
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 		cdcSinkID, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
 		if err != nil {
@@ -51,12 +49,12 @@ var getCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		printCdcSinkOutput(resp)
+		prettyPrintJson(resp)
 	},
 }
 
 var createCdcSinkCmd = &cobra.Command{
-	Use:   "cdc_sink",
+	Use:   "create",
 	Short: "Create CDC Sink in YugabyteDB Managed",
 	Long:  `Create CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -97,14 +95,14 @@ var createCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		printCdcSinkOutput(resp)
+		prettyPrintJson(resp)
 	},
 }
 
 var editCdcSinkCmd = &cobra.Command{
-	Use:   "cdc_sink",
-	Short: "Edit CDC Sink in YugabyteDB Managed",
-	Long:  `Edit CDC Sink in YugabyteDB Managed`,
+	Use:   "update",
+	Short: "Update CDC Sink in YugabyteDB Managed",
+	Long:  "Update CDC Sink in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -150,12 +148,12 @@ var editCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		printCdcSinkOutput(resp)
+		prettyPrintJson(resp)
 	},
 }
 
 var deleteCdcSinkCmd = &cobra.Command{
-	Use:   "cdc_sink",
+	Use:   "delete",
 	Short: "Delete CDC Sink in YugabyteDB Managed",
 	Long:  `Delete CDC Sink in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -181,16 +179,16 @@ var deleteCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully\n")
-
+		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully")
+		prettyPrintJson(resp)
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getCdcSinkCmd)
+	CDCSinkCmd.AddCommand(getCdcSinkCmd)
 	getCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
 
-	createCmd.AddCommand(createCdcSinkCmd)
+	CDCSinkCmd.AddCommand(createCdcSinkCmd)
 	createCdcSinkCmd.Flags().String("name", "", "Name of the CDC sink")
 	createCdcSinkCmd.Flags().String("cdc-sink-type", "", "Name of the CDC sink type")
 	createCdcSinkCmd.Flags().String("auth-type", "", "Name of the CDC sink authentication type")
@@ -198,13 +196,20 @@ func init() {
 	createCdcSinkCmd.Flags().String("username", "", "Username of the CDC sink")
 	createCdcSinkCmd.Flags().String("password", "", "Password of the CDC sink")
 
-	updateCmd.AddCommand(editCdcSinkCmd)
+	CDCSinkCmd.AddCommand(editCdcSinkCmd)
 	editCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
 	editCdcSinkCmd.Flags().String("new-name", "", "Name of the new CDC Sink")
 	editCdcSinkCmd.Flags().String("username", "", "Username of the CDC Sink")
 	editCdcSinkCmd.Flags().String("password", "", "Password of the CDC Sink")
 
-	deleteCmd.AddCommand(deleteCdcSinkCmd)
+	CDCSinkCmd.AddCommand(deleteCdcSinkCmd)
 	deleteCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
 
+}
+
+// temporary
+func prettyPrintJson(data interface{}) {
+	//b, _ := json.MarshalIndent(data, "", "  ")
+	b, _ := prettyjson.Marshal(data)
+	fmt.Println(string(b))
 }

@@ -48,7 +48,7 @@ var _ = Describe("Backup", func() {
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackup),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "get", "backup")
+			cmd := exec.Command(compiledCLIPath, "backup", "get")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
