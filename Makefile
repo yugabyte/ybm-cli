@@ -6,6 +6,12 @@ default: build
 vet:
 	go vet ./...
 
+test:
+	go install github.com/onsi/ginkgo/v2/ginkgo
+	go get github.com/onsi/gomega/...
+	ginkgo run -r -v
+
+
 build:
 	go build -ldflags="-X 'main.version=v${VERSION}'" -o ${BINARY}
 
