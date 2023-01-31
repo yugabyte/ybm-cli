@@ -633,6 +633,7 @@ func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string
 			s.StopFail()
 			return "", fmt.Errorf("receive interrupt signal")
 		case <-checkEveryInSec:
+			output := ""
 			taskList, resp, err = a.ListTasks().EntityId(entityId).EntityType(entityType).ProjectId(a.ProjectID).TaskType(taskType).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", resp)
@@ -642,8 +643,15 @@ func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string
 			if _, ok := taskList.GetDataOk(); ok {
 				c := taskList.GetData()
 				currentStatus = c[0].Info.GetState()
+
+				taskProgressInfo, _ := c[0].Info.GetTaskProgressInfoOk()
+				output += message
+				for index, action := range taskProgressInfo.GetActions() {
+					output = output + ". Task " + strconv.Itoa(index+1) + ": " + action.GetName() + " " + strconv.Itoa(int(action.GetPercentComplete())) + "% completed"
+				}
 			}
-			s.Message(message)
+
+			s.Message(output)
 			if slices.Contains(completionStatus, currentStatus) {
 				return currentStatus, nil
 			}

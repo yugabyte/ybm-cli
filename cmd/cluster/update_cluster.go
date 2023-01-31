@@ -127,6 +127,7 @@ var updateClusterCmd = &cobra.Command{
 		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
 
 		fmt.Printf("The cluster %s is being updated\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "EDIT_CLUSTER", []string{"FAILED", "SUCCEEDED"}, "The cluster is being updated", 1500)
 	},
 }
 
