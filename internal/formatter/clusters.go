@@ -33,7 +33,7 @@ func NewClusterFormat(source string) Format {
 	}
 }
 
-// ClusterWrite renders the context for a list of containers
+// ClusterWrite renders the context for a list of clusters
 func ClusterWrite(ctx Context, clusters []ybmclient.ClusterData) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, cluster := range clusters {

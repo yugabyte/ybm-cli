@@ -33,7 +33,7 @@ func NewBackupFormat(source string) Format {
 	}
 }
 
-// BackupWrite renders the context for a list of containers
+// BackupWrite renders the context for a list of backups
 func BackupWrite(ctx Context, Backups []ybmclient.BackupData) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, Backup := range Backups {
