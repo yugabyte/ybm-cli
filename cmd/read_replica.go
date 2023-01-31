@@ -136,6 +136,15 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 	return readReplicaSpecs, nil
 }
 
+func printReadReplicaOutput(resp ybmclient.ReadReplicaListResponse) {
+	readReplicaCtx := formatter.Context{
+		Output: os.Stdout,
+		Format: formatter.NewReadReplicaFormat(viper.GetString("output")),
+	}
+
+	formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
+}
+
 var getReadReplicaCmd = &cobra.Command{
 	Use:   "read_replica",
 	Short: "Get read replica in YugabyteDB Managed",
@@ -158,12 +167,8 @@ var getReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		readReplicaCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewReadReplicaFormat(viper.GetString("output")),
-		}
 
-		formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
+		printReadReplicaOutput(resp)
 
 	},
 }
@@ -214,12 +219,7 @@ var createReadReplicaCmd = &cobra.Command{
 			return
 		}
 
-		readReplicaCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewClusterFormat(viper.GetString("output")),
-		}
-
-		formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
+		printReadReplicaOutput(resp)
 	},
 }
 
@@ -266,12 +266,7 @@ var updateReadReplicaCmd = &cobra.Command{
 			return
 		}
 
-		readReplicaCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewClusterFormat(viper.GetString("output")),
-		}
-
-		formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
+		printReadReplicaOutput(resp)
 	},
 }
 

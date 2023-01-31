@@ -15,6 +15,16 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
+func printCdcStreamOutput(resp ybmclient.CDCStreamResponse) {
+	cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
+	cdcStreamCtx := formatter.Context{
+		Output: os.Stdout,
+		Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
+	}
+
+	formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
+}
+
 var getCdcStreamCmd = &cobra.Command{
 	Use:   "cdc_stream",
 	Short: "Get CDC Stream in YugabyteDB Managed",
@@ -46,13 +56,9 @@ var getCdcStreamCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
-		cdcStreamCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
-		}
 
-		formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
+		printCdcStreamOutput(resp)
+
 	},
 }
 
@@ -99,13 +105,7 @@ var createCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
-		cdcStreamCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
-		}
-
-		formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
+		printCdcStreamOutput(resp)
 	},
 }
 
@@ -152,13 +152,7 @@ var editCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
-		cdcStreamCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
-		}
-
-		formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
+		printCdcStreamOutput(resp)
 	},
 }
 

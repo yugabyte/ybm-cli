@@ -28,7 +28,7 @@ func NewCdcSinkFormat(source string) Format {
 	}
 }
 
-// CdcSinWrite renders the context for a list of containers
+// CdcSinkWrite renders the context for a list of cdc sinks
 func CdcSinkWrite(ctx Context, cdcSinks []ybmclient.CdcSinkData) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, cdcSink := range cdcSinks {

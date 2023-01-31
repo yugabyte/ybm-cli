@@ -28,7 +28,7 @@ func NewNetworkAllowListFormat(source string) Format {
 	}
 }
 
-// NetworkAllowListWrite renders the context for a list of containers
+// NetworkAllowListWrite renders the context for a list of network allow lists
 func NetworkAllowListWrite(ctx Context, nals []ybmclient.NetworkAllowListData) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, nal := range nals {

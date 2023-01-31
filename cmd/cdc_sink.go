@@ -15,6 +15,17 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
+func printCdcSinkOutput(resp ybmclient.CDCSinkResponse) {
+	cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
+	cdcSinkCtx := formatter.Context{
+		Output: os.Stdout,
+		Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
+	}
+
+	formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
+
+}
+
 var getCdcSinkCmd = &cobra.Command{
 	Use:   "cdc_sink",
 	Short: "Get CDC Sink in YugabyteDB Managed",
@@ -40,14 +51,7 @@ var getCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
-		cdcSinkCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
-		}
-
-		formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
-
+		printCdcSinkOutput(resp)
 	},
 }
 
@@ -93,13 +97,7 @@ var createCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
-		cdcSinkCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
-		}
-
-		formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
+		printCdcSinkOutput(resp)
 	},
 }
 
@@ -152,13 +150,7 @@ var editCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
-		cdcSinkCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
-		}
-
-		formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
+		printCdcSinkOutput(resp)
 	},
 }
 
@@ -190,6 +182,7 @@ var deleteCdcSinkCmd = &cobra.Command{
 		}
 
 		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully\n")
+
 	},
 }
 
