@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -33,18 +34,46 @@ var createClusterCmd = &cobra.Command{
 
 		username := credentials["username"]
 		password := credentials["password"]
-		regionInfoList := []map[string]string{}
+		regionInfoMapList := []map[string]string{}
 		if cmd.Flags().Changed("region-info") {
-			regionInfo, _ := cmd.Flags().GetStringToString("region-info")
-			if _, ok := regionInfo["region"]; !ok {
-				logrus.Errorln("Region not specified in region info")
-				return
+			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
+			for _, regionInfoString := range regionInfoList {
+				regionInfoMap := map[string]string{}
+				for _, regionInfo := range strings.Split(regionInfoString, ",") {
+					kvp := strings.Split(regionInfo, "=")
+					if len(kvp) != 2 {
+						logrus.Errorln("Incorrect format in region info")
+						return
+					}
+					key := kvp[0]
+					val := kvp[1]
+					switch key {
+					case "region":
+						if len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["region"] = val
+						}
+					case "num_nodes":
+						if len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["num_nodes"] = val
+						}
+					case "vpc":
+						if len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["vpc"] = val
+						}
+					}
+				}
+
+				if _, ok := regionInfoMap["region"]; !ok {
+					logrus.Errorln("Region not specified in region info")
+					return
+				}
+				if _, ok := regionInfoMap["num_nodes"]; !ok {
+					logrus.Errorln("Number of nodes not specified in region info")
+					return
+				}
+
+				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
 			}
-			if _, ok := regionInfo["num_nodes"]; !ok {
-				logrus.Errorln("Number of nodes not specified in region info")
-				return
-			}
-			regionInfoList = append(regionInfoList, regionInfo)
 		}
 
 		if cmd.Flags().Changed("node-config") {
@@ -55,7 +84,7 @@ var createClusterCmd = &cobra.Command{
 			}
 		}
 
-		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoList)
+		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
 			logrus.Errorf("Error while creating cluster spec: %v", err)
 			return
@@ -105,7 +134,7 @@ func init() {
 	createClusterCmd.Flags().String("cloud-type", "", "The cloud provider where database needs to be deployed. AWS or GCP.")
 	createClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	createClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes.")
-	createClusterCmd.Flags().StringToString("region-info", nil, `Region information for the cluster. Please provide key value pairs
+	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs
 	region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num_nodes are mandatory, vpc is optional.`)
 	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")

@@ -258,6 +258,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		clusterName,
 		clusterInfo,
 		softwareInfo)
+	clusterSpec.SetCloudInfo(cloudInfo)
 	if regionInfoProvided {
 		clusterSpec.SetClusterRegionInfo(clusterRegionInfo)
 	}
