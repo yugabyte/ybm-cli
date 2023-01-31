@@ -1,0 +1,10 @@
+{
+    "data": [],
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters?name=test",
+            "next": null
+        }
+    }
+}

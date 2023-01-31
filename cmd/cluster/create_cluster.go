@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cluster
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ import (
 
 // createClusterCmd represents the cluster command
 var createClusterCmd = &cobra.Command{
-	Use:   "cluster",
+	Use:   "create",
 	Short: "Create a cluster in YB Managed",
 	Long:  "Create a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -115,7 +115,7 @@ var createClusterCmd = &cobra.Command{
 }
 
 func init() {
-	createCmd.AddCommand(createClusterCmd)
+	ClusterCmd.AddCommand(createClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 

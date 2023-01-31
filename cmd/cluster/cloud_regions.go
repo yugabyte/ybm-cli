@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cluster
 
 import (
 	"os"
@@ -14,7 +14,7 @@ import (
 )
 
 var getCloudRegionsCmd = &cobra.Command{
-	Use:   "cloud_regions",
+	Use:   "describe-regions",
 	Short: "Get Cloud Regions in YugabyteDB Managed",
 	Long:  `Get Cloud Regions in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -45,7 +45,7 @@ var getCloudRegionsCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getCloudRegionsCmd)
+	ClusterCmd.AddCommand(getCloudRegionsCmd)
 	getCloudRegionsCmd.Flags().String("cloud-provider", "", "The cloud provider for which the regions have to be fetched. AWS or GCP.")
 	getCloudRegionsCmd.MarkFlagRequired("cloud-provider")
 

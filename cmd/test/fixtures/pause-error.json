@@ -1,0 +1,6 @@
+{
+    "error": {
+        "detail": "Cluster is not in an active state",
+        "status": 409
+    }
+}

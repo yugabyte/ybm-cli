@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cluster
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 
 // deleteClusterCmd represents the cluster command
 var deleteClusterCmd = &cobra.Command{
-	Use:   "cluster",
+	Use:   "delete",
 	Short: "Delete cluster in YugabyteDB Managed",
 	Long:  "Delete cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -45,7 +45,7 @@ var deleteClusterCmd = &cobra.Command{
 }
 
 func init() {
-	deleteCmd.AddCommand(deleteClusterCmd)
+	ClusterCmd.AddCommand(deleteClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 

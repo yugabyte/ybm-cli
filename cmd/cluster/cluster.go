@@ -1,24 +1,24 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cluster
 
 import (
 	"github.com/spf13/cobra"
 )
 
 // getCmd represents the list command
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get resources in YB Managed",
-	Long:  "Get resources in YB Managed",
+var ClusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "Cluster ",
+	Long:  "Cluster command",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(getCmd)
+	ClusterCmd.AddCommand()
 
 	// Here you will define your flags and configuration settings.
 

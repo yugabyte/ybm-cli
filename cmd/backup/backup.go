@@ -1,4 +1,4 @@
-package cmd
+package backup
 
 import (
 	"fmt"
@@ -12,8 +12,17 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var getBackupCmd = &cobra.Command{
+var BackupCmd = &cobra.Command{
 	Use:   "backup",
+	Short: "Backup",
+	Long:  "Backup commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+var getBackupCmd = &cobra.Command{
+	Use:   "get",
 	Short: "Get backups in YugabyteDB Managed",
 	Long:  "Get backups in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -49,7 +58,7 @@ var getBackupCmd = &cobra.Command{
 }
 
 var restoreBackupCmd = &cobra.Command{
-	Use:   "backup",
+	Use:   "restore",
 	Short: "Restore backups in YugabyteDB Managed",
 	Long:  "Restore backups in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -83,7 +92,7 @@ var restoreBackupCmd = &cobra.Command{
 }
 
 var createBackupCmd = &cobra.Command{
-	Use:   "backup",
+	Use:   "create",
 	Short: "Create backup in YugabyteDB Managed",
 	Long:  "Create backup in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -136,7 +145,7 @@ var createBackupCmd = &cobra.Command{
 }
 
 var deleteBackupCmd = &cobra.Command{
-	Use:   "backup",
+	Use:   "delete",
 	Short: "Delete backup in YugabyteDB Managed",
 	Long:  "Delete backup in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -161,22 +170,22 @@ var deleteBackupCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getBackupCmd)
+	BackupCmd.AddCommand(getBackupCmd)
 	getBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to fetch backups")
 
-	restoreCmd.AddCommand(restoreBackupCmd)
+	BackupCmd.AddCommand(restoreBackupCmd)
 	restoreBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to restore backups")
 	restoreBackupCmd.MarkFlagRequired("cluster-name")
 	restoreBackupCmd.Flags().String("backup-id", "", "ID of the backup to be restored")
 	restoreBackupCmd.MarkFlagRequired("backup-id")
 
-	createCmd.AddCommand(createBackupCmd)
+	BackupCmd.AddCommand(createBackupCmd)
 	createBackupCmd.Flags().String("cluster-name", "", "Name for the cluster")
-	createBackupCmd.MarkFlagRequired("name")
+	createBackupCmd.MarkFlagRequired("cluster-name")
 	createBackupCmd.Flags().Int32("retention-period", 0, "Retention period of the backup")
 	createBackupCmd.Flags().String("description", "", "Description of the backup")
 
-	deleteCmd.AddCommand(deleteBackupCmd)
+	BackupCmd.AddCommand(deleteBackupCmd)
 	deleteBackupCmd.Flags().String("backup-id", "", "The backup ID")
 	deleteBackupCmd.MarkFlagRequired("backup-id")
 }

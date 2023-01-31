@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cluster
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ import (
 
 // updateClusterCmd represents the cluster command
 var updateClusterCmd = &cobra.Command{
-	Use:   "cluster",
+	Use:   "update",
 	Short: "Update a cluster in YB Managed",
 	Long:  "Update a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -131,7 +131,7 @@ var updateClusterCmd = &cobra.Command{
 }
 
 func init() {
-	updateCmd.AddCommand(updateClusterCmd)
+	ClusterCmd.AddCommand(updateClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
