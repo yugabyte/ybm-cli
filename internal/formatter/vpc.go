@@ -30,7 +30,7 @@ func NewVPCFormat(source string) Format {
 	}
 }
 
-// VPCWrite renders the context for a list of containers
+// VPCWrite renders the context for a list of VPCs
 func VPCWrite(ctx Context, VPCs []ybmclient.SingleTenantVpcDataResponse) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, VPC := range VPCs {

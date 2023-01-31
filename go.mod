@@ -3,10 +3,9 @@ module github.com/yugabyte/ybm-cli
 go 1.19
 
 require (
-	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.14.0
-	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20221221120552-fec10f75497e
+	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230128004341-7bd09f253ed8
 	gotest.tools/v3 v3.4.0
 )
 
