@@ -3,7 +3,6 @@ module github.com/yugabyte/ybm-cli
 go 1.19
 
 require (
-	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f
 	github.com/onsi/ginkgo/v2 v2.7.0
 	github.com/onsi/gomega v1.24.1
 	github.com/spf13/cobra v1.5.0

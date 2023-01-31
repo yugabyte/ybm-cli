@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hokaccha/go-prettyjson"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -326,10 +325,4 @@ func init() {
 	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
 	deleteReadReplicaCmd.MarkFlagRequired("cluster-name")
 
-}
-
-func prettyPrintJson(data interface{}) {
-	//b, _ := json.MarshalIndent(data, "", "  ")
-	b, _ := prettyjson.Marshal(data)
-	fmt.Println(string(b))
 }

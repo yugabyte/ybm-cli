@@ -7,12 +7,24 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hokaccha/go-prettyjson"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
+
+func printCdcSinkOutput(resp ybmclient.CDCSinkResponse) {
+	cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
+	cdcSinkCtx := formatter.Context{
+		Output: os.Stdout,
+		Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
+	}
+
+	formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
+
+}
 
 var CDCSinkCmd = &cobra.Command{
 	Use:   "cdc_sink",
@@ -49,7 +61,7 @@ var getCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		printCdcSinkOutput(resp)
 	},
 }
 
@@ -95,7 +107,7 @@ var createCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		printCdcSinkOutput(resp)
 	},
 }
 
@@ -148,7 +160,7 @@ var editCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		printCdcSinkOutput(resp)
 	},
 }
 
@@ -180,7 +192,6 @@ var deleteCdcSinkCmd = &cobra.Command{
 		}
 
 		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully")
-		prettyPrintJson(resp)
 	},
 }
 
@@ -205,11 +216,4 @@ func init() {
 	CDCSinkCmd.AddCommand(deleteCdcSinkCmd)
 	deleteCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
 
-}
-
-// temporary
-func prettyPrintJson(data interface{}) {
-	//b, _ := json.MarshalIndent(data, "", "  ")
-	b, _ := prettyjson.Marshal(data)
-	fmt.Println(string(b))
 }
