@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -22,6 +23,7 @@ var updateClusterCmd = &cobra.Command{
 	Short: "Update a cluster in YB Managed",
 	Long:  "Update a cluster in YB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
+
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -48,30 +50,50 @@ var updateClusterCmd = &cobra.Command{
 			logrus.Errorf("Error when calling `getTrackName`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
-		vpcName := ""
-		if vpcID, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetVpcIdOk(); ok {
-			vpcName, err = authApi.GetVpcNameById(*vpcID)
-			if err != nil {
-				logrus.Errorf("Error when calling `getVpcName`: %s", ybmAuthClient.GetApiErrorDetails(err))
-				return
-			}
-		}
 
-		populateFlags(cmd, originalSpec, trackName, vpcName)
+		populateFlags(cmd, originalSpec, trackName, authApi)
 
-		regionInfoList := []map[string]string{}
-
+		regionInfoMapList := []map[string]string{}
 		if cmd.Flags().Changed("region-info") {
-			regionInfo, _ := cmd.Flags().GetStringToString("region-info")
-			if _, ok := regionInfo["region"]; !ok {
-				logrus.Error("Region not specified in region info\n")
-				return
+			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
+			regionInfoList = strings.Split(regionInfoList[0], "|")
+			for _, regionInfoString := range regionInfoList {
+				regionInfoMap := map[string]string{}
+				for _, regionInfo := range strings.Split(regionInfoString, ",") {
+					kvp := strings.Split(regionInfo, "=")
+					if len(kvp) != 2 {
+						logrus.Errorln("Incorrect format in region info")
+						return
+					}
+					key := kvp[0]
+					val := kvp[1]
+					switch key {
+					case "region":
+						if len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["region"] = val
+						}
+					case "num_nodes":
+						if len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["num_nodes"] = val
+						}
+					case "vpc":
+						if len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["vpc"] = val
+						}
+					}
+				}
+
+				if _, ok := regionInfoMap["region"]; !ok {
+					logrus.Errorln("Region not specified in region info")
+					return
+				}
+				if _, ok := regionInfoMap["num_nodes"]; !ok {
+					logrus.Errorln("Number of nodes not specified in region info")
+					return
+				}
+
+				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
 			}
-			if _, ok := regionInfo["num_nodes"]; !ok {
-				logrus.Error("Number of nodes not specified in region info\n")
-				return
-			}
-			regionInfoList = append(regionInfoList, regionInfo)
 		}
 
 		if cmd.Flags().Changed("node-config") {
@@ -82,7 +104,7 @@ var updateClusterCmd = &cobra.Command{
 			}
 		}
 
-		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoList)
+		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
 			logrus.Errorf("Error while creating cluster spec: %v", err)
 			return
@@ -124,7 +146,7 @@ func init() {
 	updateClusterCmd.Flags().String("cloud-type", "", "The cloud provider where database needs to be deployed. AWS or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes.")
-	updateClusterCmd.Flags().StringToString("region-info", nil, `Region information for the cluster. Please provide key value pairs
+	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs
 	region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num_nodes are mandatory, vpc is optional.`)
 	updateClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
@@ -132,7 +154,7 @@ func init() {
 
 }
 
-func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, trackName string, vpcName string) {
+func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, trackName string, authApi *ybmAuthClient.AuthApiClient) {
 	if !cmd.Flags().Changed("cloud-type") {
 		cmd.Flag("cloud-type").Value.Set(string(originalSpec.CloudInfo.GetCode()))
 		cmd.Flag("cloud-type").Changed = true
@@ -165,19 +187,35 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 		cmd.Flag("node-config").Changed = true
 
 	}
+	regionInfoList := ""
+	numRegions := len(originalSpec.ClusterRegionInfo)
 	if !cmd.Flags().Changed("region-info") {
-		regionInfo := ""
-		if region, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.CloudInfo.GetRegionOk(); ok {
-			regionInfo += "region=" + *region
+		for index, clusterRegionInfo := range originalSpec.ClusterRegionInfo {
+			regionInfo := ""
+			if region, ok := clusterRegionInfo.PlacementInfo.CloudInfo.GetRegionOk(); ok && region != nil {
+				regionInfo += "region=" + *region
+			}
+			//logrus.Errorln(clusterRegionInfo.PlacementInfo.GetNumNodes())
+			if numNodes, ok := clusterRegionInfo.PlacementInfo.GetNumNodesOk(); ok && numNodes != nil {
+				regionInfo += ",num_nodes=" + strconv.Itoa(int(*numNodes))
+			}
+
+			if vpcID, ok := clusterRegionInfo.PlacementInfo.GetVpcIdOk(); ok && vpcID != nil {
+				vpcName, err := authApi.GetVpcNameById(*vpcID)
+				if err != nil {
+					logrus.Errorf("Error when calling `getVpcName`: %s", ybmAuthClient.GetApiErrorDetails(err))
+					return
+				}
+				regionInfo += ",vpc=" + vpcName
+			}
+			regionInfoList += regionInfo
+			if index < numRegions-1 {
+				regionInfoList += "|"
+			}
 		}
-		if numNodes, ok := originalSpec.ClusterRegionInfo[0].PlacementInfo.GetNumNodesOk(); ok {
-			regionInfo += ",num_nodes=" + strconv.Itoa(int(*numNodes))
-		}
-		if vpcName != "" {
-			regionInfo += ",vpc=" + vpcName
-		}
-		cmd.Flag("region-info").Value.Set(regionInfo)
+		cmd.Flag("region-info").Value.Set(regionInfoList)
 		cmd.Flag("region-info").Changed = true
+
 	}
 
 }

@@ -39,7 +39,7 @@ var deleteClusterCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("The cluster %s is scheduled for deletion", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("The cluster %s is scheduled for deletion\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 	},
 }
