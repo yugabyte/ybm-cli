@@ -12,6 +12,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -157,7 +158,13 @@ var getReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		prettyPrintJson(resp)
+		readReplicaCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewReadReplicaFormat(viper.GetString("output")),
+		}
+
+		formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
+
 	},
 }
 
@@ -207,7 +214,12 @@ var createReadReplicaCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		readReplicaCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+
+		formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
 	},
 }
 
@@ -254,7 +266,12 @@ var updateReadReplicaCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		readReplicaCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+
+		formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
 	},
 }
 
@@ -280,7 +297,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		fmt.Printf("All read replica sucessfully deleted for cluster %s \n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("All read replica sucessfully scheduled for deletion for cluster %s \n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 	},
 }

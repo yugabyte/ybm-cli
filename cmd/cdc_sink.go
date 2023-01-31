@@ -9,7 +9,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -24,7 +26,6 @@ var getCdcSinkCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
-
 		cdcSinkName, _ := cmd.Flags().GetString("name")
 		cdcSinkID, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
 		if err != nil {
@@ -39,7 +40,14 @@ var getCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
+		cdcSinkCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
+		}
+
+		formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
+
 	},
 }
 
@@ -85,7 +93,13 @@ var createCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
+		cdcSinkCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
+		}
+
+		formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
 	},
 }
 
@@ -138,7 +152,13 @@ var editCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
+		cdcSinkCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
+		}
+
+		formatter.CdcSinkWrite(cdcSinkCtx, cdcSinkData)
 	},
 }
 
@@ -169,8 +189,7 @@ var deleteCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully")
-		prettyPrintJson(resp)
+		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully\n")
 	},
 }
 

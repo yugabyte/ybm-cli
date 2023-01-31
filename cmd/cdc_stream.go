@@ -4,11 +4,14 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -43,7 +46,13 @@ var getCdcStreamCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		prettyPrintJson(resp)
+		cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
+		cdcStreamCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
+		}
+
+		formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
 	},
 }
 
@@ -90,7 +99,13 @@ var createCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
+		cdcStreamCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
+		}
+
+		formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
 	},
 }
 
@@ -137,7 +152,13 @@ var editCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
+		cdcStreamCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
+		}
+
+		formatter.CdcStreamWrite(cdcStreamCtx, cdcStreamData)
 	},
 }
 
@@ -172,7 +193,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		prettyPrintJson(resp)
+		fmt.Fprintf(os.Stdout, "CDC stream deleted successfully\n")
 	},
 }
 
