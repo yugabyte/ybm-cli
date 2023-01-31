@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package readreplica
 
 import (
 	"fmt"
@@ -20,6 +20,15 @@ import (
 
 var clusterName string
 var allReplicaOpt []string
+
+var ReadReplicaCmd = &cobra.Command{
+	Use:   "read_replica",
+	Short: "read_replica",
+	Long:  "Read Replica commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
 
 func getDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmclient.ReadReplicaSpec {
 	n := int32(1)
@@ -146,7 +155,7 @@ func printReadReplicaOutput(resp ybmclient.ReadReplicaListResponse) {
 }
 
 var getReadReplicaCmd = &cobra.Command{
-	Use:   "read_replica",
+	Use:   "get",
 	Short: "Get read replica in YugabyteDB Managed",
 	Long:  "Get read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -174,7 +183,7 @@ var getReadReplicaCmd = &cobra.Command{
 }
 
 var createReadReplicaCmd = &cobra.Command{
-	Use:   "read_replica",
+	Use:   "create",
 	Short: "Create read replica in YugabyteDB Managed",
 	Long:  "Create read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -224,7 +233,7 @@ var createReadReplicaCmd = &cobra.Command{
 }
 
 var updateReadReplicaCmd = &cobra.Command{
-	Use:   "read_replica",
+	Use:   "update",
 	Short: "Edit read replica in YugabyteDB Managed",
 	Long:  "Edit read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -271,7 +280,7 @@ var updateReadReplicaCmd = &cobra.Command{
 }
 
 var deleteReadReplicaCmd = &cobra.Command{
-	Use:   "read_replica",
+	Use:   "delete",
 	Short: "Delete read replica from YugabyteDB Managed",
 	Long:  "Delete read replica from YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -298,21 +307,22 @@ var deleteReadReplicaCmd = &cobra.Command{
 }
 
 func init() {
+	ReadReplicaCmd.AddCommand(getReadReplicaCmd)
 	getReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
 	getReadReplicaCmd.MarkFlagRequired("cluster-name")
-	getCmd.AddCommand(getReadReplicaCmd)
 
+	ReadReplicaCmd.AddCommand(createReadReplicaCmd)
 	createReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
 	createReadReplicaCmd.MarkFlagRequired("cluster-name")
 	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region_num_cores>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc=<vpc_name>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
-	createCmd.AddCommand(createReadReplicaCmd)
 
+	ReadReplicaCmd.AddCommand(updateReadReplicaCmd)
 	updateReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
 	updateReadReplicaCmd.MarkFlagRequired("cluster-name")
 	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num_cores=<region_num_cores>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc=<vpc_name>,num_replicas=<num_replicas>,multi_zone=<multi_zone>`)
-	updateCmd.AddCommand(updateReadReplicaCmd)
 
+	ReadReplicaCmd.AddCommand(deleteReadReplicaCmd)
 	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
 	deleteReadReplicaCmd.MarkFlagRequired("cluster-name")
-	deleteCmd.AddCommand(deleteReadReplicaCmd)
+
 }

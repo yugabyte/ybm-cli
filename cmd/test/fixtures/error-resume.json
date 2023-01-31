@@ -1,0 +1,6 @@
+{
+    "error": {
+        "detail": "Cluster is not in paused state",
+        "status": 403
+    }
+}

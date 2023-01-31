@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package vpc
 
 import (
 	"fmt"
@@ -15,9 +15,18 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
+var VPCCmd = &cobra.Command{
+	Use:   "vpc",
+	Short: "vpc",
+	Long:  "VPC commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
 // vpcCmd represents the vpc command
 var getVpcCmd = &cobra.Command{
-	Use:   "vpc",
+	Use:   "get",
 	Short: "Get VPCs in YugabyteDB Managed",
 	Long:  "Get VPCs in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -50,7 +59,7 @@ var getVpcCmd = &cobra.Command{
 var createRegions []string
 var createCidrs []string
 var createVpcCmd = &cobra.Command{
-	Use:   "vpc",
+	Use:   "create",
 	Short: "Create a VPC in YugabyteDB Managed",
 	Long:  "Create a VPC in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -125,7 +134,7 @@ var createVpcCmd = &cobra.Command{
 }
 
 var deleteVpcCmd = &cobra.Command{
-	Use:   "vpc",
+	Use:   "delete",
 	Short: "Delete a VPC in YugabyteDB Managed",
 	Long:  "Delete a VPC in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -158,10 +167,10 @@ var deleteVpcCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getVpcCmd)
+	VPCCmd.AddCommand(getVpcCmd)
 	getVpcCmd.Flags().String("name", "", "Name for the VPC")
 
-	createCmd.AddCommand(createVpcCmd)
+	VPCCmd.AddCommand(createVpcCmd)
 	createVpcCmd.Flags().String("name", "", "Name for the VPC")
 	createVpcCmd.MarkFlagRequired("name")
 	createVpcCmd.Flags().String("cloud", "", "Cloud provider for the VPC")
@@ -172,7 +181,7 @@ func init() {
 	createVpcCmd.MarkFlagsRequiredTogether("region", "cidr")
 	createVpcCmd.MarkFlagsMutuallyExclusive("global-cidr", "cidr")
 
-	deleteCmd.AddCommand(deleteVpcCmd)
+	VPCCmd.AddCommand(deleteVpcCmd)
 	deleteVpcCmd.Flags().String("name", "", "Name for the VPC")
 	deleteVpcCmd.MarkFlagRequired("name")
 }

@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package nal
 
 import (
 	"errors"
@@ -20,6 +20,15 @@ var nalName string
 var nalDescription string
 var nalIpAddrs []string
 
+var NalCmd = &cobra.Command{
+	Use:   "network_allow_list",
+	Short: "network_allow_list",
+	Long:  "Network Allow list commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
 func findNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (ybmclient.NetworkAllowListData, error) {
 	for _, allowList := range nals {
 		if allowList.Spec.Name == nalName {
@@ -32,7 +41,7 @@ func findNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (y
 var getNetworkAllowListCmd = &cobra.Command{
 	Use:   "network_allow_list",
 	Short: "Get network allow list in YugabyteDB Managed",
-	Long:  `Get network allow list in YugabyteDB Managed`,
+	Long:  "Get network allow list in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -72,9 +81,9 @@ var getNetworkAllowListCmd = &cobra.Command{
 }
 
 var createNetworkAllowListCmd = &cobra.Command{
-	Use:   "network_allow_list",
+	Use:   "create",
 	Short: "Create network allow lists in YugabyteDB Managed",
-	Long:  `Create network allow lists in YugabyteDB Managed`,
+	Long:  "Create network allow lists in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -108,9 +117,9 @@ var createNetworkAllowListCmd = &cobra.Command{
 }
 
 var deleteNetworkAllowListCmd = &cobra.Command{
-	Use:   "network_allow_list",
+	Use:   "delete",
 	Short: "Delete network allow list from YugabyteDB Managed",
-	Long:  `Delete network allow list from YugabyteDB Managed`,
+	Long:  "Delete network allow list from YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -143,17 +152,17 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 }
 
 func init() {
+	NalCmd.AddCommand(getNetworkAllowListCmd)
 	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
-	getCmd.AddCommand(getNetworkAllowListCmd)
 
+	NalCmd.AddCommand(createNetworkAllowListCmd)
 	createNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
 	createNetworkAllowListCmd.MarkFlagRequired("name")
 	createNetworkAllowListCmd.Flags().StringVarP(&nalDescription, "description", "d", "", "Description of the Network Allow List")
 	createNetworkAllowListCmd.Flags().StringSliceVarP(&nalIpAddrs, "ip_addr", "i", []string{}, "IP addresses included in the Network Allow List")
 	createNetworkAllowListCmd.MarkFlagRequired("ip_addr")
-	createCmd.AddCommand(createNetworkAllowListCmd)
 
+	NalCmd.AddCommand(deleteNetworkAllowListCmd)
 	deleteNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
 	deleteNetworkAllowListCmd.MarkFlagRequired("name")
-	deleteCmd.AddCommand(deleteNetworkAllowListCmd)
 }

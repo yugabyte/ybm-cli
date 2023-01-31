@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cluster
 
 import (
 	"os"
@@ -14,7 +14,7 @@ import (
 )
 
 var getInstanceTypesCmd = &cobra.Command{
-	Use:   "instance_types",
+	Use:   "describe-instances",
 	Short: "Get Instance Types in YugabyteDB Managed",
 	Long:  `Get Instance Types in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -48,7 +48,7 @@ var getInstanceTypesCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getInstanceTypesCmd)
+	ClusterCmd.AddCommand(getInstanceTypesCmd)
 	getInstanceTypesCmd.Flags().String("cloud-provider", "", "The cloud provider for which the regions have to be fetched. AWS or GCP.")
 	getInstanceTypesCmd.MarkFlagRequired("cloud-provider")
 	getInstanceTypesCmd.Flags().String("region", "", "The region in the cloud provider for which the instance types have to fetched.")

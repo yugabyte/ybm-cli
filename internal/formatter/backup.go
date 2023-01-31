@@ -68,7 +68,7 @@ func (c *BackupContext) ExpireOn() string {
 		return ""
 
 	}
-	return formatDate(c.c.GetInfo().Metadata.GetUpdatedOn())
+	return FormatDate(c.c.GetInfo().Metadata.GetUpdatedOn())
 }
 
 func (c *BackupContext) CreatedOn() string {
@@ -76,7 +76,7 @@ func (c *BackupContext) CreatedOn() string {
 		return ""
 
 	}
-	return formatDate(c.c.GetInfo().Metadata.GetCreatedOn())
+	return FormatDate(c.c.GetInfo().Metadata.GetCreatedOn())
 }
 
 func (c *BackupContext) ClusterName() string {
@@ -111,7 +111,7 @@ func (c *BackupContext) MarshalJSON() ([]byte, error) {
 }
 
 // TODO add error handling
-func formatDate(dateToBeFormatted string) string {
+func FormatDate(dateToBeFormatted string) string {
 	t, _ := time.Parse(time.RFC3339Nano, dateToBeFormatted)
 	return t.Local().Format("2006-01-02,15:04")
 }

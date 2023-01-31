@@ -1,7 +1,7 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package vpcpeering
 
 import (
 	"errors"
@@ -17,6 +17,15 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
+var VPCPeeringCmd = &cobra.Command{
+	Use:   "vpc_peering",
+	Short: "vpc_peering",
+	Long:  "VPC Peerings commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
 func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmclient.VpcPeeringData, error) {
 	for _, vpcPeering := range vpcPeerings {
 		if vpcPeering.Spec.Name == name {
@@ -27,7 +36,7 @@ func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmcli
 }
 
 var getVpcPeeringCmd = &cobra.Command{
-	Use:   "vpc_peering",
+	Use:   "get",
 	Short: "Get VPC peerings in YugabyteDB Managed",
 	Long:  "Get VPC peerings in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -67,7 +76,7 @@ var getVpcPeeringCmd = &cobra.Command{
 }
 
 var createVpcPeeringCmd = &cobra.Command{
-	Use:   "vpc_peering",
+	Use:   "create",
 	Short: "Create VPC peering in YugabyteDB Managed",
 	Long:  "Create VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -176,7 +185,7 @@ var createVpcPeeringCmd = &cobra.Command{
 }
 
 var deleteVpcPeeringCmd = &cobra.Command{
-	Use:   "vpc_peering",
+	Use:   "detele",
 	Short: "Delete VPC peering in YugabyteDB Managed",
 	Long:  "Delete VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -215,10 +224,10 @@ var deleteVpcPeeringCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getVpcPeeringCmd)
+	VPCPeeringCmd.AddCommand(getVpcPeeringCmd)
 	getVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
 
-	createCmd.AddCommand(createVpcPeeringCmd)
+	VPCPeeringCmd.AddCommand(createVpcPeeringCmd)
 	createVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
 	createVpcPeeringCmd.MarkFlagRequired("name")
 	createVpcPeeringCmd.Flags().String("yb-vpc-name", "", "Name of the YugabyteDB Managed VPC.")
@@ -232,7 +241,7 @@ func init() {
 	createVpcPeeringCmd.Flags().String("app-vpc-id", "", "ID of the application VPC. Required for AWS. Not applicable for GCP.")
 	createVpcPeeringCmd.Flags().String("app-vpc-region", "", "Region of the application VPC. Required for AWS. Not applicable for GCP.")
 
-	deleteCmd.AddCommand(deleteVpcPeeringCmd)
+	VPCPeeringCmd.AddCommand(deleteVpcPeeringCmd)
 	deleteVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
 	deleteVpcPeeringCmd.MarkFlagRequired("name")
 }
