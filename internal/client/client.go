@@ -8,14 +8,18 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"os/signal"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/theckman/yacspin"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"golang.org/x/exp/slices"
 )
 
 // AuthApiClient is a auth YBM Client
@@ -50,12 +54,12 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
-
+	ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt)
 	return &AuthApiClient{
 		apiClient,
 		"",
 		"",
-		context.Background(),
+		ctx,
 	}, nil
 }
 
@@ -580,6 +584,73 @@ func (a *AuthApiClient) GetCdcSinkIDBySinkName(cdcSinkName string) (string, erro
 
 func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsRequest {
 	return a.ApiClient.ClusterApi.GetSupportedCloudRegions(a.ctx)
+}
+func (a *AuthApiClient) ListTasks() ybmclient.ApiListTasksRequest {
+	return a.ApiClient.TaskApi.ListTasks(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
+	var currentStatus string
+	var taskList ybmclient.TaskListResponse
+	var resp *http.Response
+	var err error
+
+	cfg := yacspin.Config{
+		Frequency:         100 * time.Millisecond,
+		Colors:            []string{"fgYellow"},
+		CharSet:           yacspin.CharSets[11],
+		Suffix:            " ",
+		SuffixAutoColon:   true,
+		Message:           "...",
+		StopCharacter:     "✓",
+		StopColors:        []string{"fgGreen"},
+		StopMessage:       "Operation succeeded",
+		StopFailCharacter: "✗",
+		StopFailColors:    []string{"fgRed"},
+		StopFailMessage:   "Operation Failed",
+	}
+
+	s, err := yacspin.New(cfg)
+	if err != nil {
+		return "", fmt.Errorf("failed to make spinner from struct: %v", err)
+	}
+
+	// start animating the spinner
+	if err := s.Start(); err != nil {
+		return "", fmt.Errorf("failed to start spinner: %v", err)
+	}
+	defer s.Stop()
+
+	timeout := time.After(time.Duration(timeOutInSec) * time.Second)
+	checkEveryInSec := time.Tick(2 * time.Second)
+
+	for {
+		select {
+		case <-timeout:
+			s.StopFail()
+			return "", fmt.Errorf("waiting for update from Api timeout")
+		case <-a.ctx.Done():
+			s.StopFail()
+			return "", fmt.Errorf("receive interrupt signal")
+		case <-checkEveryInSec:
+			taskList, resp, err = a.ListTasks().EntityId(entityId).EntityType(entityType).ProjectId(a.ProjectID).TaskType(taskType).Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", resp)
+				return "", fmt.Errorf("error when calling `BackupApi.CreateBackup`: %s", GetApiErrorDetails(err))
+			}
+
+			if _, ok := taskList.GetDataOk(); ok {
+				c := taskList.GetData()
+				currentStatus = c[0].Info.GetState()
+			}
+			s.Message(message)
+			if slices.Contains(completionStatus, currentStatus) {
+				return currentStatus, nil
+			}
+
+		}
+	}
+
 }
 
 func getFromNodeConfig(resource string, numCores int32, nodeConfigList []ybmclient.NodeConfigurationResponseItem) (int32, error) {

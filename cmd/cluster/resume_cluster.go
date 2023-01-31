@@ -47,7 +47,8 @@ var resumeClusterCmd = &cobra.Command{
 
 		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
 
-		fmt.Printf("The cluster %s is being resumed\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The cluster %s is being resumed", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESUME_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 240)
 	},
 }
 

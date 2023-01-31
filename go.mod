@@ -23,6 +23,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
+	github.com/theckman/yacspin v0.13.12 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 )
 
@@ -49,6 +50,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
+	golang.org/x/exp v0.0.0-20230131013936-aae9b4e6329d
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
