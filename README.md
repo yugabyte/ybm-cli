@@ -26,13 +26,13 @@ just add it to the host `http://cloud.yugabyte.com`
 ### Cluster
 Minimal Required Configurations
 ```sh
-ybm create cluster 
+ybm cluster create 
     --cluster-name=test-cluster
     --credentials=username=anonymous,password=password123
 ```
 All possibilities
 ```sh
-ybm create cluster 
+ybm cluster create
     --cluster-name=test-cluster
     --credentials=username=anonymous,password=password123
     --cloud-type=[AWS or GCP]
@@ -46,7 +46,7 @@ ybm create cluster
 
 ### Network Allow List
 ```sh
-ybm create network-allow-list 
+ybm network_allow_list create
      --name=admins
      --description="admin allow list"
      --ip_addr=0.0.0.0/12, 1.1.1.1/12
@@ -54,21 +54,21 @@ ybm create network-allow-list
 
 ### Read Replica
 ```sh
-ybm create read-replica
+ybm read_replica create
      --replica=num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc=<vpc_name>,num_replicas=<num_replicas>,multi_zone=<multi_zone>
 ```
 Additional replica can becreated by repeating the `replica` flag but each replic must be in a distinct region. 
 
 ### VPC
 ```sh
-ybm create vpc
+ybm vpc create
     --name=demo-vpc
     --cloud=GCP
     --global-cidr=10.0.0.0/18
 ```
 
 ```sh
-ybm create vpc
+ybm vpc create
     --name=demo-vpc
     --cloud=GCP
     --region=us-west1,uswest2
@@ -78,7 +78,7 @@ ybm create vpc
 
 ### VPC Peering
 ```sh
-ybm create vpc-peering
+ybm vpc_peering create
     --name=demo-peer
     --vpc-name=demo-vpc
     --cloud=GCP
@@ -91,7 +91,7 @@ ybm create vpc-peering
 ### CDC Sink
 
 ```sh
-ybm create cdc_sink 
+ybm cdc_sink create
     --name=sink-2 
     --hostname=kafka.self.us 
     --auth-type=BASIC 
@@ -101,18 +101,18 @@ ybm create cdc_sink
 ```
 
 ```sh
-./ybm get cdc_sink 
+./ybm cdc_sink get
     --name=sink-2
 ```
 
 ```sh
-./ybm update cdc_sink 
+./ybm cdc_sink update
     --name=sink-2 
     --new-name=new-sink-2
 ```
 
 ```sh
-./ybm delete cdc_sink 
+./ybm cdc_sink delete
     --name=sink-2 
 ```
 
