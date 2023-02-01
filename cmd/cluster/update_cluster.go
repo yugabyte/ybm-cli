@@ -72,9 +72,9 @@ var updateClusterCmd = &cobra.Command{
 						if len(strings.TrimSpace(val)) != 0 {
 							regionInfoMap["region"] = val
 						}
-					case "num_nodes":
+					case "num-nodes":
 						if len(strings.TrimSpace(val)) != 0 {
-							regionInfoMap["num_nodes"] = val
+							regionInfoMap["num-nodes"] = val
 						}
 					case "vpc":
 						if len(strings.TrimSpace(val)) != 0 {
@@ -87,7 +87,7 @@ var updateClusterCmd = &cobra.Command{
 					logrus.Errorln("Region not specified in region info")
 					return
 				}
-				if _, ok := regionInfoMap["num_nodes"]; !ok {
+				if _, ok := regionInfoMap["num-nodes"]; !ok {
 					logrus.Errorln("Number of nodes not specified in region info")
 					return
 				}
@@ -98,7 +98,7 @@ var updateClusterCmd = &cobra.Command{
 
 		if cmd.Flags().Changed("node-config") {
 			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-			if _, ok := nodeConfig["num_cores"]; !ok {
+			if _, ok := nodeConfig["num-cores"]; !ok {
 				logrus.Error("Number of cores not specified in node config\n")
 				return
 			}
@@ -145,9 +145,9 @@ func init() {
 	updateClusterCmd.MarkFlagRequired("cluster-name")
 	updateClusterCmd.Flags().String("cloud-type", "", "The cloud provider where database needs to be deployed. AWS or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
-	updateClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes.")
+	updateClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")
 	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs
-	region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num_nodes are mandatory, vpc is optional.`)
+	region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num-nodes are mandatory, vpc is optional.`)
 	updateClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
 	updateClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
@@ -178,10 +178,10 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 	if !cmd.Flags().Changed("node-config") {
 		nodeConfig := ""
 		if diskSizeGb, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskSizeGbOk(); ok {
-			nodeConfig += "disk_size_gb=" + strconv.Itoa(int(*diskSizeGb))
+			nodeConfig += "disk-size-gb=" + strconv.Itoa(int(*diskSizeGb))
 		}
 		if numCores, ok := originalSpec.ClusterInfo.NodeInfo.GetNumCoresOk(); ok {
-			nodeConfig += ",num_cores=" + strconv.Itoa(int(*numCores))
+			nodeConfig += ",num-cores=" + strconv.Itoa(int(*numCores))
 		}
 		cmd.Flag("node-config").Value.Set(nodeConfig)
 		cmd.Flag("node-config").Changed = true
@@ -197,7 +197,7 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 			}
 			//logrus.Errorln(clusterRegionInfo.PlacementInfo.GetNumNodes())
 			if numNodes, ok := clusterRegionInfo.PlacementInfo.GetNumNodesOk(); ok && numNodes != nil {
-				regionInfo += ",num_nodes=" + strconv.Itoa(int(*numNodes))
+				regionInfo += ",num-nodes=" + strconv.Itoa(int(*numNodes))
 			}
 
 			if vpcID, ok := clusterRegionInfo.PlacementInfo.GetVpcIdOk(); ok && vpcID != nil {
