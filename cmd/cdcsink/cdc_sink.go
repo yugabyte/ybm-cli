@@ -27,8 +27,8 @@ func printCdcSinkOutput(resp ybmclient.CDCSinkResponse) {
 }
 
 var CDCSinkCmd = &cobra.Command{
-	Use:   "cdc_sink",
-	Short: "cdc_sink",
+	Use:   "cdc-sink",
+	Short: "cdc-sink",
 	Long:  "Cdc Sink commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

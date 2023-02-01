@@ -37,8 +37,8 @@ ybm cluster create
     --credentials=username=anonymous,password=password123
     --cloud-type=[AWS or GCP]
     --cluster-type=[SYNCHRONOUS or GEO_PARTITIONED]
-    --node-config=num_cores=2
-    --region-info=region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name>
+    --node-config=num-cores=<num-cores>,disk-size-gb=<disk-size-gb>
+    --region-info=region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>
     --cluster-tier=[FREE or PAID]
     --fault-tolerance=[NONE or ZONE or Region]
     --database-track=[STABLE or PREVIEW]
@@ -46,18 +46,18 @@ ybm cluster create
 
 ### Network Allow List
 ```sh
-ybm network_allow_list create
+ybm network-allow-list create
      --name=admins
      --description="admin allow list"
-     --ip_addr=0.0.0.0/12, 1.1.1.1/12
+     --ip-addr=0.0.0.0/12, 1.1.1.1/12
 ```
 
 ### Read Replica
 ```sh
-ybm read_replica create
-     --replica=num_cores=<region-num_cores>,memory_mb=<memory_mb>,disk_size_gb=<disk_size_gb>,code=<GCP or AWS>,region=<region>,num_nodes=<num_nodes>,vpc=<vpc_name>,num_replicas=<num_replicas>,multi_zone=<multi_zone>
+ybm read-replica create
+     --replica=num-cores=<num-cores>,memory-mb=<memory-mb>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>
 ```
-Additional replica can becreated by repeating the `replica` flag but each replic must be in a distinct region. 
+Additional replica can becreated by repeating the `replica` flag but each replica must be in a distinct region. 
 
 ### VPC
 ```sh
@@ -71,14 +71,14 @@ ybm vpc create
 ybm vpc create
     --name=demo-vpc
     --cloud=GCP
-    --region=us-west1,uswest2
+    --region=us-west1,us-west2
     --cidr=10.0.0.0/18,12.0.0.0/18
 ```
 
 
 ### VPC Peering
 ```sh
-ybm vpc_peering create
+ybm vpc-peering create
     --name=demo-peer
     --vpc-name=demo-vpc
     --cloud=GCP
@@ -91,7 +91,7 @@ ybm vpc_peering create
 ### CDC Sink
 
 ```sh
-ybm cdc_sink create
+ybm cdc-sink create
     --name=sink-2 
     --hostname=kafka.self.us 
     --auth-type=BASIC 
@@ -101,18 +101,18 @@ ybm cdc_sink create
 ```
 
 ```sh
-./ybm cdc_sink get
+./ybm cdc-sink get
     --name=sink-2
 ```
 
 ```sh
-./ybm cdc_sink update
+./ybm cdc-sink update
     --name=sink-2 
     --new-name=new-sink-2
 ```
 
 ```sh
-./ybm cdc_sink delete
+./ybm cdc-sink delete
     --name=sink-2 
 ```
 
