@@ -21,8 +21,8 @@ var nalDescription string
 var nalIpAddrs []string
 
 var NalCmd = &cobra.Command{
-	Use:   "network_allow_list",
-	Short: "network_allow_list",
+	Use:   "network-allow-list",
+	Short: "network-allow-list",
 	Long:  "Network Allow list commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
@@ -39,7 +39,7 @@ func findNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (y
 }
 
 var getNetworkAllowListCmd = &cobra.Command{
-	Use:   "network_allow_list",
+	Use:   "network-allow-list",
 	Short: "Get network allow list in YugabyteDB Managed",
 	Long:  "Get network allow list in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -159,8 +159,8 @@ func init() {
 	createNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
 	createNetworkAllowListCmd.MarkFlagRequired("name")
 	createNetworkAllowListCmd.Flags().StringVarP(&nalDescription, "description", "d", "", "Description of the Network Allow List")
-	createNetworkAllowListCmd.Flags().StringSliceVarP(&nalIpAddrs, "ip_addr", "i", []string{}, "IP addresses included in the Network Allow List")
-	createNetworkAllowListCmd.MarkFlagRequired("ip_addr")
+	createNetworkAllowListCmd.Flags().StringSliceVarP(&nalIpAddrs, "ip-addr", "i", []string{}, "IP addresses included in the Network Allow List")
+	createNetworkAllowListCmd.MarkFlagRequired("ip-addr")
 
 	NalCmd.AddCommand(deleteNetworkAllowListCmd)
 	deleteNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")

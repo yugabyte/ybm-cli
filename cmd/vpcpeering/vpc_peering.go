@@ -18,8 +18,8 @@ import (
 )
 
 var VPCPeeringCmd = &cobra.Command{
-	Use:   "vpc_peering",
-	Short: "vpc_peering",
+	Use:   "vpc-peering",
+	Short: "vpc-peering",
 	Long:  "VPC Peerings commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

@@ -136,7 +136,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
 	for _, regionInfo := range regionInfoList {
-		numNodes, _ := strconv.ParseInt(regionInfo["num_nodes"], 10, 32)
+		numNodes, _ := strconv.ParseInt(regionInfo["num-nodes"], 10, 32)
 		regionNodes := int32(numNodes)
 		region := regionInfo["region"]
 		totalNodes += int(regionNodes)
@@ -212,11 +212,11 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 
 	if cmd.Flags().Changed("node-config") {
 		nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-		numCores := nodeConfig["num_cores"]
+		numCores := nodeConfig["num-cores"]
 
 		clusterInfo.NodeInfo.SetNumCores(int32(numCores))
 
-		if diskSize, ok := nodeConfig["disk_size_gb"]; ok {
+		if diskSize, ok := nodeConfig["disk-size-gb"]; ok {
 			diskSizeGb = int32(diskSize)
 		}
 
