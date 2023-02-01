@@ -56,7 +56,7 @@ var unassignClusterCmd = &cobra.Command{
 			}
 		}
 		if !nalFound {
-			logrus.Errorln("The allow list %s is not associated with the cluster %s", formatter.Colorize(newNetworkAllowListName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			logrus.Errorf("The allow list %s is not associated with the cluster %s", formatter.Colorize(newNetworkAllowListName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 		}
 
 		_, r, err = authApi.EditClusterNetworkAllowLists(clusterId, allowListIds).Execute()
