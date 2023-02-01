@@ -26,8 +26,8 @@ func printCdcStreamOutput(resp ybmclient.CDCStreamResponse) {
 }
 
 var CDCStreamCmd = &cobra.Command{
-	Use:   "cdc_stream",
-	Short: "cdc_stream",
+	Use:   "cdc-stream",
+	Short: "cdc-stream",
 	Long:  "CDC stream commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

@@ -52,9 +52,9 @@ var createClusterCmd = &cobra.Command{
 						if len(strings.TrimSpace(val)) != 0 {
 							regionInfoMap["region"] = val
 						}
-					case "num_nodes":
+					case "num-nodes":
 						if len(strings.TrimSpace(val)) != 0 {
-							regionInfoMap["num_nodes"] = val
+							regionInfoMap["num-nodes"] = val
 						}
 					case "vpc":
 						if len(strings.TrimSpace(val)) != 0 {
@@ -67,7 +67,7 @@ var createClusterCmd = &cobra.Command{
 					logrus.Errorln("Region not specified in region info")
 					return
 				}
-				if _, ok := regionInfoMap["num_nodes"]; !ok {
+				if _, ok := regionInfoMap["num-nodes"]; !ok {
 					logrus.Errorln("Number of nodes not specified in region info")
 					return
 				}
@@ -78,7 +78,7 @@ var createClusterCmd = &cobra.Command{
 
 		if cmd.Flags().Changed("node-config") {
 			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-			if _, ok := nodeConfig["num_cores"]; !ok {
+			if _, ok := nodeConfig["num-cores"]; !ok {
 				logrus.Errorln("Number of cores not specified in node config")
 				return
 			}
@@ -133,9 +133,9 @@ func init() {
 
 	createClusterCmd.Flags().String("cloud-type", "", "The cloud provider where database needs to be deployed. AWS or GCP.")
 	createClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
-	createClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes.")
+	createClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")
 	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs
-	region=<region-name>,num_nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num_nodes are mandatory, vpc is optional.`)
+	region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified.`)
 	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
 	createClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
