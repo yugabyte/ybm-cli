@@ -119,15 +119,40 @@ var updateClusterCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
+		clusterData := []ybmclient.ClusterData{resp.GetData()}
+
+		msg := fmt.Sprintf("The cluster %s is being updated", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "EDIT_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1500)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The cluster %s has been updated\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
+			if err != nil {
+				logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", r)
+				return
+			}
+			clusterData = respC.GetData()
+		} else {
+			fmt.Println(msg)
+		}
+
 		clustersCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewClusterFormat(viper.GetString("output")),
 		}
 
-		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
+		formatter.ClusterWrite(clustersCtx, clusterData)
 
-		fmt.Printf("The cluster %s is being updated\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-		authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "EDIT_CLUSTER", []string{"FAILED", "SUCCEEDED"}, "The cluster is being updated", 1500)
 	},
 }
 

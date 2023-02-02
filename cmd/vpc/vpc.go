@@ -121,14 +121,39 @@ var createVpcCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
+		vpcID := resp.Data.GetInfo().Id
+		vpcData := []ybmclient.SingleTenantVpcDataResponse{resp.GetData()}
+
+		msg := fmt.Sprintf("The VPC %s is being created", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(vpcID, "", "CREATE_VPC", []string{"FAILED", "SUCCEEDED"}, msg, 2400)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The VPC %s has been created\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
+
+			vpcListRequest := authApi.ListSingleTenantVpcsByName(vpcName)
+			respC, r, err := vpcListRequest.Execute()
+			if err != nil {
+				logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", r)
+				return
+			}
+			vpcData = respC.GetData()
+		} else {
+			fmt.Println(msg)
+		}
 		vpcCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewVPCFormat(viper.GetString("output")),
 		}
-
-		formatter.VPCWrite(vpcCtx, []ybmclient.SingleTenantVpcDataResponse{resp.GetData()})
-
-		fmt.Printf("The VPC %s is being created\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
+		formatter.VPCWrite(vpcCtx, vpcData)
 
 	},
 }
@@ -161,8 +186,22 @@ var deleteVpcCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("The VPC %s is being deleted\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The VPC %s is being deleted", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
 
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(vpcId, "", "DELETE_VPC", []string{"FAILED", "SUCCEEDED"}, msg, 2400)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The VPC %s has been deleted\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
+			return
+		}
+		fmt.Println(msg)
 	},
 }
 

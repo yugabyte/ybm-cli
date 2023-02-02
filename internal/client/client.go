@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/theckman/yacspin"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	"golang.org/x/exp/slices"
 )
@@ -415,6 +415,10 @@ func (a *AuthApiClient) GetVpcNameById(vpcId string) (string, error) {
 	return vpcNameResp.GetData().Spec.Name, nil
 }
 
+func (a *AuthApiClient) GetVpcPeering(vpcPeeringID string) ybmclient.ApiGetVpcPeeringRequest {
+	return a.ApiClient.NetworkApi.GetVpcPeering(a.ctx, a.AccountID, a.ProjectID, vpcPeeringID)
+}
+
 func (a *AuthApiClient) CreateVpcPeering() ybmclient.ApiCreateVpcPeeringRequest {
 	return a.ApiClient.NetworkApi.CreateVpcPeering(a.ctx, a.AccountID, a.ProjectID)
 }
@@ -435,6 +439,10 @@ func (a *AuthApiClient) DeleteNetworkAllowList(allowListId string) ybmclient.Api
 }
 func (a *AuthApiClient) ListNetworkAllowLists() ybmclient.ApiListNetworkAllowListsRequest {
 	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) GetBackup(backupID string) ybmclient.ApiGetBackupRequest {
+	return a.ApiClient.BackupApi.GetBackup(a.ctx, a.AccountID, a.ProjectID, backupID)
 }
 
 func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
@@ -590,72 +598,61 @@ func (a *AuthApiClient) ListTasks() ybmclient.ApiListTasksRequest {
 }
 
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
-	var currentStatus string
 	var taskList ybmclient.TaskListResponse
 	var resp *http.Response
 	var err error
 
-	cfg := yacspin.Config{
-		Frequency:         100 * time.Millisecond,
-		Colors:            []string{"fgYellow"},
-		CharSet:           yacspin.CharSets[11],
-		Suffix:            " ",
-		SuffixAutoColon:   true,
-		Message:           "...",
-		StopCharacter:     "✓",
-		StopColors:        []string{"fgGreen"},
-		StopMessage:       "Operation succeeded",
-		StopFailCharacter: "✗",
-		StopFailColors:    []string{"fgRed"},
-		StopFailMessage:   "Operation Failed",
-	}
-
-	s, err := yacspin.New(cfg)
-	if err != nil {
-		return "", fmt.Errorf("failed to make spinner from struct: %v", err)
-	}
-
+	currentStatus := "UNKNOW"
+	output := fmt.Sprintf(" %s: %s", message, currentStatus)
+	s := spinner.New(spinner.CharSets[36], 300*time.Millisecond)
+	s.Color("green", "bold")
 	// start animating the spinner
-	if err := s.Start(); err != nil {
-		return "", fmt.Errorf("failed to start spinner: %v", err)
-	}
+	s.Start()
+	s.Suffix = " " + output
+	s.FinalMSG = ""
 	defer s.Stop()
-
 	timeout := time.After(time.Duration(timeOutInSec) * time.Second)
 	checkEveryInSec := time.Tick(2 * time.Second)
 
 	for {
 		select {
 		case <-timeout:
-			s.StopFail()
-			return "", fmt.Errorf("waiting for update from Api timeout")
+			s.Stop()
+			return "", fmt.Errorf("wait timeout, operation could still be on-going")
 		case <-a.ctx.Done():
-			s.StopFail()
-			return "", fmt.Errorf("receive interrupt signal")
+			s.Stop()
+			return "", fmt.Errorf("receive interrupt signal, operation could still be on-going")
 		case <-checkEveryInSec:
-			output := ""
-			taskList, resp, err = a.ListTasks().EntityId(entityId).EntityType(entityType).ProjectId(a.ProjectID).TaskType(taskType).Execute()
+			apiRequest := a.ListTasks().TaskType(taskType).ProjectId(a.ProjectID).EntityId(entityId).Limit(1)
+			//Sometime the api do not need any entity type, for example VPC, VPC_PEERING
+			if len(entityType) > 0 {
+				apiRequest.EntityType(entityType)
+			}
+			taskList, resp, err = apiRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", resp)
-				return "", fmt.Errorf("error when calling `BackupApi.CreateBackup`: %s", GetApiErrorDetails(err))
+				return "", fmt.Errorf("error when calling `TaskApi.ListTasks`: %s", GetApiErrorDetails(err))
 			}
 
-			if _, ok := taskList.GetDataOk(); ok {
+			if v, ok := taskList.GetDataOk(); ok && v != nil {
 				c := taskList.GetData()
-				currentStatus = c[0].Info.GetState()
+				if len(c) > 0 {
+					if status, ok := c[0].GetInfoOk(); ok {
+						currentStatus = status.GetState()
+					}
+					output = fmt.Sprintf(" %s: %s", message, currentStatus)
+					if taskProgressInfo, _ := c[0].Info.GetTaskProgressInfoOk(); ok && taskProgressInfo != nil {
 
-				taskProgressInfo, _ := c[0].Info.GetTaskProgressInfoOk()
-				output += message
-				for index, action := range taskProgressInfo.GetActions() {
-					output = output + ". Task " + strconv.Itoa(index+1) + ": " + action.GetName() + " " + strconv.Itoa(int(action.GetPercentComplete())) + "% completed"
+						for index, action := range taskProgressInfo.GetActions() {
+							output = output + "\n" + ". Task " + strconv.Itoa(index+1) + ": " + action.GetName() + " " + strconv.Itoa(int(action.GetPercentComplete())) + "% completed"
+						}
+					}
 				}
 			}
-
-			s.Message(output)
+			s.Suffix = output
 			if slices.Contains(completionStatus, currentStatus) {
 				return currentStatus, nil
 			}
-
 		}
 	}
 

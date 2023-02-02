@@ -33,21 +33,47 @@ var pauseClusterCmd = &cobra.Command{
 			logrus.Error(err)
 			return
 		}
+
 		resp, r, err := authApi.PauseCluster(clusterID).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `ClusterApi.PauseCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
+		clusterData := []ybmclient.ClusterData{resp.GetData()}
+
+		msg := fmt.Sprintf("The cluster %s is being paused", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "PAUSE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 360)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The cluster %s has been paused\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
+			if err != nil {
+				logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", r)
+				return
+			}
+			clusterData = respC.GetData()
+		} else {
+			fmt.Println(msg)
+		}
+
 		clustersCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewClusterFormat(viper.GetString("output")),
 		}
 
-		formatter.ClusterWrite(clustersCtx, []ybmclient.ClusterData{resp.GetData()})
+		formatter.ClusterWrite(clustersCtx, clusterData)
 
-		msg := fmt.Sprintf("The cluster %s is being paused", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-		authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "PAUSE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 240)
 	},
 }
 

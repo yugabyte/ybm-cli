@@ -87,7 +87,23 @@ var restoreBackupCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		fmt.Printf("The backup %v is being restored onto the cluster %v", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Backup %v is being restored onto the cluster %v", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESTORE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 1500)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("Backup %v has been restored onto the cluster %v\n", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			return
+		} else {
+			fmt.Println(msg)
+		}
 	},
 }
 
@@ -132,6 +148,32 @@ var createBackupCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", response)
 			return
 		}
+		backupID := backupResp.GetData().Info.Id
+
+		msg := fmt.Sprintf("The backup for cluster %s is being created", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(*backupID, "BACKUP", "CREATE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 1500)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The backup for cluster %s has been created\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+			respC, r, err := authApi.GetBackup(*backupID).Execute()
+			if err != nil {
+				logrus.Errorf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", r)
+				return
+			}
+			backupResp = respC
+		} else {
+			fmt.Println(msg)
+		}
 
 		backupsCtx := formatter.Context{
 			Output: os.Stdout,
@@ -139,8 +181,6 @@ var createBackupCmd = &cobra.Command{
 		}
 
 		formatter.BackupWrite(backupsCtx, []ybmclient.BackupData{backupResp.GetData()})
-
-		fmt.Printf("The backup for cluster %s is being created\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -165,7 +205,24 @@ var deleteBackupCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Backup %s was queued for deletion.", formatter.Colorize(backupID, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The backup %s is being deleted", formatter.Colorize(backupID, formatter.GREEN_COLOR))
+
+		//Seems delete backup do not yet create any task, not sure it's by design or not.
+		// if viper.GetBool("wait") {
+		// 	returnStatus, err := authApi.WaitForTaskCompletion(backupID, "BACKUP", "DELETE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 30)
+		// 	if err != nil {
+		// 		logrus.Errorf("error when getting task status: %s", err)
+		// 		return
+		// 	}
+		// 	if returnStatus != "SUCCEEDED" {
+		// 		logrus.Errorf("Operation failed with error: %s", returnStatus)
+		// 		return
+		// 	}
+		// 	fmt.Printf("The backup %s has been deleted\n", formatter.Colorize(backupID, formatter.GREEN_COLOR))
+		// 	return
+
+		// }
+		fmt.Println(msg)
 	},
 }
 
