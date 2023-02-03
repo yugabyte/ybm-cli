@@ -205,7 +205,7 @@ var deleteBackupCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("The backup %s is being queued for deletion.\n", formatter.Colorize(backupID, formatter.GREEN_COLOR)))
+		fmt.Printf("The backup %s is being queued for deletion.\n", formatter.Colorize(backupID, formatter.GREEN_COLOR))
 	},
 }
 
