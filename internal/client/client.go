@@ -43,12 +43,11 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	configuration := ybmclient.NewConfiguration()
 	//Configure the client
 
-	url, err := parseURL(viper.GetString("host"))
+	url, err := ParseURL(viper.GetString("host"))
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-
 	configuration.Host = url.Host
 	configuration.Scheme = url.Scheme
 	apiClient := ybmclient.NewAPIClient(configuration)
@@ -726,13 +725,16 @@ func getAPIError(b []byte) *ybmclient.ApiError {
 	return apiError
 }
 
-func parseURL(host string) (*url.URL, error) {
-	endpoint, err := url.Parse(host)
+func ParseURL(host string) (*url.URL, error) {
+	if strings.HasPrefix(strings.ToLower(host), "http://") {
+		logrus.Warnf("you are using insecure api endpoint %s", host)
+	} else if !strings.HasPrefix(strings.ToLower(host), "https://") {
+		host = "https://" + host
+	}
+
+	endpoint, err := url.ParseRequestURI(host)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse ybm server url (%s): %w", host, err)
-	}
-	if endpoint.Scheme == "" {
-		endpoint.Scheme = "https"
 	}
 	return endpoint, err
 }
