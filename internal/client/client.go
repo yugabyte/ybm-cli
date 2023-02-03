@@ -18,6 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	"golang.org/x/exp/slices"
 )
@@ -443,6 +444,31 @@ func (a *AuthApiClient) ListNetworkAllowLists() ybmclient.ApiListNetworkAllowLis
 
 func (a *AuthApiClient) GetBackup(backupID string) ybmclient.ApiGetBackupRequest {
 	return a.ApiClient.BackupApi.GetBackup(a.ctx, a.AccountID, a.ProjectID, backupID)
+}
+
+func (a *AuthApiClient) GetNetworkAllowListIdByName(networkAllowListName string) (string, error) {
+	nalResp, resp, err := a.ListNetworkAllowLists().Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return "", err
+	}
+	nalData, err := util.FindNetworkAllowList(nalResp.Data, networkAllowListName)
+
+	if err != nil {
+		return "", err
+	}
+
+	return nalData.Info.GetId(), nil
+
+}
+
+func (a *AuthApiClient) EditClusterNetworkAllowLists(clusterId string, allowListIds []string) ybmclient.ApiEditClusterNetworkAllowListsRequest {
+	return a.ApiClient.ClusterApi.EditClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId).RequestBody(allowListIds)
+}
+
+func (a *AuthApiClient) ListClusterNetworkAllowLists(clusterId string) ybmclient.ApiListClusterNetworkAllowListsRequest {
+	return a.ApiClient.ClusterApi.ListClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
 func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
