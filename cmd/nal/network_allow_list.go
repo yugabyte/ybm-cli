@@ -30,7 +30,7 @@ var NalCmd = &cobra.Command{
 }
 
 var getNetworkAllowListCmd = &cobra.Command{
-	Use:   "network-allow-list",
+	Use:   "get",
 	Short: "Get network allow list in YugabyteDB Managed",
 	Long:  "Get network allow list in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
