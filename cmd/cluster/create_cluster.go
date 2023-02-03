@@ -109,7 +109,7 @@ var createClusterCmd = &cobra.Command{
 		msg := fmt.Sprintf("The cluster %s is being created", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 2400)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
 				logrus.Errorf("error when getting task status: %s", err)
 				return

@@ -90,7 +90,7 @@ var restoreBackupCmd = &cobra.Command{
 		msg := fmt.Sprintf("Backup %v is being restored onto the cluster %v", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESTORE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 1500)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESTORE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Errorf("error when getting task status: %s", err)
 				return
@@ -153,7 +153,7 @@ var createBackupCmd = &cobra.Command{
 		msg := fmt.Sprintf("The backup for cluster %s is being created", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(*backupID, "BACKUP", "CREATE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 1500)
+			returnStatus, err := authApi.WaitForTaskCompletion(*backupID, "BACKUP", "CREATE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Errorf("error when getting task status: %s", err)
 				return
@@ -205,24 +205,7 @@ var deleteBackupCmd = &cobra.Command{
 			return
 		}
 
-		msg := fmt.Sprintf("The backup %s is being deleted", formatter.Colorize(backupID, formatter.GREEN_COLOR))
-
-		//Seems delete backup do not yet create any task, not sure it's by design or not.
-		// if viper.GetBool("wait") {
-		// 	returnStatus, err := authApi.WaitForTaskCompletion(backupID, "BACKUP", "DELETE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 30)
-		// 	if err != nil {
-		// 		logrus.Errorf("error when getting task status: %s", err)
-		// 		return
-		// 	}
-		// 	if returnStatus != "SUCCEEDED" {
-		// 		logrus.Errorf("Operation failed with error: %s", returnStatus)
-		// 		return
-		// 	}
-		// 	fmt.Printf("The backup %s has been deleted\n", formatter.Colorize(backupID, formatter.GREEN_COLOR))
-		// 	return
-
-		// }
-		fmt.Println(msg)
+		fmt.Printf("The backup %s is being queued for deletion.\n", formatter.Colorize(backupID, formatter.GREEN_COLOR)))
 	},
 }
 

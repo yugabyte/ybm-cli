@@ -45,7 +45,7 @@ var resumeClusterCmd = &cobra.Command{
 		msg := fmt.Sprintf("The cluster %s is being resumed", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESUME_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 360)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESUME_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Errorf("error when getting task status: %s", err)
 				return
