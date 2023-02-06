@@ -95,8 +95,7 @@ var createCdcStreamCmd = &cobra.Command{
 		tables, _ := cmd.Flags().GetStringArray("tables")
 		snapshotExistingData, _ := cmd.Flags().GetBool("snapshot-existing-data")
 		kafkaPrefix, _ := cmd.Flags().GetString("kafka-prefix")
-		logrus.Errorln(tables)
-		return
+
 		cdcStreamSpec := ybmclient.CdcStreamSpec{
 			Name:                 cdcStreamName,
 			CdcSinkId:            sinkId,
