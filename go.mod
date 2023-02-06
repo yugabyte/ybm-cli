@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
+	github.com/briandowns/spinner v1.21.0
 	github.com/enescakir/emoji v1.0.0
 	github.com/fatih/color v1.14.1
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
@@ -15,6 +16,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230128004341-7bd09f253ed8
+	golang.org/x/exp v0.0.0-20230203172020-98cc5a0785f9
 	gotest.tools/v3 v3.4.0
 )
 
@@ -48,6 +50,7 @@ require (
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
 	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
