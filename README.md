@@ -5,7 +5,7 @@ A CLI implementation for YB Managed.
 This CLI support 3 possibles configurations: 
 * Passing values as flags 
   ```shell
-  ybm --apiKey AWERDFSSS --host cloud.yugabyte.com get cluster  
+  ybm --apiKey AWERDFSSS --host cloud.yugabyte.com cluster get
   ```
 * Using a configuration file called `.ybm-cli.yaml` under your `$HOME` directory.
   You can use the command `ybm configure` to help to setup the file
