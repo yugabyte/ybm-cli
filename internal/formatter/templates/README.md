@@ -1,11 +1,11 @@
-## YugabyteDB Licensing
+We are using a modified version of templates package from the docker-cli project ([from here](https://github.com/docker/cli/blob/master/templates/templates.go)). This package is available under the Apache 2.0 License which is available below.
 
-Source code in this repository is variously licensed under the Apache License 2.0 and BSD license. A copy of the Apache License 2.0 is available below.
+
 
 
                                  Apache License
                            Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+                        https://www.apache.org/licenses/
 
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
@@ -180,24 +180,13 @@ Source code in this repository is variously licensed under the Apache License 2.
 
    END OF TERMS AND CONDITIONS
 
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright 2022-present Yugabyte, Inc.
+   Copyright 2013-2017 Docker, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+       https://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
