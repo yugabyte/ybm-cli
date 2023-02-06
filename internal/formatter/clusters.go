@@ -114,6 +114,9 @@ func (c *ClusterContext) totalResource(resource int32) int32 {
 // clusterHealthStateToEmoji return emoji based on cluster health state
 // See http://www.unicode.org/emoji/charts/emoji-list.html#1f49a
 func clusterHealthStateToEmoji(healthState ybmclient.ClusterHealthState) string {
+
+	// Windows terminal do not support emoji
+	// So we return directly the healthstate
 	if runtime.GOOS == "windows" {
 		return string(healthState)
 	}
