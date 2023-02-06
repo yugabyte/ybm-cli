@@ -173,19 +173,44 @@ var createVpcPeeringCmd = &cobra.Command{
 			return
 		}
 
+		vpcPeeringID := vpcPeeringResp.GetData().Info.Id
+
+		msg := fmt.Sprintf("The VPC Peering %s is being created", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(ybVpcId, "", "CREATE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The VPC Peering %s has been created\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
+
+			vpcPeeringResp, response, err = authApi.GetVpcPeering(vpcPeeringID).Execute()
+			if err != nil {
+				logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Errorf("Full HTTP response: %v", response)
+				return
+			}
+
+		} else {
+			fmt.Println(msg)
+		}
+
 		vpcPeeringCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewVPCPeeringFormat(viper.GetString("output")),
 		}
 
 		formatter.VPCPeeringWrite(vpcPeeringCtx, []ybmclient.VpcPeeringData{vpcPeeringResp.GetData()})
-
-		fmt.Printf("The VPC Peering %s is being created\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 	},
 }
 
 var deleteVpcPeeringCmd = &cobra.Command{
-	Use:   "detele",
+	Use:   "delete",
 	Short: "Delete VPC peering in YugabyteDB Managed",
 	Long:  "Delete VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -212,6 +237,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 			return
 		}
 		vpcPeeringId := vpcPeering.Info.Id
+		ybvpcID := vpcPeering.Spec.InternalYugabyteVpcId
 
 		response, err := authApi.DeleteVpcPeering(vpcPeeringId).Execute()
 		if err != nil {
@@ -219,7 +245,22 @@ var deleteVpcPeeringCmd = &cobra.Command{
 			logrus.Errorf("Full HTTP response: %v", response)
 			return
 		}
-		fmt.Printf("VPC peering %s was queued for termination.\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("VPC peering %s is being terminated", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(ybvpcID, "", "DELETE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("VPC peering %s has been terminated.\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
+			return
+		}
+		fmt.Println(msg)
 	},
 }
 

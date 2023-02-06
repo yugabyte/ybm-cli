@@ -59,7 +59,7 @@ var getCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		resp, r, err := authApi.GetCdcStream(clusterID, cdcStreamID).Execute()
+		resp, r, err := authApi.GetCdcStream(cdcStreamID, clusterID).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)

@@ -228,6 +228,29 @@ var createReadReplicaCmd = &cobra.Command{
 			return
 		}
 
+		msg := fmt.Sprintf("Read Replica is being created for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("Read Replica has been created for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
+			if err != nil {
+				logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", r)
+				return
+			}
+		} else {
+			fmt.Println(msg)
+		}
 		printReadReplicaOutput(resp)
 	},
 }
@@ -274,7 +297,29 @@ var updateReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
+		msg := fmt.Sprintf("Read Replica is being updated for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "EDIT_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("Read Replica has been updated for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
+			if err != nil {
+				logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", r)
+				return
+			}
+		} else {
+			fmt.Println(msg)
+		}
 		printReadReplicaOutput(resp)
 	},
 }
@@ -301,7 +346,22 @@ var deleteReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		fmt.Printf("All read replica sucessfully scheduled for deletion for cluster %s \n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Read Replica is being deleted for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "DELETE_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("All Read Replica has been deleted for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			return
+		}
+		fmt.Printf("All Read Replica has been deleted for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 	},
 }
