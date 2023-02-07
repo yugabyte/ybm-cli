@@ -15,7 +15,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
-	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20221018202914-9c176e4ea750
+	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230207224135-6e1028d8c2a3
 	golang.org/x/exp v0.0.0-20230203172020-98cc5a0785f9
 	gotest.tools/v3 v3.4.0
 )

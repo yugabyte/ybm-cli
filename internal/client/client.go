@@ -455,6 +455,10 @@ func (a *AuthApiClient) ListNetworkAllowLists() ybmclient.ApiListNetworkAllowLis
 	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID)
 }
 
+func (a *AuthApiClient) GetGreetings() ybmclient.ApiGetGreetingsRequest {
+	return a.ApiClient.GreetingsApi.GetGreetings(a.ctx)
+}
+
 func (a *AuthApiClient) GetBackup(backupID string) ybmclient.ApiGetBackupRequest {
 	return a.ApiClient.BackupApi.GetBackup(a.ctx, a.AccountID, a.ProjectID, backupID)
 }

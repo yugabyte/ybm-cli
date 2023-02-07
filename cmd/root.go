@@ -24,6 +24,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cdcsink"
 	"github.com/yugabyte/ybm-cli/cmd/cdcstream"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
+	"github.com/yugabyte/ybm-cli/cmd/greet"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/readreplica"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
@@ -101,6 +102,7 @@ func init() {
 	rootCmd.AddCommand(readreplica.ReadReplicaCmd)
 	rootCmd.AddCommand(vpc.VPCCmd)
 	rootCmd.AddCommand(vpcpeering.VPCPeeringCmd)
+	rootCmd.AddCommand(greet.GreetCmd)
 	rootCmd.AddCommand(configureCmd)
 
 }

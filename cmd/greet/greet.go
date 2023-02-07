@@ -1,35 +1,41 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package greet
 
 import (
-	"context"
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 )
 
 // greetCmd represents the greet command
-var greetCmd = &cobra.Command{
+var GreetCmd = &cobra.Command{
 	Use:   "greet",
 	Short: "Greet the users of YBM CLI",
 	Long:  "Greet the users of YBM CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		apiClient, _ := getApiClient(context.Background())
-		resp, r, err := apiClient.GreetingsApi.GetGreetings(context.Background()).Execute()
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Errorf("could not initiate api client: %s", err.Error())
+			os.Exit(1)
+		}
+		authApi.GetInfo("", "")
+
+		resp, r, err := authApi.GetGreetings().Execute()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `GreetingsApi.GetGreetings`: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 		}
-		prettyPrintJson(resp)
+		fmt.Println(resp.GetData())
 
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(greetCmd)
 
 }
