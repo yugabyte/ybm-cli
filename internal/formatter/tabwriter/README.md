@@ -1,4 +1,4 @@
-We are using a modified version of the tabwriter package ([from here](https://github.com/golang/go/blob/master/src/text/tabwriter/tabwriter.go)). This package is available under the BSD license which is available below.
+This project uses using a modified version of the tabwriter package ([from here](https://github.com/golang/go/blob/master/src/text/tabwriter/tabwriter.go)). This package is available under the BSD license which is available below.
 
 
 

@@ -1,4 +1,4 @@
-We are using a modified version of templates package from the docker-cli project ([from here](https://github.com/docker/cli/blob/master/templates/templates.go)). This package is available under the Apache 2.0 License which is available below.
+This project uses a modified version of templates package from the docker-cli project ([from here](https://github.com/docker/cli/blob/master/templates/templates.go)). This package is available under the Apache 2.0 License which is available below.
 
 
 
