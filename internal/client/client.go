@@ -22,14 +22,19 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"os/signal"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"golang.org/x/exp/slices"
 )
 
 // AuthApiClient is a auth YBM Client
@@ -52,24 +57,23 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	configuration := ybmclient.NewConfiguration()
 	//Configure the client
 
-	url, err := parseURL(viper.GetString("host"))
+	url, err := ParseURL(viper.GetString("host"))
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-
 	configuration.Host = url.Host
 	configuration.Scheme = url.Scheme
 	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
-
+	ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt)
 	return &AuthApiClient{
 		apiClient,
 		"",
 		"",
-		context.Background(),
+		ctx,
 	}, nil
 }
 
@@ -425,6 +429,10 @@ func (a *AuthApiClient) GetVpcNameById(vpcId string) (string, error) {
 	return vpcNameResp.GetData().Spec.Name, nil
 }
 
+func (a *AuthApiClient) GetVpcPeering(vpcPeeringID string) ybmclient.ApiGetVpcPeeringRequest {
+	return a.ApiClient.NetworkApi.GetVpcPeering(a.ctx, a.AccountID, a.ProjectID, vpcPeeringID)
+}
+
 func (a *AuthApiClient) CreateVpcPeering() ybmclient.ApiCreateVpcPeeringRequest {
 	return a.ApiClient.NetworkApi.CreateVpcPeering(a.ctx, a.AccountID, a.ProjectID)
 }
@@ -445,6 +453,35 @@ func (a *AuthApiClient) DeleteNetworkAllowList(allowListId string) ybmclient.Api
 }
 func (a *AuthApiClient) ListNetworkAllowLists() ybmclient.ApiListNetworkAllowListsRequest {
 	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) GetBackup(backupID string) ybmclient.ApiGetBackupRequest {
+	return a.ApiClient.BackupApi.GetBackup(a.ctx, a.AccountID, a.ProjectID, backupID)
+}
+
+func (a *AuthApiClient) GetNetworkAllowListIdByName(networkAllowListName string) (string, error) {
+	nalResp, resp, err := a.ListNetworkAllowLists().Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return "", err
+	}
+	nalData, err := util.FindNetworkAllowList(nalResp.Data, networkAllowListName)
+
+	if err != nil {
+		return "", err
+	}
+
+	return nalData.Info.GetId(), nil
+
+}
+
+func (a *AuthApiClient) EditClusterNetworkAllowLists(clusterId string, allowListIds []string) ybmclient.ApiEditClusterNetworkAllowListsRequest {
+	return a.ApiClient.ClusterApi.EditClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId).RequestBody(allowListIds)
+}
+
+func (a *AuthApiClient) ListClusterNetworkAllowLists(clusterId string) ybmclient.ApiListClusterNetworkAllowListsRequest {
+	return a.ApiClient.ClusterApi.ListClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
 func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
@@ -595,6 +632,70 @@ func (a *AuthApiClient) GetCdcSinkIDBySinkName(cdcSinkName string) (string, erro
 func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsRequest {
 	return a.ApiClient.ClusterApi.GetSupportedCloudRegions(a.ctx)
 }
+func (a *AuthApiClient) ListTasks() ybmclient.ApiListTasksRequest {
+	return a.ApiClient.TaskApi.ListTasks(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
+	var taskList ybmclient.TaskListResponse
+	var resp *http.Response
+	var err error
+
+	currentStatus := "UNKNOW"
+	output := fmt.Sprintf(" %s: %s", message, currentStatus)
+	s := spinner.New(spinner.CharSets[36], 300*time.Millisecond)
+	s.Color("green", "bold")
+	// start animating the spinner
+	s.Start()
+	s.Suffix = " " + output
+	s.FinalMSG = ""
+	defer s.Stop()
+	timeout := time.After(time.Duration(timeOutInSec) * time.Second)
+	checkEveryInSec := time.Tick(2 * time.Second)
+
+	for {
+		select {
+		case <-timeout:
+			s.Stop()
+			return "", fmt.Errorf("wait timeout, operation could still be on-going")
+		case <-a.ctx.Done():
+			s.Stop()
+			return "", fmt.Errorf("receive interrupt signal, operation could still be on-going")
+		case <-checkEveryInSec:
+			apiRequest := a.ListTasks().TaskType(taskType).ProjectId(a.ProjectID).EntityId(entityId).Limit(1)
+			//Sometime the api do not need any entity type, for example VPC, VPC_PEERING
+			if len(entityType) > 0 {
+				apiRequest.EntityType(entityType)
+			}
+			taskList, resp, err = apiRequest.Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", resp)
+				return "", fmt.Errorf("error when calling `TaskApi.ListTasks`: %s", GetApiErrorDetails(err))
+			}
+
+			if v, ok := taskList.GetDataOk(); ok && v != nil {
+				c := taskList.GetData()
+				if len(c) > 0 {
+					if status, ok := c[0].GetInfoOk(); ok {
+						currentStatus = status.GetState()
+					}
+					output = fmt.Sprintf(" %s: %s", message, currentStatus)
+					if taskProgressInfo, _ := c[0].Info.GetTaskProgressInfoOk(); ok && taskProgressInfo != nil {
+
+						for index, action := range taskProgressInfo.GetActions() {
+							output = output + "\n" + ". Task " + strconv.Itoa(index+1) + ": " + action.GetName() + " " + strconv.Itoa(int(action.GetPercentComplete())) + "% completed"
+						}
+					}
+				}
+			}
+			s.Suffix = output
+			if slices.Contains(completionStatus, currentStatus) {
+				return currentStatus, nil
+			}
+		}
+	}
+
+}
 
 func getFromNodeConfig(resource string, numCores int32, nodeConfigList []ybmclient.NodeConfigurationResponseItem) (int32, error) {
 	resourceValue := int32(0)
@@ -638,13 +739,16 @@ func getAPIError(b []byte) *ybmclient.ApiError {
 	return apiError
 }
 
-func parseURL(host string) (*url.URL, error) {
-	endpoint, err := url.Parse(host)
+func ParseURL(host string) (*url.URL, error) {
+	if strings.HasPrefix(strings.ToLower(host), "http://") {
+		logrus.Warnf("you are using insecure api endpoint %s", host)
+	} else if !strings.HasPrefix(strings.ToLower(host), "https://") {
+		host = "https://" + host
+	}
+
+	endpoint, err := url.ParseRequestURI(host)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse ybm server url (%s): %w", host, err)
-	}
-	if endpoint.Scheme == "" {
-		endpoint.Scheme = "https"
 	}
 	return endpoint, err
 }

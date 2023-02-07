@@ -68,8 +68,8 @@ var _ = Describe("Backup", func() {
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(
-				`Created On         Expire On          Clusters                Description        State       Type      Retains\(day\)
-%s   %s   proficient-parrotfish   scdasfdadfasdsad   SUCCEEDED   MANUAL    25`, formatter.FormatDate("2023-01-17T08:31:35.818Z"), formatter.FormatDate("2023-01-17T08:31:35.818Z"))))
+				`ID                                     Created On         Expire On          Clusters                Description        State       Type      Retains\(day\)
+7d08a5c3-8097-48f0-8019-da236e876ab9   %s   %s   proficient-parrotfish   scdasfdadfasdsad   SUCCEEDED   MANUAL    25`, formatter.FormatDate("2023-01-17T08:31:35.818Z"), formatter.FormatDate("2023-01-17T08:31:35.818Z"))))
 			session.Kill()
 		})
 

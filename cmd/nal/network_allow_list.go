@@ -15,13 +15,13 @@
 package nal
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -40,17 +40,8 @@ var NalCmd = &cobra.Command{
 	},
 }
 
-func findNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (ybmclient.NetworkAllowListData, error) {
-	for _, allowList := range nals {
-		if allowList.Spec.Name == nalName {
-			return allowList, nil
-		}
-	}
-	return ybmclient.NetworkAllowListData{}, errors.New("Unable to find NetworkAllowList " + name)
-}
-
 var getNetworkAllowListCmd = &cobra.Command{
-	Use:   "network-allow-list",
+	Use:   "get",
 	Short: "Get network allow list in YugabyteDB Managed",
 	Long:  "Get network allow list in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -72,7 +63,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 
 		respFilter = resp.GetData()
 		if cmd.Flags().Changed("name") {
-			allowList, err := findNetworkAllowList(resp.Data, nalName)
+			allowList, err := util.FindNetworkAllowList(resp.Data, nalName)
 
 			if err != nil {
 				logrus.Error(err)
@@ -146,7 +137,7 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 			return
 		}
 
-		allowList, err := findNetworkAllowList(resp.Data, nalName)
+		allowList, err := util.FindNetworkAllowList(resp.Data, nalName)
 		if err != nil {
 			logrus.Error(err)
 			return

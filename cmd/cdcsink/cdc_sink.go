@@ -104,7 +104,11 @@ var createCdcSinkCmd = &cobra.Command{
 			Kafka:    kafkaSpec,
 		}
 
-		authTypeEnum, _ := ybmclient.NewCdcSinkAuthTypeEnumFromValue(authType)
+		authTypeEnum, err := ybmclient.NewCdcSinkAuthTypeEnumFromValue(authType)
+		if err != nil {
+			logrus.Errorf("Error when getting auth type enum from value: %s", err)
+			return
+		}
 		cdcSinkAuthSpec := ybmclient.NewCdcSinkAuthSpec(*authTypeEnum)
 		cdcSinkAuthSpec.SetUsername(username)
 		cdcSinkAuthSpec.SetPassword(password)

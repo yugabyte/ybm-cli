@@ -63,6 +63,7 @@ func setDefaults() {
 	viper.SetDefault("logLevel", "info")
 	viper.SetDefault("debug", false)
 	viper.SetDefault("no-color", false)
+	viper.SetDefault("wait", false)
 }
 
 func init() {
@@ -78,6 +79,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("logLevel", "l", "", "Select the desired log level format(info). Default to info")
 	rootCmd.PersistentFlags().Bool("debug", false, "Use debug mode, same as --logLevel debug")
 	rootCmd.PersistentFlags().Bool("no-color", false, "Disable colors in output , default to false")
+	rootCmd.PersistentFlags().Bool("wait", false, "Wait until the task is completed, otherwise it will exit immediately, default to false")
 
 	//Bind peristents flags to viper
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
@@ -86,6 +88,7 @@ func init() {
 	viper.BindPFlag("logLevel", rootCmd.PersistentFlags().Lookup("logLevel"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("no-color", rootCmd.PersistentFlags().Lookup("no-color"))
+	viper.BindPFlag("wait", rootCmd.PersistentFlags().Lookup("wait"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

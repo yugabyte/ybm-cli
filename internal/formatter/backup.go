@@ -23,10 +23,10 @@ import (
 )
 
 const (
-	defaultBackupListing   = "table {{.CreatedOn}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.Description}}\t{{.BackupState}}\t{{.BackupType}}\t{{.RetainInDays}}"
+	defaultBackupListing   = "table {{.Id}}\t{{.CreatedOn}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.Description}}\t{{.BackupState}}\t{{.BackupType}}\t{{.RetainInDays}}"
 	backupIdCreateOnHeader = "Created On"
 	backupIdExpireOnHeader = "Expire On"
-	backupIdHeader         = "Backup ID"
+	backupIdHeader         = "ID"
 	backupTypeHeader       = "Type"
 	retainInDaysHeader     = "Retains(day)"
 )
@@ -65,7 +65,7 @@ func BackupWrite(ctx Context, Backups []ybmclient.BackupData) error {
 func NewBackupContext() *BackupContext {
 	BackupCtx := BackupContext{}
 	BackupCtx.Header = SubHeaderContext{
-		"BackupId":     backupIdHeader,
+		"Id":           backupIdHeader,
 		"BackupState":  stateHeader,
 		"BackupType":   backupTypeHeader,
 		"ClusterName":  clustersHeader,
@@ -104,8 +104,8 @@ func (c *BackupContext) Description() string {
 	return ""
 }
 
-func (c *BackupContext) BackupId() string {
-	return c.c.GetSpec().ClusterId
+func (c *BackupContext) Id() string {
+	return *c.c.GetInfo().Id
 }
 
 func (c *BackupContext) BackupState() string {

@@ -20,6 +20,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
@@ -50,8 +51,22 @@ var deleteClusterCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("The cluster %s is scheduled for deletion\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The cluster %s is being deleted", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "DELETE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The cluster %s has been deleted\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			return
+		}
+		fmt.Println(msg)
 	},
 }
 
