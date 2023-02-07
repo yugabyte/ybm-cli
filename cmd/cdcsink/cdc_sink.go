@@ -15,8 +15,8 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-func printCdcSinkOutput(resp ybmclient.CDCSinkResponse) {
-	cdcSinkData := []ybmclient.CdcSinkData{resp.GetData()}
+func printCdcSinkOutput(cdcSinkData []ybmclient.CdcSinkData) {
+
 	cdcSinkCtx := formatter.Context{
 		Output: os.Stdout,
 		Format: formatter.NewCdcSinkFormat(viper.GetString("output")),
@@ -47,21 +47,20 @@ var getCdcSinkCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
+		cdcSinkRequest := authApi.ListCdcSinks()
 		cdcSinkName, _ := cmd.Flags().GetString("name")
-		cdcSinkID, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
-		if err != nil {
-			logrus.Errorf("No Cdc Sink named `%s` found: %v", cdcSinkName, err)
-			return
+		if cdcSinkName != "" {
+			cdcSinkRequest = cdcSinkRequest.Name(cdcSinkName)
 		}
 
-		resp, r, err := authApi.GetCdcSink(cdcSinkID).Execute()
+		resp, r, err := cdcSinkRequest.Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `CdcApi.GetCdcSink`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
-		printCdcSinkOutput(resp)
+		printCdcSinkOutput(resp.GetData())
 	},
 }
 
@@ -111,7 +110,7 @@ var createCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		printCdcSinkOutput(resp)
+		printCdcSinkOutput([]ybmclient.CdcSinkData{resp.GetData()})
 	},
 }
 
@@ -164,7 +163,7 @@ var editCdcSinkCmd = &cobra.Command{
 			return
 		}
 
-		printCdcSinkOutput(resp)
+		printCdcSinkOutput([]ybmclient.CdcSinkData{resp.GetData()})
 	},
 }
 

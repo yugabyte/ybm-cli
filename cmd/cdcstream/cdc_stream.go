@@ -15,8 +15,7 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-func printCdcStreamOutput(resp ybmclient.CDCStreamResponse) {
-	cdcStreamData := []ybmclient.CdcStreamData{resp.GetData()}
+func printCdcStreamOutput(cdcStreamData []ybmclient.CdcStreamData) {
 	cdcStreamCtx := formatter.Context{
 		Output: os.Stdout,
 		Format: formatter.NewCdcStreamFormat(viper.GetString("output")),
@@ -45,27 +44,28 @@ var getCdcStreamCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authApi.GetInfo("", "")
+		cdcStreamRequest := authApi.ListCdcStreamsForAccount()
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterID, err := authApi.GetClusterIdByName(clusterName)
-		if err != nil {
-			logrus.Error(err)
-			return
+		if clusterName != "" {
+			clusterID, err := authApi.GetClusterIdByName(clusterName)
+			if err != nil {
+				logrus.Error(err)
+				return
+			}
+			cdcStreamRequest.ClusterId(clusterID)
 		}
-
 		cdcStreamName, _ := cmd.Flags().GetString("name")
-		cdcStreamID, err := authApi.GetCdcStreamIDByStreamName(cdcStreamName)
-		if err != nil {
-			logrus.Errorf("Error when getting StreamId with the name %s: %v", cdcStreamName, err)
-			return
+		if cdcStreamName != "" {
+			cdcStreamRequest.Name(cdcStreamName)
 		}
 
-		resp, r, err := authApi.GetCdcStream(cdcStreamID, clusterID).Execute()
+		resp, r, err := cdcStreamRequest.Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
-		printCdcStreamOutput(resp)
+		printCdcStreamOutput(resp.GetData())
 	},
 }
 
@@ -112,7 +112,24 @@ var createCdcStreamCmd = &cobra.Command{
 			return
 		}
 
-		printCdcStreamOutput(resp)
+		msg := fmt.Sprintf("The CDC stream %s is being created", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The CDC stream %s has been created\n", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
+		} else {
+			fmt.Println(msg)
+		}
+
+		printCdcStreamOutput([]ybmclient.CdcStreamData{resp.GetData()})
 	},
 }
 
@@ -152,14 +169,38 @@ var editCdcStreamCmd = &cobra.Command{
 			editCdcStreamRequest.SetTables(tables)
 		}
 
-		resp, r, err := authApi.EditCdcStream(clusterID, cdcStreamID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
+		resp, r, err := authApi.EditCdcStream(cdcStreamID, clusterID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `CdcApi.EditCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
 			return
 		}
 
-		printCdcStreamOutput(resp)
+		msg := fmt.Sprintf("The CDC stream %s is being updated", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+
+			if cmd.Flags().Changed("tables") {
+				returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RECONFIGURE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
+				if err != nil {
+					logrus.Errorf("error when getting task status: %s", err)
+					return
+				}
+				if returnStatus != "SUCCEEDED" {
+					logrus.Errorf("Operation failed with error: %s", returnStatus)
+					return
+				}
+			}
+			fmt.Printf("The CDC stream %s has been updated\n", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
+		} else {
+			if cmd.Flags().Changed("tables") {
+				fmt.Println(msg)
+			} else {
+				fmt.Printf("The CDC stream %s has been updated\n", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
+			}
+		}
+
+		printCdcStreamOutput([]ybmclient.CdcStreamData{resp.GetData()})
 	},
 }
 
@@ -187,14 +228,30 @@ var deleteCdcStreamCmd = &cobra.Command{
 			logrus.Errorf("Error when getting StreamId with the name %s: %v", cdcStreamName, err)
 			return
 		}
-		resp, err := authApi.DeleteCdcStream(clusterID, cdcStreamID).Execute()
+		resp, err := authApi.DeleteCdcStream(cdcStreamID, clusterID).Execute()
 		if err != nil {
 			logrus.Errorf("Error when calling `CdcApi.DeleteCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", resp)
 			return
 		}
 
-		fmt.Fprintf(os.Stdout, "CDC stream deleted successfully\n")
+		msg := fmt.Sprintf("The CDC stream %s is being deleted", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "DELETE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
+			if err != nil {
+				logrus.Errorf("error when getting task status: %s", err)
+				return
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Errorf("Operation failed with error: %s", returnStatus)
+				return
+			}
+			fmt.Printf("The CDC stream %s has been deleted\n", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
+		} else {
+			fmt.Println(msg)
+		}
+
 	},
 }
 
