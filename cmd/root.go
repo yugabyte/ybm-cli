@@ -41,8 +41,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "ybm",
 	Short: "ybm is a CLI for YugabyteDB Managed",
-	Long: `ybm is a CLI tool which  helps in managing database infrastructure on YugabyteDB Managed,
-	the fully managed DBaaS offering of YugabteDB.`,
+	Long:  `ybm is a CLI tool which  helps in managing database infrastructure on YugabyteDB Managed, the fully managed DBaaS offering of YugabyteDB.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
