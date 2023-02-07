@@ -50,11 +50,11 @@ dockers:
   build_flag_templates:
   - "--platform=linux/arm64/v8"
 docker_manifests:
-- name_template: "posriniv/test-cli:{{ .Version }}"
+- name_template: "yugabytedb/ybm-cli:{{ .Version }}"
   image_templates:
-  - "posriniv/test-cli:{{ .Version }}-amd64"
-  - "posriniv/test-cli:{{ .Version }}-arm64v8"
-- name_template: "posriniv/test-cli:latest"
+  - "yugabytedb/ybm-cli:{{ .Version }}-amd64"
+  - "yugabytedb/ybm-cli:{{ .Version }}-arm64v8"
+- name_template: "yugabytedb/ybm-cli:latest"
   image_templates:
-  - "posriniv/test-cli:latest-amd64"
-  - "posriniv/test-cli:latest-arm64v8"
+  - "yugabytedb/ybm-cli:latest-amd64"
+  - "yugabytedb/ybm-cli:latest-arm64v8"

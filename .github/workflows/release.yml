@@ -27,7 +27,7 @@ jobs:
           sudo chmod 0400 ~/.ssh/id_ed25519
           git config --global url."git@github.com:".insteadOf https://github.com/
       - name: Docker Login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
