@@ -34,21 +34,18 @@ var resumeClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 		resp, r, err := authApi.ResumeCluster(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.ResumeCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `ClusterApi.ResumeCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		clusterData := []ybmclient.ClusterData{resp.GetData()}
@@ -58,20 +55,17 @@ var resumeClusterCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESUME_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The cluster %s has been resumed\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
-				logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				logrus.Debugf("Full HTTP response: %v", r)
-				return
+				logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 			clusterData = respC.GetData()
 		} else {

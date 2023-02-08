@@ -35,8 +35,7 @@ var createClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
@@ -53,8 +52,7 @@ var createClusterCmd = &cobra.Command{
 				for _, regionInfo := range strings.Split(regionInfoString, ",") {
 					kvp := strings.Split(regionInfo, "=")
 					if len(kvp) != 2 {
-						logrus.Errorln("Incorrect format in region info")
-						return
+						logrus.Fatalln("Incorrect format in region info")
 					}
 					key := kvp[0]
 					val := kvp[1]
@@ -75,12 +73,10 @@ var createClusterCmd = &cobra.Command{
 				}
 
 				if _, ok := regionInfoMap["region"]; !ok {
-					logrus.Errorln("Region not specified in region info")
-					return
+					logrus.Fatalln("Region not specified in region info")
 				}
 				if _, ok := regionInfoMap["num-nodes"]; !ok {
-					logrus.Errorln("Number of nodes not specified in region info")
-					return
+					logrus.Fatalln("Number of nodes not specified in region info")
 				}
 
 				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
@@ -90,15 +86,13 @@ var createClusterCmd = &cobra.Command{
 		if cmd.Flags().Changed("node-config") {
 			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
 			if _, ok := nodeConfig["num-cores"]; !ok {
-				logrus.Errorln("Number of cores not specified in node config")
-				return
+				logrus.Fatalln("Number of cores not specified in node config")
 			}
 		}
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
-			logrus.Errorf("Error while creating cluster spec: %v", err)
-			return
+			logrus.Fatalf("Error while creating cluster spec: %v", err)
 		}
 
 		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentials()
@@ -109,9 +103,8 @@ var createClusterCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `ClusterApi.CreateCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
-			fmt.Fprintf(os.Stderr, "Full HTTP response: %v", r)
-			return
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf("Error when calling `ClusterApi.CreateCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		clusterID := resp.GetData().Info.Id
@@ -122,20 +115,17 @@ var createClusterCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The cluster %s has been created\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
-				logrus.Errorf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				logrus.Debugf("Full HTTP response: %v", r)
-				return
+				logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 			clusterData = respC.GetData()
 		} else {
