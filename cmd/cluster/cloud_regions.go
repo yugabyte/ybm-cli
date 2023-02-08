@@ -31,17 +31,15 @@ var getCloudRegionsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
 		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
 		cloudRegionsResp, resp, err := authApi.GetSupportedCloudRegions().Cloud(cloudProvider).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.GetSupportedCloudRegions`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", resp)
-			return
+			logrus.Fatalf("Error when calling `ClusterApi.GetSupportedCloudRegions`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		cloudRegionData := cloudRegionsResp.GetData()

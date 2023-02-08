@@ -51,8 +51,7 @@ var getCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		cdcStreamRequest := authApi.ListCdcStreamsForAccount()
@@ -60,8 +59,7 @@ var getCdcStreamCmd = &cobra.Command{
 		if clusterName != "" {
 			clusterID, err := authApi.GetClusterIdByName(clusterName)
 			if err != nil {
-				logrus.Error(err)
-				return
+				logrus.Fatal(err)
 			}
 			cdcStreamRequest.ClusterId(clusterID)
 		}
@@ -72,9 +70,8 @@ var getCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := cdcStreamRequest.Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.GetCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `CdcApi.GetCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		printCdcStreamOutput(resp.GetData())
 	},
@@ -87,15 +84,13 @@ var createCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
@@ -118,9 +113,8 @@ var createCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateCdcStream(clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.CreateCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `CdcApi.CreateCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being created", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -128,12 +122,10 @@ var createCdcStreamCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The CDC stream %s has been created\n", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
 		} else {
@@ -151,22 +143,19 @@ var editCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
 		cdcStreamID, err := authApi.GetCdcStreamIDByStreamName(cdcStreamName)
 		if err != nil {
-			logrus.Errorf("Error when getting StreamId with the name %s: %v", cdcStreamName, err)
-			return
+			logrus.Fatalf("Error when getting StreamId with the name %s: %v", cdcStreamName, err)
 		}
 
 		editCdcStreamRequest := ybmclient.NewEditCdcStreamRequest()
@@ -182,9 +171,8 @@ var editCdcStreamCmd = &cobra.Command{
 
 		resp, r, err := authApi.EditCdcStream(cdcStreamID, clusterID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.EditCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `CdcApi.EditCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being updated", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -194,12 +182,10 @@ var editCdcStreamCmd = &cobra.Command{
 			if cmd.Flags().Changed("tables") {
 				returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RECONFIGURE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
 				if err != nil {
-					logrus.Errorf("error when getting task status: %s", err)
-					return
+					logrus.Fatalf("error when getting task status: %s", err)
 				}
 				if returnStatus != "SUCCEEDED" {
-					logrus.Errorf("Operation failed with error: %s", returnStatus)
-					return
+					logrus.Fatalf("Operation failed with error: %s", returnStatus)
 				}
 			}
 			fmt.Printf("The CDC stream %s has been updated\n", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -222,15 +208,13 @@ var deleteCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
@@ -241,9 +225,8 @@ var deleteCdcStreamCmd = &cobra.Command{
 		}
 		resp, err := authApi.DeleteCdcStream(cdcStreamID, clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `CdcApi.DeleteCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", resp)
-			return
+			logrus.Fatalf("Error when calling `CdcApi.DeleteCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being deleted", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -251,12 +234,10 @@ var deleteCdcStreamCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "DELETE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The CDC stream %s has been deleted\n", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
 		} else {

@@ -43,19 +43,17 @@ var getVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		vpcName, _ := cmd.Flags().GetString("name")
 
 		vpcListRequest := authApi.ListSingleTenantVpcsByName(vpcName)
-		resp, r, err := vpcListRequest.Execute()
 
+		resp, r, err := vpcListRequest.Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		// response from `ListClusters`: ClusterListResponse
 		vpcCtx := formatter.Context{
@@ -76,13 +74,11 @@ var createVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Validations
 		if !cmd.Flags().Changed("global-cidr") && !cmd.Flags().Changed("cidr") {
-			fmt.Fprintln(os.Stderr, "Either global-cidr or cidr must be specified")
-			os.Exit(1)
+			logrus.Fatal("Either global-cidr or cidr must be specified")
 		}
 
 		if len(createRegions) != len(createCidrs) {
-			fmt.Fprintln(os.Stderr, "Number of regions and cidrs must be equal")
-			os.Exit(1)
+			logrus.Fatal("Number of regions and cidrs must be equal")
 		}
 
 		vpcName, _ := cmd.Flags().GetString("name")
@@ -91,8 +87,7 @@ var createVpcCmd = &cobra.Command{
 
 		// global CIDR only works with GCP
 		if cloud != "GCP" && cmd.Flags().Changed("global-cidr") {
-			fmt.Fprintln(os.Stderr, "global-cidr is only supported for GCP")
-			os.Exit(1)
+			logrus.Fatal("global-cidr is only supported for GCP")
 		}
 
 		// If non-global CIDR, validate that there are different regions specified
@@ -109,8 +104,7 @@ var createVpcCmd = &cobra.Command{
 				vpcRegionSpec = append(vpcRegionSpec, spec)
 			}
 			if len(regionMap) != len(createRegions) {
-				fmt.Fprintln(os.Stderr, "Regions must be unique")
-				os.Exit(1)
+				logrus.Fatal("Regions must be unique")
 			}
 		}
 
@@ -122,15 +116,13 @@ var createVpcCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		resp, r, err := authApi.CreateVpc().SingleTenantVpcRequest(vpcRequest).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.CreateVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.CreateVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		vpcID := resp.Data.GetInfo().Id
 		vpcData := []ybmclient.SingleTenantVpcDataResponse{resp.GetData()}
@@ -140,21 +132,18 @@ var createVpcCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(vpcID, "", "CREATE_VPC", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The VPC %s has been created\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
 
 			vpcListRequest := authApi.ListSingleTenantVpcsByName(vpcName)
 			respC, r, err := vpcListRequest.Execute()
 			if err != nil {
-				logrus.Errorf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				logrus.Debugf("Full HTTP response: %v", r)
-				return
+				logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 			vpcData = respC.GetData()
 		} else {
@@ -176,25 +165,21 @@ var deleteVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		vpcName, _ := cmd.Flags().GetString("name")
 		if vpcName == "" {
-			logrus.Error("name field is required")
-			os.Exit(1)
+			logrus.Fatal("name field is required")
 		}
 		vpcId, err := authApi.GetVpcIdByName(vpcName)
 		if err != nil {
-			logrus.Errorf("could not fetch VPC ID: %s", err.Error())
-			return
+			logrus.Fatalf("could not fetch VPC ID: %s", err.Error())
 		}
 		r, err := authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.DeleteVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.DeleteVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The VPC %s is being deleted", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
@@ -202,12 +187,10 @@ var deleteVpcCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(vpcId, "", "DELETE_VPC", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The VPC %s has been deleted\n", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
 			return
