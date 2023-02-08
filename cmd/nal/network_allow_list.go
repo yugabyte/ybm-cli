@@ -47,8 +47,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
@@ -56,18 +55,15 @@ var getNetworkAllowListCmd = &cobra.Command{
 		// No option to filter by name :(
 		resp, r, err := authApi.ListNetworkAllowLists().Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		respFilter = resp.GetData()
 		if cmd.Flags().Changed("name") {
 			allowList, err := util.FindNetworkAllowList(resp.Data, nalName)
-
 			if err != nil {
-				logrus.Error(err)
-				return
+				logrus.Fatal(err)
 			}
 
 			respFilter = []ybmclient.NetworkAllowListData{allowList}
@@ -89,8 +85,7 @@ var createNetworkAllowListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		nalSpec := ybmclient.NetworkAllowListSpec{
@@ -101,9 +96,8 @@ var createNetworkAllowListCmd = &cobra.Command{
 
 		resp, r, err := authApi.CreateNetworkAllowList().NetworkAllowListSpec(nalSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		nalCtx := formatter.Context{
@@ -125,16 +119,14 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
 		resp, r, err := authApi.ListNetworkAllowLists().Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.ListNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		allowList, err := util.FindNetworkAllowList(resp.Data, nalName)
@@ -145,9 +137,8 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 
 		r, err = authApi.DeleteNetworkAllowList(allowList.Info.Id).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.DeleteNetworkAllowList`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.DeleteNetworkAllowList`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		fmt.Printf("NetworkAllowList %s successfully deleted\n", formatter.Colorize(nalName, formatter.GREEN_COLOR))
 	},

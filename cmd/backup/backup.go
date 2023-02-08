@@ -42,8 +42,7 @@ var getBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		listBackupRequest := authApi.ListBackups()
@@ -51,16 +50,14 @@ var getBackupCmd = &cobra.Command{
 			clusterName, _ := cmd.Flags().GetString("cluster-name")
 			clusterID, err := authApi.GetClusterIdByName(clusterName)
 			if err != nil {
-				logrus.Error(err)
-				return
+				logrus.Fatal(err)
 			}
 			listBackupRequest = listBackupRequest.ClusterId(clusterID)
 		}
 		resp, r, err := listBackupRequest.Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		backupsCtx := formatter.Context{
 			Output: os.Stdout,
@@ -78,8 +75,7 @@ var restoreBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
@@ -87,8 +83,7 @@ var restoreBackupCmd = &cobra.Command{
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 
 		restoreSpec := ybmclient.NewRestoreSpec()
@@ -97,21 +92,18 @@ var restoreBackupCmd = &cobra.Command{
 
 		_, r, err := authApi.RestoreBackup().RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.RestoreBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `BackupApi.RestoreBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("Backup %v is being restored onto the cluster %v", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RESTORE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("Backup %v has been restored onto the cluster %v\n", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 			return
@@ -128,15 +120,13 @@ var createBackupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 
 		createBackupSpec := *ybmclient.NewBackupSpecWithDefaults()
@@ -156,11 +146,9 @@ var createBackupCmd = &cobra.Command{
 		}
 
 		backupResp, response, err := authApi.CreateBackup().BackupSpec(createBackupSpec).Execute()
-
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.CreateBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", response)
-			return
+			logrus.Fatalf("Error when calling `BackupApi.CreateBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		backupID := backupResp.GetData().Info.Id
 
@@ -169,20 +157,17 @@ var createBackupCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(*backupID, "BACKUP", "CREATE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The backup for cluster %s has been created\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 			respC, r, err := authApi.GetBackup(*backupID).Execute()
 			if err != nil {
-				logrus.Errorf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				logrus.Debugf("Full HTTP response: %v", r)
-				return
+				logrus.Fatalf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 			backupResp = respC
 		} else {
@@ -207,16 +192,14 @@ var deleteBackupCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		response, err := authApi.DeleteBackup(backupID).Execute()
 
 		if err != nil {
-			logrus.Errorf("Error when calling `BackupApi.DeleteBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", response)
-			return
+			logrus.Fatalf("Error when calling `BackupApi.DeleteBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("The backup %s is being queued for deletion.\n", formatter.Colorize(backupID, formatter.GREEN_COLOR))

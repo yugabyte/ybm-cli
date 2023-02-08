@@ -31,8 +31,7 @@ var getInstanceTypesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
@@ -42,9 +41,8 @@ var getInstanceTypesCmd = &cobra.Command{
 		showDisabled, _ := cmd.Flags().GetBool("show-disabled")
 		instanceTypesResp, resp, err := authApi.GetSupportedInstanceTypes(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.GetSupportedInstanceTypes`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", resp)
-			return
+			logrus.Fatalf("Error when calling `ClusterApi.GetSupportedInstanceTypes`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		instanceTypeData := instanceTypesResp.GetData()[cloudRegion]

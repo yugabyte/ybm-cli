@@ -172,20 +172,17 @@ var getReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 		resp, r, err := authApi.ListReadReplicas(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		printReadReplicaOutput(resp)
@@ -200,43 +197,37 @@ var createReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 
 		vpcId, err := authApi.GetClusterVpcById(clusterID)
 		if err != nil {
-			logrus.Errorf("Error while fetching the VPC ID of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
-			return
+			logrus.Fatalf("Error while fetching the VPC ID of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		if vpcId == "" {
-			logrus.Error("The cluster must be deployed in a dedicated VPC to create read replicas")
-			return
+			logrus.Fatal("The cluster must be deployed in a dedicated VPC to create read replicas")
 		}
 
 		primaryClusterCloud, err := authApi.GetClusterCloudById(clusterID)
 		if err != nil {
-			logrus.Errorf("Error while fetching the cloud provider of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
-			return
+			logrus.Fatalf("Error while fetching the cloud provider of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud, vpcId)
 		if err != nil {
-			logrus.Errorf("Error while parsing read replica options: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("Error while parsing read replica options: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
 
 		resp, r, err := authApi.CreateReadReplica(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.CreateReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `ReadReplicaApi.CreateReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("Read Replica is being created for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
@@ -244,20 +235,17 @@ var createReadReplicaCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("Read Replica has been created for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
 			if err != nil {
-				logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				logrus.Debugf("Full HTTP response: %v", r)
-				return
+				logrus.Fatalf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 		} else {
 			fmt.Println(msg)
@@ -273,14 +261,12 @@ var updateReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 		vpcId, err := authApi.GetClusterVpcById(clusterID)
 		if err != nil {
@@ -304,29 +290,25 @@ var updateReadReplicaCmd = &cobra.Command{
 
 		resp, r, err := authApi.EditReadReplicas(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.EditReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `ReadReplicaApi.EditReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("Read Replica is being updated for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "EDIT_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("Read Replica has been updated for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
 			if err != nil {
-				logrus.Errorf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				logrus.Debugf("Full HTTP response: %v", r)
-				return
+				logrus.Fatalf("Error when calling `ReadReplicaApi.ListReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 		} else {
 			fmt.Println(msg)
@@ -342,32 +324,27 @@ var deleteReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 		r, err := authApi.DeleteReadReplica(clusterID).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("Read Replica is being deleted for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "DELETE_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("All Read Replica has been deleted for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 			return

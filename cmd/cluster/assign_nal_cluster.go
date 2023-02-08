@@ -16,7 +16,6 @@ package cluster
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -33,28 +32,24 @@ var assignClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterId, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 		newNetworkAllowListName, _ := cmd.Flags().GetString("network-allow-list")
 		newNetworkAllowListId, err := authApi.GetNetworkAllowListIdByName(newNetworkAllowListName)
 		if err != nil {
-			logrus.Error(err)
-			return
+			logrus.Fatal(err)
 		}
 
 		networkAllowListListResp, r, err := authApi.ListClusterNetworkAllowLists(clusterId).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.ListClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `ClusterApi.ListClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		allowListIds := []string{}
@@ -65,9 +60,8 @@ var assignClusterCmd = &cobra.Command{
 
 		_, r, err = authApi.EditClusterNetworkAllowLists(clusterId, allowListIds).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `ClusterApi.EditClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Debugf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `ClusterApi.EditClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The cluster %s is being assigned the network allow list %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR), formatter.Colorize(newNetworkAllowListName, formatter.GREEN_COLOR))
@@ -75,12 +69,10 @@ var assignClusterCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, "CLUSTER", "EDIT_ALLOW_LIST", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The cluster %s has been assigned the network allow list %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR), formatter.Colorize(newNetworkAllowListName, formatter.GREEN_COLOR))
 

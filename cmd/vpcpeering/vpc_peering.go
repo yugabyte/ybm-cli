@@ -17,7 +17,6 @@ package vpcpeering
 import (
 	"errors"
 	"fmt"
-	"net/http/httputil"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -53,16 +52,14 @@ var getVpcPeeringCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-		resp, r, err := authApi.ListVpcPeerings().Execute()
 
+		resp, r, err := authApi.ListVpcPeerings().Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Errorf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		vpcPeeringCtx := formatter.Context{
@@ -75,8 +72,7 @@ var getVpcPeeringCmd = &cobra.Command{
 		if vpcPeeringName != "" {
 			vpcPeering, findErr := findVpcPeering(resp.Data, vpcPeeringName)
 			if findErr != nil {
-				logrus.Errorf("Error: %s\n", findErr)
-				return
+				logrus.Fatalf("Error: %s\n", findErr)
 			}
 			formatter.VPCPeeringWrite(vpcPeeringCtx, []ybmclient.VpcPeeringData{vpcPeering})
 			return
@@ -101,23 +97,23 @@ var createVpcPeeringCmd = &cobra.Command{
 		if appCloud == "AWS" {
 			appAccountID, _ := cmd.Flags().GetString("app-vpc-account-id")
 			if appAccountID == "" {
-				logrus.Error("Could not create VPC peering: app-vpc-account-id is required for AWS.")
+				logrus.Fatal("Could not create VPC peering: app-vpc-account-id is required for AWS.")
 				return
 			}
 			appVpcID, _ := cmd.Flags().GetString("app-vpc-id")
 			if appVpcID == "" {
-				logrus.Error("Could not create VPC peering: app-vpc-id is required for AWS.")
+				logrus.Fatal("Could not create VPC peering: app-vpc-id is required for AWS.")
 				return
 			}
 			appVpcRegion, _ := cmd.Flags().GetString("app-vpc-region")
 			if appVpcRegion == "" {
-				logrus.Error("Could not create VPC peering: app-vpc-region is required for AWS.")
+				logrus.Fatal("Could not create VPC peering: app-vpc-region is required for AWS.")
 				return
 			}
 
 			appVpcCidr, _ := cmd.Flags().GetString("app-vpc-cidr")
 			if appVpcCidr == "" {
-				logrus.Error("Could not create VPC peering: app-vpc-cidr is required for AWS.")
+				logrus.Fatal("Could not create VPC peering: app-vpc-cidr is required for AWS.")
 				return
 			}
 			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcID, appAccountID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
@@ -127,13 +123,11 @@ var createVpcPeeringCmd = &cobra.Command{
 		} else if appCloud == "GCP" {
 			appProjectID, _ := cmd.Flags().GetString("app-vpc-project-id")
 			if appProjectID == "" {
-				logrus.Errorf("Could not create VPC peering: app-vpc-project-id is required for GCP.")
-				return
+				logrus.Fatalf("Could not create VPC peering: app-vpc-project-id is required for GCP.")
 			}
 			appVpcName, _ := cmd.Flags().GetString("app-vpc-name")
 			if appVpcName == "" {
-				logrus.Errorf("Could not create VPC peering: app-vpc-name is required for GCP.")
-				return
+				logrus.Fatalf("Could not create VPC peering: app-vpc-name is required for GCP.")
 			}
 
 			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcName, appProjectID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
@@ -145,29 +139,24 @@ var createVpcPeeringCmd = &cobra.Command{
 			}
 
 		} else {
-			logrus.Error("Could not create VPC peering: The cloud provider must be either GCP or AWS.")
-			return
+			logrus.Fatal("Could not create VPC peering: The cloud provider must be either GCP or AWS.")
 		}
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
 		ybVpcId, err := authApi.GetVpcIdByName(ybVpcName)
 		if err != nil {
-			logrus.Errorf("Unable to find VPC with name %v. Error: %v", ybVpcName, err)
-			return
+			logrus.Fatalf("Unable to find VPC with name %v. Error: %v", ybVpcName, err)
 		}
 
 		ybVpcResp, resp, err := authApi.GetSingleTenantVpc(ybVpcId).Execute()
 		if err != nil {
-			b, _ := httputil.DumpResponse(resp, true)
-			logrus.Debug(b)
-			logrus.Errorf("Error when calling `GetSingleTenantVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
-			return
+			logrus.Debugf("Full HTTP response: %v", resp)
+			logrus.Fatalf("Error when calling `GetSingleTenantVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		ybVpcCloud := string(ybVpcResp.Data.Spec.GetCloud())
 
@@ -179,9 +168,8 @@ var createVpcPeeringCmd = &cobra.Command{
 		vpcPeeringSpec := *ybmclient.NewVpcPeeringSpec(ybVpcId, vpcPeeringName, *applicationVPCSpec)
 		vpcPeeringResp, response, err := authApi.CreateVpcPeering().VpcPeeringSpec(vpcPeeringSpec).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.CreateVpcPeering`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Errorf("Full HTTP response: %v", response)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.CreateVpcPeering`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		vpcPeeringID := vpcPeeringResp.GetData().Info.Id
@@ -191,20 +179,17 @@ var createVpcPeeringCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(ybVpcId, "", "CREATE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("The VPC Peering %s has been created\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 
 			vpcPeeringResp, response, err = authApi.GetVpcPeering(vpcPeeringID).Execute()
 			if err != nil {
-				logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
 				logrus.Errorf("Full HTTP response: %v", response)
-				return
+				logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 		} else {
@@ -229,44 +214,38 @@ var deleteVpcPeeringCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Errorf("could not initiate api client: %s", err.Error())
-			os.Exit(1)
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-		resp, r, err := authApi.ListVpcPeerings().Execute()
 
+		resp, r, err := authApi.ListVpcPeerings().Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
 			logrus.Errorf("Full HTTP response: %v", r)
-			return
+			logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		// check vpcPeeringName exists
 		vpcPeering, err := findVpcPeering(resp.Data, vpcPeeringName)
 		if err != nil {
-			logrus.Errorf("Error: %s\n", err)
-			return
+			logrus.Fatalf("Error: %s\n", err)
 		}
 		vpcPeeringId := vpcPeering.Info.Id
 		ybvpcID := vpcPeering.Spec.InternalYugabyteVpcId
 
 		response, err := authApi.DeleteVpcPeering(vpcPeeringId).Execute()
 		if err != nil {
-			logrus.Errorf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
-			logrus.Errorf("Full HTTP response: %v", response)
-			return
+			logrus.Debugf("Full HTTP response: %v", response)
+			logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("VPC peering %s is being terminated", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(ybvpcID, "", "DELETE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
-				logrus.Errorf("error when getting task status: %s", err)
-				return
+				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
-				logrus.Errorf("Operation failed with error: %s", returnStatus)
-				return
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
 			fmt.Printf("VPC peering %s has been terminated.\n", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 			return
