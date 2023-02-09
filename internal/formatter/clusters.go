@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"runtime"
+	"sort"
 
 	"github.com/enescakir/emoji"
 	"github.com/inhies/go-bytesize"
@@ -81,8 +82,21 @@ func (c *ClusterContext) Name() string {
 	return c.c.Spec.Name
 }
 
+// Return single region or the first regions with +number of others region
 func (c *ClusterContext) Regions() string {
-	return c.c.GetSpec().CloudInfo.Region
+	if ok := c.c.Spec.HasClusterRegionInfo(); ok {
+
+		if len(c.c.GetSpec().ClusterRegionInfo) > 1 {
+			sort.Slice(c.c.GetSpec().ClusterRegionInfo, func(i, j int) bool {
+				return c.c.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Region < c.c.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Region
+			})
+			return fmt.Sprintf("%s,+%d", c.c.GetSpec().ClusterRegionInfo[0].PlacementInfo.CloudInfo.Region, len(c.c.GetSpec().ClusterRegionInfo)-1)
+		} else {
+			return c.c.GetSpec().ClusterRegionInfo[0].PlacementInfo.CloudInfo.Region
+		}
+
+	}
+	return ""
 }
 
 func (c *ClusterContext) State() string {
