@@ -21,7 +21,7 @@ By default, `https` will be added to the host if no scheme are provided if you w
 just add it to the host `http://cloud.yugabyte.com`
 
 
-## Sample Create Commands:
+## Sample Commands:
 
 ### Cluster
 
@@ -260,7 +260,19 @@ ybm cdc-stream update \
 ybm cdc-stream delete \
     --name=cdc-stream-1 
 ```
+### Wait
 
+All the long running commands like the cluster creation, cluster deletion etc have the `--wait` option to wait until the operation is completed. 
+
+```sh
+ybm cluster delete \
+    --cluster-name=test-cluster \
+    --wait
+```
+
+[![asciicast](https://asciinema.org/a/dUSEfk4cJKdsxsZ8gnIU4l4lY.svg)](https://asciinema.org/a/dUSEfk4cJKdsxsZ8gnIU4l4lY)
 
 ## Update CLI
 - make update-cli
+
+
