@@ -21,8 +21,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yugabyte/ybm-cli/cmd/backup"
-	"github.com/yugabyte/ybm-cli/cmd/cdcsink"
-	"github.com/yugabyte/ybm-cli/cmd/cdcstream"
+	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/readreplica"
@@ -57,7 +56,7 @@ func Execute() {
 }
 
 func setDefaults() {
-	viper.SetDefault("host", "devcloud.yugabyte.com")
+	viper.SetDefault("host", "cloud.yugabyte.com")
 	viper.SetDefault("output", "table")
 	viper.SetDefault("logLevel", "info")
 	viper.SetDefault("debug", false)
@@ -95,13 +94,12 @@ func init() {
 
 	rootCmd.AddCommand(cluster.ClusterCmd)
 	rootCmd.AddCommand(backup.BackupCmd)
-	rootCmd.AddCommand(cdcsink.CDCSinkCmd)
-	rootCmd.AddCommand(cdcstream.CDCStreamCmd)
 	rootCmd.AddCommand(nal.NalCmd)
 	rootCmd.AddCommand(readreplica.ReadReplicaCmd)
 	rootCmd.AddCommand(vpc.VPCCmd)
 	rootCmd.AddCommand(vpcpeering.VPCPeeringCmd)
 	rootCmd.AddCommand(configureCmd)
+	rootCmd.AddCommand(cdc.CdcCmd)
 
 }
 
