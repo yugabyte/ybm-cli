@@ -163,7 +163,7 @@ func init() {
 	createClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")
 	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs
 	region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified.`)
-	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
+	createClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. Sandbox or Dedicated.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
 	createClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
 

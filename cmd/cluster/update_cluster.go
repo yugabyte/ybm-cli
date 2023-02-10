@@ -172,7 +172,7 @@ func init() {
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")
 	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs
 	region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num-nodes are mandatory, vpc is optional.`)
-	updateClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
+	updateClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. Sandbox or Dedicated.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
 	updateClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
 
@@ -188,7 +188,12 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 		cmd.Flag("cluster-type").Changed = true
 	}
 	if !cmd.Flags().Changed("cluster-tier") {
-		cmd.Flag("cluster-tier").Value.Set(string(originalSpec.ClusterInfo.GetClusterTier()))
+		clusterTier := string(originalSpec.ClusterInfo.GetClusterTier())
+		clusterTierCli := "Sandbox"
+		if clusterTier == "PAID" {
+			clusterTierCli = "Dedicated"
+		}
+		cmd.Flag("cluster-tier").Value.Set(clusterTierCli)
 		cmd.Flag("cluster-tier").Changed = true
 	}
 	if !cmd.Flags().Changed("fault-tolerance") {

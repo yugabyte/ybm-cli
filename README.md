@@ -43,7 +43,7 @@ ybm cluster create
     --cluster-type=[SYNCHRONOUS or GEO_PARTITIONED] \
     --node-config=num-cores=<num-cores>,disk-size-gb=<disk-size-gb> \
     --region-info=region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> \
-    --cluster-tier=[FREE or PAID] \
+    --cluster-tier=[Sandbox or Dedicated] \
     --fault-tolerance=[NONE or ZONE or Region] \
     --database-track=[STABLE or PREVIEW] 
 ```

@@ -37,7 +37,15 @@ var getInstanceTypesCmd = &cobra.Command{
 
 		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
 		cloudRegion, _ := cmd.Flags().GetString("region")
-		tier, _ := cmd.Flags().GetString("tier")
+		tierCli, _ := cmd.Flags().GetString("tier")
+		var tier string
+		if tierCli == "Dedicated" {
+			tier = "PAID"
+		} else if tierCli == "Sandbox" {
+			tier = "FREE"
+		} else {
+			logrus.Fatalln("The tier must be either 'Sandbox' or 'Dedicated'")
+		}
 		showDisabled, _ := cmd.Flags().GetBool("show-disabled")
 		instanceTypesResp, resp, err := authApi.GetSupportedInstanceTypes(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
 		if err != nil {
@@ -62,7 +70,7 @@ func init() {
 	getInstanceTypesCmd.MarkFlagRequired("cloud-provider")
 	getInstanceTypesCmd.Flags().String("region", "", "The region in the cloud provider for which the instance types have to fetched.")
 	getInstanceTypesCmd.MarkFlagRequired("region")
-	getInstanceTypesCmd.Flags().String("tier", "PAID", "Tier. FREE or PAID. Default: PAID")
+	getInstanceTypesCmd.Flags().String("tier", "Dedicated", "Tier. Sandbox or Dedicated. Default: Dedicated")
 	getInstanceTypesCmd.Flags().Bool("show-disabled", false, "Whether to show disabled instance types. true or false. Default: false")
 
 }

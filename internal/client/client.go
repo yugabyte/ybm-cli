@@ -207,7 +207,15 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 
 	clusterInfo := *ybmclient.NewClusterInfoWithDefaults()
 	if cmd.Flags().Changed("cluster-tier") {
-		clusterTier, _ := cmd.Flags().GetString("cluster-tier")
+		clusterTierCli, _ := cmd.Flags().GetString("cluster-tier")
+		var clusterTier string
+		if clusterTierCli == "Dedicated" {
+			clusterTier = "PAID"
+		} else if clusterTierCli == "Sandbox" {
+			clusterTier = "FREE"
+		} else {
+			return nil, fmt.Errorf("The cluster tier must be either 'Sandbox' or 'Dedicated'")
+		}
 		if clusterTier == "PAID" {
 			isProduction = true
 		}
