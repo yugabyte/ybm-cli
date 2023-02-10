@@ -27,8 +27,8 @@ import (
 // assignClusterCmd represents the cluster command
 var assignClusterCmd = &cobra.Command{
 	Use:   "assign",
-	Short: "Assign resources(e.g. network allow lists) to clusters in YugabyteDB Managed",
-	Long:  "Assign resources(e.g. network allow lists) to clusters in YugabyteDB Managed",
+	Short: "Assign resources(e.g. network allow lists) to clusters",
+	Long:  "Assign resources(e.g. network allow lists) to clusters",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -84,9 +84,9 @@ var assignClusterCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand(assignClusterCmd)
-	assignClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be assignd")
+	assignClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be assigned [REQUIRED]")
 	assignClusterCmd.MarkFlagRequired("cluster-name")
-	assignClusterCmd.Flags().String("network-allow-list", "", "The name of the network allow list to be assignd")
+	assignClusterCmd.Flags().String("network-allow-list", "", "The name of the network allow list to be assigned [REQUIRED]")
 	// Marked as required for now since as of now network allow list is the only resource that can be assigned
 	assignClusterCmd.MarkFlagRequired("network-allow-list")
 }

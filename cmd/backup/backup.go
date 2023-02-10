@@ -28,8 +28,8 @@ import (
 
 var BackupCmd = &cobra.Command{
 	Use:   "backup",
-	Short: "Backup",
-	Long:  "Backup commands",
+	Short: "Manage backup operations of a cluster",
+	Long:  "Manage backup operations of a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -37,8 +37,8 @@ var BackupCmd = &cobra.Command{
 
 var getBackupCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get backups in YugabyteDB Managed",
-	Long:  "Get backups in YugabyteDB Managed",
+	Short: "Get backups for a cluster in YugabyteDB Managed",
+	Long:  "Get backups for a cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -70,8 +70,8 @@ var getBackupCmd = &cobra.Command{
 
 var restoreBackupCmd = &cobra.Command{
 	Use:   "restore",
-	Short: "Restore backups in YugabyteDB Managed",
-	Long:  "Restore backups in YugabyteDB Managed",
+	Short: "Restore backups into a cluster in YugabyteDB Managed",
+	Long:  "Restore backups into a cluster in  YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -115,8 +115,8 @@ var restoreBackupCmd = &cobra.Command{
 
 var createBackupCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create backup in YugabyteDB Managed",
-	Long:  "Create backup in YugabyteDB Managed",
+	Short: "Create backup for a cluster in YugabyteDB Managed",
+	Long:  "Create backup for a cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -185,8 +185,8 @@ var createBackupCmd = &cobra.Command{
 
 var deleteBackupCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete backup in YugabyteDB Managed",
-	Long:  "Delete backup in YugabyteDB Managed",
+	Short: "Delete backup for a cluster in YugabyteDB Managed",
+	Long:  "Delete backup for a cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		backupID, _ := cmd.Flags().GetString("backup-id")
 
@@ -208,21 +208,21 @@ var deleteBackupCmd = &cobra.Command{
 
 func init() {
 	BackupCmd.AddCommand(getBackupCmd)
-	getBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to fetch backups")
+	getBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to fetch backups [OPTIONAL]")
 
 	BackupCmd.AddCommand(restoreBackupCmd)
-	restoreBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to restore backups")
+	restoreBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to restore backups [REQUIRED]")
 	restoreBackupCmd.MarkFlagRequired("cluster-name")
-	restoreBackupCmd.Flags().String("backup-id", "", "ID of the backup to be restored")
+	restoreBackupCmd.Flags().String("backup-id", "", "ID of the backup to be restored [REQUIRED]")
 	restoreBackupCmd.MarkFlagRequired("backup-id")
 
 	BackupCmd.AddCommand(createBackupCmd)
-	createBackupCmd.Flags().String("cluster-name", "", "Name for the cluster")
+	createBackupCmd.Flags().String("cluster-name", "", "Name for the cluster [REQUIRED]")
 	createBackupCmd.MarkFlagRequired("cluster-name")
-	createBackupCmd.Flags().Int32("retention-period", 0, "Retention period of the backup")
-	createBackupCmd.Flags().String("description", "", "Description of the backup")
+	createBackupCmd.Flags().Int32("retention-period", 0, "Retention period of the backup [OPTIONAL]")
+	createBackupCmd.Flags().String("description", "", "Description of the backup [OPTIONAL]")
 
 	BackupCmd.AddCommand(deleteBackupCmd)
-	deleteBackupCmd.Flags().String("backup-id", "", "The backup ID")
+	deleteBackupCmd.Flags().String("backup-id", "", "The backup ID [REQUIRED]")
 	deleteBackupCmd.MarkFlagRequired("backup-id")
 }

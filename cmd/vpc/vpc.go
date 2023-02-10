@@ -28,8 +28,8 @@ import (
 
 var VPCCmd = &cobra.Command{
 	Use:   "vpc",
-	Short: "vpc",
-	Long:  "VPC commands",
+	Short: "Manage VPCs",
+	Long:  "Manage VPCs",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -201,20 +201,21 @@ var deleteVpcCmd = &cobra.Command{
 
 func init() {
 	VPCCmd.AddCommand(getVpcCmd)
-	getVpcCmd.Flags().String("name", "", "Name for the VPC")
+	getVpcCmd.Flags().String("name", "", "Name for the VPC. [REQUIRED]")
+	getVpcCmd.MarkFlagRequired("cloud")
 
 	VPCCmd.AddCommand(createVpcCmd)
-	createVpcCmd.Flags().String("name", "", "Name for the VPC")
+	createVpcCmd.Flags().String("name", "", "Name for the VPC. [REQUIRED]")
 	createVpcCmd.MarkFlagRequired("name")
-	createVpcCmd.Flags().String("cloud", "", "Cloud provider for the VPC")
+	createVpcCmd.Flags().String("cloud", "", "Cloud provider for the VPC. [REQUIRED")
 	createVpcCmd.MarkFlagRequired("cloud")
-	createVpcCmd.Flags().String("global-cidr", "", "Global CIDR for the VPC")
-	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "")
-	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "")
+	createVpcCmd.Flags().String("global-cidr", "", "Global CIDR for the VPC. [OPTIONAL]")
+	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "Region of the VPC. [OPTIONAL] ")
+	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "CIDR of the VPC. [OPTIONAL]")
 	createVpcCmd.MarkFlagsRequiredTogether("region", "cidr")
 	createVpcCmd.MarkFlagsMutuallyExclusive("global-cidr", "cidr")
 
 	VPCCmd.AddCommand(deleteVpcCmd)
-	deleteVpcCmd.Flags().String("name", "", "Name for the VPC")
+	deleteVpcCmd.Flags().String("name", "", "Name for the VPC. [REQUIRED]")
 	deleteVpcCmd.MarkFlagRequired("name")
 }

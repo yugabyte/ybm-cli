@@ -27,8 +27,8 @@ import (
 // getClusterCmd represents the cluster command
 var getClusterCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get clusters in YugabyteDB Managed",
-	Long:  "Get clusters in YugabyteDB Managed",
+	Short: "Get clusters",
+	Long:  "Get clusters",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -70,5 +70,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// getClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	getClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to get details")
+	getClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to get details. [REQUIRED]")
+	getClusterCmd.MarkFlagRequired("cluster-name")
 }

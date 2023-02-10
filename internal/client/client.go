@@ -271,8 +271,8 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 
 	// Compute track ID for database version
 	softwareInfo := *ybmclient.NewSoftwareInfoWithDefaults()
-	if cmd.Flags().Changed("database-track") {
-		trackName, _ = cmd.Flags().GetString("database-track")
+	if cmd.Flags().Changed("database-version") {
+		trackName, _ = cmd.Flags().GetString("database-version")
 		trackId, err = a.GetTrackIdByName(trackName)
 		if err != nil {
 			return nil, err

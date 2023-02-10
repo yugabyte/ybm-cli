@@ -45,7 +45,7 @@ ybm cluster create
     --region-info=region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> \
     --cluster-tier=[Sandbox or Dedicated] \
     --fault-tolerance=[NONE or ZONE or Region] \
-    --database-track=[STABLE or PREVIEW] 
+    --database-version=[Stable or Preview] 
 ```
 
 #### List Clusters

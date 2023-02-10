@@ -39,8 +39,8 @@ func printCdcSinkOutput(cdcSinkData []ybmclient.CdcSinkData) {
 
 var CDCSinkCmd = &cobra.Command{
 	Use:   "sink",
-	Short: "Change Data Capture Sink commands",
-	Long:  "Change Data Capture Sink commands",
+	Short: "Manage Change Data Capture Sink operations",
+	Long:  "Manage Change Data Capture Sink operations",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -202,23 +202,33 @@ func init() {
 	CdcCmd.AddCommand(CDCSinkCmd)
 
 	CDCSinkCmd.AddCommand(getCdcSinkCmd)
-	getCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
+	getCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink [REQUIRED]")
+	getCdcSinkCmd.MarkFlagRequired("name")
 
 	CDCSinkCmd.AddCommand(createCdcSinkCmd)
-	createCdcSinkCmd.Flags().String("name", "", "Name of the CDC sink")
-	createCdcSinkCmd.Flags().String("cdc-sink-type", "", "Name of the CDC sink type")
-	createCdcSinkCmd.Flags().String("auth-type", "", "Name of the CDC sink authentication type")
-	createCdcSinkCmd.Flags().String("hostname", "", "Hostname of the CDC sink")
-	createCdcSinkCmd.Flags().String("username", "", "Username of the CDC sink")
-	createCdcSinkCmd.Flags().String("password", "", "Password of the CDC sink")
+	createCdcSinkCmd.Flags().String("name", "", "Name of the CDC sink [REQUIRED]")
+	createCdcSinkCmd.MarkFlagRequired("name")
+	createCdcSinkCmd.Flags().String("cdc-sink-type", "", "Name of the CDC sink type [REQUIRED]")
+	createCdcSinkCmd.MarkFlagRequired("cdc-sink-type")
+	createCdcSinkCmd.Flags().String("auth-type", "", "Name of the CDC sink authentication type [REQUIRED]")
+	createCdcSinkCmd.MarkFlagRequired("auth-type")
+	createCdcSinkCmd.Flags().String("hostname", "", "Hostname of the CDC sink [REQUIRED]")
+	createCdcSinkCmd.MarkFlagRequired("hostname")
+	createCdcSinkCmd.Flags().String("username", "", "Username of the CDC sink [REQUIRED]")
+	createCdcSinkCmd.MarkFlagRequired("username")
+	createCdcSinkCmd.Flags().String("password", "", "Password of the CDC sink [REQUIRED]")
+	createCdcSinkCmd.MarkFlagRequired("password")
 
 	CDCSinkCmd.AddCommand(editCdcSinkCmd)
-	editCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
-	editCdcSinkCmd.Flags().String("new-name", "", "Name of the new CDC Sink")
-	editCdcSinkCmd.Flags().String("username", "", "Username of the CDC Sink")
-	editCdcSinkCmd.Flags().String("password", "", "Password of the CDC Sink")
+	editCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink. [REQUIRED]")
+	editCdcSinkCmd.MarkFlagRequired("name")
+	editCdcSinkCmd.Flags().String("new-name", "", "Name of the new CDC Sink. [OPTIONAL]")
+	editCdcSinkCmd.Flags().String("auth-type", "", "Name of the new CDC Sink. [OPTIONAL]")
+	editCdcSinkCmd.Flags().String("username", "", "Username of the CDC Sink. [OPTIONAL]")
+	editCdcSinkCmd.Flags().String("password", "", "Password of the CDC Sink. [OPTIONAL]")
 
 	CDCSinkCmd.AddCommand(deleteCdcSinkCmd)
-	deleteCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
+	deleteCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink.[REQUIRED]")
+	deleteCdcSinkCmd.MarkFlagRequired("name")
 
 }
