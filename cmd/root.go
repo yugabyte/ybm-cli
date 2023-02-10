@@ -101,7 +101,6 @@ func init() {
 	rootCmd.AddCommand(vpcpeering.VPCPeeringCmd)
 	rootCmd.AddCommand(configureCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
-	//rootCmd.AddCommand(cdc.CdcCmd)
 
 }
 
