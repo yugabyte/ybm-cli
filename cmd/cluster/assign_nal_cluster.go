@@ -84,9 +84,9 @@ var assignClusterCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand(assignClusterCmd)
-	assignClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be assigned [REQUIRED]")
+	assignClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be assigned.")
 	assignClusterCmd.MarkFlagRequired("cluster-name")
-	assignClusterCmd.Flags().String("network-allow-list", "", "The name of the network allow list to be assigned [REQUIRED]")
+	assignClusterCmd.Flags().String("network-allow-list", "", "[REQUIRED] The name of the network allow list to be assigned.")
 	// Marked as required for now since as of now network allow list is the only resource that can be assigned
 	assignClusterCmd.MarkFlagRequired("network-allow-list")
 }

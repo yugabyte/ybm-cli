@@ -93,9 +93,9 @@ var unassignClusterCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand(unassignClusterCmd)
-	unassignClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be unassigned. [REQUIRED]")
+	unassignClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be unassigned.")
 	unassignClusterCmd.MarkFlagRequired("cluster-name")
-	unassignClusterCmd.Flags().String("network-allow-list", "", "The name of the network allow list to be unassigned. [REQUIRED]")
+	unassignClusterCmd.Flags().String("network-allow-list", "", "[REQUIRED] The name of the network allow list to be unassigned.")
 	// Marked as required for now since as of now network allow list is the only resource that can be unassigned
 	unassignClusterCmd.MarkFlagRequired("network-allow-list")
 }

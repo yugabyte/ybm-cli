@@ -70,6 +70,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// getClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	getClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to get details. [REQUIRED]")
+	getClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
 	getClusterCmd.MarkFlagRequired("cluster-name")
 }

@@ -208,21 +208,21 @@ var deleteBackupCmd = &cobra.Command{
 
 func init() {
 	BackupCmd.AddCommand(getBackupCmd)
-	getBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to fetch backups [OPTIONAL]")
+	getBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
 
 	BackupCmd.AddCommand(restoreBackupCmd)
-	restoreBackupCmd.Flags().String("cluster-name", "", "Name of the cluster to restore backups [REQUIRED]")
+	restoreBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster to restore backups.")
 	restoreBackupCmd.MarkFlagRequired("cluster-name")
-	restoreBackupCmd.Flags().String("backup-id", "", "ID of the backup to be restored [REQUIRED]")
+	restoreBackupCmd.Flags().String("backup-id", "", "[REQUIRED] ID of the backup to be restored.")
 	restoreBackupCmd.MarkFlagRequired("backup-id")
 
 	BackupCmd.AddCommand(createBackupCmd)
-	createBackupCmd.Flags().String("cluster-name", "", "Name for the cluster [REQUIRED]")
+	createBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name for the cluster.")
 	createBackupCmd.MarkFlagRequired("cluster-name")
-	createBackupCmd.Flags().Int32("retention-period", 0, "Retention period of the backup [OPTIONAL]")
-	createBackupCmd.Flags().String("description", "", "Description of the backup [OPTIONAL]")
+	createBackupCmd.Flags().Int32("retention-period", 0, "[OPTIONAL] Retention period of the backup.")
+	createBackupCmd.Flags().String("description", "", "[OPTIONAL] Description of the backup.")
 
 	BackupCmd.AddCommand(deleteBackupCmd)
-	deleteBackupCmd.Flags().String("backup-id", "", "The backup ID [REQUIRED]")
+	deleteBackupCmd.Flags().String("backup-id", "", "[REQUIRED] The backup ID.")
 	deleteBackupCmd.MarkFlagRequired("backup-id")
 }

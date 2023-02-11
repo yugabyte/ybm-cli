@@ -66,11 +66,11 @@ var getInstanceTypesCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand(getInstanceTypesCmd)
-	getInstanceTypesCmd.Flags().String("cloud-provider", "", "The cloud provider for which the regions have to be fetched. AWS or GCP. [REQUIRED]")
+	getInstanceTypesCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
 	getInstanceTypesCmd.MarkFlagRequired("cloud-provider")
-	getInstanceTypesCmd.Flags().String("region", "", "The region in the cloud provider for which the instance types have to fetched. [REQUIRED]")
+	getInstanceTypesCmd.Flags().String("region", "", "[REQUIRED] The region in the cloud provider for which the instance types have to fetched.")
 	getInstanceTypesCmd.MarkFlagRequired("region")
-	getInstanceTypesCmd.Flags().String("tier", "Dedicated", "Tier. Sandbox or Dedicated. [OPTIONAL")
-	getInstanceTypesCmd.Flags().Bool("show-disabled", false, "Whether to show disabled instance types. true or false. [OPTOINAL]")
+	getInstanceTypesCmd.Flags().String("tier", "Dedicated", "[OPTIONAL] Tier. Sandbox or Dedicated.")
+	getInstanceTypesCmd.Flags().Bool("show-disabled", false, "[OPTIONAL] Whether to show disabled instance types. true or false.")
 
 }

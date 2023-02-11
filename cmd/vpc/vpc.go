@@ -201,21 +201,21 @@ var deleteVpcCmd = &cobra.Command{
 
 func init() {
 	VPCCmd.AddCommand(getVpcCmd)
-	getVpcCmd.Flags().String("name", "", "Name for the VPC. [REQUIRED]")
+	getVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	getVpcCmd.MarkFlagRequired("cloud")
 
 	VPCCmd.AddCommand(createVpcCmd)
-	createVpcCmd.Flags().String("name", "", "Name for the VPC. [REQUIRED]")
+	createVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	createVpcCmd.MarkFlagRequired("name")
-	createVpcCmd.Flags().String("cloud", "", "Cloud provider for the VPC. [REQUIRED")
+	createVpcCmd.Flags().String("cloud", "", "[REQUIRED] Cloud provider for the VPC.")
 	createVpcCmd.MarkFlagRequired("cloud")
-	createVpcCmd.Flags().String("global-cidr", "", "Global CIDR for the VPC. [OPTIONAL]")
-	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "Region of the VPC. [OPTIONAL] ")
-	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "CIDR of the VPC. [OPTIONAL]")
+	createVpcCmd.Flags().String("global-cidr", "", "[OPTIONAL] Global CIDR for the VPC.")
+	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "[OPTIONAL] Region of the VPC.")
+	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "[OPTIONAL] CIDR of the VPC.")
 	createVpcCmd.MarkFlagsRequiredTogether("region", "cidr")
 	createVpcCmd.MarkFlagsMutuallyExclusive("global-cidr", "cidr")
 
 	VPCCmd.AddCommand(deleteVpcCmd)
-	deleteVpcCmd.Flags().String("name", "", "Name for the VPC. [REQUIRED]")
+	deleteVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	deleteVpcCmd.MarkFlagRequired("name")
 }
