@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cdcsink
+package cdc
 
 import (
 	"fmt"
@@ -38,9 +38,9 @@ func printCdcSinkOutput(cdcSinkData []ybmclient.CdcSinkData) {
 }
 
 var CDCSinkCmd = &cobra.Command{
-	Use:   "cdc-sink",
-	Short: "cdc-sink",
-	Long:  "Cdc Sink commands",
+	Use:   "sink",
+	Short: "Change Data Capture Sink commands",
+	Long:  "Change Data Capture Sink commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -199,6 +199,8 @@ var deleteCdcSinkCmd = &cobra.Command{
 }
 
 func init() {
+	CdcCmd.AddCommand(CDCSinkCmd)
+
 	CDCSinkCmd.AddCommand(getCdcSinkCmd)
 	getCdcSinkCmd.Flags().String("name", "", "Name of the CDC Sink")
 
