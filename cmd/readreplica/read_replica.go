@@ -96,7 +96,10 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 			kvp := strings.Split(subOpt, "=")
 			key := kvp[0]
 			val := kvp[1]
-			n, _ := strconv.Atoi(val)
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				return nil, err
+			}
 			switch key {
 			case "num-cores":
 				//Avoid potential integer overflow see gosec
@@ -135,7 +138,10 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 					spec.PlacementInfo.NumReplicas = *ybmclient.NewNullableInt32(&numReplicas)
 				}
 			case "multi-zone":
-				isMultiZone, _ := strconv.ParseBool(val)
+				isMultiZone, err := strconv.ParseBool(val)
+				if err != nil {
+					return nil, err
+				}
 				spec.PlacementInfo.MultiZone = *ybmclient.NewNullableBool(&isMultiZone)
 			}
 

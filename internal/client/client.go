@@ -150,7 +150,10 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
 	for _, regionInfo := range regionInfoList {
-		numNodes, _ := strconv.ParseInt(regionInfo["num-nodes"], 10, 32)
+		numNodes, err := strconv.ParseInt(regionInfo["num-nodes"], 10, 32)
+		if err != nil {
+			return nil, err
+		}
 		regionNodes := int32(numNodes)
 		region := regionInfo["region"]
 		totalNodes += int(regionNodes)
