@@ -21,8 +21,8 @@ import (
 // getCmd represents the list command
 var CdcCmd = &cobra.Command{
 	Use:   "cdc",
-	Short: "Change Data Capture",
-	Long:  "Change Data Capture related commands",
+	Short: "Manage Change Data Capture operations",
+	Long:  "Manage Change Data Capture operations",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
