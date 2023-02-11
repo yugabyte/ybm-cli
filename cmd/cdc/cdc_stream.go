@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cdcstream
+package cdc
 
 import (
 	"fmt"
@@ -36,9 +36,9 @@ func printCdcStreamOutput(cdcStreamData []ybmclient.CdcStreamData) {
 }
 
 var CDCStreamCmd = &cobra.Command{
-	Use:   "cdc-stream",
-	Short: "cdc-stream",
-	Long:  "CDC stream commands",
+	Use:   "stream",
+	Short: "Change Data Capture stream",
+	Long:  "Change Data Capture stream commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -248,6 +248,8 @@ var deleteCdcStreamCmd = &cobra.Command{
 }
 
 func init() {
+	CdcCmd.AddCommand(CDCStreamCmd)
+
 	CDCStreamCmd.AddCommand(getCdcStreamCmd)
 	getCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
 	getCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
