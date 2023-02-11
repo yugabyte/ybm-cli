@@ -251,8 +251,7 @@ func init() {
 	CdcCmd.AddCommand(CDCStreamCmd)
 
 	CDCStreamCmd.AddCommand(getCdcStreamCmd)
-	getCdcStreamCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC Stream.")
-	getCdcStreamCmd.MarkFlagRequired("name")
+	getCdcStreamCmd.Flags().String("name", "", "[OPTIONAL] Name of the CDC Stream.")
 	getCdcStreamCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the Cluster.")
 	getCdcStreamCmd.MarkFlagRequired("cluster-name")
 

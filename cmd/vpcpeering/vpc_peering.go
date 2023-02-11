@@ -256,8 +256,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 
 func init() {
 	VPCPeeringCmd.AddCommand(getVpcPeeringCmd)
-	getVpcPeeringCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC peering.")
-	getVpcPeeringCmd.MarkFlagRequired("name")
+	getVpcPeeringCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC peering.")
 
 	VPCPeeringCmd.AddCommand(createVpcPeeringCmd)
 	createVpcPeeringCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC peering.")

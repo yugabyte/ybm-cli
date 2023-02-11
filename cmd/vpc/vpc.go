@@ -201,8 +201,7 @@ var deleteVpcCmd = &cobra.Command{
 
 func init() {
 	VPCCmd.AddCommand(getVpcCmd)
-	getVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
-	getVpcCmd.MarkFlagRequired("cloud")
+	getVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
 
 	VPCCmd.AddCommand(createVpcCmd)
 	createVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")

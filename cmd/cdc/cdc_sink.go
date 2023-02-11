@@ -202,8 +202,7 @@ func init() {
 	CdcCmd.AddCommand(CDCSinkCmd)
 
 	CDCSinkCmd.AddCommand(getCdcSinkCmd)
-	getCdcSinkCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC sink.")
-	getCdcSinkCmd.MarkFlagRequired("name")
+	getCdcSinkCmd.Flags().String("name", "", "[OPTIONAL] Name of the CDC sink.")
 
 	CDCSinkCmd.AddCommand(createCdcSinkCmd)
 	createCdcSinkCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC sink.")

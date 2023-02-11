@@ -146,8 +146,7 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 
 func init() {
 	NalCmd.AddCommand(getNetworkAllowListCmd)
-	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[REQUIRED] The name of the Network Allow List.")
-	getNetworkAllowListCmd.MarkFlagRequired("name")
+	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[OPTIONAL] The name of the Network Allow List.")
 
 	NalCmd.AddCommand(createNetworkAllowListCmd)
 	createNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[REQUIRED] The name of the Network Allow List.")
