@@ -97,7 +97,7 @@ var createCdcStreamCmd = &cobra.Command{
 		cdcSinkName, _ := cmd.Flags().GetString("sink")
 		sinkId, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
 		if err != nil {
-			logrus.Fatal(err)
+			logrus.Fatalf("Please provide a valid sink name: %s", err)
 		}
 
 		dbName, _ := cmd.Flags().GetString("db-name")

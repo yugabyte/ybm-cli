@@ -20,6 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
@@ -38,13 +39,9 @@ var getInstanceTypesCmd = &cobra.Command{
 		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
 		cloudRegion, _ := cmd.Flags().GetString("region")
 		tierCli, _ := cmd.Flags().GetString("tier")
-		var tier string
-		if tierCli == "Dedicated" {
-			tier = "PAID"
-		} else if tierCli == "Sandbox" {
-			tier = "FREE"
-		} else {
-			logrus.Fatalln("The tier must be either 'Sandbox' or 'Dedicated'")
+		tier, err := util.GetClusterTier(tierCli)
+		if err != nil {
+			logrus.Fatalln(err)
 		}
 		showDisabled, _ := cmd.Flags().GetBool("show-disabled")
 		instanceTypesResp, resp, err := authApi.GetSupportedInstanceTypes(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()

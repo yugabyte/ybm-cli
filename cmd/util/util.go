@@ -16,6 +16,7 @@ package util
 
 import (
 	"errors"
+	"fmt"
 
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -27,4 +28,15 @@ func FindNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (y
 		}
 	}
 	return ybmclient.NetworkAllowListData{}, errors.New("Unable to find NetworkAllowList " + name)
+}
+
+func GetClusterTier(tierCli string) (string, error) {
+
+	if tierCli == "Dedicated" {
+		return "PAID", nil
+	} else if tierCli == "Sandbox" {
+		return "FREE", nil
+	}
+
+	return "", fmt.Errorf("The tier must be either 'Sandbox' or 'Dedicated'")
 }

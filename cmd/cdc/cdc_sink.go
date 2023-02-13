@@ -93,7 +93,7 @@ var createCdcSinkCmd = &cobra.Command{
 
 		sinkTypeEnum, err := ybmclient.NewCdcSinkTypeEnumFromValue(sinkType)
 		if err != nil {
-			logrus.Fatalf("Error when getting cdc sink type enum from value: %s", err)
+			logrus.Fatalf("Please provide a valid sink type: %s", err)
 		}
 		kafkaSpec := ybmclient.NewCdcSinkKafka(hostname)
 
@@ -105,7 +105,7 @@ var createCdcSinkCmd = &cobra.Command{
 
 		authTypeEnum, err := ybmclient.NewCdcSinkAuthTypeEnumFromValue(authType)
 		if err != nil {
-			logrus.Fatalf("Error when getting auth type enum from value: %s", err)
+			logrus.Fatalf("Please provide a valid auth type: %s", err)
 		}
 		cdcSinkAuthSpec := ybmclient.NewCdcSinkAuthSpec(*authTypeEnum)
 		cdcSinkAuthSpec.SetUsername(username)
@@ -151,7 +151,7 @@ var editCdcSinkCmd = &cobra.Command{
 			updatedAuthType, _ := cmd.Flags().GetString("auth-type")
 			updatedAuthTypeEnum, err := ybmclient.NewCdcSinkAuthTypeEnumFromValue(updatedAuthType)
 			if err != nil {
-				logrus.Fatal(err)
+				logrus.Fatalf("Please provide a valid auth type: %s", err)
 			}
 			editCdcSinkRequest.Auth.SetAuthType(*updatedAuthTypeEnum)
 		}
