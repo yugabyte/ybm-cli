@@ -21,8 +21,8 @@ import (
 // getCmd represents the list command
 var ClusterCmd = &cobra.Command{
 	Use:   "cluster",
-	Short: "Cluster ",
-	Long:  "Cluster command",
+	Short: "Manage cluster operations",
+	Long:  "Manage cluster operations",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

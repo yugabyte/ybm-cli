@@ -34,8 +34,8 @@ var allReplicaOpt []string
 
 var ReadReplicaCmd = &cobra.Command{
 	Use:   "read-replica",
-	Short: "read-replica",
-	Long:  "Read Replica commands",
+	Short: "Manage Read Replicas",
+	Long:  "Manage Read Replicas",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -96,7 +96,10 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 			kvp := strings.Split(subOpt, "=")
 			key := kvp[0]
 			val := kvp[1]
-			n, _ := strconv.Atoi(val)
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				return nil, err
+			}
 			switch key {
 			case "num-cores":
 				//Avoid potential integer overflow see gosec
@@ -135,7 +138,10 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 					spec.PlacementInfo.NumReplicas = *ybmclient.NewNullableInt32(&numReplicas)
 				}
 			case "multi-zone":
-				isMultiZone, _ := strconv.ParseBool(val)
+				isMultiZone, err := strconv.ParseBool(val)
+				if err != nil {
+					return nil, err
+				}
 				spec.PlacementInfo.MultiZone = *ybmclient.NewNullableBool(&isMultiZone)
 			}
 
@@ -356,21 +362,21 @@ var deleteReadReplicaCmd = &cobra.Command{
 
 func init() {
 	ReadReplicaCmd.AddCommand(getReadReplicaCmd)
-	getReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	getReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	getReadReplicaCmd.MarkFlagRequired("cluster-name")
 
 	ReadReplicaCmd.AddCommand(createReadReplicaCmd)
-	createReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	createReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	createReadReplicaCmd.MarkFlagRequired("cluster-name")
-	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>`)
+	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(updateReadReplicaCmd)
-	updateReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	updateReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	updateReadReplicaCmd.MarkFlagRequired("cluster-name")
-	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>`)
+	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(deleteReadReplicaCmd)
-	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "The name of the cluster")
+	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	deleteReadReplicaCmd.MarkFlagRequired("cluster-name")
 
 }

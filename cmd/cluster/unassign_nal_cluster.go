@@ -27,8 +27,8 @@ import (
 // unassignClusterCmd represents the cluster command
 var unassignClusterCmd = &cobra.Command{
 	Use:   "unassign",
-	Short: "Unassign resources(e.g. network allow lists) to clusters in YugabyteDB Managed",
-	Long:  "Unassign resources(e.g. network allow lists) to clusters in YugabyteDB Managed",
+	Short: "Unassign resources(e.g. network allow lists) to clusters",
+	Long:  "Unassign resources(e.g. network allow lists) to clusters",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -93,9 +93,9 @@ var unassignClusterCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand(unassignClusterCmd)
-	unassignClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be unassignd")
+	unassignClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be unassigned.")
 	unassignClusterCmd.MarkFlagRequired("cluster-name")
-	unassignClusterCmd.Flags().String("network-allow-list", "", "The name of the network allow list to be unassignd")
+	unassignClusterCmd.Flags().String("network-allow-list", "", "[REQUIRED] The name of the network allow list to be unassigned.")
 	// Marked as required for now since as of now network allow list is the only resource that can be unassigned
 	unassignClusterCmd.MarkFlagRequired("network-allow-list")
 }

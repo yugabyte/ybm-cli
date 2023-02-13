@@ -150,7 +150,10 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
 	for _, regionInfo := range regionInfoList {
-		numNodes, _ := strconv.ParseInt(regionInfo["num-nodes"], 10, 32)
+		numNodes, err := strconv.ParseInt(regionInfo["num-nodes"], 10, 32)
+		if err != nil {
+			return nil, err
+		}
 		regionNodes := int32(numNodes)
 		region := regionInfo["region"]
 		totalNodes += int(regionNodes)
@@ -207,7 +210,11 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 
 	clusterInfo := *ybmclient.NewClusterInfoWithDefaults()
 	if cmd.Flags().Changed("cluster-tier") {
-		clusterTier, _ := cmd.Flags().GetString("cluster-tier")
+		clusterTierCli, _ := cmd.Flags().GetString("cluster-tier")
+		clusterTier, err := util.GetClusterTier(clusterTierCli)
+		if err != nil {
+			return nil, err
+		}
 		if clusterTier == "PAID" {
 			isProduction = true
 		}
@@ -263,8 +270,8 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 
 	// Compute track ID for database version
 	softwareInfo := *ybmclient.NewSoftwareInfoWithDefaults()
-	if cmd.Flags().Changed("database-track") {
-		trackName, _ = cmd.Flags().GetString("database-track")
+	if cmd.Flags().Changed("database-version") {
+		trackName, _ = cmd.Flags().GetString("database-version")
 		trackId, err = a.GetTrackIdByName(trackName)
 		if err != nil {
 			return nil, err

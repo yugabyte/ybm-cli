@@ -31,8 +31,8 @@ import (
 // updateClusterCmd represents the cluster command
 var updateClusterCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update a cluster in YB Managed",
-	Long:  "Update a cluster in YB Managed",
+	Short: "Update a cluster",
+	Long:  "Update a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -165,16 +165,15 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	updateClusterCmd.Flags().String("cluster-name", "", "Name of the cluster.")
+	updateClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster.")
 	updateClusterCmd.MarkFlagRequired("cluster-name")
-	updateClusterCmd.Flags().String("cloud-type", "", "The cloud provider where database needs to be deployed. AWS or GCP.")
-	updateClusterCmd.Flags().String("cluster-type", "", "Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
-	updateClusterCmd.Flags().StringToInt("node-config", nil, "Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")
-	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs
-	region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. region and num-nodes are mandatory, vpc is optional.`)
-	updateClusterCmd.Flags().String("cluster-tier", "", "The tier of the cluster. FREE or PAID.")
-	updateClusterCmd.Flags().String("fault-tolerance", "", "The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
-	updateClusterCmd.Flags().String("database-track", "", "The database track of the cluster. Stable or Preview.")
+	updateClusterCmd.Flags().String("cloud-type", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP.")
+	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
+	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")
+	updateClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If provided, region and num-nodes are mandatory, vpc is optional.`)
+	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
+	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
+	updateClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview.")
 
 }
 
@@ -188,16 +187,21 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 		cmd.Flag("cluster-type").Changed = true
 	}
 	if !cmd.Flags().Changed("cluster-tier") {
-		cmd.Flag("cluster-tier").Value.Set(string(originalSpec.ClusterInfo.GetClusterTier()))
+		clusterTier := string(originalSpec.ClusterInfo.GetClusterTier())
+		clusterTierCli := "Sandbox"
+		if clusterTier == "PAID" {
+			clusterTierCli = "Dedicated"
+		}
+		cmd.Flag("cluster-tier").Value.Set(clusterTierCli)
 		cmd.Flag("cluster-tier").Changed = true
 	}
 	if !cmd.Flags().Changed("fault-tolerance") {
 		cmd.Flag("fault-tolerance").Value.Set(string(originalSpec.ClusterInfo.GetFaultTolerance()))
 		cmd.Flag("fault-tolerance").Changed = true
 	}
-	if !cmd.Flags().Changed("database-track") {
-		cmd.Flag("database-track").Value.Set(trackName)
-		cmd.Flag("database-track").Changed = true
+	if !cmd.Flags().Changed("database-version") {
+		cmd.Flag("database-version").Value.Set(trackName)
+		cmd.Flag("database-version").Changed = true
 	}
 	if !cmd.Flags().Changed("node-config") {
 		nodeConfig := ""

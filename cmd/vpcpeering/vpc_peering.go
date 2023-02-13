@@ -29,8 +29,8 @@ import (
 
 var VPCPeeringCmd = &cobra.Command{
 	Use:   "vpc-peering",
-	Short: "vpc-peering",
-	Long:  "VPC Peerings commands",
+	Short: "Manage VPC Peerings",
+	Long:  "Manage VPC Peerings",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -256,23 +256,23 @@ var deleteVpcPeeringCmd = &cobra.Command{
 
 func init() {
 	VPCPeeringCmd.AddCommand(getVpcPeeringCmd)
-	getVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
+	getVpcPeeringCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC peering.")
 
 	VPCPeeringCmd.AddCommand(createVpcPeeringCmd)
-	createVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
+	createVpcPeeringCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC peering.")
 	createVpcPeeringCmd.MarkFlagRequired("name")
-	createVpcPeeringCmd.Flags().String("yb-vpc-name", "", "Name of the YugabyteDB Managed VPC.")
+	createVpcPeeringCmd.Flags().String("yb-vpc-name", "", "[REQUIRED] Name of the YugabyteDB Managed VPC.")
 	createVpcPeeringCmd.MarkFlagRequired("yb-vpc-name")
-	createVpcPeeringCmd.Flags().String("cloud-provider", "", "Cloud of the VPC with which to peer. AWS or GCP.")
+	createVpcPeeringCmd.Flags().String("cloud-provider", "", "[REQUIRED] Cloud of the VPC with which to peer. AWS or GCP.")
 	createVpcPeeringCmd.MarkFlagRequired("cloud-provider")
-	createVpcPeeringCmd.Flags().String("app-vpc-name", "", "Name of the application VPC. Required for GCP. Not applicable for AWS.")
-	createVpcPeeringCmd.Flags().String("app-vpc-project-id", "", "Project ID of the application VPC. Required for GCP. Not applicable for AWS.")
-	createVpcPeeringCmd.Flags().String("app-vpc-cidr", "", "CIDR of the application VPC. Required for AWS. Optional for GCP.")
-	createVpcPeeringCmd.Flags().String("app-vpc-account-id", "", "Account ID of the application VPC. Required for AWS. Not applicable for GCP.")
-	createVpcPeeringCmd.Flags().String("app-vpc-id", "", "ID of the application VPC. Required for AWS. Not applicable for GCP.")
-	createVpcPeeringCmd.Flags().String("app-vpc-region", "", "Region of the application VPC. Required for AWS. Not applicable for GCP.")
+	createVpcPeeringCmd.Flags().String("app-vpc-name", "", "[OPTIONAL] Name of the application VPC. Required for GCP. Not applicable for AWS.")
+	createVpcPeeringCmd.Flags().String("app-vpc-project-id", "", "[OPTIONAL] Project ID of the application VPC. Required for GCP. Not applicable for AWS.")
+	createVpcPeeringCmd.Flags().String("app-vpc-cidr", "", "[OPTIONAL] CIDR of the application VPC. Required for AWS. Optional for GCP.")
+	createVpcPeeringCmd.Flags().String("app-vpc-account-id", "", "[OPTIONAL] Account ID of the application VPC. Required for AWS. Not applicable for GCP.")
+	createVpcPeeringCmd.Flags().String("app-vpc-id", "", "[OPTIONAL] ID of the application VPC. Required for AWS. Not applicable for GCP.")
+	createVpcPeeringCmd.Flags().String("app-vpc-region", "", "[OPTIONAL] Region of the application VPC. Required for AWS. Not applicable for GCP.")
 
 	VPCPeeringCmd.AddCommand(deleteVpcPeeringCmd)
-	deleteVpcPeeringCmd.Flags().String("name", "", "Name for the VPC peering")
+	deleteVpcPeeringCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC peering.")
 	deleteVpcPeeringCmd.MarkFlagRequired("name")
 }
