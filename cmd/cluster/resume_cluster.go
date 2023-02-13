@@ -29,8 +29,8 @@ import (
 // resumeClusterCmd represents the cluster command
 var resumeClusterCmd = &cobra.Command{
 	Use:   "resume",
-	Short: "Resume a cluster in YugabyteDB Managed",
-	Long:  "Resume a cluster in YugabyteDB Managed",
+	Short: "Resume a cluster",
+	Long:  "Resume a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -93,6 +93,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// resumeClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	resumeClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be resumed")
+	resumeClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be resumed.")
 	resumeClusterCmd.MarkFlagRequired("cluster-name")
 }

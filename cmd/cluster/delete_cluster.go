@@ -27,8 +27,8 @@ import (
 // deleteClusterCmd represents the cluster command
 var deleteClusterCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete cluster in YugabyteDB Managed",
-	Long:  "Delete cluster in YugabyteDB Managed",
+	Short: "Delete a cluster",
+	Long:  "Delete a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -75,6 +75,6 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	deleteClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be deleted")
+	deleteClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be deleted.")
 	deleteClusterCmd.MarkFlagRequired("cluster-name")
 }

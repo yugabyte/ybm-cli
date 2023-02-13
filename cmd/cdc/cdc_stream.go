@@ -37,8 +37,8 @@ func printCdcStreamOutput(cdcStreamData []ybmclient.CdcStreamData) {
 
 var CDCStreamCmd = &cobra.Command{
 	Use:   "stream",
-	Short: "Change Data Capture stream",
-	Long:  "Change Data Capture stream commands",
+	Short: "Manage Change Data Capture stream operations",
+	Long:  "Manage Change Data Capture stream operations",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -95,7 +95,10 @@ var createCdcStreamCmd = &cobra.Command{
 
 		cdcStreamName, _ := cmd.Flags().GetString("name")
 		cdcSinkName, _ := cmd.Flags().GetString("sink")
-		sinkId, _ := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
+		sinkId, err := authApi.GetCdcSinkIDBySinkName(cdcSinkName)
+		if err != nil {
+			logrus.Fatalf("Please provide a valid sink name: %s", err)
+		}
 
 		dbName, _ := cmd.Flags().GetString("db-name")
 		tables, _ := cmd.Flags().GetStringArray("tables")
@@ -251,26 +254,36 @@ func init() {
 	CdcCmd.AddCommand(CDCStreamCmd)
 
 	CDCStreamCmd.AddCommand(getCdcStreamCmd)
-	getCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	getCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
+	getCdcStreamCmd.Flags().String("name", "", "[OPTIONAL] Name of the CDC Stream.")
+	getCdcStreamCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the Cluster.")
+	getCdcStreamCmd.MarkFlagRequired("cluster-name")
 
 	CDCStreamCmd.AddCommand(createCdcStreamCmd)
-	createCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	createCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
-	createCdcStreamCmd.Flags().StringArray("tables", []string{}, "Database tables the Cdc Stream will listen to")
-	createCdcStreamCmd.Flags().String("sink", "", "Destination sink for the CDC Stream")
-	createCdcStreamCmd.Flags().String("db-name", "", "Database that the Cdc Stream will listen to")
-	createCdcStreamCmd.Flags().String("snapshot-existing-data", "", "Whether to snapshot the existing data in the database")
-	createCdcStreamCmd.Flags().String("kafka-prefix", "", "A prefix for the Kafka topics")
+	createCdcStreamCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC Stream.")
+	createCdcStreamCmd.MarkFlagRequired("name")
+	createCdcStreamCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the Cluster.")
+	createCdcStreamCmd.MarkFlagRequired("cluster-name")
+	createCdcStreamCmd.Flags().StringArray("tables", []string{}, "[REQUIRED] Database tables the CDC Stream will listen to.")
+	createCdcStreamCmd.MarkFlagRequired("tables")
+	createCdcStreamCmd.Flags().String("sink", "", "[REQUIRED] Destination sink for the CDC Stream.")
+	createCdcStreamCmd.MarkFlagRequired("sink")
+	createCdcStreamCmd.Flags().String("db-name", "", "[REQUIRED] Database that the CDC Stream will listen to.")
+	createCdcStreamCmd.MarkFlagRequired("db-name")
+	createCdcStreamCmd.Flags().Bool("snapshot-existing-data", false, "[OPTIONAL] Whether to snapshot the existing data in the database.")
+	createCdcStreamCmd.Flags().String("kafka-prefix", "", "[OPTIONAL] A prefix for the Kafka topics.")
 
 	CDCStreamCmd.AddCommand(editCdcStreamCmd)
-	editCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	editCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
-	editCdcStreamCmd.Flags().String("new-name", "", "Updated name of the CDC Stream")
-	editCdcStreamCmd.Flags().StringArray("tables", []string{}, "Tables the Cdc Stream will listen to")
+	editCdcStreamCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC Stream.")
+	editCdcStreamCmd.MarkFlagRequired("name")
+	editCdcStreamCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the Cluster.")
+	editCdcStreamCmd.MarkFlagRequired("cluster-name")
+	editCdcStreamCmd.Flags().String("new-name", "", "[OPTIONAL] Updated name of the CDC Stream.")
+	editCdcStreamCmd.Flags().StringArray("tables", []string{}, "[OPTIONAL] Tables the Cdc Stream will listen to.")
 
 	CDCStreamCmd.AddCommand(deleteCdcStreamCmd)
-	deleteCdcStreamCmd.Flags().String("name", "", "Name of the CDC Stream")
-	deleteCdcStreamCmd.Flags().String("cluster-name", "", "Name of the Cluster")
+	deleteCdcStreamCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC Stream.")
+	deleteCdcStreamCmd.MarkFlagRequired("name")
+	deleteCdcStreamCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the Cluster.")
+	deleteCdcStreamCmd.MarkFlagRequired("cluster-name")
 
 }

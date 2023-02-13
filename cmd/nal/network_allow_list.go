@@ -33,8 +33,8 @@ var nalIpAddrs []string
 
 var NalCmd = &cobra.Command{
 	Use:   "network-allow-list",
-	Short: "network-allow-list",
-	Long:  "Network Allow list commands",
+	Short: "Manage Network Allow Lists",
+	Long:  "Manage Network ALlow Lists",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -146,16 +146,16 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 
 func init() {
 	NalCmd.AddCommand(getNetworkAllowListCmd)
-	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
+	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[OPTIONAL] The name of the Network Allow List.")
 
 	NalCmd.AddCommand(createNetworkAllowListCmd)
-	createNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
+	createNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[REQUIRED] The name of the Network Allow List.")
 	createNetworkAllowListCmd.MarkFlagRequired("name")
-	createNetworkAllowListCmd.Flags().StringVarP(&nalDescription, "description", "d", "", "Description of the Network Allow List")
-	createNetworkAllowListCmd.Flags().StringSliceVarP(&nalIpAddrs, "ip-addr", "i", []string{}, "IP addresses included in the Network Allow List")
+	createNetworkAllowListCmd.Flags().StringVarP(&nalDescription, "description", "d", "", "[OPTIONAL] Description of the Network Allow List.")
+	createNetworkAllowListCmd.Flags().StringSliceVarP(&nalIpAddrs, "ip-addr", "i", []string{}, "[REQUIRED] IP addresses included in the Network Allow List.")
 	createNetworkAllowListCmd.MarkFlagRequired("ip-addr")
 
 	NalCmd.AddCommand(deleteNetworkAllowListCmd)
-	deleteNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "The name of the Network Allow List")
+	deleteNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[REQUIRED] The name of the Network Allow List.")
 	deleteNetworkAllowListCmd.MarkFlagRequired("name")
 }

@@ -29,8 +29,8 @@ import (
 // pauseClusterCmd represents the cluster command
 var pauseClusterCmd = &cobra.Command{
 	Use:   "pause",
-	Short: "Pause clusters in YugabyteDB Managed",
-	Long:  "Pause clusters in YugabyteDB Managed",
+	Short: "Pause a cluster",
+	Long:  "Pause a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -94,6 +94,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// pauseClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	pauseClusterCmd.Flags().String("cluster-name", "", "The name of the cluster to be paused")
+	pauseClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be paused.")
 	pauseClusterCmd.MarkFlagRequired("cluster-name")
 }
