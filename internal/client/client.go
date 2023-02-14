@@ -644,6 +644,70 @@ func (a *AuthApiClient) ListTasks() ybmclient.ApiListTasksRequest {
 }
 
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
+
+	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {
+		return a.WaitForTaskCompletionCI(entityId, entityType, taskType, completionStatus, message, timeOutInSec)
+	}
+	return a.WaitForTaskCompletionFull(entityId, entityType, taskType, completionStatus, message, timeOutInSec)
+
+}
+
+func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
+	var taskList ybmclient.TaskListResponse
+	var resp *http.Response
+	var err error
+	currentStatus := "UNKNOW"
+	previousStatus := "UNKNOW"
+	output := fmt.Sprintf(" %s: %s", message, currentStatus)
+	timeout := time.After(time.Duration(timeOutInSec) * time.Second)
+	checkEveryInSec := time.Tick(2 * time.Second)
+	fmt.Println(output)
+	for {
+		select {
+		case <-timeout:
+			return "", fmt.Errorf("wait timeout, operation could still be on-going")
+		case <-a.ctx.Done():
+			return "", fmt.Errorf("receive interrupt signal, operation could still be on-going")
+		case <-checkEveryInSec:
+			apiRequest := a.ListTasks().TaskType(taskType).ProjectId(a.ProjectID).EntityId(entityId).Limit(1)
+			//Sometime the api do not need any entity type, for example VPC, VPC_PEERING
+			if len(entityType) > 0 {
+				apiRequest.EntityType(entityType)
+			}
+			taskList, resp, err = apiRequest.Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", resp)
+				return "", fmt.Errorf("error when calling `TaskApi.ListTasks`: %s", GetApiErrorDetails(err))
+			}
+
+			if v, ok := taskList.GetDataOk(); ok && v != nil {
+				c := taskList.GetData()
+				if len(c) > 0 {
+					if status, ok := c[0].GetInfoOk(); ok {
+						previousStatus = currentStatus
+						currentStatus = status.GetState()
+					}
+					output = fmt.Sprintf(" %s: %s", message, currentStatus)
+					if taskProgressInfo, _ := c[0].Info.GetTaskProgressInfoOk(); ok && taskProgressInfo != nil {
+
+						for index, action := range taskProgressInfo.GetActions() {
+							output = output + "\n" + ". Task " + strconv.Itoa(index+1) + ": " + action.GetName() + " " + strconv.Itoa(int(action.GetPercentComplete())) + "% completed"
+						}
+					}
+				}
+			}
+			if slices.Contains(completionStatus, currentStatus) {
+				return currentStatus, nil
+			}
+			if previousStatus != currentStatus {
+				fmt.Println(output)
+			}
+		}
+	}
+
+}
+
+func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
 	var taskList ybmclient.TaskListResponse
 	var resp *http.Response
 	var err error
