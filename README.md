@@ -270,7 +270,7 @@ ybm cluster delete \
     --wait
 ```
 
-If you are using the CLI with the `--wait` flag in your CI system you can specify the environment variable `YBM_CI` to avoid 
+If you are using the CLI with the `--wait` flag in your CI system you can specify the environment variable `YBM_CI` to `true` to avoid 
  generating unnecessary logs lines.
 
 [![asciicast](https://asciinema.org/a/dUSEfk4cJKdsxsZ8gnIU4l4lY.svg)](https://asciinema.org/a/dUSEfk4cJKdsxsZ8gnIU4l4lY)
