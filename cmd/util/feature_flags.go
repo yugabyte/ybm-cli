@@ -25,6 +25,7 @@ type FeatureFlag string
 
 const (
 	CDC FeatureFlag = "CDC"
+	PSE FeatureFlag = "PRIVATE_SERVICE_ENDPOINT"
 )
 
 func (f FeatureFlag) String() string {
