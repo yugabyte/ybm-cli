@@ -36,11 +36,12 @@ var getClusterCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 		clusterListRequest := authApi.ListClusters()
-
+		isGet := false
 		// if user filters by name, add it to the request
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		if clusterName != "" {
 			clusterListRequest = clusterListRequest.Name(clusterName)
+			isGet = true
 		}
 
 		resp, r, err := clusterListRequest.Execute()
@@ -53,6 +54,14 @@ var getClusterCmd = &cobra.Command{
 		clustersCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+		if isGet {
+			fullClusterContext := *formatter.NewFullClusterContext()
+			fullClusterContext.Output = os.Stdout
+			dt := resp.GetData()
+			fullClusterContext.SetClusterData(dt[0])
+			fullClusterContext.Write()
+			return
 		}
 		formatter.ClusterWrite(clustersCtx, resp.GetData())
 	},

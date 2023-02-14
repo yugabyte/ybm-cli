@@ -1,0 +1,57 @@
+// package cluster
+
+// import (
+// 	"github.com/sirupsen/logrus"
+// 	"github.com/spf13/cobra"
+// 	"github.com/spf13/viper"
+// 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+// )
+
+// var publicAccessClusterCmd = &cobra.Command{
+// 	Use:   "public-endpoint",
+// 	Short: "Enable or Disable public endpoint for a cluster in YugabyteDB Managed",
+// 	Long:  "Enable or Disable public for a cluster in YugabyteDB Managed",
+// 	Run: func(cmd *cobra.Command, args []string) {
+// 		if viper.GetBool("enable") && viper.GetBool("disable") {
+// 			logrus.Fatal("only one of the flag enable or disable should be set")
+// 		}
+
+// 		if !viper.GetBool("enable") && !viper.GetBool("disable") {
+// 			logrus.Fatal("please set one of the following flag: enable or disable")
+// 		}
+
+// 		clusterName, _ := cmd.Flags().GetString("cluster-name")
+// 		//if cmd.Flk
+// 		authApi, err := ybmAuthClient.NewAuthApiClient()
+// 		if err != nil {
+// 			logrus.Fatalf("could not initiate api client: %s", err.Error())
+// 		}
+// 		authApi.GetInfo("", "")
+// 		clusterID, err := authApi.GetClusterIdByName(clusterName)
+// 		if err != nil {
+// 			logrus.Fatal(err)
+// 		}
+// 		resp, r, err := authApi.GetCluster(clusterID).Execute()
+// 		if err != nil {
+// 			logrus.Debugf("Full HTTP response: %v", r)
+// 			logrus.Fatalf("Error when calling `ClusterApi.GetCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+// 		}
+// 		newSpec := resp.Data.GetSpec()
+
+// 		if viper.GetBool("enable") {
+// 			newSpec.Acc
+// 		}
+
+// 	},
+// }
+
+// func init() {
+// 	ClusterCmd.AddCommand(publicAccessClusterCmd)
+// 	publicAccessClusterCmd.Flags().String("cluster-name", "", "Name of the cluster.")
+// 	publicAccessClusterCmd.MarkFlagRequired("cluster-name")
+
+// 	publicAccessClusterCmd.Flags().Bool("enable", false, "Enable public access for the cluster")
+// 	publicAccessClusterCmd.Flags().Bool("disable", false, "Disable public access for the cluster")
+// 	viper.BindPFlag("enable", publicAccessClusterCmd.Flags().Lookup("enable"))
+// 	viper.BindPFlag("enable", publicAccessClusterCmd.Flags().Lookup("disable"))
+// }
