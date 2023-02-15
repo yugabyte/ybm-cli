@@ -656,8 +656,8 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType stri
 	var taskList ybmclient.TaskListResponse
 	var resp *http.Response
 	var err error
-	currentStatus := "UNKNOW"
-	previousStatus := "UNKNOW"
+	currentStatus := "UNKNOWN"
+	previousStatus := "UNKNOWN"
 	output := fmt.Sprintf(" %s: %s", message, currentStatus)
 	timeout := time.After(time.Duration(timeOutInSec) * time.Second)
 	checkEveryInSec := time.Tick(2 * time.Second)
@@ -712,7 +712,7 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType st
 	var resp *http.Response
 	var err error
 
-	currentStatus := "UNKNOW"
+	currentStatus := "UNKNOWN"
 	output := fmt.Sprintf(" %s: %s", message, currentStatus)
 	s := spinner.New(spinner.CharSets[36], 300*time.Millisecond)
 	s.Color("green", "bold")
