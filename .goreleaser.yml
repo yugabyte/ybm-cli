@@ -23,4 +23,11 @@ checksum:
   algorithm: sha256
 milestones:
   - close: true
-release:
+brews:
+  - tap:
+      owner: yugabyte
+      name: ybm-cli
+    folder: Formula
+    homepage: "https://github.com/yugabyte/ybm-cli"
+    description: "YugabyteDB Managed CLI"
+    license: "Apache"
