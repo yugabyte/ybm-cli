@@ -23,16 +23,4 @@ checksum:
   algorithm: sha256
 milestones:
   - close: true
-brews:
-  - tap:
-      owner: yugabyte
-      name: ybm-cli
-    folder: Formula
-    homepage: "https://github.com/yugabyte/ybm-cli"
-    # Allows you to set a custom download strategy.
-    download_strategy: GitHubPrivateRepositoryReleaseDownloadStrategy
-    # Allows you to add a custom require_relative at the top of the formula template
-    custom_require: "lib/custom_download_strategy"
-    description: "YugabyteDB Managed CLI"
-    license: "Apache"
     
