@@ -3,10 +3,10 @@ A CLI implementation for YB Managed.
 
 # Install with brew
 
-- export HOMEBREW_GITHUB_API_TOKEN=<GITHUB_API_TOKEN>
+- `export HOMEBREW_GITHUB_API_TOKEN=<GITHUB_API_TOKEN>`
     - Github allows the creation of fine-grained personal access tokens. The details can be found [here](https://github.com/settings/personal-access-tokens/new). Please ensure that the token has READ ONLY access only to the `Contents` section of the `ybm-cli` repository.
-- brew tap yugabyte/ybm-cli https://github.com/yugabyte/ybm-cli.git
-- brew install yugabyte/ybm-cli
+- `brew tap yugabyte/ybm-cli https://github.com/yugabyte/ybm-cli.git`
+- `brew install ybm-cli`
 
 # Global configuration
 This CLI support 3 possibles configurations: 

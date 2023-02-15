@@ -35,4 +35,3 @@ brews:
     custom_require: "lib/custom_download_strategy"
     description: "YugabyteDB Managed CLI"
     license: "Apache"
-    
