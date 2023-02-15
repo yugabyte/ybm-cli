@@ -16,6 +16,7 @@ package cluster
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 )
 
 // getCmd represents the list command
@@ -30,6 +31,7 @@ var ClusterCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand()
+	util.AddCommandIfFeatureFlag(ClusterCmd, PseCmd, util.PSE)
 
 	// Here you will define your flags and configuration settings.
 
