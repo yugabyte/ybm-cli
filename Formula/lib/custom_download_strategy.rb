@@ -115,19 +115,11 @@ class DownloadStrategyDetector
     module Compat
       def detect(url, using = nil)
         strategy = super
-        require_aws_sdk if strategy == S3DownloadStrategy
         strategy
       end
 
       def detect_from_url(url)
-        case url
-        when %r{^s3://}
-          S3DownloadStrategy
-        when %r{^scp://}
-          ScpDownloadStrategy
-        else
           super(url)
-        end
       end
 
       def detect_from_symbol(symbol)
@@ -136,10 +128,6 @@ class DownloadStrategyDetector
           GitHubPrivateRepositoryDownloadStrategy
         when :github_private_release
           GitHubPrivateRepositoryReleaseDownloadStrategy
-        when :s3
-          S3DownloadStrategy
-        when :scp
-          ScpDownloadStrategy
         else
           super(symbol)
         end
