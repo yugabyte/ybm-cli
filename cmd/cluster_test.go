@@ -250,7 +250,7 @@ us-west-2   1         2           8GB        100GB`))
 				statusCode = 200
 				err := loadJson("./test/fixtures/no-clusters.json", &responseCluster)
 				Expect(err).ToNot(HaveOccurred())
-				server.AppendHandlers(
+				server.SetHandler(2,
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
