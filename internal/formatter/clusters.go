@@ -70,6 +70,7 @@ func NewClusterContext() *ClusterContext {
 	clusterCtx := ClusterContext{}
 	clusterCtx.Header = SubHeaderContext{
 		"Name":             nameHeader,
+		"ID":               "ID",
 		"Regions":          regionsHeader,
 		"Nodes":            numNodesHeader,
 		"NodesSpec":        nodeInfoHeader,
@@ -81,6 +82,10 @@ func NewClusterContext() *ClusterContext {
 		"DataDistribution": dataDistributionHeader,
 	}
 	return &clusterCtx
+}
+
+func (c *ClusterContext) ID() string {
+	return c.c.Info.Id
 }
 
 func (c *ClusterContext) Name() string {
@@ -148,7 +153,7 @@ func (c *ClusterContext) Provider() string {
 	providers := make(map[string]string)
 
 	if ok := c.c.Spec.HasClusterRegionInfo(); ok {
-		if len(c.c.GetSpec().ClusterRegionInfo) > 1 {
+		if len(c.c.GetSpec().ClusterRegionInfo) > 0 {
 			sort.Slice(c.c.GetSpec().ClusterRegionInfo, func(i, j int) bool {
 				return string(c.c.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code) < string(c.c.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code)
 			})

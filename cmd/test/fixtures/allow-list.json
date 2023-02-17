@@ -1,0 +1,34 @@
+{
+    "data": [
+        {
+            "spec": {
+                "name": "device-ip-gween",
+                "description": "device-ip-gween",
+                "allow_list": [
+                    "152.165.26.42/32"
+                ]
+            },
+            "info": {
+                "id": "1eaf5552-e2f3-4a28-b215-106667c05178",
+                "project_id": "78d4459c-0f45-47a5-899a-45ddf43eba6e",
+                "cluster_ids": [
+                    "5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"
+                ],
+                "cluster_list": [
+                    {
+                        "id": "5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8",
+                        "name": "stunning-sole"
+                    }
+                ],
+                "peering_id": null
+            }
+        }
+    ],
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/allow-lists",
+            "next": null
+        }
+    }
+}
