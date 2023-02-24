@@ -21,4 +21,4 @@ subcomponent's license, as noted in the LICENSE file.
 The following subcomponents are used:
 EOF
 
-go-licenses report --include_tests $PARENT_DIRECTORY --ignore github.com/yugabyte/yugabytedb-managed-go-client-internal --template ./licenses.tpl 2>/dev/null >> NOTICE
+go-licenses report --include_tests $PARENT_DIRECTORY --ignore github.com/yugabyte/yugabytedb-managed-go-client-internal --template $DIR/licenses.tpl 2>/dev/null >> NOTICE
