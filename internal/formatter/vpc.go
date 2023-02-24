@@ -23,9 +23,10 @@ import (
 )
 
 const (
-	defaultVPCListing = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.RegionsCIDR}}\t{{.Peerings}}\t{{.Clusters}}"
-	vpcCIDRHeader     = "Region-CIDR"
-	vpcPeeringHeader  = "Peerings"
+	defaultVPCListing   = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.RegionsCIDR}}\t{{.Peerings}}\t{{.Clusters}}"
+	vpcRegionCIDRHeader = "Region[CIDR]"
+	vpcCIDRHeader       = "CIDR"
+	vpcPeeringHeader    = "Peerings"
 )
 
 type VPCContext struct {
@@ -64,7 +65,9 @@ func NewVPCContext() *VPCContext {
 	VPCCtx.Header = SubHeaderContext{
 		"Name":        nameHeader,
 		"State":       stateHeader,
-		"RegionsCIDR": regionsHeader,
+		"RegionsCIDR": vpcRegionCIDRHeader,
+		"Regions":     regionsHeader,
+		"CIDR":        vpcCIDRHeader,
 		"Provider":    providerHeader,
 		"Peerings":    vpcPeeringHeader,
 		"Clusters":    clustersHeader,
@@ -74,6 +77,22 @@ func NewVPCContext() *VPCContext {
 
 func (c *VPCContext) Name() string {
 	return c.c.Spec.Name
+}
+
+func (c *VPCContext) CIDR() string {
+	var CIDRList []string
+	for _, regionSpec := range c.c.GetSpec().RegionSpecs {
+		CIDRList = append(CIDRList, regionSpec.GetCidr())
+	}
+	return strings.Join(CIDRList, ",")
+}
+
+func (c *VPCContext) Regions() string {
+	var RegionsList []string
+	for _, regionSpec := range c.c.GetSpec().RegionSpecs {
+		RegionsList = append(RegionsList, regionSpec.GetRegion())
+	}
+	return strings.Join(RegionsList, ",")
 }
 
 func (c *VPCContext) RegionsCIDR() string {
