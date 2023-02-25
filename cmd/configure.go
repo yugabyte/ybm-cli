@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,8 +35,11 @@ var configureCmd = &cobra.Command{
 		var host string
 		fmt.Scanln(&apiKey)
 		viper.GetViper().Set("apikey", &apiKey)
-		fmt.Print("Enter Host: ")
+		fmt.Print("Enter Host (leave empty for default cloud.yugabyte.com): ")
 		fmt.Scanln(&host)
+		if strings.TrimSpace(host) == "" {
+			host = "cloud.yugabyte.com"
+		}
 		viper.GetViper().Set("host", &host)
 		err := viper.WriteConfig()
 		if err != nil {
