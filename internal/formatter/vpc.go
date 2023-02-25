@@ -1,16 +1,17 @@
-// Copyright (c) YugaByte, Inc.
+// Licensed to Yugabyte, Inc. under one or more contributor license
+// agreements. See the NOTICE file distributed with this work for
+// additional information regarding copyright ownership. Yugabyte
+// licenses this file to you under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package formatter
 
@@ -23,9 +24,10 @@ import (
 )
 
 const (
-	defaultVPCListing = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.RegionsCIDR}}\t{{.Peerings}}\t{{.Clusters}}"
-	vpcCIDRHeader     = "Region-CIDR"
-	vpcPeeringHeader  = "Peerings"
+	defaultVPCListing   = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.RegionsCIDR}}\t{{.Peerings}}\t{{.Clusters}}"
+	vpcRegionCIDRHeader = "Region[CIDR]"
+	vpcCIDRHeader       = "CIDR"
+	vpcPeeringHeader    = "Peerings"
 )
 
 type VPCContext struct {
@@ -64,7 +66,9 @@ func NewVPCContext() *VPCContext {
 	VPCCtx.Header = SubHeaderContext{
 		"Name":        nameHeader,
 		"State":       stateHeader,
-		"RegionsCIDR": regionsHeader,
+		"RegionsCIDR": vpcRegionCIDRHeader,
+		"Regions":     regionsHeader,
+		"CIDR":        vpcCIDRHeader,
 		"Provider":    providerHeader,
 		"Peerings":    vpcPeeringHeader,
 		"Clusters":    clustersHeader,
@@ -74,6 +78,22 @@ func NewVPCContext() *VPCContext {
 
 func (c *VPCContext) Name() string {
 	return c.c.Spec.Name
+}
+
+func (c *VPCContext) CIDR() string {
+	var CIDRList []string
+	for _, regionSpec := range c.c.GetSpec().RegionSpecs {
+		CIDRList = append(CIDRList, regionSpec.GetCidr())
+	}
+	return strings.Join(CIDRList, ",")
+}
+
+func (c *VPCContext) Regions() string {
+	var RegionsList []string
+	for _, regionSpec := range c.c.GetSpec().RegionSpecs {
+		RegionsList = append(RegionsList, regionSpec.GetRegion())
+	}
+	return strings.Join(RegionsList, ",")
 }
 
 func (c *VPCContext) RegionsCIDR() string {

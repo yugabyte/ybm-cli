@@ -1,16 +1,17 @@
-// Copyright (c) YugaByte, Inc.
+// Licensed to Yugabyte, Inc. under one or more contributor license
+// agreements. See the NOTICE file distributed with this work for
+// additional information regarding copyright ownership. Yugabyte
+// licenses this file to you under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package formatter
 
@@ -19,11 +20,13 @@ import (
 	"fmt"
 	"runtime"
 	"sort"
+	"strings"
 
 	"github.com/enescakir/emoji"
 	"github.com/inhies/go-bytesize"
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"golang.org/x/exp/maps"
 )
 
 const (
@@ -67,15 +70,23 @@ func ClusterWrite(ctx Context, clusters []ybmclient.ClusterData) error {
 func NewClusterContext() *ClusterContext {
 	clusterCtx := ClusterContext{}
 	clusterCtx.Header = SubHeaderContext{
-		"Name":            nameHeader,
-		"Regions":         regionsHeader,
-		"Nodes":           numNodesHeader,
-		"NodesSpec":       nodeInfoHeader,
-		"SoftwareVersion": softwareVersionHeader,
-		"State":           stateHeader,
-		"HealthState":     healthStateHeader,
+		"Name":             nameHeader,
+		"ID":               "ID",
+		"Regions":          regionsHeader,
+		"Nodes":            numNodesHeader,
+		"NodesSpec":        nodeInfoHeader,
+		"SoftwareVersion":  softwareVersionHeader,
+		"State":            stateHeader,
+		"HealthState":      healthStateHeader,
+		"Provider":         providerHeader,
+		"FaultTolerance":   faultToleranceHeader,
+		"DataDistribution": dataDistributionHeader,
 	}
 	return &clusterCtx
+}
+
+func (c *ClusterContext) ID() string {
+	return c.c.Info.Id
 }
 
 func (c *ClusterContext) Name() string {
@@ -137,6 +148,32 @@ func (c *ClusterContext) MarshalJSON() ([]byte, error) {
 
 func (c *ClusterContext) totalResource(resource int32) int32 {
 	return c.c.GetSpec().ClusterInfo.NumNodes * resource
+}
+
+func (c *ClusterContext) Provider() string {
+	providers := make(map[string]string)
+
+	if ok := c.c.Spec.HasClusterRegionInfo(); ok {
+		if len(c.c.GetSpec().ClusterRegionInfo) > 0 {
+			sort.Slice(c.c.GetSpec().ClusterRegionInfo, func(i, j int) bool {
+				return string(c.c.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code) < string(c.c.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code)
+			})
+			for _, p := range c.c.GetSpec().ClusterRegionInfo {
+				//Check uniqueness of Cloud (in case multi cloud with strange distribution, AWS, GCP,AWS)
+				if _, ok := providers[string(p.PlacementInfo.CloudInfo.Code)]; !ok {
+					providers[string(p.PlacementInfo.CloudInfo.Code)] = string(p.PlacementInfo.CloudInfo.Code)
+				}
+			}
+		}
+	}
+	return strings.Join(maps.Keys(providers), ",")
+}
+func (c *ClusterContext) FaultTolerance() string {
+	return string(c.c.GetSpec().ClusterInfo.FaultTolerance)
+}
+
+func (c *ClusterContext) DataDistribution() string {
+	return "No idea"
 }
 
 // clusterHealthStateToEmoji return emoji based on cluster health state

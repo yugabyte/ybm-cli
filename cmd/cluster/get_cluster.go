@@ -1,16 +1,17 @@
-// Copyright (c) YugaByte, Inc.
+// Licensed to Yugabyte, Inc. under one or more contributor license
+// agreements. See the NOTICE file distributed with this work for
+// additional information regarding copyright ownership. Yugabyte
+// licenses this file to you under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package cluster
 
@@ -36,11 +37,12 @@ var getClusterCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 		clusterListRequest := authApi.ListClusters()
-
+		isGetByName := false
 		// if user filters by name, add it to the request
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		if clusterName != "" {
 			clusterListRequest = clusterListRequest.Name(clusterName)
+			isGetByName = true
 		}
 
 		resp, r, err := clusterListRequest.Execute()
@@ -50,6 +52,14 @@ var getClusterCmd = &cobra.Command{
 			logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
+		if isGetByName && len(resp.GetData()) > 0 {
+			fullClusterContext := *formatter.NewFullClusterContext()
+			fullClusterContext.Output = os.Stdout
+			fullClusterContext.Format = formatter.NewFullClusterFormat(viper.GetString("output"))
+			fullClusterContext.SetFullCluster(*authApi, resp.GetData()[0])
+			fullClusterContext.Write()
+			return
+		}
 		clustersCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewClusterFormat(viper.GetString("output")),
