@@ -26,11 +26,6 @@ jobs:
           echo '${{ secrets.GO_CLIENT_SECRET }}' > ~/.ssh/id_ed25519
           sudo chmod 0400 ~/.ssh/id_ed25519
           git config --global url."git@github.com:".insteadOf https://github.com/
-      - name: Docker Login
-        uses: docker/login-action@v2
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4.2.0
