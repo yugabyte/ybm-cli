@@ -33,7 +33,7 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
-          GITHUB_TOKEN: ${{ secrets.CLI_GITHUB_TOKEN }} #Needs to have access only to the CLI repo and the homebrew repo.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - 
         name: Clean upSSH key
         run: |
