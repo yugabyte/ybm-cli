@@ -23,4 +23,29 @@ checksum:
   algorithm: sha256
 milestones:
   - close: true
-    
+
+dockers:
+- image_templates:
+  - "yugabytedb/ybm-cli:{{ .Version }}-amd64"
+  - "yugabytedb/ybm-cli:latest-amd64"
+  use: buildx
+  dockerfile: Dockerfile
+  build_flag_templates:
+  - "--platform=linux/amd64"
+- image_templates:
+  - "yugabytedb/ybm-cli:{{ .Version }}-arm64v8"
+  - "yugabytedb/ybm-cli:latest-arm64v8"
+  use: buildx
+  goarch: arm64
+  dockerfile: Dockerfile
+  build_flag_templates:
+  - "--platform=linux/arm64/v8"
+docker_manifests:
+- name_template: "yugabytedb/ybm-cli:{{ .Version }}"
+  image_templates:
+  - "yugabytedb/ybm-cli:{{ .Version }}-amd64"
+  - "yugabytedb/ybm-cli:{{ .Version }}-arm64v8"
+- name_template: "yugabytedb/ybm-cli:latest"
+  image_templates:
+  - "yugabytedb/ybm-cli:latest-amd64"
+  - "yugabytedb/ybm-cli:latest-arm64v8"
