@@ -24,15 +24,6 @@ checksum:
 milestones:
   - close: true
 
-brews:
-  - tap:
-      owner: yugabyte
-      name: homebrew-yugabytedb
-    folder: Formula
-    homepage: "https://github.com/yugabyte/ybm-cli"
-    description: "The CLI for YugabyteDB Managed"
-    license: "Apache"
-
 dockers:
 - image_templates:
   - "yugabytedb/ybm-cli:{{ .Version }}-amd64"
