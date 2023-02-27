@@ -20,7 +20,7 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 )
 
-var version = "v0.1.0"
+var version = "v0.0.1-dev"
 
 func main() {
 	ybmAuthClient.SetVersion(version)

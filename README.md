@@ -3,30 +3,29 @@ A CLI implementation for YB Managed.
 
 # Install with brew
 
-- `export HOMEBREW_GITHUB_API_TOKEN=<GITHUB_API_TOKEN>`
-    - Github allows the creation of fine-grained personal access tokens. The details can be found [here](https://github.com/settings/personal-access-tokens/new). Please ensure that the token has READ ONLY access only to the `Contents` section of the `ybm-cli` repository.
-- `brew tap yugabyte/ybm-cli https://github.com/yugabyte/ybm-cli.git`
-- `brew install ybm-cli`
+- `brew install yugabyte/yugabytedb/ybm`
 
 # Global configuration
 This CLI support 3 possibles configurations: 
 * Passing values as flags 
-  ```shell
+  ```sh
   ybm --apiKey AWERDFSSS --host cloud.yugabyte.com cluster get
   ```
+
 * Using a configuration file called `.ybm-cli.yaml` under your `$HOME` directory.
   You can use the command `ybm configure` to help to setup the file
 
 * Using environment variables (all need to start with `YBM_`)
- ```shell
- export YBM_APIKEY=AWERDFSSS
- export YBM_HOST=cloud.yugabyte.com
- ybm cluster get
- ```
+  ```sh
+  export YBM_APIKEY=AWERDFSSS
+  export YBM_HOST=cloud.yugabyte.com
+  ybm cluster get
+  ```
 
 By default, `https` will be added to the host if no scheme are provided if you want to use `http` 
 just add it to the host `http://cloud.yugabyte.com`
 
+![Demo of the CLI](./resources/demo.gif)
 
 ## Sample Commands:
 
@@ -37,7 +36,7 @@ just add it to the host `http://cloud.yugabyte.com`
 ```sh
 ybm cluster create \
     --cluster-name=test-cluster \
-    --credentials=username=anonymous,password=password123 
+    --credentials=username=admin,password=YBM.Is.Always.Great! 
 ```
 
 This will use configured default values to spawn the cluster. A single node synchronous cluster will be provisioned in AWS in the `us-west-2` region with 2 vCPUs, 4GB RAM and 10GB disk.
@@ -45,7 +44,7 @@ This will use configured default values to spawn the cluster. A single node sync
 ```sh
 ybm cluster create
     --cluster-name=test-cluster \
-    --credentials=username=anonymous,password=password123 \
+    --credentials=username=admin,password=YBM.Is.Always.Great! \
     --cloud-type=[AWS or GCP] \
     --cluster-type=[SYNCHRONOUS or GEO_PARTITIONED] \
     --node-config=num-cores=<num-cores>,disk-size-gb=<disk-size-gb> \
@@ -89,7 +88,7 @@ ybm network-allow-list get
 
 #### Get Network Allow List
 ```sh
-ybm network-allow-list get
+ybm network-allow-list get \
     --name=admins
 ```
 
@@ -102,7 +101,7 @@ ybm cluster assign network-allow-list \
 
 #### Delete Network Allow List
 ```sh
-ybm network-allow-list delete
+ybm network-allow-list delete \
     --name=admins
 ```
 
@@ -144,7 +143,7 @@ All the read replicas will be deleted. To delete only specific read replicas, us
 ybm vpc create \
     --name=demo-vpc \
     --cloud=GCP \
-    --global-cidr=10.0.0.0/18 \
+    --global-cidr=10.0.0.0/18
 ```
 
 #### List VPCs
@@ -185,88 +184,16 @@ ybm vpc-peering get
 
 #### Get VPC Peering
 ```sh
-ybm vpc-peering get 
+ybm vpc-peering get \
     --name=demo-peer
 ```
 
 #### Delete VPC Peering
 ```sh
-ybm vpc-peering delete 
+ybm vpc-peering delete \
     --name=demo-peer
 ```
 
-### CDC Sink
-
-#### Create CDC Sink
-```sh
-ybm cdc-sink create \
-    --name=sink-2 \
-    --hostname=kafka.self.us \
-    --auth-type=BASIC \
-    --cdc-sink-type=KAFKA \
-    --username=something \
-    --password=something \
-```
-
-#### List CDC Sinks
-```sh
-ybm cdc-sink get 
-```
-#### Get CDC Sink
-```sh
-ybm cdc-sink get \
-    --name=sink-2 
-```
-#### Update CDC Sink
-
-```sh
-ybm cdc-sink update \
-    --name=sink-2 \
-    --new-name=new-sink-2 
-```
-
-#### Delete CDC Sink
-```sh
-ybm cdc-sink delete \
-    --name=sink-2 
-```
-
-### CDC Stream
-
-#### Create CDC Stream
-```sh
-ybm cdc-stream create \
-    --name=cdc-stream-1 \
-    --cluster-name=test-cluster-2 \ 
-    --db-name=yugabyte \ 
-    --kafka-prefix=kafkaPrefix \
-    --sink=cdc-sink \
-    --tables=public.dept 
-```
-
-#### List CDC Streams
-
-```sh
-ybm cdc-stream get 
-```
-
-#### Get CDC Stream
-```sh
-ybm cdc-stream get \
-    --name=cdc-stream-1 
-```
-
-#### Update CDC Stream
-```sh
-ybm cdc-stream update \
-    --name=cdc-stream-1 \
-    --tables=public.emp 
-```
-#### Delete CDC Stream
-```sh
-ybm cdc-stream delete \
-    --name=cdc-stream-1 
-```
 ### Wait
 
 All the long running commands like the cluster creation, cluster deletion etc have the `--wait` option to wait until the operation is completed. 
@@ -280,9 +207,7 @@ ybm cluster delete \
 If you are using the CLI with the `--wait` flag in your CI system you can specify the environment variable `YBM_CI` to `true` to avoid 
  generating unnecessary logs lines.
 
-[![asciicast](https://asciinema.org/a/dUSEfk4cJKdsxsZ8gnIU4l4lY.svg)](https://asciinema.org/a/dUSEfk4cJKdsxsZ8gnIU4l4lY)
-
-## Update CLI
+## Update REST API Client
 - make update-cli
 
 
