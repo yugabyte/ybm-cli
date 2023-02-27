@@ -3,8 +3,7 @@ A CLI implementation for YB Managed.
 
 # Install with brew
 
-- `brew tap yugabyte/yugabytedb`
-- `brew install ybm-cli`
+- `brew install yugabyte/yugabytedb/ybm`
 
 # Global configuration
 This CLI support 3 possibles configurations: 
