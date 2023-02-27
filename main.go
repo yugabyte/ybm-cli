@@ -24,5 +24,5 @@ var version = "v0.1.0"
 
 func main() {
 	ybmAuthClient.SetVersion(version)
-	cmd.Execute()
+	cmd.Execute(version)
 }
