@@ -18,30 +18,32 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // configureCmd represents the configure command
 var configureCmd = &cobra.Command{
-	Use:   "configure",
-	Short: "Configure ybm CLI",
-	Long:  "Configure the ybm CLI through this command by providing the API Key.",
+	Use:   "auth",
+	Short: "Authenticate ybm CLI",
+	Long:  "Authenticate the ybm CLI through this command by providing the API Key.",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Print("Enter API Key: ")
 		var apiKey string
 		var host string
-		fmt.Scanln(&apiKey)
-		viper.GetViper().Set("apikey", &apiKey)
-		fmt.Print("Enter Host (leave empty for default cloud.yugabyte.com): ")
-		fmt.Scanln(&host)
-		if strings.TrimSpace(host) == "" {
-			host = "cloud.yugabyte.com"
+		var data []byte
+		data, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil {
+			logrus.Fatalln("could not read apiKey: ", err)
 		}
+		apiKey = string(data)
+		viper.GetViper().Set("apikey", &apiKey)
+		host = "cloud.yugabyte.com"
 		viper.GetViper().Set("host", &host)
-		err := viper.WriteConfig()
+		err = viper.WriteConfig()
 		if err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				fmt.Fprintln(os.Stdout, "No config was found a new one will be created.")
@@ -56,6 +58,6 @@ var configureCmd = &cobra.Command{
 				return
 			}
 		}
-		fmt.Println("Configuration file sucessfully updated.")
+		fmt.Println("\nConfiguration file sucessfully updated.")
 	},
 }
