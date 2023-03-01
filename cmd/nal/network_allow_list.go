@@ -150,11 +150,12 @@ func init() {
 	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[OPTIONAL] The name of the Network Allow List.")
 
 	NalCmd.AddCommand(createNetworkAllowListCmd)
+	createNetworkAllowListCmd.Flags().SortFlags = false
+	createNetworkAllowListCmd.Flags().StringSliceVarP(&nalIpAddrs, "ip-addr", "i", []string{}, "[REQUIRED] IP addresses included in the Network Allow List.")
+	createNetworkAllowListCmd.MarkFlagRequired("ip-addr")
 	createNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[REQUIRED] The name of the Network Allow List.")
 	createNetworkAllowListCmd.MarkFlagRequired("name")
 	createNetworkAllowListCmd.Flags().StringVarP(&nalDescription, "description", "d", "", "[OPTIONAL] Description of the Network Allow List.")
-	createNetworkAllowListCmd.Flags().StringSliceVarP(&nalIpAddrs, "ip-addr", "i", []string{}, "[REQUIRED] IP addresses included in the Network Allow List.")
-	createNetworkAllowListCmd.MarkFlagRequired("ip-addr")
 
 	NalCmd.AddCommand(deleteNetworkAllowListCmd)
 	deleteNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[REQUIRED] The name of the Network Allow List.")

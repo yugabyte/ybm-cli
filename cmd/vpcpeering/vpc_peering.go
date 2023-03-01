@@ -260,6 +260,7 @@ func init() {
 	getVpcPeeringCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC peering.")
 
 	VPCPeeringCmd.AddCommand(createVpcPeeringCmd)
+	createVpcPeeringCmd.Flags().SortFlags = false
 	createVpcPeeringCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC peering.")
 	createVpcPeeringCmd.MarkFlagRequired("name")
 	createVpcPeeringCmd.Flags().String("yb-vpc-name", "", "[REQUIRED] Name of the YugabyteDB Managed VPC.")

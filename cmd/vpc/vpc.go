@@ -205,6 +205,7 @@ func init() {
 	getVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
 
 	VPCCmd.AddCommand(createVpcCmd)
+	createVpcCmd.Flags().SortFlags = false
 	createVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	createVpcCmd.MarkFlagRequired("name")
 	createVpcCmd.Flags().String("cloud", "", "[REQUIRED] Cloud provider for the VPC.")
