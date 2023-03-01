@@ -26,6 +26,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/readreplica"
+	"github.com/yugabyte/ybm-cli/cmd/signup"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
 	"github.com/yugabyte/ybm-cli/cmd/vpcpeering"
@@ -100,6 +101,7 @@ func init() {
 	rootCmd.AddCommand(vpc.VPCCmd)
 	rootCmd.AddCommand(vpcpeering.VPCPeeringCmd)
 	rootCmd.AddCommand(configureCmd)
+	rootCmd.AddCommand(signup.SignUpCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
 }
