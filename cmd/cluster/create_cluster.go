@@ -93,7 +93,7 @@ var createClusterCmd = &cobra.Command{
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
-			logrus.Fatalf("Error while creating cluster spec: %v", err)
+			logrus.Fatalf("Error while creating cluster spec: %v", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentials()
