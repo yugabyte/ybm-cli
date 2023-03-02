@@ -233,8 +233,8 @@ stunning-sole   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8G
 Name            ID                                     Version       State     Health
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
-Provider   Fault Tolerance   Data Distribution   Nodes     Total Res.\(Vcpu/Mem/Disk\)
-AWS        NONE              No idea             1         2 / 8GB / 100GB
+Provider   Fault Tolerance   Nodes     Total Res.\(Vcpu/Mem/Disk\)
+AWS        NONE              1         2 / 8GB / 100GB
 
 
 Network AllowList
