@@ -133,7 +133,7 @@ var createClusterCmd = &cobra.Command{
 
 			cmkSpec = ybmclient.NewCMKSpec(cmkProvider)
 			if cmkProvider == "AWS" {
-				cmkSpec.AwsCmkSpec = ybmclient.NewAWSCMKSpec(cmkAwsSecretKey, cmkAwsAccessKey, cmkAwsArnList)
+				cmkSpec.AwsCmkSpec = ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList)
 			}
 		}
 
