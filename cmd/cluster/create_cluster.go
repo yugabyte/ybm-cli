@@ -91,6 +91,52 @@ var createClusterCmd = &cobra.Command{
 			}
 		}
 
+		var cmkSpec *ybmclient.CMKSpec = nil
+		if cmd.Flags().Changed("cmk-spec") {
+			cmkString, _ := cmd.Flags().GetString("cmk-spec")
+			cmkProvider := ""
+			cmkAwsSecretKey := ""
+			cmkAwsAccessKey := ""
+			cmkAwsArnList := []string{}
+
+			for _, cmkInfo := range strings.Split(cmkString, ",") {
+				kvp := strings.Split(cmkInfo, "=")
+				if len(kvp) != 2 {
+					logrus.Fatalln("Incorrect format in cmk spec")
+				}
+				key := kvp[0]
+				val := kvp[1]
+				switch key {
+				case "provider":
+					if len(strings.TrimSpace(val)) != 0 {
+						cmkProvider = val
+					}
+				case "aws-secret-key":
+					if len(strings.TrimSpace(val)) != 0 {
+						cmkAwsSecretKey = val
+					}
+				case "aws-access-key":
+					if len(strings.TrimSpace(val)) != 0 {
+						cmkAwsAccessKey = val
+					}
+				case "aws-arn":
+					if len(strings.TrimSpace(val)) != 0 {
+						cmkAwsArnList = append(cmkAwsArnList, val)
+					}
+				}
+			}
+
+			if cmkProvider == "" ||
+				(cmkProvider == "AWS" && (cmkAwsSecretKey == "" || cmkAwsAccessKey == "" || len(cmkAwsArnList) == 0)) {
+				logrus.Fatalln("Incorrect format in cmk spec")
+			}
+
+			cmkSpec = ybmclient.NewCMKSpec(cmkProvider)
+			if cmkProvider == "AWS" {
+				cmkSpec.AwsCmkSpec = ybmclient.NewAWSCMKSpec(cmkAwsSecretKey, cmkAwsAccessKey, cmkAwsArnList)
+			}
+		}
+
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
 			logrus.Fatalf("Error while creating cluster spec: %v", err)
@@ -101,6 +147,11 @@ var createClusterCmd = &cobra.Command{
 		dbCredentials.Ysql = ybmclient.NewDBCredentials(username, password)
 
 		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec, *dbCredentials)
+
+		if cmkSpec != nil {
+			logrus.Debug("Setting up CMK spec for cluster creation")
+			createClusterRequest.SecurityCmkSpec = cmkSpec
+		}
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
@@ -114,7 +165,7 @@ var createClusterCmd = &cobra.Command{
 		msg := fmt.Sprintf("The cluster %s is being created", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, "CREATE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -165,5 +216,6 @@ func init() {
 	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
 	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview.")
+	createClusterCmd.Flags().String("cmk-spec", "", "[OPTIONAL] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> . If specified, all parameters for that provider are mandatory.")
 
 }
