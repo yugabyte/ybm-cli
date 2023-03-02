@@ -18,6 +18,7 @@ package formatter
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -79,11 +80,15 @@ func NewBackupContext() *BackupContext {
 }
 
 func (c *BackupContext) ExpireOn() string {
-	if !c.c.GetInfo().Metadata.HasUpdatedOn() {
-		return ""
-
+	CreatedOn := c.CreatedOn()
+	if len(CreatedOn) > 0 {
+		t, _ := time.Parse("2006-01-02,15:04", CreatedOn)
+		fmt.Println(c.RetainInDays())
+		retainInDay, _ := strconv.Atoi(c.RetainInDays())
+		//CreatedOn is already formatted in Local time
+		return t.AddDate(0, 0, retainInDay).Format("2006-01-02,15:04")
 	}
-	return FormatDate(c.c.GetInfo().Metadata.GetUpdatedOn())
+	return ""
 }
 
 func (c *BackupContext) CreatedOn() string {
