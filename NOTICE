@@ -76,8 +76,8 @@ The following subcomponents are used:
 ## github.com/google/uuid
 
 * Name: github.com/google/uuid
-* Version: v1.1.2
-* License: [BSD-3-Clause](https://github.com/google/uuid/blob/v1.1.2/LICENSE)
+* Version: v1.3.0
+* License: [BSD-3-Clause](https://github.com/google/uuid/blob/v1.3.0/LICENSE)
 
 
 ## github.com/hashicorp/hcl
@@ -90,15 +90,15 @@ The following subcomponents are used:
 ## github.com/huandu/xstrings
 
 * Name: github.com/huandu/xstrings
-* Version: v1.3.3
-* License: [MIT](https://github.com/huandu/xstrings/blob/v1.3.3/LICENSE)
+* Version: v1.4.0
+* License: [MIT](https://github.com/huandu/xstrings/blob/v1.4.0/LICENSE)
 
 
 ## github.com/imdario/mergo
 
 * Name: github.com/imdario/mergo
-* Version: v0.3.11
-* License: [BSD-3-Clause](https://github.com/imdario/mergo/blob/v0.3.11/LICENSE)
+* Version: v0.3.13
+* License: [BSD-3-Clause](https://github.com/imdario/mergo/blob/v0.3.13/LICENSE)
 
 
 ## github.com/inhies/go-bytesize
@@ -139,8 +139,8 @@ The following subcomponents are used:
 ## github.com/mitchellh/copystructure
 
 * Name: github.com/mitchellh/copystructure
-* Version: v1.0.0
-* License: [MIT](https://github.com/mitchellh/copystructure/blob/v1.0.0/LICENSE)
+* Version: v1.2.0
+* License: [MIT](https://github.com/mitchellh/copystructure/blob/v1.2.0/LICENSE)
 
 
 ## github.com/mitchellh/mapstructure
@@ -153,22 +153,22 @@ The following subcomponents are used:
 ## github.com/mitchellh/reflectwalk
 
 * Name: github.com/mitchellh/reflectwalk
-* Version: v1.0.0
-* License: [MIT](https://github.com/mitchellh/reflectwalk/blob/v1.0.0/LICENSE)
+* Version: v1.0.2
+* License: [MIT](https://github.com/mitchellh/reflectwalk/blob/v1.0.2/LICENSE)
 
 
 ## github.com/onsi/ginkgo/v2
 
 * Name: github.com/onsi/ginkgo/v2
-* Version: v2.8.1
-* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.8.1/LICENSE)
+* Version: v2.8.4
+* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.8.4/LICENSE)
 
 
 ## github.com/onsi/gomega
 
 * Name: github.com/onsi/gomega
-* Version: v1.27.1
-* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.1/LICENSE)
+* Version: v1.27.2
+* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.2/LICENSE)
 
 
 ## github.com/pelletier/go-toml/v2
@@ -176,6 +176,13 @@ The following subcomponents are used:
 * Name: github.com/pelletier/go-toml/v2
 * Version: v2.0.6
 * License: [MIT](https://github.com/pelletier/go-toml/blob/v2.0.6/LICENSE)
+
+
+## github.com/pkg/browser
+
+* Name: github.com/pkg/browser
+* Version: v0.0.0-20210911075715-681adbf594b8
+* License: [BSD-2-Clause](https://github.com/pkg/browser/blob/681adbf594b8/LICENSE)
 
 
 ## github.com/pkg/errors
@@ -188,15 +195,15 @@ The following subcomponents are used:
 ## github.com/rivo/uniseg
 
 * Name: github.com/rivo/uniseg
-* Version: v0.2.0
-* License: [MIT](https://github.com/rivo/uniseg/blob/v0.2.0/LICENSE.txt)
+* Version: v0.4.4
+* License: [MIT](https://github.com/rivo/uniseg/blob/v0.4.4/LICENSE.txt)
 
 
 ## github.com/shopspring/decimal
 
 * Name: github.com/shopspring/decimal
-* Version: v1.2.0
-* License: [MIT](https://github.com/shopspring/decimal/blob/v1.2.0/LICENSE)
+* Version: v1.3.1
+* License: [MIT](https://github.com/shopspring/decimal/blob/v1.3.1/LICENSE)
 
 
 ## github.com/sirupsen/logrus
@@ -209,8 +216,8 @@ The following subcomponents are used:
 ## github.com/spf13/afero
 
 * Name: github.com/spf13/afero
-* Version: v1.9.3
-* License: [Apache-2.0](https://github.com/spf13/afero/blob/v1.9.3/LICENSE.txt)
+* Version: v1.9.4
+* License: [Apache-2.0](https://github.com/spf13/afero/blob/v1.9.4/LICENSE.txt)
 
 
 ## github.com/spf13/cast
@@ -286,22 +293,22 @@ The following subcomponents are used:
 ## golang.org/x/exp
 
 * Name: golang.org/x/exp
-* Version: v0.0.0-20230203172020-98cc5a0785f9
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/exp/+/98cc5a07:LICENSE)
+* Version: v0.0.0-20230224173230-c95f2b4c22f2
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/exp/+/c95f2b4c:LICENSE)
 
 
-## golang.org/x/net
+## golang.org/x/net/html
 
-* Name: golang.org/x/net
-* Version: v0.5.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/net/+/v0.5.0:LICENSE)
+* Name: golang.org/x/net/html
+* Version: v0.7.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/net/+/v0.7.0:LICENSE)
 
 
 ## golang.org/x/oauth2
 
 * Name: golang.org/x/oauth2
-* Version: v0.0.0-20221014153046-6fdb5e3db783
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/oauth2/+/6fdb5e3d:LICENSE)
+* Version: v0.5.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/oauth2/+/v0.5.0:LICENSE)
 
 
 ## golang.org/x/sys/unix
@@ -314,8 +321,8 @@ The following subcomponents are used:
 ## golang.org/x/term
 
 * Name: golang.org/x/term
-* Version: v0.4.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/term/+/v0.4.0:LICENSE)
+* Version: v0.5.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/term/+/v0.5.0:LICENSE)
 
 
 ## golang.org/x/text
