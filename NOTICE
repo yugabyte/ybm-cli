@@ -160,15 +160,15 @@ The following subcomponents are used:
 ## github.com/onsi/ginkgo/v2
 
 * Name: github.com/onsi/ginkgo/v2
-* Version: v2.8.1
-* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.8.1/LICENSE)
+* Version: v2.8.4
+* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.8.4/LICENSE)
 
 
 ## github.com/onsi/gomega
 
 * Name: github.com/onsi/gomega
-* Version: v1.27.1
-* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.1/LICENSE)
+* Version: v1.27.2
+* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.2/LICENSE)
 
 
 ## github.com/pelletier/go-toml/v2
