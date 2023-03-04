@@ -18,6 +18,7 @@ package formatter
 import (
 	"encoding/json"
 
+	emoji "github.com/jayco/go-emoji-flag"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -25,7 +26,7 @@ const (
 	defaulCloudRegionListing = "table {{.RegionName}}\t{{.RegionCode}}\t{{.CountryCode}}"
 	regionNameHeader         = "Region Name"
 	regionCodeHeader         = "Region Code"
-	countryCodeHeader        = "Country Code"
+	countryCodeHeader        = "Country"
 )
 
 type CloudRegionContext struct {
@@ -78,7 +79,7 @@ func (c *CloudRegionContext) RegionCode() string {
 }
 
 func (c *CloudRegionContext) CountryCode() string {
-	return c.c.GetCountryCode()
+	return emoji.GetFlag(c.c.GetCountryCode()) + "  " + c.c.GetCountryCode()
 }
 
 func (c *CloudRegionContext) MarshalJSON() ([]byte, error) {

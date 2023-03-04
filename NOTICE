@@ -108,6 +108,13 @@ The following subcomponents are used:
 * License: [BSD-3-Clause](https://github.com/inhies/go-bytesize/blob/4913239db9cf/LICENSE)
 
 
+## github.com/jayco/go-emoji-flag
+
+* Name: github.com/jayco/go-emoji-flag
+* Version: v0.0.0-20190810054606-01604da018da
+* License: [MIT](https://github.com/jayco/go-emoji-flag/blob/01604da018da/LICENSE)
+
+
 ## github.com/magiconair/properties
 
 * Name: github.com/magiconair/properties
