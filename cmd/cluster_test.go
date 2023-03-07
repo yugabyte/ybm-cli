@@ -209,8 +209,8 @@ var _ = Describe("Cluster", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				Expect(session.Out).Should(gbytes.Say(
-					`Name            Version       State     Health    Regions     Nodes     Total Res.\(Vcpu/Mem/Disk\)
-stunning-sole   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8GB / 100GB`))
+					`Name            Tier        Version       State     Health    Regions     Nodes     Total Res.\(Vcpu/Mem/Disk\)
+stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8GB / 100GB`))
 				session.Kill()
 			})
 
@@ -233,8 +233,8 @@ stunning-sole   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8G
 Name            ID                                     Version       State     Health
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
-Provider   Fault Tolerance   Nodes     Total Res.\(Vcpu/Mem/Disk\)
-AWS        NONE              1         2 / 8GB / 100GB
+Provider   Tier        Fault Tolerance   Nodes     Total Res.\(Vcpu/Mem/Disk\)
+AWS        Dedicated   NONE              1         2 / 8GB / 100GB
 
 
 Network AllowList
@@ -263,7 +263,7 @@ us-west-2   1         2           8GB        100GB`))
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				Expect(session.Out).Should(gbytes.Say(
-					`Name      Version   State     Health    Regions   Nodes     Total Res.\(Vcpu/Mem/Disk\)`))
+					`Name      Tier      Version   State     Health    Regions   Nodes     Total Res.\(Vcpu/Mem/Disk\)`))
 				session.Kill()
 			})
 		})

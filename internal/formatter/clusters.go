@@ -30,10 +30,11 @@ import (
 )
 
 const (
-	defaultClusterListing = "table {{.Name}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
 	numNodesHeader        = "Nodes"
 	nodeInfoHeader        = "Total Res.(Vcpu/Mem/Disk)"
 	healthStateHeader     = "Health"
+	tierHeader            = "Tier"
 )
 
 type ClusterContext struct {
@@ -81,6 +82,7 @@ func NewClusterContext() *ClusterContext {
 		"Provider":         providerHeader,
 		"FaultTolerance":   faultToleranceHeader,
 		"DataDistribution": dataDistributionHeader,
+		"Tier":             tierHeader,
 	}
 	return &clusterCtx
 }
@@ -167,6 +169,13 @@ func (c *ClusterContext) Provider() string {
 		}
 	}
 	return strings.Join(maps.Keys(providers), ",")
+}
+
+func (c *ClusterContext) Tier() string {
+	if c.c.GetSpec().ClusterInfo.ClusterTier == ybmclient.CLUSTERTIER_FREE {
+		return "Sandbox"
+	}
+	return "Dedicated"
 }
 func (c *ClusterContext) FaultTolerance() string {
 	return string(c.c.GetSpec().ClusterInfo.FaultTolerance)
