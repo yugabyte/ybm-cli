@@ -68,6 +68,7 @@ func setDefaults() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	cobra.EnableCaseInsensitive = true
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
