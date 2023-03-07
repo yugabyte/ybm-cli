@@ -220,7 +220,7 @@ func init() {
 	BackupCmd.AddCommand(createBackupCmd)
 	createBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name for the cluster.")
 	createBackupCmd.MarkFlagRequired("cluster-name")
-	createBackupCmd.Flags().Int32("retention-period", 0, "[OPTIONAL] Retention period of the backup.")
+	createBackupCmd.Flags().Int32("retention-period", 0, "[OPTIONAL] Retention period of the backup in days. (Default: 1)")
 	createBackupCmd.Flags().String("description", "", "[OPTIONAL] Description of the backup.")
 
 	BackupCmd.AddCommand(deleteBackupCmd)
