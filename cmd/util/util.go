@@ -18,6 +18,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"net"
 
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -40,4 +41,12 @@ func GetClusterTier(tierCli string) (string, error) {
 	}
 
 	return "", fmt.Errorf("The tier must be either 'Sandbox' or 'Dedicated'")
+}
+
+func ValidateCIDR(cidr string) (bool, error) {
+	_, _, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return false, fmt.Errorf("%s is not a valid CIDR", cidr)
+	}
+	return true, nil
 }
