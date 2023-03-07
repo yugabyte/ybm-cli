@@ -22,6 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -98,6 +99,9 @@ var createVpcCmd = &cobra.Command{
 		if cmd.Flags().Changed("cidr") {
 			for index, region := range createRegions {
 				cidr := createCidrs[index]
+				if valid, err := util.ValidateCIDR(cidr); !valid {
+					logrus.Fatal(err)
+				}
 				spec := *ybmclient.NewVpcRegionSpecWithDefaults()
 				regionMap[region] = index
 				spec.SetRegion(region)
@@ -111,6 +115,9 @@ var createVpcCmd = &cobra.Command{
 
 		vpcSpec := *ybmclient.NewSingleTenantVpcSpec(vpcName, ybmclient.CloudEnum(cloud), vpcRegionSpec)
 		if cmd.Flags().Changed("global-cidr") {
+			if valid, err := util.ValidateCIDR(globalCidrRange); !valid {
+				logrus.Fatal(err)
+			}
 			vpcSpec.SetParentCidr(globalCidrRange)
 		}
 		vpcRequest := *ybmclient.NewSingleTenantVpcRequest(vpcSpec)

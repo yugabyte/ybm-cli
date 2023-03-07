@@ -22,7 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // configureCmd represents the configure command
@@ -35,7 +35,7 @@ var configureCmd = &cobra.Command{
 		var apiKey string
 		var host string
 		var data []byte
-		data, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		data, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			logrus.Fatalln("could not read apiKey: ", err)
 		}
