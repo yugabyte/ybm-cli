@@ -38,8 +38,8 @@ var BackupCmd = &cobra.Command{
 
 var getBackupCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get backups for a cluster in YugabyteDB Managed",
-	Long:  "Get backups for a cluster in YugabyteDB Managed",
+	Short: "Get list of existing backups available for a cluster in YugabyteDB Managed",
+	Long:  "Get list of existing backups available for a cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
