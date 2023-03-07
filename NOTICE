@@ -167,8 +167,8 @@ The following subcomponents are used:
 ## github.com/onsi/ginkgo/v2
 
 * Name: github.com/onsi/ginkgo/v2
-* Version: v2.8.4
-* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.8.4/LICENSE)
+* Version: v2.9.0
+* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.9.0/LICENSE)
 
 
 ## github.com/onsi/gomega
@@ -304,9 +304,9 @@ The following subcomponents are used:
 * License: [BSD-3-Clause](https://cs.opensource.google/go/x/exp/+/c95f2b4c:LICENSE)
 
 
-## golang.org/x/net/html
+## golang.org/x/net
 
-* Name: golang.org/x/net/html
+* Name: golang.org/x/net
 * Version: v0.7.0
 * License: [BSD-3-Clause](https://cs.opensource.google/go/x/net/+/v0.7.0:LICENSE)
 
