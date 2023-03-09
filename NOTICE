@@ -66,6 +66,13 @@ The following subcomponents are used:
 * License: [Apache-2.0](https://github.com/go-logr/logr/blob/v1.2.3/LICENSE)
 
 
+## github.com/golang-jwt/jwt/v5
+
+* Name: github.com/golang-jwt/jwt/v5
+* Version: v5.0.0-rc.1
+* License: [MIT](https://github.com/golang-jwt/jwt/blob/v5.0.0-rc.1/LICENSE)
+
+
 ## github.com/google/go-cmp/cmp
 
 * Name: github.com/google/go-cmp/cmp
