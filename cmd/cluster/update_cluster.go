@@ -49,14 +49,14 @@ var updateClusterCmd = &cobra.Command{
 		resp, r, err := authApi.GetCluster(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.GetCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		originalSpec := resp.Data.GetSpec()
 		trackID := originalSpec.SoftwareInfo.GetTrackId()
 		trackName, err := authApi.GetTrackNameById(trackID)
 		if err != nil {
-			logrus.Fatalf("Error when calling `getTrackName`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		populateFlags(cmd, originalSpec, trackName, authApi)
@@ -119,7 +119,7 @@ var updateClusterCmd = &cobra.Command{
 		resp, r, err = authApi.EditCluster(clusterID).ClusterSpec(*clusterSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.UpdateCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		clusterData := []ybmclient.ClusterData{resp.GetData()}
 
@@ -138,7 +138,7 @@ var updateClusterCmd = &cobra.Command{
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			clusterData = respC.GetData()
 		} else {
@@ -232,7 +232,7 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 			if vpcID, ok := clusterRegionInfo.PlacementInfo.GetVpcIdOk(); ok && vpcID != nil {
 				vpcName, err := authApi.GetVpcNameById(*vpcID)
 				if err != nil {
-					logrus.Fatalf("Error when calling `getVpcName`: %s", ybmAuthClient.GetApiErrorDetails(err))
+					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 					return
 				}
 				regionInfo += ",vpc=" + vpcName

@@ -55,7 +55,7 @@ var getVpcCmd = &cobra.Command{
 		resp, r, err := vpcListRequest.Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		// response from `ListClusters`: ClusterListResponse
 		vpcCtx := formatter.Context{
@@ -130,7 +130,7 @@ var createVpcCmd = &cobra.Command{
 		resp, r, err := authApi.CreateVpc().SingleTenantVpcRequest(vpcRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.CreateVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		vpcID := resp.Data.GetInfo().Id
 		vpcData := []ybmclient.SingleTenantVpcDataResponse{resp.GetData()}
@@ -151,7 +151,7 @@ var createVpcCmd = &cobra.Command{
 			respC, r, err := vpcListRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			vpcData = respC.GetData()
 		} else {
@@ -187,7 +187,7 @@ var deleteVpcCmd = &cobra.Command{
 		r, err := authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.DeleteVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The VPC %s is being deleted", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
