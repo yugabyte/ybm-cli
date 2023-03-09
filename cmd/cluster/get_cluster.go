@@ -52,7 +52,7 @@ var getClusterCmd = &cobra.Command{
 			logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		if isGetByName && len(resp.GetData()) > 0 {
+		if isGetByName && len(resp.GetData()) > 0 && viper.GetString("output") == "table" {
 			fullClusterContext := *formatter.NewFullClusterContext()
 			fullClusterContext.Output = os.Stdout
 			fullClusterContext.Format = formatter.NewFullClusterFormat(viper.GetString("output"))

@@ -71,8 +71,12 @@ func (f *FullCluster) SetVPCs(authApi ybmAuthClient.AuthApiClient) {
 func (f *FullCluster) SetAllowLists(authApi ybmAuthClient.AuthApiClient) {
 	resp, r, err := authApi.ListClusterNetworkAllowLists(f.Cluster.Info.Id).Execute()
 	if err != nil {
-		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf("Error when calling `ClusterApi.ListClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+		if err.Error() == "409 Conflict" {
+			logrus.Debug("Failed to get allow lists because cluster %s is not ready yet", f.Cluster.Info.Id)
+		} else {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf("Error when calling `ClusterApi.ListClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+		}
 	}
 	if _, ok := resp.GetDataOk(); ok {
 		f.AllowList = resp.GetData()
