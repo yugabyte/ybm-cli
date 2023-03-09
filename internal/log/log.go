@@ -18,8 +18,11 @@ package log
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
 
@@ -29,10 +32,23 @@ func SetFormatter() {
 	})
 }
 
+func SetDebugFormatter() {
+	logrus.SetReportCaller(true)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableColors:          viper.GetBool("no-color"),
+		DisableLevelTruncation: true,
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			//We don't need the full path to just returning the file
+			return "", fmt.Sprintf("%s:%d", filepath.Base(f.File), f.Line)
+		},
+	})
+}
+
 func SetLogLevel(logLevel string, debug bool) {
 
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
+		SetDebugFormatter()
 		return
 	}
 	if logLevel != "" {
