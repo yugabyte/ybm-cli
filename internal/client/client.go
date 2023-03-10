@@ -65,7 +65,6 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	}
 	configuration.Host = url.Host
 	configuration.Scheme = url.Scheme
-	configuration.Debug = true
 	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
