@@ -105,7 +105,7 @@ func (c *BackupContext) ClusterName() string {
 
 func (c *BackupContext) Description() string {
 	if v, ok := c.c.Spec.GetDescriptionOk(); ok {
-		return *v
+		return Truncate(*v, 10)
 	}
 	return ""
 }
