@@ -98,9 +98,15 @@ func (c *VPCContext) Regions() string {
 
 func (c *VPCContext) RegionsCIDR() string {
 	var RegionsCIDRList []string
+
 	for _, regionSpec := range c.c.GetSpec().RegionSpecs {
 		RegionsCIDRList = append(RegionsCIDRList, fmt.Sprintf("%s[%s]", regionSpec.GetRegion(), regionSpec.GetCidr()))
 	}
+
+	if len(c.c.GetSpec().RegionSpecs) > 1 {
+		return fmt.Sprintf("%s,+%d", RegionsCIDRList[0], len(RegionsCIDRList)-1)
+	}
+
 	return strings.Join(RegionsCIDRList, ",")
 }
 
