@@ -93,7 +93,7 @@ var createClusterCmd = &cobra.Command{
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
-			logrus.Fatalf("Error while creating cluster spec: %v", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentials()
@@ -105,7 +105,7 @@ var createClusterCmd = &cobra.Command{
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.CreateCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		clusterID := resp.GetData().Info.Id
@@ -126,7 +126,7 @@ var createClusterCmd = &cobra.Command{
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			clusterData = respC.GetData()
 		} else {
