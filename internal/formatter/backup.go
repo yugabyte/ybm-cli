@@ -83,7 +83,6 @@ func (c *BackupContext) ExpireOn() string {
 	CreatedOn := c.CreatedOn()
 	if len(CreatedOn) > 0 {
 		t, _ := time.Parse("2006-01-02,15:04", CreatedOn)
-		fmt.Println(c.RetainInDays())
 		retainInDay, _ := strconv.Atoi(c.RetainInDays())
 		//CreatedOn is already formatted in Local time
 		return t.AddDate(0, 0, retainInDay).Format("2006-01-02,15:04")
