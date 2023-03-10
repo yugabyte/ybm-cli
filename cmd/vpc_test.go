@@ -26,11 +26,10 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/ghttp"
-	"github.com/yugabyte/ybm-cli/internal/formatter"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var _ = Describe("Backup", func() {
+var _ = Describe("VPC", func() {
 
 	var (
 		server          *ghttp.Server
@@ -38,8 +37,7 @@ var _ = Describe("Backup", func() {
 		args            []string
 		responseAccount openapi.AccountListResponse
 		responseProject openapi.ProjectListResponse
-		responseBackup  openapi.BackupListResponse
-		//cbr        *cobra.Command
+		responseVPC     openapi.SingleTenantVpcListResponse
 	)
 
 	BeforeEach(func() {
@@ -54,23 +52,24 @@ var _ = Describe("Backup", func() {
 
 	Context("When running with a valid Api token", func() {
 
-		It("should return list of available backup", func() {
+		It("should return list of vpc and trim more than one regions", func() {
 			statusCode = 200
-			err := loadJson("./test/fixtures/backups.json", &responseBackup)
+			err := loadJson("./test/fixtures/vpc-gcp-global.json", &responseVPC)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backups"),
-					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackup),
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/vpcs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseVPC),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "backup", "get")
+			cmd := exec.Command(compiledCLIPath, "vpc", "get")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(
-				`ID                                     Created On         Expire On          Clusters                Description     State       Type      Retains\(day\)
-7d08a5c3-8097-48f0-8019-da236e876ab9   %s   %s   proficient-parrotfish   scdasfdadf...   SUCCEEDED   MANUAL    25`, formatter.FormatDate("2023-01-17T08:31:35.818Z"), formatter.FormatDate("2023-02-11T08:31:35.818Z"))))
+			Expect(session.Out).Should(gbytes.Say(
+				`Name            State     Provider   Region\[CIDR\]                  Peerings   Clusters
+gwenn-gcp-jp3   ACTIVE    GCP        us-west1\[10.10.64.0/22\],\+27   0          0
+gwenn-jp3       ACTIVE    AWS        ap-northeast-3\[10.7.0.0/24\]   0          0`))
 			session.Kill()
 		})
 

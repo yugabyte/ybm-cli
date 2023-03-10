@@ -66,6 +66,13 @@ The following subcomponents are used:
 * License: [Apache-2.0](https://github.com/go-logr/logr/blob/v1.2.3/LICENSE)
 
 
+## github.com/golang-jwt/jwt/v5
+
+* Name: github.com/golang-jwt/jwt/v5
+* Version: v5.0.0-rc.1
+* License: [MIT](https://github.com/golang-jwt/jwt/blob/v5.0.0-rc.1/LICENSE)
+
+
 ## github.com/google/go-cmp/cmp
 
 * Name: github.com/google/go-cmp/cmp
@@ -267,6 +274,13 @@ The following subcomponents are used:
 * Name: github.com/subosito/gotenv
 * Version: v1.4.2
 * License: [MIT](https://github.com/subosito/gotenv/blob/v1.4.2/LICENSE)
+
+
+## github.com/t-tomalak/logrus-easy-formatter
+
+* Name: github.com/t-tomalak/logrus-easy-formatter
+* Version: v0.0.0-20190827215021-c074f06c5816
+* License: [MIT](https://github.com/t-tomalak/logrus-easy-formatter/blob/c074f06c5816/LICENSE)
 
 
 ## github.com/yugabyte/ybm-cli

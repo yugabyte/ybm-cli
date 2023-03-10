@@ -19,6 +19,9 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -49,4 +52,38 @@ func ValidateCIDR(cidr string) (bool, error) {
 		return false, fmt.Errorf("%s is not a valid CIDR", cidr)
 	}
 	return true, nil
+}
+
+func ExtractJwtClaims(tokenStr string) (jwt.MapClaims, error) {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenStr, jwt.MapClaims{})
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := token.Claims.(jwt.MapClaims); ok {
+		return token.Claims.(jwt.MapClaims), nil
+	}
+	return nil, errors.New("Unable to extract claims from token")
+}
+
+func IsJwtTokenExpiredWithTime(tokenStr string, now time.Time) (bool, error) {
+	claims, err := ExtractJwtClaims(tokenStr)
+	if err != nil {
+		return false, err
+	}
+
+	exp := claims["exp"].(float64)
+	if exp < float64(now.Unix()) {
+		return true, nil
+	}
+
+	iat := claims["iat"].(float64)
+	if iat > float64(now.Unix()) {
+		return true, nil
+	}
+	return false, nil
+}
+
+func IsJwtTokenExpired(tokenStr string) (bool, error) {
+	return IsJwtTokenExpiredWithTime(tokenStr, time.Now())
 }

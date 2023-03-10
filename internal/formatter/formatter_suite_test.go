@@ -13,34 +13,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package util
+package formatter_test
 
 import (
-	"os"
-	"strings"
+	"testing"
 
-	"github.com/spf13/cobra"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-type FeatureFlag string
-
-const (
-	CDC           FeatureFlag = "CDC"
-	CONFIGURE_URL FeatureFlag = "CONFIGURE_URL"
-)
-
-func (f FeatureFlag) String() string {
-	return string(f)
-}
-
-func IsFeatureFlagEnabled(featureFlag FeatureFlag) bool {
-	envVarName := "YBM_FF_" + featureFlag.String()
-	return strings.ToLower(os.Getenv(envVarName)) == "true"
-}
-
-func AddCommandIfFeatureFlag(rootCmd *cobra.Command, cmd *cobra.Command, featureFlag FeatureFlag) {
-	// If the feature flag is enabled, add the command to the root command
-	if IsFeatureFlagEnabled(featureFlag) {
-		rootCmd.AddCommand(cmd)
-	}
+func TestFormatter(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Formatter Suite")
 }

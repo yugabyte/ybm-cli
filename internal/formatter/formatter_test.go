@@ -13,34 +13,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package util
+package formatter_test
 
 import (
-	"os"
-	"strings"
-
-	"github.com/spf13/cobra"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-type FeatureFlag string
+var _ = Describe("Formatter", func() {
 
-const (
-	CDC           FeatureFlag = "CDC"
-	CONFIGURE_URL FeatureFlag = "CONFIGURE_URL"
-)
+	Context("when using utils function ", func() {
+		DescribeTable("to Truncate",
+			func(text string, lenght int, expected string) {
+				Expect(formatter.Truncate(text, lenght)).To(Equal(expected))
+			},
+			Entry("with text and lenght", "derftd", 3, "der..."),
+			Entry("with text and lenght = 0", "", 0, ""),
+			Entry("with not text and lenght", "", 3, ""),
+			Entry("with japanese  and lenght", "コニチワ", 3, "コニチ..."),
+		)
+	})
 
-func (f FeatureFlag) String() string {
-	return string(f)
-}
-
-func IsFeatureFlagEnabled(featureFlag FeatureFlag) bool {
-	envVarName := "YBM_FF_" + featureFlag.String()
-	return strings.ToLower(os.Getenv(envVarName)) == "true"
-}
-
-func AddCommandIfFeatureFlag(rootCmd *cobra.Command, cmd *cobra.Command, featureFlag FeatureFlag) {
-	// If the feature flag is enabled, add the command to the root command
-	if IsFeatureFlagEnabled(featureFlag) {
-		rootCmd.AddCommand(cmd)
-	}
-}
+})

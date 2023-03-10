@@ -58,7 +58,7 @@ func (f *FullCluster) SetVPCs(authApi ybmAuthClient.AuthApiClient) {
 		resp, r, err := authApi.ListSingleTenantVpcs().Ids(VpcIds).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		if _, ok := resp.GetDataOk(); ok {
 			for _, v := range resp.GetData() {
@@ -75,7 +75,7 @@ func (f *FullCluster) SetAllowLists(authApi ybmAuthClient.AuthApiClient) {
 			logrus.Debugf("Failed to get allow lists because cluster %s is not ready yet", f.Cluster.Info.Id)
 		} else {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.ListClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 	}
 	if _, ok := resp.GetDataOk(); ok {
