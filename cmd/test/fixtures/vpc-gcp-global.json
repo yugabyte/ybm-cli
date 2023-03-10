@@ -1,0 +1,161 @@
+{
+    "data": [
+        {
+            "spec": {
+                "name": "gwenn-gcp-jp3",
+                "cloud": "GCP",
+                "parent_cidr": "10.10.0.0/16",
+                "region_specs": [
+                    {
+                        "region": "us-west1",
+                        "cidr": "10.10.64.0/22"
+                    },
+                    {
+                        "region": "europe-central2",
+                        "cidr": "10.10.92.0/22"
+                    },
+                    {
+                        "region": "us-east4",
+                        "cidr": "10.10.40.0/22"
+                    },
+                    {
+                        "region": "southamerica-east1",
+                        "cidr": "10.10.28.0/22"
+                    },
+                    {
+                        "region": "asia-northeast3",
+                        "cidr": "10.10.0.0/22"
+                    },
+                    {
+                        "region": "us-west2",
+                        "cidr": "10.10.20.0/22"
+                    },
+                    {
+                        "region": "europe-west4",
+                        "cidr": "10.10.44.0/22"
+                    },
+                    {
+                        "region": "northamerica-northeast2",
+                        "cidr": "10.10.8.0/22"
+                    },
+                    {
+                        "region": "asia-south1",
+                        "cidr": "10.10.16.0/22"
+                    },
+                    {
+                        "region": "us-east1",
+                        "cidr": "10.10.80.0/22"
+                    },
+                    {
+                        "region": "asia-east2",
+                        "cidr": "10.10.60.0/22"
+                    },
+                    {
+                        "region": "asia-northeast2",
+                        "cidr": "10.10.84.0/22"
+                    },
+                    {
+                        "region": "us-central1",
+                        "cidr": "10.10.4.0/22"
+                    },
+                    {
+                        "region": "europe-west6",
+                        "cidr": "10.10.108.0/22"
+                    },
+                    {
+                        "region": "australia-southeast1",
+                        "cidr": "10.10.36.0/22"
+                    },
+                    {
+                        "region": "europe-west1",
+                        "cidr": "10.10.100.0/22"
+                    },
+                    {
+                        "region": "us-west4",
+                        "cidr": "10.10.104.0/22"
+                    },
+                    {
+                        "region": "asia-east1",
+                        "cidr": "10.10.96.0/22"
+                    },
+                    {
+                        "region": "asia-southeast1",
+                        "cidr": "10.10.24.0/22"
+                    },
+                    {
+                        "region": "asia-south2",
+                        "cidr": "10.10.32.0/22"
+                    },
+                    {
+                        "region": "asia-northeast1",
+                        "cidr": "10.10.12.0/22"
+                    },
+                    {
+                        "region": "asia-southeast2",
+                        "cidr": "10.10.76.0/22"
+                    },
+                    {
+                        "region": "europe-north1",
+                        "cidr": "10.10.72.0/22"
+                    },
+                    {
+                        "region": "northamerica-northeast1",
+                        "cidr": "10.10.48.0/22"
+                    },
+                    {
+                        "region": "europe-west3",
+                        "cidr": "10.10.88.0/22"
+                    },
+                    {
+                        "region": "australia-southeast2",
+                        "cidr": "10.10.52.0/22"
+                    },
+                    {
+                        "region": "us-west3",
+                        "cidr": "10.10.68.0/22"
+                    },
+                    {
+                        "region": "europe-west2",
+                        "cidr": "10.10.56.0/22"
+                    }
+                ]
+            },
+            "info": {
+                "id": "e492d584-6d16-4e7b-b3cd-cecd1f5bfced",
+                "cloud_provider_project": "yugabyte-cloud-portal",
+                "cluster_ids": [],
+                "peering_ids": [],
+                "state": "ACTIVE",
+                "external_vpc_id": "pu4sjnlbdnczhhxm6nz3gr6w745u"
+            }
+        },
+        {
+            "spec": {
+                "name": "gwenn-jp3",
+                "cloud": "AWS",
+                "parent_cidr": null,
+                "region_specs": [
+                    {
+                        "region": "ap-northeast-3",
+                        "cidr": "10.7.0.0/24"
+                    }
+                ]
+            },
+            "info": {
+                "id": "3762dd44-23d6-4152-9734-414182959ebd",
+                "cloud_provider_project": "123505328935",
+                "cluster_ids": [],
+                "peering_ids": [],
+                "state": "ACTIVE",
+                "external_vpc_id": "vpc-0fe5fb5d99332ee20"
+            }
+        }
+    ],
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/vpcs",
+            "next": null
+        }
+    }
+}
