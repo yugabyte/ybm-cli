@@ -53,7 +53,7 @@ var getVpcPeeringCmd = &cobra.Command{
 	Long:  "Get VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		listVpcPeeringCmd.Run(cmd, args)
-		logrus.Warnln("The command `ybm vpc-peering get` is deprecated. Please use `ybm vpc-peering list` instead.")
+		logrus.Warnln("\nThe command `ybm vpc-peering get` is deprecated. Please use `ybm vpc-peering list` instead.")
 	},
 }
 

@@ -178,7 +178,7 @@ var getReadReplicaCmd = &cobra.Command{
 	Long:  "Get read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		listReadReplicaCmd.Run(cmd, args)
-		logrus.Warnln("The command `ybm read-replica get` is deprecated. Please use `ybm read-replica list` instead.")
+		logrus.Warnln("\nThe command `ybm read-replica get` is deprecated. Please use `ybm read-replica list` instead.")
 	},
 }
 

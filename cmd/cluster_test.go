@@ -204,7 +204,7 @@ var _ = Describe("Cluster", func() {
 		})
 		Context("with a valid Api token and default output table", func() {
 			It("should return list of cluster", func() {
-				cmd := exec.Command(compiledCLIPath, "cluster", "get")
+				cmd := exec.Command(compiledCLIPath, "cluster", "list")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -224,7 +224,7 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1   
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "cluster", "get", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -258,7 +258,7 @@ us-west-2   1         2           8GB        100GB`))
 						ghttp.VerifyFormKV("name", "test"),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "cluster", "get", "--cluster-name", "test")
+				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "test")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)

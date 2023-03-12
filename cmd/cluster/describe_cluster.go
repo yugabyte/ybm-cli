@@ -36,13 +36,8 @@ var describeClusterCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 		clusterListRequest := authApi.ListClusters()
-		isGetByName := false
-		// if user filters by name, add it to the request
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		if clusterName != "" {
-			clusterListRequest = clusterListRequest.Name(clusterName)
-			isGetByName = true
-		}
+		clusterListRequest = clusterListRequest.Name(clusterName)
 
 		resp, r, err := clusterListRequest.Execute()
 
@@ -51,7 +46,7 @@ var describeClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		if isGetByName && len(resp.GetData()) > 0 {
+		if len(resp.GetData()) > 0 && viper.GetString("output") == "table" {
 			fullClusterContext := *formatter.NewFullClusterContext()
 			fullClusterContext.Output = os.Stdout
 			fullClusterContext.Format = formatter.NewFullClusterFormat(viper.GetString("output"))

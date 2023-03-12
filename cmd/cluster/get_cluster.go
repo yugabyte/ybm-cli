@@ -28,10 +28,10 @@ var getClusterCmd = &cobra.Command{
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		if clusterName != "" {
 			describeClusterCmd.Run(cmd, args)
-			logrus.Warnln("The command `ybm cluster get --cluster-name` is deprecated. Please use `ybm cluster describe --cluster-name` instead.")
+			logrus.Warnln("\nThe command `ybm cluster get --cluster-name` is deprecated. Please use `ybm cluster describe --cluster-name` instead.")
 		} else {
 			listClusterCmd.Run(cmd, args)
-			logrus.Warnln("The command `ybm cluster get` is deprecated. Please use `ybm cluster list` instead.")
+			logrus.Warnln("\nThe command `ybm cluster get` is deprecated. Please use `ybm cluster list` instead.")
 		}
 	},
 }

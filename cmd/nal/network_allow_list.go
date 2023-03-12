@@ -47,7 +47,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 	Long:  `Get network allow list in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
 		listNetworkAllowListCmd.Run(cmd, args)
-		logrus.Warnln("The command `ybm network-allow-list get` is deprecated. Please use `ybm network-allow-list list` instead.")
+		logrus.Warnln("\nThe command `ybm network-allow-list get` is deprecated. Please use `ybm network-allow-list list` instead.")
 	},
 }
 
