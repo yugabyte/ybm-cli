@@ -62,7 +62,7 @@ var _ = Describe("VPC", func() {
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseVPC),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "vpc", "get")
+			cmd := exec.Command(compiledCLIPath, "vpc", "list")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
