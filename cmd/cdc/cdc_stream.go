@@ -45,6 +45,8 @@ var CDCStreamCmd = &cobra.Command{
 	},
 }
 
+// TODO: change this to list
+
 var getCdcStreamCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get CDC Stream in YugabyteDB Managed",
@@ -77,6 +79,8 @@ var getCdcStreamCmd = &cobra.Command{
 		printCdcStreamOutput(resp.GetData())
 	},
 }
+
+// TODO: implement a describe command, which will show the details of a CDC stream
 
 var createCdcStreamCmd = &cobra.Command{
 	Use:   "create",

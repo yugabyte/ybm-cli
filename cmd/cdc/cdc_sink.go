@@ -47,6 +47,8 @@ var CDCSinkCmd = &cobra.Command{
 	},
 }
 
+// TODO: change this to list
+
 var getCdcSinkCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get CDC Sink in YugabyteDB Managed",
@@ -73,6 +75,8 @@ var getCdcSinkCmd = &cobra.Command{
 		printCdcSinkOutput(resp.GetData())
 	},
 }
+
+// TODO: implement describe that shows the details of a sink
 
 var createCdcSinkCmd = &cobra.Command{
 	Use:   "create",

@@ -37,11 +37,21 @@ var VPCCmd = &cobra.Command{
 	},
 }
 
-// vpcCmd represents the vpc command
 var getVpcCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get VPCs in YugabyteDB Managed",
-	Long:  "Get VPCs in YugabyteDB Managed",
+	Short: "Get VPC in YugabyteDB Managed",
+	Long:  `Get VPC in YugabyteDB Managed`,
+	Run: func(cmd *cobra.Command, args []string) {
+		listVpcCmd.Run(cmd, args)
+		logrus.Warnln("\nThe command `ybm vpc get` is deprecated. Please use `ybm vpc list` instead.")
+	},
+}
+
+// vpcCmd represents the vpc command
+var listVpcCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List VPCs in YugabyteDB Managed",
+	Long:  "List VPCs in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -66,6 +76,8 @@ var getVpcCmd = &cobra.Command{
 		formatter.VPCWrite(vpcCtx, resp.GetData())
 	},
 }
+
+// TODO: make list VPC not show the IP ranges and other details and build a describe for showing that.
 
 var createRegions []string
 var createCidrs []string
@@ -210,6 +222,9 @@ var deleteVpcCmd = &cobra.Command{
 func init() {
 	VPCCmd.AddCommand(getVpcCmd)
 	getVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
+
+	VPCCmd.AddCommand(listVpcCmd)
+	listVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
 
 	VPCCmd.AddCommand(createVpcCmd)
 	createVpcCmd.Flags().SortFlags = false

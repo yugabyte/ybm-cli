@@ -38,8 +38,18 @@ var BackupCmd = &cobra.Command{
 
 var getBackupCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get list of existing backups available for a cluster in YugabyteDB Managed",
-	Long:  "Get list of existing backups available for a cluster in YugabyteDB Managed",
+	Short: "Get backup details in YugabyteDB Managed",
+	Long:  `Get backup details in YugabyteDB Managed`,
+	Run: func(cmd *cobra.Command, args []string) {
+		listBackupCmd.Run(cmd, args)
+		logrus.Warnln("The command `ybm backup get` is deprecated. Please use `ybm backup list` instead.")
+	},
+}
+
+var listBackupCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List existing backups available for a cluster in YugabyteDB Managed",
+	Long:  "List existing backups available for a cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -68,6 +78,8 @@ var getBackupCmd = &cobra.Command{
 		formatter.BackupWrite(backupsCtx, resp.GetData())
 	},
 }
+
+// TODO: implement a backup describe command that shows the details of a backup
 
 var restoreBackupCmd = &cobra.Command{
 	Use:   "restore",
@@ -210,6 +222,9 @@ var deleteBackupCmd = &cobra.Command{
 func init() {
 	BackupCmd.AddCommand(getBackupCmd)
 	getBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
+
+	BackupCmd.AddCommand(listBackupCmd)
+	listBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
 
 	BackupCmd.AddCommand(restoreBackupCmd)
 	restoreBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster to restore backups.")

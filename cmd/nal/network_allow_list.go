@@ -44,7 +44,17 @@ var NalCmd = &cobra.Command{
 var getNetworkAllowListCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get network allow list in YugabyteDB Managed",
-	Long:  "Get network allow list in YugabyteDB Managed",
+	Long:  `Get network allow list in YugabyteDB Managed`,
+	Run: func(cmd *cobra.Command, args []string) {
+		listNetworkAllowListCmd.Run(cmd, args)
+		logrus.Warnln("The command `ybm network-allow-list get` is deprecated. Please use `ybm network-allow-list list` instead.")
+	},
+}
+
+var listNetworkAllowListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List network allow lists in YugabyteDB Managed",
+	Long:  "List network allow lists in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -61,6 +71,7 @@ var getNetworkAllowListCmd = &cobra.Command{
 		}
 
 		respFilter = resp.GetData()
+		// TODO: should we even allow this parameter to be specified when you do list?
 		if cmd.Flags().Changed("name") {
 			allowList, err := util.FindNetworkAllowList(resp.Data, nalName)
 			if err != nil {
@@ -78,6 +89,8 @@ var getNetworkAllowListCmd = &cobra.Command{
 		formatter.NetworkAllowListWrite(nalCtx, respFilter)
 	},
 }
+
+// TODO: decide if we need a describe
 
 var createNetworkAllowListCmd = &cobra.Command{
 	Use:   "create",
@@ -148,6 +161,9 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 func init() {
 	NalCmd.AddCommand(getNetworkAllowListCmd)
 	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[OPTIONAL] The name of the Network Allow List.")
+
+	NalCmd.AddCommand(listNetworkAllowListCmd)
+	listNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[OPTIONAL] The name of the Network Allow List.")
 
 	NalCmd.AddCommand(createNetworkAllowListCmd)
 	createNetworkAllowListCmd.Flags().SortFlags = false
