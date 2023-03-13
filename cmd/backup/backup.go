@@ -39,7 +39,7 @@ var BackupCmd = &cobra.Command{
 var getBackupCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get list of existing backups available for a cluster in YugabyteDB Managed",
-	Long:  `Get list of existing backups available for a cluster in YugabyteDB Managed`,
+	Long:  "Get list of existing backups available for a cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		listBackupCmd.Run(cmd, args)
 		logrus.Warnln("\nThe command `ybm backup get` is deprecated. Please use `ybm backup list` instead.")
