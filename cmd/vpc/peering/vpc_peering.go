@@ -13,7 +13,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package vpcpeering
+package peering
 
 import (
 	"errors"
@@ -30,7 +30,7 @@ import (
 )
 
 var VPCPeeringCmd = &cobra.Command{
-	Use:   "vpc-peering",
+	Use:   "peering",
 	Short: "Manage VPC Peerings",
 	Long:  "Manage VPC Peerings",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -49,8 +49,8 @@ func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmcli
 
 var getVpcPeeringCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get VPC peering in YugabyteDB Managed",
-	Long:  "Get VPC peering in YugabyteDB Managed",
+	Short: "Get VPC peerings",
+	Long:  "Get VPC peerings in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		listVpcPeeringCmd.Run(cmd, args)
 		logrus.Warnln("\nThe command `ybm vpc-peering get` is deprecated. Please use `ybm vpc-peering list` instead.")
@@ -59,7 +59,7 @@ var getVpcPeeringCmd = &cobra.Command{
 
 var listVpcPeeringCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List VPC peerings in YugabyteDB Managed",
+	Short: "List VPC peerings",
 	Long:  "List VPC peerings in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
@@ -96,7 +96,7 @@ var listVpcPeeringCmd = &cobra.Command{
 
 var createVpcPeeringCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create VPC peering in YugabyteDB Managed",
+	Short: "Create VPC peering",
 	Long:  "Create VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
@@ -225,7 +225,7 @@ var createVpcPeeringCmd = &cobra.Command{
 
 var deleteVpcPeeringCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete VPC peering in YugabyteDB Managed",
+	Short: "Delete VPC peering",
 	Long:  "Delete VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")

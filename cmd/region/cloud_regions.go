@@ -13,7 +13,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cluster
+package region
 
 import (
 	"os"
@@ -25,45 +25,47 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-var describeClusterCmd = &cobra.Command{
-	Use:   "describe",
-	Short: "Describe a cluster",
-	Long:  "Describe a cluster in YugabyteDB Managed",
+var CloudRegionsCmd = &cobra.Command{
+	Use:   "region",
+	Short: "Manage cloud regions",
+	Long:  "Manage cloud regions for your YBM clusters",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+var listCloudRegionsCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List Cloud Provider Regions",
+	Long:  `List Cloud Provider Regions`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-		clusterListRequest := authApi.ListClusters()
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterListRequest = clusterListRequest.Name(clusterName)
 
-		resp, r, err := clusterListRequest.Execute()
-
+		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
+		cloudRegionsResp, resp, err := authApi.GetSupportedCloudRegions().Cloud(cloudProvider).Execute()
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Debugf("Full HTTP response: %v", resp)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		if len(resp.GetData()) > 0 && viper.GetString("output") == "table" {
-			fullClusterContext := *formatter.NewFullClusterContext()
-			fullClusterContext.Output = os.Stdout
-			fullClusterContext.Format = formatter.NewFullClusterFormat(viper.GetString("output"))
-			fullClusterContext.SetFullCluster(*authApi, resp.GetData()[0])
-			fullClusterContext.Write()
-			return
-		}
-		clustersCtx := formatter.Context{
+		cloudRegionData := cloudRegionsResp.GetData()
+
+		cloudRegionCtx := formatter.Context{
 			Output: os.Stdout,
-			Format: formatter.NewClusterFormat(viper.GetString("output")),
+			Format: formatter.NewCloudRegionFormat(viper.GetString("output")),
 		}
-		formatter.ClusterWrite(clustersCtx, resp.GetData())
+
+		formatter.CloudRegionWrite(cloudRegionCtx, cloudRegionData)
 	},
 }
 
 func init() {
-	ClusterCmd.AddCommand(describeClusterCmd)
-	describeClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
-	describeClusterCmd.MarkFlagRequired("cluster-name")
+	CloudRegionsCmd.AddCommand(listCloudRegionsCmd)
+
+	listCloudRegionsCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
+	listCloudRegionsCmd.MarkFlagRequired("cloud-provider")
 }

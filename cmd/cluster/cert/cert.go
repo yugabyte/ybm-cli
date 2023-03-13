@@ -13,50 +13,59 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cluster
+package cert
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
-	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-var getCloudRegionsCmd = &cobra.Command{
-	Use:   "describe-regions",
-	Short: "Describe Cloud Regions",
-	Long:  `Describe Cloud Regions`,
+var CertCmd = &cobra.Command{
+	Use:   "cert",
+	Short: "Get the root CA certificate",
+	Long:  "Get the root CA certificate for your YBM clusters",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+var downloadCertificate = &cobra.Command{
+	Use:   "download",
+	Short: "Download the root CA certificate",
+	Long:  `Download the root CA certificate`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-
-		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
-		cloudRegionsResp, resp, err := authApi.GetSupportedCloudRegions().Cloud(cloudProvider).Execute()
+		certificate, err := authApi.GetConnectionCertificate()
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal("Fail to retrieve connection certtificate: ", err)
 		}
 
-		cloudRegionData := cloudRegionsResp.GetData()
-
-		cloudRegionCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewCloudRegionFormat(viper.GetString("output")),
+		if output, _ := cmd.Flags().GetString("output"); output != "" {
+			f, err := os.Create(output)
+			if err != nil {
+				logrus.Fatal("Fail to create output file: ", err)
+			}
+			defer f.Close()
+			_, err = f.WriteString(certificate)
+			if err != nil {
+				logrus.Fatal("Fail to write to output file: ", err)
+			}
+		} else {
+			fmt.Println(certificate)
 		}
 
-		formatter.CloudRegionWrite(cloudRegionCtx, cloudRegionData)
 	},
 }
 
 func init() {
-	ClusterCmd.AddCommand(getCloudRegionsCmd)
-	getCloudRegionsCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
-	getCloudRegionsCmd.MarkFlagRequired("cloud-provider")
-
+	CertCmd.AddCommand(downloadCertificate)
+	downloadCertificate.Flags().StringP("output", "o", "", "[OPTIONAL] Output file name (default: stdout)")
 }

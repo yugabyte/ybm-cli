@@ -13,7 +13,7 @@ This CLI support 3 possibles configurations:
   ```
 
 * Using a configuration file called `.ybm-cli.yaml` under your `$HOME` directory.
-  You can use the command `ybm configure` to help to setup the file
+  You can use the command `ybm auth` to help to setup the file
 
 * Using environment variables (all need to start with `YBM_`)
   ```sh

@@ -25,11 +25,10 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
-	"github.com/yugabyte/ybm-cli/cmd/readreplica"
+	"github.com/yugabyte/ybm-cli/cmd/region"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
-	"github.com/yugabyte/ybm-cli/cmd/vpcpeering"
 	"github.com/yugabyte/ybm-cli/internal/log"
 )
 
@@ -98,11 +97,10 @@ func init() {
 	rootCmd.AddCommand(cluster.ClusterCmd)
 	rootCmd.AddCommand(backup.BackupCmd)
 	rootCmd.AddCommand(nal.NalCmd)
-	rootCmd.AddCommand(readreplica.ReadReplicaCmd)
 	rootCmd.AddCommand(vpc.VPCCmd)
-	rootCmd.AddCommand(vpcpeering.VPCPeeringCmd)
-	rootCmd.AddCommand(configureCmd)
+	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(signup.SignUpCmd)
+	rootCmd.AddCommand(region.CloudRegionsCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
 }

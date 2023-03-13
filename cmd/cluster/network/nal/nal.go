@@ -13,27 +13,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package network
+package nal
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/yugabyte/ybm-cli/cmd/cluster/network/endpoint"
-	"github.com/yugabyte/ybm-cli/cmd/cluster/network/nal"
 )
 
-var ClusterName string
-
-var NetworkCmd = &cobra.Command{
-	Use:   "network",
-	Short: "Manage network operations",
-	Long:  "Manage network operations for a cluster",
+var AllowListCmd = &cobra.Command{
+	Use:   "allow-list",
+	Short: "Manage network allow-list operations for a cluster",
+	Long:  "Manage network allow-list operations for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
 }
 
 func init() {
-	NetworkCmd.AddCommand()
-	NetworkCmd.AddCommand(nal.AllowListCmd)
-	NetworkCmd.AddCommand(endpoint.EndpointCmd)
+	AllowListCmd.AddCommand()
 }

@@ -352,6 +352,17 @@ func (a *AuthApiClient) GetClusterCloudById(clusterId string) (ybmclient.CloudEn
 	return clusterCloud, nil
 }
 
+func (a *AuthApiClient) GetConnectionCertificate() (string, error) {
+	certResp, resp, err := a.ApiClient.ClusterApi.GetConnectionCertificate(a.ctx).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return "", err
+	}
+	certData := certResp.GetData()
+	return certData, nil
+}
+
 func (a *AuthApiClient) EditCluster(clusterId string) ybmclient.ApiEditClusterRequest {
 	return a.ApiClient.ClusterApi.EditCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
