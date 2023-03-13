@@ -16,27 +16,47 @@
 package cluster
 
 import (
+	"os"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-var getClusterCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get clusters",
-	Long:  "Get clusters",
+var listClusterCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List clusters in YugabyteDB Managed",
+	Long:  "List clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+		clusterListRequest := authApi.ListClusters()
+		// if user filters by name, add it to the request
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		if clusterName != "" {
-			describeClusterCmd.Run(cmd, args)
-			logrus.Warnln("\nThe command `ybm cluster get --cluster-name` is deprecated. Please use `ybm cluster describe --cluster-name` instead.")
-		} else {
-			listClusterCmd.Run(cmd, args)
-			logrus.Warnln("\nThe command `ybm cluster get` is deprecated. Please use `ybm cluster list` instead.")
+			clusterListRequest = clusterListRequest.Name(clusterName)
 		}
+
+		resp, r, err := clusterListRequest.Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		clustersCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+		formatter.ClusterWrite(clustersCtx, resp.GetData())
 	},
 }
 
 func init() {
-	ClusterCmd.AddCommand(getClusterCmd)
-	getClusterCmd.Flags().String("cluster-name", "", "[OPTIONAL] The name of the cluster to get details.")
+	ClusterCmd.AddCommand(listClusterCmd)
 }

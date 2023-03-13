@@ -47,10 +47,10 @@ var CDCSinkCmd = &cobra.Command{
 	},
 }
 
-var getCdcSinkCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get CDC Sink in YugabyteDB Managed",
-	Long:  `Get CDC Sink in YugabyteDB Managed`,
+var listCdcSinkCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List CDC Sinks in YugabyteDB Managed",
+	Long:  `List CDC Sinks in YugabyteDB Managed`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -73,6 +73,8 @@ var getCdcSinkCmd = &cobra.Command{
 		printCdcSinkOutput(resp.GetData())
 	},
 }
+
+// TODO: implement describe that shows the details of a sink
 
 var createCdcSinkCmd = &cobra.Command{
 	Use:   "create",
@@ -208,8 +210,8 @@ var deleteCdcSinkCmd = &cobra.Command{
 func init() {
 	CdcCmd.AddCommand(CDCSinkCmd)
 
-	CDCSinkCmd.AddCommand(getCdcSinkCmd)
-	getCdcSinkCmd.Flags().String("name", "", "[OPTIONAL] Name of the CDC sink.")
+	CDCSinkCmd.AddCommand(listCdcSinkCmd)
+	listCdcSinkCmd.Flags().String("name", "", "[OPTIONAL] Name of the CDC sink.")
 
 	CDCSinkCmd.AddCommand(createCdcSinkCmd)
 	createCdcSinkCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC sink.")

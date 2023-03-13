@@ -177,6 +177,16 @@ var getReadReplicaCmd = &cobra.Command{
 	Short: "Get read replica in YugabyteDB Managed",
 	Long:  "Get read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
+		listReadReplicaCmd.Run(cmd, args)
+		logrus.Warnln("\nThe command `ybm read-replica get` is deprecated. Please use `ybm read-replica list` instead.")
+	},
+}
+
+var listReadReplicaCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List read replica in YugabyteDB Managed",
+	Long:  "List read replica in YugabyteDB Managed",
+	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
@@ -365,6 +375,10 @@ func init() {
 	ReadReplicaCmd.AddCommand(getReadReplicaCmd)
 	getReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	getReadReplicaCmd.MarkFlagRequired("cluster-name")
+
+	ReadReplicaCmd.AddCommand(listReadReplicaCmd)
+	listReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	listReadReplicaCmd.MarkFlagRequired("cluster-name")
 
 	ReadReplicaCmd.AddCommand(createReadReplicaCmd)
 	createReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
