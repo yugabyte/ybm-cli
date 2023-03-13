@@ -45,12 +45,10 @@ var CDCStreamCmd = &cobra.Command{
 	},
 }
 
-// TODO: change this to list
-
-var getCdcStreamCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get CDC Stream in YugabyteDB Managed",
-	Long:  "Get CDC Stream in YugabyteDB Managed",
+var listCdcStreamCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List CDC Streams in YugabyteDB Managed",
+	Long:  "List CDC Streams in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -258,10 +256,10 @@ var deleteCdcStreamCmd = &cobra.Command{
 func init() {
 	CdcCmd.AddCommand(CDCStreamCmd)
 
-	CDCStreamCmd.AddCommand(getCdcStreamCmd)
-	getCdcStreamCmd.Flags().String("name", "", "[OPTIONAL] Name of the CDC Stream.")
-	getCdcStreamCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the Cluster.")
-	getCdcStreamCmd.MarkFlagRequired("cluster-name")
+	CDCStreamCmd.AddCommand(listCdcStreamCmd)
+	listCdcStreamCmd.Flags().String("name", "", "[OPTIONAL] Name of the CDC Stream.")
+	listCdcStreamCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the Cluster.")
+	listCdcStreamCmd.MarkFlagRequired("cluster-name")
 
 	CDCStreamCmd.AddCommand(createCdcStreamCmd)
 	createCdcStreamCmd.Flags().String("name", "", "[REQUIRED] Name of the CDC Stream.")
