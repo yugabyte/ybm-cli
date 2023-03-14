@@ -56,12 +56,12 @@ ybm cluster create
 
 #### List Clusters
 ```sh
-ybm cluster get 
+ybm cluster list 
 ```
 
-#### Get Cluster
+#### Describe Cluster
 ```sh
-ybm cluster get \
+ybm cluster describe \
     --cluster-name=test-cluster-1
 ```
 
@@ -83,18 +83,18 @@ ybm network-allow-list create \
 
 #### List Network Allow Lists
 ```sh
-ybm network-allow-list get 
+ybm network-allow-list list
 ```
 
-#### Get Network Allow List
+#### Filter Network Allow List
 ```sh
-ybm network-allow-list get \
+ybm network-allow-list list \
     --name=admins
 ```
 
 #### Assign network allow list to cluster
 ```sh
-ybm cluster assign network-allow-list \
+ybm cluster network allow-list assign \
      --cluster-name=test-cluster \
      --network-allow-list=admins 
 ```
@@ -109,7 +109,7 @@ ybm network-allow-list delete \
 
 #### Create Read Replica
 ```sh
-ybm read-replica create \
+ybm cluster read-replica create \
      --cluster-name=test-cluster \
      --replica=num-cores=<num-cores>,memory-mb=<memory-mb>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone> 
 ```
@@ -117,12 +117,12 @@ The `--replica` tag is optional. If omitted, a single read replica will be creat
 
 #### List Read Replicas
 ```sh
-ybm read-replica get \
+ybm cluster read-replica list \
     --cluster-name=test-cluster
 ```
 #### Update Read Replicas
 ```sh
-ybm read-replica update \
+ybm cluster read-replica update \
      --cluster-name=test-cluster \
      --replica=num-cores=<num-cores>,memory-mb=<memory-mb>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone> 
 ```
@@ -130,7 +130,7 @@ The `--replica` tag is optional. If omitted, the cluster will be updated with a 
 
 #### Delete Read Replicas
 ```sh
-ybm read-replica delete \
+ybm cluster read-replica delete \
      --cluster-name=test-cluster 
     
 ```
@@ -148,11 +148,11 @@ ybm vpc create \
 
 #### List VPCs
 ```sh
-ybm vpc get 
+ybm vpc list
 ```
-#### Get VPC
+#### Filter VPC
 ```sh
-ybm vpc get \
+ybm vpc list \
     --name=demo-vpc 
 ```
 
@@ -167,7 +167,7 @@ ybm vpc delete \
 
 #### Create VPC Peering
 ```sh
-ybm vpc-peering create \
+ybm vpc peering create \
     --name=demo-peer \
     --vpc-name=demo-vpc \
     --cloud=GCP \
@@ -179,18 +179,18 @@ ybm vpc-peering create \
 
 #### List VPC Peerings
 ```sh
-ybm vpc-peering get 
+ybm vpc peering list
 ```
 
-#### Get VPC Peering
+#### Filter VPC Peering
 ```sh
-ybm vpc-peering get \
+ybm vpc peering list \
     --name=demo-peer
 ```
 
 #### Delete VPC Peering
 ```sh
-ybm vpc-peering delete \
+ybm vpc peering delete \
     --name=demo-peer
 ```
 
