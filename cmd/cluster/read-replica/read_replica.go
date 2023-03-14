@@ -30,7 +30,7 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var clusterName string
+var ClusterName string
 var allReplicaOpt []string
 
 var ReadReplicaCmd = &cobra.Command{
@@ -174,25 +174,25 @@ func printReadReplicaOutput(resp ybmclient.ReadReplicaListResponse) {
 
 var getReadReplicaCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get read replica in YugabyteDB Managed",
+	Short: "Get read replica",
 	Long:  "Get read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		listReadReplicaCmd.Run(cmd, args)
-		logrus.Warnln("\nThe command `ybm read-replica get` is deprecated. Please use `ybm read-replica list` instead.")
+		logrus.Warnln("\nThe command `ybm cluster read-replica get` is deprecated. Please use `ybm cluster read-replica list` instead.")
 	},
 }
 
 var listReadReplicaCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List read replica in YugabyteDB Managed",
-	Long:  "List read replica in YugabyteDB Managed",
+	Short: "List read replicas",
+	Long:  "List read replicas in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterIdByName(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -209,7 +209,7 @@ var listReadReplicaCmd = &cobra.Command{
 
 var createReadReplicaCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create read replica in YugabyteDB Managed",
+	Short: "Create read replica",
 	Long:  "Create read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
@@ -217,7 +217,7 @@ var createReadReplicaCmd = &cobra.Command{
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterIdByName(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -247,7 +247,7 @@ var createReadReplicaCmd = &cobra.Command{
 			logrus.Fatalf("Error when calling `ReadReplicaApi.CreateReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("Read Replica is being created for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Read Replica is being created for cluster %s", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
@@ -257,7 +257,7 @@ var createReadReplicaCmd = &cobra.Command{
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("Read Replica has been created for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			fmt.Printf("Read Replica has been created for cluster %s.\n", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
 			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
 			if err != nil {
@@ -273,7 +273,7 @@ var createReadReplicaCmd = &cobra.Command{
 
 var updateReadReplicaCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Edit read replica in YugabyteDB Managed",
+	Short: "Edit read replica",
 	Long:  "Edit read replica in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
@@ -281,7 +281,7 @@ var updateReadReplicaCmd = &cobra.Command{
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterIdByName(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -310,7 +310,7 @@ var updateReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf("Error when calling `ReadReplicaApi.EditReadReplicas`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		msg := fmt.Sprintf("Read Replica is being updated for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Read Replica is being updated for cluster %s", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "EDIT_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
@@ -320,7 +320,7 @@ var updateReadReplicaCmd = &cobra.Command{
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("Read Replica has been updated for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			fmt.Printf("Read Replica has been updated for cluster %s.\n", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
 			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
 			if err != nil {
@@ -336,7 +336,7 @@ var updateReadReplicaCmd = &cobra.Command{
 
 var deleteReadReplicaCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete read replica from YugabyteDB Managed",
+	Short: "Delete read replica",
 	Long:  "Delete read replica from YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
@@ -344,7 +344,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
-		clusterID, err := authApi.GetClusterIdByName(clusterName)
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -353,7 +353,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf("Error when calling `ReadReplicaApi.DeleteReadReplica`: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		msg := fmt.Sprintf("Read Replica is being deleted for cluster %s", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Read Replica is being deleted for cluster %s", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "DELETE_READ_REPLICA", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
@@ -363,35 +363,24 @@ var deleteReadReplicaCmd = &cobra.Command{
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("All Read Replica has been deleted for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			fmt.Printf("All Read Replica has been deleted for cluster %s.\n", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 			return
 		}
-		fmt.Printf("All Read Replica has been deleted for cluster %s.\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("All Read Replica has been deleted for cluster %s.\n", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
 	},
 }
 
 func init() {
 	ReadReplicaCmd.AddCommand(getReadReplicaCmd)
-	getReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
-	getReadReplicaCmd.MarkFlagRequired("cluster-name")
 
 	ReadReplicaCmd.AddCommand(listReadReplicaCmd)
-	listReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
-	listReadReplicaCmd.MarkFlagRequired("cluster-name")
 
 	ReadReplicaCmd.AddCommand(createReadReplicaCmd)
-	createReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
-	createReadReplicaCmd.MarkFlagRequired("cluster-name")
 	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(updateReadReplicaCmd)
-	updateReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
-	updateReadReplicaCmd.MarkFlagRequired("cluster-name")
 	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(deleteReadReplicaCmd)
-	deleteReadReplicaCmd.Flags().StringVarP(&clusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
-	deleteReadReplicaCmd.MarkFlagRequired("cluster-name")
-
 }

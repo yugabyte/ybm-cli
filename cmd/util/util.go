@@ -87,3 +87,15 @@ func IsJwtTokenExpiredWithTime(tokenStr string, now time.Time) (bool, error) {
 func IsJwtTokenExpired(tokenStr string) (bool, error) {
 	return IsJwtTokenExpiredWithTime(tokenStr, time.Now())
 }
+
+// Inspired from here:
+// https://stackoverflow.com/questions/37562873/most-idiomatic-way-to-select-elements-from-an-array-in-golang
+// This allows us to filter a slice of any type using a function that returns a bool
+func Filter[T any](ss []T, test func(T) bool) (ret []T) {
+	for _, s := range ss {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return
+}

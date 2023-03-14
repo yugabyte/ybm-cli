@@ -13,7 +13,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cluster
+package region
 
 import (
 	"os"
@@ -25,10 +25,19 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-var getCloudRegionsCmd = &cobra.Command{
-	Use:   "describe-regions",
-	Short: "Describe Cloud Regions",
-	Long:  `Describe Cloud Regions`,
+var CloudRegionsCmd = &cobra.Command{
+	Use:   "region",
+	Short: "Manage cloud regions",
+	Long:  "Manage cloud regions for your YBM clusters",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+var listCloudRegionsCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List Cloud Provider Regions",
+	Long:  `List Cloud Provider Regions`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -55,8 +64,8 @@ var getCloudRegionsCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand(getCloudRegionsCmd)
-	getCloudRegionsCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
-	getCloudRegionsCmd.MarkFlagRequired("cloud-provider")
+	CloudRegionsCmd.AddCommand(listCloudRegionsCmd)
 
+	listCloudRegionsCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
+	listCloudRegionsCmd.MarkFlagRequired("cloud-provider")
 }

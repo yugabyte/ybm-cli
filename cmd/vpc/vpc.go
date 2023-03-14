@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yugabyte/ybm-cli/cmd/util"
+	"github.com/yugabyte/ybm-cli/cmd/vpc/peering"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -220,6 +221,8 @@ var deleteVpcCmd = &cobra.Command{
 }
 
 func init() {
+	VPCCmd.AddCommand(peering.VPCPeeringCmd)
+
 	VPCCmd.AddCommand(getVpcCmd)
 	getVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
 

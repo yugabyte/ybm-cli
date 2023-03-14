@@ -28,8 +28,7 @@ import (
 	"golang.org/x/term"
 )
 
-// configureCmd represents the configure command
-var configureCmd = &cobra.Command{
+var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authenticate ybm CLI",
 	Long:  "Authenticate the ybm CLI through this command by providing the API Key.",

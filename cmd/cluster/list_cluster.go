@@ -27,7 +27,7 @@ import (
 
 var listClusterCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List clusters in YugabyteDB Managed",
+	Short: "List clusters",
 	Long:  "List clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
