@@ -49,6 +49,14 @@ var downloadCertificate = &cobra.Command{
 		}
 
 		if output, _ := cmd.Flags().GetString("output"); output != "" {
+			// check if the file exists
+			if _, err := os.Stat(output); err == nil {
+				// Only overwrite if force is set
+				if !cmd.Flags().Changed("force") {
+					logrus.Fatalf("File %s already exists", output)
+				}
+			}
+
 			f, err := os.Create(output)
 			if err != nil {
 				logrus.Fatal("Fail to create output file: ", err)
@@ -68,4 +76,5 @@ var downloadCertificate = &cobra.Command{
 func init() {
 	CertCmd.AddCommand(downloadCertificate)
 	downloadCertificate.Flags().StringP("output", "o", "", "[OPTIONAL] Output file name (default: stdout)")
+	downloadCertificate.Flags().BoolP("force", "f", false, "[OPTIONAL] Overwrite the output file if it exists")
 }
