@@ -67,6 +67,12 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	configuration.Scheme = url.Scheme
 	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
+
+	// If the api key is empty, then tell the user to run the auth command.
+	if len(apiKey) == 0 {
+		logrus.Fatalln("No valid API key detected. Please run `ybm auth` to authenticate with YugabyteDB Managed.")
+	}
+
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
 	ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt)
