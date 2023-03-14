@@ -21,6 +21,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 
@@ -57,14 +58,14 @@ var listEndpointCmd = &cobra.Command{
 
 		region, _ := cmd.Flags().GetString("region")
 		if region != "" {
-			clusterEndpoints = filter(clusterEndpoints, func(endpoint ybmclient.Endpoint) bool {
+			clusterEndpoints = util.Filter(clusterEndpoints, func(endpoint ybmclient.Endpoint) bool {
 				return endpoint.GetRegion() == region
 			})
 		}
 
 		accessibility, _ := cmd.Flags().GetString("accessibility")
 		if accessibility != "" {
-			clusterEndpoints = filter(clusterEndpoints, func(endpoint ybmclient.Endpoint) bool {
+			clusterEndpoints = util.Filter(clusterEndpoints, func(endpoint ybmclient.Endpoint) bool {
 				return string(endpoint.GetAccessibilityType()) == accessibility
 			})
 		}
@@ -81,17 +82,8 @@ var listEndpointCmd = &cobra.Command{
 	},
 }
 
-func filter[T any](ss []T, test func(T) bool) (ret []T) {
-	for _, s := range ss {
-		if test(s) {
-			ret = append(ret, s)
-		}
-	}
-	return
-}
-
 func init() {
 	EndpointCmd.AddCommand(listEndpointCmd)
-	listEndpointCmd.Flags().String("region", "", "[OPTIONAL] Region of the endpoint")
 	listEndpointCmd.Flags().String("accessibility", "", "[OPTIONAL] Accessibility of the endpoint")
+	listEndpointCmd.Flags().String("region", "", "[OPTIONAL] Region of the endpoint")
 }

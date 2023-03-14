@@ -45,10 +45,10 @@ var downloadCertificate = &cobra.Command{
 		authApi.GetInfo("", "")
 		certificate, err := authApi.GetConnectionCertificate()
 		if err != nil {
-			logrus.Fatal("Fail to retrieve connection certtificate: ", err)
+			logrus.Fatal("Fail to retrieve connection certificate: ", err)
 		}
 
-		if output, _ := cmd.Flags().GetString("output"); output != "" {
+		if output, _ := cmd.Flags().GetString("out"); output != "" {
 			// check if the file exists
 			if _, err := os.Stat(output); err == nil {
 				// Only overwrite if force is set
@@ -75,6 +75,6 @@ var downloadCertificate = &cobra.Command{
 
 func init() {
 	CertCmd.AddCommand(downloadCertificate)
-	downloadCertificate.Flags().StringP("output", "o", "", "[OPTIONAL] Output file name (default: stdout)")
+	downloadCertificate.Flags().StringP("out", "", "", "[OPTIONAL] Output file name (default: stdout)")
 	downloadCertificate.Flags().BoolP("force", "f", false, "[OPTIONAL] Overwrite the output file if it exists")
 }
