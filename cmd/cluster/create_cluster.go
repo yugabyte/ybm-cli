@@ -96,9 +96,9 @@ var createClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentials()
-		dbCredentials.Ycql = ybmclient.NewDBCredentials(username, password)
-		dbCredentials.Ysql = ybmclient.NewDBCredentials(username, password)
+		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentialsWithDefaults()
+		dbCredentials.Ycql = *ybmclient.NewDBCredentials(username, password)
+		dbCredentials.Ysql = *ybmclient.NewDBCredentials(username, password)
 
 		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec, *dbCredentials)
 
@@ -114,7 +114,7 @@ var createClusterCmd = &cobra.Command{
 		msg := fmt.Sprintf("The cluster %s is being created", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_CREATE_CLUSTER, []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
