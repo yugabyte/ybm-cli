@@ -237,14 +237,19 @@ Provider   Tier        Fault Tolerance   Nodes     Total Res.\(Vcpu/Mem/Disk\)
 AWS        Dedicated   NONE              1         2 / 8GB / 100GB
 
 
-Network AllowList
-Name              Description       Allow List
-device-ip-gween   device-ip-gween   152.165.26.42/32
-
-
 Regions
 Region      Nodes     vCPU/Node   Mem/Node   Disk/Node   VPC
-us-west-2   1         2           8GB        100GB`))
+us-west-2   1         2           8GB        100GB       
+
+
+Endpoints
+Region      Accessibility   State     Host
+us-west-2   PUBLIC          ACTIVE    us-west-2.a49ee751-6c5d-490f-8d38-347cefc9d53c.fake.yugabyte.com
+
+
+Network AllowList
+Name              Description       Allow List
+device-ip-gween   device-ip-gween   152.165.26.42/32`))
 				session.Kill()
 			})
 			It("should return only header when cluster-name is wrong", func() {
