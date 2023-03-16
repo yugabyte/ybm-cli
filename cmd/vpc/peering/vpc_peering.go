@@ -195,7 +195,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		msg := fmt.Sprintf("The VPC Peering %s is being created", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(ybVpcId, "", "CREATE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			returnStatus, err := authApi.WaitForTaskCompletion(ybVpcId, "", ybmclient.TASKTYPEENUM_CREATE_VPC_PEERING, []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -258,7 +258,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 		msg := fmt.Sprintf("VPC peering %s is being terminated", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(ybvpcID, "", "DELETE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(ybvpcID, "", ybmclient.TASKTYPEENUM_DELETE_VPC_PEERING, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}

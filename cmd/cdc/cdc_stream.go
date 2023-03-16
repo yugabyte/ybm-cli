@@ -126,7 +126,7 @@ var createCdcStreamCmd = &cobra.Command{
 		msg := fmt.Sprintf("The CDC stream %s is being created", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "CREATE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_CREATE_CDC_SERVICE, []string{"FAILED", "SUCCEEDED"}, msg, 1200)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -186,7 +186,7 @@ var editCdcStreamCmd = &cobra.Command{
 		if viper.GetBool("wait") {
 
 			if cmd.Flags().Changed("tables") {
-				returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "RECONFIGURE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
+				returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_RECONFIGURE_CDC_SERVICE, []string{"FAILED", "SUCCEEDED"}, msg, 1200)
 				if err != nil {
 					logrus.Fatalf("error when getting task status: %s", err)
 				}
@@ -238,7 +238,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 		msg := fmt.Sprintf("The CDC stream %s is being deleted", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, "CLUSTER", "DELETE_CDC_SERVICE", []string{"FAILED", "SUCCEEDED"}, msg, 1200)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DELETE_CDC_SERVICE, []string{"FAILED", "SUCCEEDED"}, msg, 1200)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
