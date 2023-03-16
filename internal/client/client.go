@@ -484,6 +484,10 @@ func (a *AuthApiClient) GetBackup(backupID string) ybmclient.ApiGetBackupRequest
 	return a.ApiClient.BackupApi.GetBackup(a.ctx, a.AccountID, a.ProjectID, backupID)
 }
 
+func (a *AuthApiClient) GetClusterNamespaces(clusterID string) ybmclient.ApiGetClusterNamespacesRequest {
+	return a.ApiClient.ClusterApi.GetClusterNamespaces(a.ctx, a.AccountID, a.ProjectID, clusterID)
+}
+
 func (a *AuthApiClient) GetNetworkAllowListIdByName(networkAllowListName string) (string, error) {
 	nalResp, resp, err := a.ListNetworkAllowLists().Execute()
 	if err != nil {
