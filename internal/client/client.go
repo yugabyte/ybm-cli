@@ -661,7 +661,7 @@ func (a *AuthApiClient) ListTasks() ybmclient.ApiListTasksRequest {
 	return a.ApiClient.TaskApi.ListTasks(a.ctx, a.AccountID)
 }
 
-func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
+func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string, timeOutInSec int) (string, error) {
 
 	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {
 		return a.WaitForTaskCompletionCI(entityId, entityType, taskType, completionStatus, message, timeOutInSec)
@@ -670,7 +670,7 @@ func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType string
 
 }
 
-func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
+func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string, timeOutInSec int) (string, error) {
 	var taskList ybmclient.TaskListResponse
 	var resp *http.Response
 	var err error
@@ -725,7 +725,7 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType stri
 
 }
 
-func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType string, taskType string, completionStatus []string, message string, timeOutInSec int) (string, error) {
+func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string, timeOutInSec int) (string, error) {
 	var taskList ybmclient.TaskListResponse
 	var resp *http.Response
 	var err error
