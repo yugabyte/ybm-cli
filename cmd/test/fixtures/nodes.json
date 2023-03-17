@@ -1,0 +1,58 @@
+{
+    "data": [
+        {
+            "name": "test-cli-2-n2",
+            "is_node_up": true,
+            "is_master": false,
+            "is_tserver": true,
+            "is_read_replica": false,
+            "metrics": {
+                "memory_used_bytes": 28606464,
+                "total_sst_file_size_bytes": 0,
+                "uncompressed_sst_file_size_bytes": 0,
+                "read_ops_per_sec": 0.0,
+                "write_ops_per_sec": 0.0
+            },
+            "cloud_info": {
+                "region": "us-west-2",
+                "zone": "us-west-2c"
+            }
+        },
+        {
+            "name": "test-cli-2-n3",
+            "is_node_up": true,
+            "is_master": false,
+            "is_tserver": true,
+            "is_read_replica": false,
+            "metrics": {
+                "memory_used_bytes": 29949952,
+                "total_sst_file_size_bytes": 0,
+                "uncompressed_sst_file_size_bytes": 0,
+                "read_ops_per_sec": 0.0,
+                "write_ops_per_sec": 0.0
+            },
+            "cloud_info": {
+                "region": "us-west-2",
+                "zone": "us-west-2c"
+            }
+        },
+        {
+            "name": "test-cli-2-n1",
+            "is_node_up": true,
+            "is_master": true,
+            "is_tserver": true,
+            "is_read_replica": false,
+            "metrics": {
+                "memory_used_bytes": 45301760,
+                "total_sst_file_size_bytes": 0,
+                "uncompressed_sst_file_size_bytes": 0,
+                "read_ops_per_sec": 0.0,
+                "write_ops_per_sec": 0.0
+            },
+            "cloud_info": {
+                "region": "us-west-2",
+                "zone": "us-west-2c"
+            }
+        }
+    ]
+}

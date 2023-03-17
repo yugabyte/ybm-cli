@@ -41,6 +41,7 @@ var _ = Describe("Cluster", func() {
 		responseNetworkAllowList openapi.NetworkAllowListListResponse
 		responseError            openapi.ApiError
 		responseCluster          openapi.ClusterData
+		responseNodes            openapi.ClusterNodesResponse
 	)
 
 	BeforeEach(func() {
@@ -218,10 +219,16 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1   
 				statusCode = 200
 				err := loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
 				Expect(err).ToNot(HaveOccurred())
+				err = loadJson("./test/fixtures/nodes.json", &responseNodes)
+				Expect(err).ToNot(HaveOccurred())
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/allow-lists"),
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/nodes"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNodes),
 					),
 				)
 				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")
@@ -249,7 +256,14 @@ us-west-2   PUBLIC          ACTIVE    us-west-2.a49ee751-6c5d-490f-8d38-347cefc9
 
 Network AllowList
 Name              Description       Allow List
-device-ip-gween   device-ip-gween   152.165.26.42/32`))
+device-ip-gween   device-ip-gween   152.165.26.42/32
+
+
+Nodes
+Name            Region\[zone\]            Health    Master    Tserver   ReadReplica   Used Memory\(MB\)
+test-cli-2-n1   us-west-2\[us-west-2c\]   💚        ✅        ✅        ❌            43MB
+test-cli-2-n2   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌            27MB
+test-cli-2-n3   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌            29MB`))
 				session.Kill()
 			})
 			It("should return only header when cluster-name is wrong", func() {

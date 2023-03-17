@@ -77,6 +77,7 @@ type fullClusterContext struct {
 	CIRContext      []*clusterInfoRegionsContext
 	NalContext      []*NetworkAllowListContext
 	EndpointContext []*EndpointContext
+	NodeContext     []*NodeContext
 }
 
 func (c *FullClusterContext) Write() error {
@@ -86,6 +87,7 @@ func (c *FullClusterContext) Write() error {
 		CIRContext:      make([]*clusterInfoRegionsContext, 0, len(c.fullCluster.Cluster.Spec.ClusterRegionInfo)),
 		NalContext:      make([]*NetworkAllowListContext, 0, len(c.fullCluster.AllowList)),
 		EndpointContext: make([]*EndpointContext, 0, len(c.fullCluster.Cluster.Info.ClusterEndpoints)),
+		NodeContext:     make([]*NodeContext, 0, len(c.fullCluster.Nodes)),
 	}
 
 	fcc.Cluster.c = c.fullCluster.Cluster
@@ -118,6 +120,14 @@ func (c *FullClusterContext) Write() error {
 	//Adding AllowList
 	for _, nal := range c.fullCluster.AllowList {
 		fcc.NalContext = append(fcc.NalContext, &NetworkAllowListContext{c: nal})
+	}
+
+	//Adding Node
+	sort.Slice(c.fullCluster.Nodes, func(i, j int) bool {
+		return string(c.fullCluster.Nodes[i].Name) < string(c.fullCluster.Nodes[j].Name)
+	})
+	for _, node := range c.fullCluster.Nodes {
+		fcc.NodeContext = append(fcc.NodeContext, &NodeContext{n: node})
 	}
 
 	//First Section
@@ -198,6 +208,21 @@ func (c *FullClusterContext) Write() error {
 			}
 		}
 		c.postFormat(tmpl, NewVPCContext())
+	}
+
+	//Node subsection if any
+	if len(fcc.NodeContext) > 0 {
+		tmpl, err = c.startSubsection(defaultNodeListing)
+		if err != nil {
+			return err
+		}
+		c.SubSection("Nodes")
+		for _, v := range fcc.NodeContext {
+			if err := c.contextFormat(tmpl, v); err != nil {
+				return err
+			}
+		}
+		c.postFormat(tmpl, NewNodeContext())
 	}
 
 	return nil
