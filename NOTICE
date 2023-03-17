@@ -174,15 +174,15 @@ The following subcomponents are used:
 ## github.com/onsi/ginkgo/v2
 
 * Name: github.com/onsi/ginkgo/v2
-* Version: v2.9.0
-* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.9.0/LICENSE)
+* Version: v2.9.1
+* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.9.1/LICENSE)
 
 
 ## github.com/onsi/gomega
 
 * Name: github.com/onsi/gomega
-* Version: v1.27.2
-* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.2/LICENSE)
+* Version: v1.27.4
+* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.4/LICENSE)
 
 
 ## github.com/pelletier/go-toml/v2
@@ -321,8 +321,8 @@ The following subcomponents are used:
 ## golang.org/x/net
 
 * Name: golang.org/x/net
-* Version: v0.7.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/net/+/v0.7.0:LICENSE)
+* Version: v0.8.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/net/+/v0.8.0:LICENSE)
 
 
 ## golang.org/x/oauth2
@@ -342,8 +342,8 @@ The following subcomponents are used:
 ## golang.org/x/term
 
 * Name: golang.org/x/term
-* Version: v0.5.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/term/+/v0.5.0:LICENSE)
+* Version: v0.6.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/term/+/v0.6.0:LICENSE)
 
 
 ## golang.org/x/text
