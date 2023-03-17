@@ -33,6 +33,14 @@ var _ = Describe("Formatter", func() {
 			Entry("with not text and lenght", "", 3, ""),
 			Entry("with japanese  and lenght", "コニチワ", 3, "コニチ..."),
 		)
+
+		DescribeTable("convert bytes to  MB",
+			func(value int64, expected string) {
+				Expect(formatter.ConvertBytestoGb(value)).To(Equal(expected))
+			},
+			Entry("with 1000000", int64(1000000), "1MB"),
+			Entry("with 42000000", int64(42000000), "40MB"),
+		)
 	})
 
 })

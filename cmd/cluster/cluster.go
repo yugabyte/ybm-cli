@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
+	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 )
 
@@ -42,4 +43,6 @@ func init() {
 	ClusterCmd.AddCommand(readreplica.ReadReplicaCmd)
 	readreplica.ReadReplicaCmd.PersistentFlags().StringVarP(&readreplica.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	readreplica.ReadReplicaCmd.MarkPersistentFlagRequired("cluster-name")
+
+	ClusterCmd.AddCommand(node.NodeCmd)
 }

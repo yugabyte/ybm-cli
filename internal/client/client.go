@@ -65,6 +65,7 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	}
 	configuration.Host = url.Host
 	configuration.Scheme = url.Scheme
+	configuration.Debug = true
 	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
 
@@ -652,6 +653,10 @@ func (a *AuthApiClient) GetCdcSinkIDBySinkName(cdcSinkName string) (string, erro
 	}
 
 	return "", fmt.Errorf("couldn't find any cdcSink with the given name")
+}
+
+func (a *AuthApiClient) GetClusterNode(clusterId string) ybmclient.ApiGetClusterNodesRequest {
+	return a.ApiClient.ClusterApi.GetClusterNodes(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
 func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsRequest {
