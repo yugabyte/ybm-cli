@@ -22,9 +22,10 @@ import (
 )
 
 const (
-	defaultEndpointListing = "table {{.Region}}\t{{.Accessibility}}\t{{.State}}\t{{.Host}}"
+	defaultEndpointListing = "table {{.Id}}\t{{.Region}}\t{{.Accessibility}}\t{{.State}}\t{{.Host}}"
 	accessibilityHeader    = "Accessibility"
 	hostHeader             = "Host"
+	idHeader               = "Id"
 )
 
 type EndpointContext struct {
@@ -59,12 +60,23 @@ func EndpointWrite(ctx Context, endpoints []ybmclient.Endpoint) error {
 func NewEndpointContext() *EndpointContext {
 	epCtx := EndpointContext{}
 	epCtx.Header = SubHeaderContext{
+		"Id":            idHeader,
 		"Region":        regionHeader,
 		"Accessibility": accessibilityHeader,
 		"State":         stateHeader,
 		"Host":          hostHeader,
 	}
 	return &epCtx
+}
+
+func (e *EndpointContext) Id() string {
+	if e.e.GetPseId() != "" {
+		return e.e.GetPseId()
+	}
+	if e.e.GetId() != "" {
+		return e.e.GetId()
+	}
+	return "N/A"
 }
 
 func (e *EndpointContext) Region() string {

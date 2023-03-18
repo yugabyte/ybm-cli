@@ -389,6 +389,24 @@ func (a *AuthApiClient) ResumeCluster(clusterId string) ybmclient.ApiResumeClust
 	return a.ApiClient.ClusterApi.ResumeCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) GetPrivateServiceEndpoint(clusterId string, endpointId string) ybmclient.ApiGetPrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.GetPrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId, endpointId)
+}
+
+func (a *AuthApiClient) EditPrivateServiceEndpoint(clusterId string, endpointId string) ybmclient.ApiEditPrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.EditPrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId, endpointId)
+}
+
+func (a *AuthApiClient) CreatePrivateServiceEndpointSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointRegionSpec {
+	pseSpecs := []ybmclient.PrivateServiceEndpointRegionSpec{}
+
+	for regionId, arnList := range regionArnMap {
+		local := *ybmclient.NewPrivateServiceEndpointRegionSpec(regionId, arnList)
+		pseSpecs = append(pseSpecs, local)
+	}
+	return pseSpecs
+}
+
 func (a *AuthApiClient) CreateReadReplica(clusterId string) ybmclient.ApiCreateReadReplicaRequest {
 	return a.ApiClient.ReadReplicaApi.CreateReadReplica(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
