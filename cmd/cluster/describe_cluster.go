@@ -55,7 +55,7 @@ var describeClusterCmd = &cobra.Command{
 			fullClusterContext.Write()
 			return
 		}
-		fmt.Println("No clusters found")
+		fmt.Println("No cluster found")
 	},
 }
 
