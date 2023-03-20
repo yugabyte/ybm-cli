@@ -325,7 +325,7 @@ func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
 		return clusterData[0].Info.GetId(), nil
 	}
 
-	return "", fmt.Errorf("could no get cluster data for cluster name: %s", clusterName)
+	return "", fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {
@@ -437,7 +437,7 @@ func (a *AuthApiClient) GetVpcIdByName(vpcName string) (string, error) {
 		return vpcData[0].Info.GetId(), nil
 	}
 
-	return "", fmt.Errorf("could no get vpc data for vpc name: %s", vpcName)
+	return "", fmt.Errorf("could not get vpc data for vpc name: %s", vpcName)
 }
 
 func (a *AuthApiClient) GetSingleTenantVpc(vpcId string) ybmclient.ApiGetSingleTenantVpcRequest {
