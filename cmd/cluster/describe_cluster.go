@@ -55,7 +55,15 @@ var describeClusterCmd = &cobra.Command{
 			fullClusterContext.Write()
 			return
 		}
-		fmt.Println("No cluster found")
+		if len(resp.GetData()) < 1 {
+			fmt.Println("No cluster found")
+			return
+		}
+		clustersCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
+		}
+		formatter.ClusterWrite(clustersCtx, resp.GetData())
 	},
 }
 
