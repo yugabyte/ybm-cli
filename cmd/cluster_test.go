@@ -266,7 +266,7 @@ test-cli-2-n2   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌ 
 test-cli-2-n3   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌            29MB`))
 				session.Kill()
 			})
-			It("should return only header when cluster-name is wrong", func() {
+			It("should return no cluster found when cluster-name is wrong", func() {
 				statusCode = 200
 				err := loadJson("./test/fixtures/no-clusters.json", &responseCluster)
 				Expect(err).ToNot(HaveOccurred())
@@ -282,7 +282,7 @@ test-cli-2-n3   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌ 
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				Expect(session.Out).Should(gbytes.Say(
-					`No clusters found`))
+					`No cluster found`))
 				session.Kill()
 			})
 		})
