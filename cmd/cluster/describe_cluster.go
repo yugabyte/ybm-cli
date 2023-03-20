@@ -16,6 +16,7 @@
 package cluster
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -54,11 +55,7 @@ var describeClusterCmd = &cobra.Command{
 			fullClusterContext.Write()
 			return
 		}
-		clustersCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewClusterFormat(viper.GetString("output")),
-		}
-		formatter.ClusterWrite(clustersCtx, resp.GetData())
+		fmt.Println("No clusters found")
 	},
 }
 

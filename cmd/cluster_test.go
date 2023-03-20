@@ -282,7 +282,7 @@ test-cli-2-n3   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌ 
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				Expect(session.Out).Should(gbytes.Say(
-					`Name      Tier      Version   State     Health    Regions   Nodes     Total Res.\(Vcpu/Mem/Disk\)`))
+					`No clusters found`))
 				session.Kill()
 			})
 		})
