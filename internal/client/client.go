@@ -658,6 +658,10 @@ func (a *AuthApiClient) GetClusterNode(clusterId string) ybmclient.ApiGetCluster
 	return a.ApiClient.ClusterApi.GetClusterNodes(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) PerformNodeOperation(clusterId string) ybmclient.ApiPerformNodeOperationRequest {
+	return a.ApiClient.ClusterApi.PerformNodeOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsRequest {
 	return a.ApiClient.ClusterApi.GetSupportedCloudRegions(a.ctx)
 }
