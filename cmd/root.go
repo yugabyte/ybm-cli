@@ -60,11 +60,13 @@ var rootCmd = &cobra.Command{
 			return
 		}
 		// Don't print any error if we are not able to fetch the latest release
-		latestVersion, _ := releases.GetLatestRelease()
-		currentVersion := ybmAuthClient.GetVersion()
-		if semver.Compare(currentVersion, latestVersion) == -1 {
-			message := fmt.Sprintf("A newer version is available. Please upgrade to the latest version %s\n", latestVersion)
-			logrus.Println(formatter.Colorize(message, formatter.GREEN_COLOR))
+		latestVersion, err := releases.GetLatestRelease()
+		if err == nil {
+			currentVersion := ybmAuthClient.GetVersion()
+			if semver.Compare(currentVersion, latestVersion) == -1 {
+				message := fmt.Sprintf("A newer version is available. Please upgrade to the latest version %s\n", latestVersion)
+				logrus.Println(formatter.Colorize(message, formatter.GREEN_COLOR))
+			}
 		}
 	},
 }
