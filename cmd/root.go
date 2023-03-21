@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -32,6 +33,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	"github.com/yugabyte/ybm-cli/internal/log"
 	"github.com/yugabyte/ybm-cli/internal/releases"
 	"golang.org/x/mod/semver"
@@ -61,7 +63,8 @@ var rootCmd = &cobra.Command{
 		latestVersion, _ := releases.GetLatestRelease()
 		currentVersion := ybmAuthClient.GetVersion()
 		if semver.Compare(currentVersion, latestVersion) == -1 {
-			logrus.Printf("A newer version is available. Please upgrade to the latest version %s\n", latestVersion)
+			message := fmt.Sprintf("A newer version is available. Please upgrade to the latest version %s\n", latestVersion)
+			logrus.Println(formatter.Colorize(message, formatter.GREEN_COLOR))
 		}
 	},
 }
