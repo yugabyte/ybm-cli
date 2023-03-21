@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/sirupsen/logrus"
@@ -30,7 +31,10 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/signup"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/log"
+	"github.com/yugabyte/ybm-cli/internal/releases"
+	"golang.org/x/mod/semver"
 )
 
 var (
@@ -48,6 +52,17 @@ var rootCmd = &cobra.Command{
 		myFigure.Print()
 		logrus.Printf("\n")
 		cmd.Help()
+	}
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if strings.HasPrefix(cmd.CommandPath(), "ybm completion") {
+			return
+		}
+		// Don't print any error if we are not able to fetch the latest release
+		latestVersion, _ := releases.GetLatestRelease()
+		currentVersion := ybmAuthClient.GetVersion()
+		if semver.Compare(currentVersion, latestVersion) == -1 {
+			logrus.Printf("A newer version is available. Please upgrade to the latest version %s\n", latestVersion)
+		}
 	},
 }
 
