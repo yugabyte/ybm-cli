@@ -16,13 +16,11 @@
 package endpoint
 
 import (
-	"encoding/json"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -39,33 +37,7 @@ var describeEndpointCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterListRequest := authApi.ListClusters()
-		// user filters by name, add it to the request
-		clusterListRequest = clusterListRequest.Name(clusterName)
-
-		resp, r, err := clusterListRequest.Execute()
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		if len(resp.GetData()) == 0 {
-			logrus.Fatalf("Cluster not found")
-		}
-
-		clusterId := resp.GetData()[0].Info.Id
-		clusterEndpoints := resp.GetData()[0].Info.ClusterEndpoints
-		jsonEndpoints, _ := json.Marshal(clusterEndpoints)
-		logrus.Debugf("Found endpoints: %v", string(jsonEndpoints))
-		endpointId, _ := cmd.Flags().GetString("endpoint-id")
-		clusterEndpoints = util.Filter(clusterEndpoints, func(endpoint ybmclient.Endpoint) bool {
-			return endpoint.Id == endpointId || endpoint.GetPseId() == endpointId
-		})
-
-		if len(clusterEndpoints) == 0 {
-			logrus.Fatalf("Endpoint not found")
-		}
+		clusterEndpoints, clusterId, endpointId := getEndpointById(cmd, authApi)
 
 		// We currently support fetching just Private Service Endpoints
 		switch clusterEndpoints[0].GetAccessibilityType() {
@@ -92,8 +64,6 @@ var describeEndpointCmd = &cobra.Command{
 			}
 			formatter.PSEndpointWrite(psEndpointContext, pseGetResponse.GetData(), clusterEndpoints[0])
 
-			break
-
 		default:
 			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.")
 		}
@@ -103,4 +73,5 @@ var describeEndpointCmd = &cobra.Command{
 func init() {
 	EndpointCmd.AddCommand(describeEndpointCmd)
 	describeEndpointCmd.Flags().String("endpoint-id", "", "[REQUIRED] The ID of the endpoint")
+	describeEndpointCmd.MarkFlagRequired("endpoint-id")
 }

@@ -397,11 +397,30 @@ func (a *AuthApiClient) EditPrivateServiceEndpoint(clusterId string, endpointId 
 	return a.ApiClient.ClusterApi.EditPrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId, endpointId)
 }
 
-func (a *AuthApiClient) CreatePrivateServiceEndpointSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointRegionSpec {
+func (a *AuthApiClient) DeletePrivateServiceEndpoint(clusterId string, endpointId string) ybmclient.ApiDeletePrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.DeletePrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId, endpointId)
+}
+
+func (a *AuthApiClient) CreatePrivateServiceEndpoint(clusterId string) ybmclient.ApiCreatePrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.CreatePrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) CreatePrivateServiceEndpointRegionSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointRegionSpec {
 	pseSpecs := []ybmclient.PrivateServiceEndpointRegionSpec{}
 
 	for regionId, arnList := range regionArnMap {
 		local := *ybmclient.NewPrivateServiceEndpointRegionSpec(regionId, arnList)
+		pseSpecs = append(pseSpecs, local)
+	}
+	return pseSpecs
+}
+
+func (a *AuthApiClient) CreatePrivateServiceEndpointSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointSpec {
+	pseSpecs := []ybmclient.PrivateServiceEndpointSpec{}
+
+	for regionId, arnList := range regionArnMap {
+		regionSpec := *ybmclient.NewPrivateServiceEndpointRegionSpec(regionId, arnList)
+		local := *ybmclient.NewPrivateServiceEndpointSpec([]ybmclient.PrivateServiceEndpointRegionSpec{regionSpec})
 		pseSpecs = append(pseSpecs, local)
 	}
 	return pseSpecs

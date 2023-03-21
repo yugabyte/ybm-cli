@@ -14,3 +14,52 @@
 // under the License.
 
 package endpoint
+
+import (
+	"fmt"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+)
+
+var deleteEndpointCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete a private service endpoint",
+	Long:  `Delete a private service endpoint.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		clusterEndpoints, clusterId, endpointId := getEndpointById(cmd, authApi)
+
+		// We currently support fetching just Private Service Endpoints
+		switch clusterEndpoints[0].GetAccessibilityType() {
+
+		case ybmclient.ACCESSIBILITYTYPE_PRIVATE_SERVICE_ENDPOINT:
+			logrus.Debugln("Endpoint is a private service endpoint, attempting to delete")
+			r, err := authApi.DeletePrivateServiceEndpoint(clusterId, endpointId).Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", r)
+				logrus.Fatalf("Error when calling `ClusterApi.DeletePrivateServiceEndpoint`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			}
+
+			msg := fmt.Sprintf("Deleted endpoint %s", endpointId)
+			fmt.Println(msg)
+
+		default:
+			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.")
+		}
+
+	},
+}
+
+func init() {
+	EndpointCmd.AddCommand(deleteEndpointCmd)
+	deleteEndpointCmd.Flags().String("endpoint-id", "", "[REQUIRED] THe ID of the endpoint")
+	deleteEndpointCmd.MarkFlagRequired("endpoint-id")
+}
