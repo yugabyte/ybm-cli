@@ -25,10 +25,10 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
-	"github.com/yugabyte/ybm-cli/cmd/readreplica"
+	"github.com/yugabyte/ybm-cli/cmd/region"
+	"github.com/yugabyte/ybm-cli/cmd/signup"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
-	"github.com/yugabyte/ybm-cli/cmd/vpcpeering"
 	"github.com/yugabyte/ybm-cli/internal/log"
 )
 
@@ -67,12 +67,12 @@ func setDefaults() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	cobra.EnableCaseInsensitive = true
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	setDefaults()
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ybm-cli.yaml)")
-	rootCmd.PersistentFlags().StringP("host", "", "", "YBM Api hostname")
 	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YBM Api Key")
 	rootCmd.PersistentFlags().StringP("output", "o", "", "Select the desired output format (table, json, pretty). Default to table")
 	rootCmd.PersistentFlags().StringP("logLevel", "l", "", "Select the desired log level format(info). Default to info")
@@ -81,13 +81,18 @@ func init() {
 	rootCmd.PersistentFlags().Bool("wait", false, "Wait until the task is completed, otherwise it will exit immediately, default to false")
 
 	//Bind peristents flags to viper
-	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("apiKey", rootCmd.PersistentFlags().Lookup("apiKey"))
 	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 	viper.BindPFlag("logLevel", rootCmd.PersistentFlags().Lookup("logLevel"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("no-color", rootCmd.PersistentFlags().Lookup("no-color"))
 	viper.BindPFlag("wait", rootCmd.PersistentFlags().Lookup("wait"))
+
+	// Make host configurable only if the CONFIGURE_URL feature flag is set to true
+	if util.IsFeatureFlagEnabled(util.CONFIGURE_URL) {
+		rootCmd.PersistentFlags().StringP("host", "", "", "YBM Api hostname")
+		viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
+	}
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -96,10 +101,10 @@ func init() {
 	rootCmd.AddCommand(cluster.ClusterCmd)
 	rootCmd.AddCommand(backup.BackupCmd)
 	rootCmd.AddCommand(nal.NalCmd)
-	rootCmd.AddCommand(readreplica.ReadReplicaCmd)
 	rootCmd.AddCommand(vpc.VPCCmd)
-	rootCmd.AddCommand(vpcpeering.VPCPeeringCmd)
-	rootCmd.AddCommand(configureCmd)
+	rootCmd.AddCommand(authCmd)
+	rootCmd.AddCommand(signup.SignUpCmd)
+	rootCmd.AddCommand(region.CloudRegionsCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
 }

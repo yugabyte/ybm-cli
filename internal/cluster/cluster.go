@@ -29,6 +29,8 @@ type FullCluster struct {
 	Vpc map[string]ybmclient.SingleTenantVpcDataResponse
 	//AllowList Attach to the cluster
 	AllowList []ybmclient.NetworkAllowListData
+	//Nodes of the cluster
+	Nodes []ybmclient.NodeData
 }
 
 func NewFullCluster(authApi ybmAuthClient.AuthApiClient, clusterData ybmclient.ClusterData) *FullCluster {
@@ -39,6 +41,7 @@ func NewFullCluster(authApi ybmAuthClient.AuthApiClient, clusterData ybmclient.C
 	// Add VPC information
 	fc.SetVPCs(authApi)
 	fc.SetAllowLists(authApi)
+	fc.SetNodes(authApi)
 	return fc
 }
 
@@ -58,7 +61,7 @@ func (f *FullCluster) SetVPCs(authApi ybmAuthClient.AuthApiClient) {
 		resp, r, err := authApi.ListSingleTenantVpcs().Ids(VpcIds).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		if _, ok := resp.GetDataOk(); ok {
 			for _, v := range resp.GetData() {
@@ -71,10 +74,29 @@ func (f *FullCluster) SetVPCs(authApi ybmAuthClient.AuthApiClient) {
 func (f *FullCluster) SetAllowLists(authApi ybmAuthClient.AuthApiClient) {
 	resp, r, err := authApi.ListClusterNetworkAllowLists(f.Cluster.Info.Id).Execute()
 	if err != nil {
-		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf("Error when calling `ClusterApi.ListClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+		if err.Error() == "409 Conflict" {
+			logrus.Debugf("Failed to get allow lists because cluster %s is not ready yet", f.Cluster.Info.Id)
+		} else {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
 	}
 	if _, ok := resp.GetDataOk(); ok {
 		f.AllowList = resp.GetData()
+	}
+}
+
+func (f *FullCluster) SetNodes(authApi ybmAuthClient.AuthApiClient) {
+	resp, r, err := authApi.GetClusterNode(f.Cluster.Info.Id).Execute()
+	if err != nil {
+		if err.Error() == "409 Conflict" {
+			logrus.Debugf("Failed to get allow lists because cluster %s is not ready yet", f.Cluster.Info.Id)
+		} else {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+	}
+	if _, ok := resp.GetDataOk(); ok {
+		f.Nodes = resp.GetData()
 	}
 }

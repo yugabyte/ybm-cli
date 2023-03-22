@@ -25,16 +25,23 @@ import (
 type FeatureFlag string
 
 const (
-	CDC FeatureFlag = "CDC"
+	CDC           FeatureFlag = "CDC"
+	CONFIGURE_URL FeatureFlag = "CONFIGURE_URL"
+	NODE_OP       FeatureFlag = "NODE_OPS"
 )
 
 func (f FeatureFlag) String() string {
 	return string(f)
 }
 
-func AddCommandIfFeatureFlag(rootCmd *cobra.Command, cmd *cobra.Command, featureFlag FeatureFlag) {
+func IsFeatureFlagEnabled(featureFlag FeatureFlag) bool {
 	envVarName := "YBM_FF_" + featureFlag.String()
-	if strings.ToLower(os.Getenv(envVarName)) == "true" {
+	return strings.ToLower(os.Getenv(envVarName)) == "true"
+}
+
+func AddCommandIfFeatureFlag(rootCmd *cobra.Command, cmd *cobra.Command, featureFlag FeatureFlag) {
+	// If the feature flag is enabled, add the command to the root command
+	if IsFeatureFlagEnabled(featureFlag) {
 		rootCmd.AddCommand(cmd)
 	}
 }

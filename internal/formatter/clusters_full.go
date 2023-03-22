@@ -29,11 +29,12 @@ import (
 
 const (
 	defaultFullClusterGeneral       = "table {{.Name}}\t{{.ID}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}"
-	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.FaultTolerance}}\t{{.DataDistribution}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}"
 	defaultVPCListingCluster        = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
 	defaultDefaultFullClusterRegion = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
 	defaultFullClusterNalListing    = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
 	defaultFullClusterCMK           = "table {{.Provider}}\t{{.Key Alias}}\t{{.ARNs}}"
+	defaultFullClusterEndpoints     = "table {{.Region}}\t{{.Accessibility}}\t{{.State}}\t{{.Host}}"
 	faultToleranceHeader            = "Fault Tolerance"
 	dataDistributionHeader          = "Data Distribution"
 	vcpuByNodeHeader                = "vCPU/Node"
@@ -72,18 +73,22 @@ func NewFullClusterFormat(source string) Format {
 }
 
 type fullClusterContext struct {
-	Cluster    *ClusterContext
-	VPCContext []*VPCContext
-	CIRContext []*clusterInfoRegionsContext
-	NalContext []*NetworkAllowListContext
+	Cluster         *ClusterContext
+	VPCContext      []*VPCContext
+	CIRContext      []*clusterInfoRegionsContext
+	NalContext      []*NetworkAllowListContext
+	EndpointContext []*EndpointContext
+	NodeContext     []*NodeContext
 }
 
 func (c *FullClusterContext) Write() error {
 	fcc := &fullClusterContext{
-		Cluster:    &ClusterContext{},
-		VPCContext: make([]*VPCContext, 0, len(c.fullCluster.Vpc)),
-		CIRContext: make([]*clusterInfoRegionsContext, 0, len(c.fullCluster.Cluster.Spec.ClusterRegionInfo)),
-		NalContext: make([]*NetworkAllowListContext, 0, len(c.fullCluster.AllowList)),
+		Cluster:         &ClusterContext{},
+		VPCContext:      make([]*VPCContext, 0, len(c.fullCluster.Vpc)),
+		CIRContext:      make([]*clusterInfoRegionsContext, 0, len(c.fullCluster.Cluster.Spec.ClusterRegionInfo)),
+		NalContext:      make([]*NetworkAllowListContext, 0, len(c.fullCluster.AllowList)),
+		EndpointContext: make([]*EndpointContext, 0, len(c.fullCluster.Cluster.Info.ClusterEndpoints)),
+		NodeContext:     make([]*NodeContext, 0, len(c.fullCluster.Nodes)),
 	}
 
 	fcc.Cluster.c = c.fullCluster.Cluster
@@ -106,9 +111,24 @@ func (c *FullClusterContext) Write() error {
 			})
 	}
 
+	//Adding Endpoints
+	for _, ep := range c.fullCluster.Cluster.Info.ClusterEndpoints {
+		fcc.EndpointContext = append(fcc.EndpointContext, &EndpointContext{
+			e: ep,
+		})
+	}
+
 	//Adding AllowList
 	for _, nal := range c.fullCluster.AllowList {
 		fcc.NalContext = append(fcc.NalContext, &NetworkAllowListContext{c: nal})
+	}
+
+	//Adding Node
+	sort.Slice(c.fullCluster.Nodes, func(i, j int) bool {
+		return string(c.fullCluster.Nodes[i].Name) < string(c.fullCluster.Nodes[j].Name)
+	})
+	for _, node := range c.fullCluster.Nodes {
+		fcc.NodeContext = append(fcc.NodeContext, &NodeContext{n: node})
 	}
 
 	//First Section
@@ -132,6 +152,34 @@ func (c *FullClusterContext) Write() error {
 		return err
 	}
 	c.postFormat(tmpl, NewClusterContext())
+
+	//Regions Subsection
+	tmpl, err = c.startSubsection(defaultDefaultFullClusterRegion)
+	if err != nil {
+		return err
+	}
+	c.SubSection("Regions")
+	for _, v := range fcc.CIRContext {
+		if err := c.contextFormat(tmpl, v); err != nil {
+			return err
+		}
+	}
+	c.postFormat(tmpl, NewClusterInfoRegionsContext())
+
+	// Cluster endpoints
+	if len(fcc.EndpointContext) > 0 {
+		tmpl, err = c.startSubsection(defaultFullClusterEndpoints)
+		if err != nil {
+			return err
+		}
+		c.SubSection("Endpoints")
+		for _, v := range fcc.EndpointContext {
+			if err := c.contextFormat(tmpl, v); err != nil {
+				return err
+			}
+		}
+		c.postFormat(tmpl, NewEndpointContext())
+	}
 
 	//NAL subsection if any
 	if len(fcc.NalContext) > 0 {
@@ -163,18 +211,20 @@ func (c *FullClusterContext) Write() error {
 		c.postFormat(tmpl, NewVPCContext())
 	}
 
-	//Regions Subsection
-	tmpl, err = c.startSubsection(defaultDefaultFullClusterRegion)
-	if err != nil {
-		return err
-	}
-	c.SubSection("Regions")
-	for _, v := range fcc.CIRContext {
-		if err := c.contextFormat(tmpl, v); err != nil {
+	//Node subsection if any
+	if len(fcc.NodeContext) > 0 {
+		tmpl, err = c.startSubsection(defaultNodeListing)
+		if err != nil {
 			return err
 		}
+		c.SubSection("Nodes")
+		for _, v := range fcc.NodeContext {
+			if err := c.contextFormat(tmpl, v); err != nil {
+				return err
+			}
+		}
+		c.postFormat(tmpl, NewNodeContext())
 	}
-	c.postFormat(tmpl, NewClusterInfoRegionsContext())
 
 	return nil
 }

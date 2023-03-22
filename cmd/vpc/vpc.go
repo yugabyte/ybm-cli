@@ -22,6 +22,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
+	"github.com/yugabyte/ybm-cli/cmd/vpc/peering"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -36,11 +38,21 @@ var VPCCmd = &cobra.Command{
 	},
 }
 
-// vpcCmd represents the vpc command
 var getVpcCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get VPCs in YugabyteDB Managed",
-	Long:  "Get VPCs in YugabyteDB Managed",
+	Short: "Get VPC in YugabyteDB Managed",
+	Long:  `Get VPC in YugabyteDB Managed`,
+	Run: func(cmd *cobra.Command, args []string) {
+		listVpcCmd.Run(cmd, args)
+		logrus.Warnln("\nThe command `ybm vpc get` is deprecated. Please use `ybm vpc list` instead.")
+	},
+}
+
+// vpcCmd represents the vpc command
+var listVpcCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List VPCs in YugabyteDB Managed",
+	Long:  "List VPCs in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -54,7 +66,7 @@ var getVpcCmd = &cobra.Command{
 		resp, r, err := vpcListRequest.Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		// response from `ListClusters`: ClusterListResponse
 		vpcCtx := formatter.Context{
@@ -65,6 +77,8 @@ var getVpcCmd = &cobra.Command{
 		formatter.VPCWrite(vpcCtx, resp.GetData())
 	},
 }
+
+// TODO: make list VPC not show the IP ranges and other details and build a describe for showing that.
 
 var createRegions []string
 var createCidrs []string
@@ -98,6 +112,9 @@ var createVpcCmd = &cobra.Command{
 		if cmd.Flags().Changed("cidr") {
 			for index, region := range createRegions {
 				cidr := createCidrs[index]
+				if valid, err := util.ValidateCIDR(cidr); !valid {
+					logrus.Fatal(err)
+				}
 				spec := *ybmclient.NewVpcRegionSpecWithDefaults()
 				regionMap[region] = index
 				spec.SetRegion(region)
@@ -111,6 +128,9 @@ var createVpcCmd = &cobra.Command{
 
 		vpcSpec := *ybmclient.NewSingleTenantVpcSpec(vpcName, ybmclient.CloudEnum(cloud), vpcRegionSpec)
 		if cmd.Flags().Changed("global-cidr") {
+			if valid, err := util.ValidateCIDR(globalCidrRange); !valid {
+				logrus.Fatal(err)
+			}
 			vpcSpec.SetParentCidr(globalCidrRange)
 		}
 		vpcRequest := *ybmclient.NewSingleTenantVpcRequest(vpcSpec)
@@ -123,7 +143,7 @@ var createVpcCmd = &cobra.Command{
 		resp, r, err := authApi.CreateVpc().SingleTenantVpcRequest(vpcRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.CreateVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		vpcID := resp.Data.GetInfo().Id
 		vpcData := []ybmclient.SingleTenantVpcDataResponse{resp.GetData()}
@@ -131,7 +151,7 @@ var createVpcCmd = &cobra.Command{
 		msg := fmt.Sprintf("The VPC %s is being created", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(vpcID, "", "CREATE_VPC", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(vpcID, "", ybmclient.TASKTYPEENUM_CREATE_VPC, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -144,7 +164,7 @@ var createVpcCmd = &cobra.Command{
 			respC, r, err := vpcListRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `NetworkApi.ListSingleTenantVpcs`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			vpcData = respC.GetData()
 		} else {
@@ -180,13 +200,13 @@ var deleteVpcCmd = &cobra.Command{
 		r, err := authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.DeleteVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The VPC %s is being deleted", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(vpcId, "", "DELETE_VPC", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(vpcId, "", ybmclient.TASKTYPEENUM_DELETE_VPC, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -201,8 +221,13 @@ var deleteVpcCmd = &cobra.Command{
 }
 
 func init() {
+	VPCCmd.AddCommand(peering.VPCPeeringCmd)
+
 	VPCCmd.AddCommand(getVpcCmd)
 	getVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
+
+	VPCCmd.AddCommand(listVpcCmd)
+	listVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
 
 	VPCCmd.AddCommand(createVpcCmd)
 	createVpcCmd.Flags().SortFlags = false

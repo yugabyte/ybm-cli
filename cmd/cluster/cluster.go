@@ -17,6 +17,10 @@ package cluster
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
+	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
+	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
+	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 )
 
 // getCmd represents the list command
@@ -30,15 +34,15 @@ var ClusterCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand()
+	ClusterCmd.AddCommand(cert.CertCmd)
 
-	// Here you will define your flags and configuration settings.
+	ClusterCmd.AddCommand(network.NetworkCmd)
+	network.NetworkCmd.PersistentFlags().StringVarP(&network.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	network.NetworkCmd.MarkPersistentFlagRequired("cluster-name")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
+	ClusterCmd.AddCommand(readreplica.ReadReplicaCmd)
+	readreplica.ReadReplicaCmd.PersistentFlags().StringVarP(&readreplica.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	readreplica.ReadReplicaCmd.MarkPersistentFlagRequired("cluster-name")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	ClusterCmd.AddCommand(node.NodeCmd)
 }

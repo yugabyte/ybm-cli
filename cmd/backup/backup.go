@@ -38,8 +38,18 @@ var BackupCmd = &cobra.Command{
 
 var getBackupCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get backups for a cluster in YugabyteDB Managed",
-	Long:  "Get backups for a cluster in YugabyteDB Managed",
+	Short: "Get list of existing backups available for a cluster in YugabyteDB Managed",
+	Long:  "Get list of existing backups available for a cluster in YugabyteDB Managed",
+	Run: func(cmd *cobra.Command, args []string) {
+		listBackupCmd.Run(cmd, args)
+		logrus.Warnln("\nThe command `ybm backup get` is deprecated. Please use `ybm backup list` instead.")
+	},
+}
+
+var listBackupCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List existing backups available for a cluster in YugabyteDB Managed",
+	Long:  "List existing backups available for a cluster in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -58,7 +68,7 @@ var getBackupCmd = &cobra.Command{
 		resp, r, err := listBackupRequest.Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		backupsCtx := formatter.Context{
 			Output: os.Stdout,
@@ -68,6 +78,8 @@ var getBackupCmd = &cobra.Command{
 		formatter.BackupWrite(backupsCtx, resp.GetData())
 	},
 }
+
+// TODO: implement a backup describe command that shows the details of a backup
 
 var restoreBackupCmd = &cobra.Command{
 	Use:   "restore",
@@ -94,12 +106,12 @@ var restoreBackupCmd = &cobra.Command{
 		_, r, err := authApi.RestoreBackup().RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `BackupApi.RestoreBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("Backup %v is being restored onto the cluster %v", formatter.Colorize(backupID, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, "RESTORE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_RESTORE_BACKUP, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -149,14 +161,14 @@ var createBackupCmd = &cobra.Command{
 		backupResp, response, err := authApi.CreateBackup().BackupSpec(createBackupSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf("Error when calling `BackupApi.CreateBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		backupID := backupResp.GetData().Info.Id
 
 		msg := fmt.Sprintf("The backup for cluster %s is being created", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(*backupID, ybmclient.ENTITYTYPEENUM_BACKUP, "CREATE_BACKUP", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(*backupID, ybmclient.ENTITYTYPEENUM_BACKUP, ybmclient.TASKTYPEENUM_CREATE_BACKUP, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -168,7 +180,7 @@ var createBackupCmd = &cobra.Command{
 			respC, r, err := authApi.GetBackup(*backupID).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `BackupApi.ListBackups`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			backupResp = respC
 		} else {
@@ -200,7 +212,7 @@ var deleteBackupCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf("Error when calling `BackupApi.DeleteBackup`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("The backup %s is being queued for deletion.\n", formatter.Colorize(backupID, formatter.GREEN_COLOR))
@@ -211,6 +223,9 @@ func init() {
 	BackupCmd.AddCommand(getBackupCmd)
 	getBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
 
+	BackupCmd.AddCommand(listBackupCmd)
+	listBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
+
 	BackupCmd.AddCommand(restoreBackupCmd)
 	restoreBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster to restore backups.")
 	restoreBackupCmd.MarkFlagRequired("cluster-name")
@@ -220,7 +235,7 @@ func init() {
 	BackupCmd.AddCommand(createBackupCmd)
 	createBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name for the cluster.")
 	createBackupCmd.MarkFlagRequired("cluster-name")
-	createBackupCmd.Flags().Int32("retention-period", 0, "[OPTIONAL] Retention period of the backup.")
+	createBackupCmd.Flags().Int32("retention-period", 0, "[OPTIONAL] Retention period of the backup in days. (Default: 1)")
 	createBackupCmd.Flags().String("description", "", "[OPTIONAL] Description of the backup.")
 
 	BackupCmd.AddCommand(deleteBackupCmd)

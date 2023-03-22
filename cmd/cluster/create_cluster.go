@@ -139,12 +139,12 @@ var createClusterCmd = &cobra.Command{
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
-			logrus.Fatalf("Error while creating cluster spec: %v", err)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentials()
-		dbCredentials.Ycql = ybmclient.NewDBCredentials(username, password)
-		dbCredentials.Ysql = ybmclient.NewDBCredentials(username, password)
+		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentialsWithDefaults()
+		dbCredentials.Ycql = *ybmclient.NewDBCredentials(username, password)
+		dbCredentials.Ysql = *ybmclient.NewDBCredentials(username, password)
 
 		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec, *dbCredentials)
 
@@ -156,7 +156,7 @@ var createClusterCmd = &cobra.Command{
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.CreateCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		clusterID := resp.GetData().Info.Id
@@ -165,7 +165,7 @@ var createClusterCmd = &cobra.Command{
 		msg := fmt.Sprintf("The cluster %s is being created", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, "CREATE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_CREATE_CLUSTER, []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -177,7 +177,7 @@ var createClusterCmd = &cobra.Command{
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			clusterData = respC.GetData()
 		} else {
@@ -209,13 +209,13 @@ func init() {
 	createClusterCmd.MarkFlagRequired("cluster-name")
 	createClusterCmd.Flags().StringToString("credentials", nil, `[REQUIRED] Credentials to login to the cluster. Please provide key value pairs username=<user-name>,password=<password>.`)
 	createClusterCmd.MarkFlagRequired("credentials")
-	createClusterCmd.Flags().String("cloud-type", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP.")
-	createClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
+	createClusterCmd.Flags().String("cloud-type", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP. Default AWS.")
+	createClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.")
 	createClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value. If specified  num-cores is mandatory, disk-size-gb is optional.")
-	createClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If specified, region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified.`)
-	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
-	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
-	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview.")
+	createClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If specified, region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified by using multiple --region-info arguments. Default if not specified is us-west-2 AWS region.`)
+	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.")
+	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION. Default NONE.")
+	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.")
 	createClusterCmd.Flags().String("cmk-spec", "", "[OPTIONAL] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> . If specified, all parameters for that provider are mandatory.")
 
 }

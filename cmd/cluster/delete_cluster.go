@@ -46,13 +46,13 @@ var deleteClusterCmd = &cobra.Command{
 		r, err := authApi.DeleteCluster(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.DeleteCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The cluster %s is being deleted", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, "DELETE_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DELETE_CLUSTER, []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}

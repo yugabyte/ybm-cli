@@ -16,6 +16,7 @@
 package cluster
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -25,38 +26,42 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-var getCloudRegionsCmd = &cobra.Command{
-	Use:   "describe-regions",
-	Short: "Describe Cloud Regions",
-	Long:  `Describe Cloud Regions`,
+var listClusterCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List clusters",
+	Long:  "List clusters in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
+		clusterListRequest := authApi.ListClusters()
+		// if user filters by name, add it to the request
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		if clusterName != "" {
+			clusterListRequest = clusterListRequest.Name(clusterName)
+		}
 
-		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
-		cloudRegionsResp, resp, err := authApi.GetSupportedCloudRegions().Cloud(cloudProvider).Execute()
+		resp, r, err := clusterListRequest.Execute()
+
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf("Error when calling `ClusterApi.GetSupportedCloudRegions`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		cloudRegionData := cloudRegionsResp.GetData()
-
-		cloudRegionCtx := formatter.Context{
+		clustersCtx := formatter.Context{
 			Output: os.Stdout,
-			Format: formatter.NewCloudRegionFormat(viper.GetString("output")),
+			Format: formatter.NewClusterFormat(viper.GetString("output")),
 		}
-
-		formatter.CloudRegionWrite(cloudRegionCtx, cloudRegionData)
+		if len(resp.GetData()) < 1 {
+			fmt.Println("No clusters found")
+			return
+		}
+		formatter.ClusterWrite(clustersCtx, resp.GetData())
 	},
 }
 
 func init() {
-	ClusterCmd.AddCommand(getCloudRegionsCmd)
-	getCloudRegionsCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
-	getCloudRegionsCmd.MarkFlagRequired("cloud-provider")
-
+	ClusterCmd.AddCommand(listClusterCmd)
 }

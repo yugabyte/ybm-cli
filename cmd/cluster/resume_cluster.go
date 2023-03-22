@@ -46,7 +46,7 @@ var resumeClusterCmd = &cobra.Command{
 		resp, r, err := authApi.ResumeCluster(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.ResumeCluster`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		clusterData := []ybmclient.ClusterData{resp.GetData()}
@@ -54,7 +54,7 @@ var resumeClusterCmd = &cobra.Command{
 		msg := fmt.Sprintf("The cluster %s is being resumed", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, "RESUME_CLUSTER", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_RESUME_CLUSTER, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -66,7 +66,7 @@ var resumeClusterCmd = &cobra.Command{
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			clusterData = respC.GetData()
 		} else {

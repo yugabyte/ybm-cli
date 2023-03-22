@@ -41,6 +41,7 @@ var _ = Describe("Cluster", func() {
 		responseNetworkAllowList openapi.NetworkAllowListListResponse
 		responseError            openapi.ApiError
 		responseCluster          openapi.ClusterData
+		responseNodes            openapi.ClusterNodesResponse
 	)
 
 	BeforeEach(func() {
@@ -204,13 +205,13 @@ var _ = Describe("Cluster", func() {
 		})
 		Context("with a valid Api token and default output table", func() {
 			It("should return list of cluster", func() {
-				cmd := exec.Command(compiledCLIPath, "cluster", "get")
+				cmd := exec.Command(compiledCLIPath, "cluster", "list")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				Expect(session.Out).Should(gbytes.Say(
-					`Name            Version       State     Health    Regions     Nodes     Total Res.\(Vcpu/Mem/Disk\)
-stunning-sole   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8GB / 100GB`))
+					`Name            Tier        Version       State     Health    Regions     Nodes     Total Res.\(Vcpu/Mem/Disk\)
+stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8GB / 100GB`))
 				session.Kill()
 			})
 
@@ -218,13 +219,19 @@ stunning-sole   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8G
 				statusCode = 200
 				err := loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
 				Expect(err).ToNot(HaveOccurred())
+				err = loadJson("./test/fixtures/nodes.json", &responseNodes)
+				Expect(err).ToNot(HaveOccurred())
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/allow-lists"),
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
 					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/nodes"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNodes),
+					),
 				)
-				cmd := exec.Command(compiledCLIPath, "cluster", "get", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
@@ -233,8 +240,18 @@ stunning-sole   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8G
 Name            ID                                     Version       State     Health
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
-Provider   Fault Tolerance   Data Distribution   Nodes     Total Res.\(Vcpu/Mem/Disk\)
-AWS        NONE              No idea             1         2 / 8GB / 100GB
+Provider   Tier        Fault Tolerance   Nodes     Total Res.\(Vcpu/Mem/Disk\)
+AWS        Dedicated   NONE              1         2 / 8GB / 100GB
+
+
+Regions
+Region      Nodes     vCPU/Node   Mem/Node   Disk/Node   VPC
+us-west-2   1         2           8GB        100GB       
+
+
+Endpoints
+Region      Accessibility   State     Host
+us-west-2   PUBLIC          ACTIVE    us-west-2.a49ee751-6c5d-490f-8d38-347cefc9d53c.fake.yugabyte.com
 
 
 Network AllowList
@@ -242,12 +259,14 @@ Name              Description       Allow List
 device-ip-gween   device-ip-gween   152.165.26.42/32
 
 
-Regions
-Region      Nodes     vCPU/Node   Mem/Node   Disk/Node   VPC
-us-west-2   1         2           8GB        100GB`))
+Nodes
+Name            Region\[zone\]            Health    Master    Tserver   ReadReplica   Used Memory\(MB\)
+test-cli-2-n1   us-west-2\[us-west-2c\]   💚        ✅        ✅        ❌            43MB
+test-cli-2-n2   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌            27MB
+test-cli-2-n3   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌            29MB`))
 				session.Kill()
 			})
-			It("should return only header when cluster-name is wrong", func() {
+			It("should return no cluster found when cluster-name is wrong", func() {
 				statusCode = 200
 				err := loadJson("./test/fixtures/no-clusters.json", &responseCluster)
 				Expect(err).ToNot(HaveOccurred())
@@ -258,12 +277,12 @@ us-west-2   1         2           8GB        100GB`))
 						ghttp.VerifyFormKV("name", "test"),
 					),
 				)
-				cmd := exec.Command(compiledCLIPath, "cluster", "get", "--cluster-name", "test")
+				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "test")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				Expect(session.Out).Should(gbytes.Say(
-					`Name      Version   State     Health    Regions   Nodes     Total Res.\(Vcpu/Mem/Disk\)`))
+					`No cluster found`))
 				session.Kill()
 			})
 		})

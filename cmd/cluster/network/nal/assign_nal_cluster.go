@@ -13,7 +13,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cluster
+package nal
 
 import (
 	"fmt"
@@ -51,7 +51,7 @@ var assignClusterCmd = &cobra.Command{
 		networkAllowListListResp, r, err := authApi.ListClusterNetworkAllowLists(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.ListClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		allowListIds := []string{}
@@ -63,13 +63,13 @@ var assignClusterCmd = &cobra.Command{
 		_, r, err = authApi.EditClusterNetworkAllowLists(clusterId, allowListIds).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.EditClusterNetworkAllowLists`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The network allow list %s is being assigned to the cluster %s", formatter.Colorize(newNetworkAllowListName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, "EDIT_ALLOW_LIST", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_EDIT_ALLOW_LIST, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -85,10 +85,7 @@ var assignClusterCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand(assignClusterCmd)
-	assignClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be assigned.")
-	assignClusterCmd.MarkFlagRequired("cluster-name")
+	AllowListCmd.AddCommand(assignClusterCmd)
 	assignClusterCmd.Flags().String("network-allow-list", "", "[REQUIRED] The name of the network allow list to be assigned.")
-	// Marked as required for now since as of now network allow list is the only resource that can be assigned
 	assignClusterCmd.MarkFlagRequired("network-allow-list")
 }

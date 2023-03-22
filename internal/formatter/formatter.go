@@ -17,6 +17,7 @@ package formatter
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strings"
 	"text/template"
@@ -26,6 +27,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yugabyte/ybm-cli/internal/formatter/tabwriter"
 	"github.com/yugabyte/ybm-cli/internal/formatter/templates"
+	"golang.org/x/exp/utf8string"
 )
 
 // Format keys used to specify certain kinds of output formats
@@ -176,4 +178,12 @@ func Colorize(message string, colors string) string {
 	default:
 		return message
 	}
+}
+
+func Truncate(text string, lenght int) string {
+	if lenght <= 0 || len(text) <= 0 {
+		return ""
+	}
+	s := utf8string.NewString(text)
+	return fmt.Sprintf("%s...", s.Slice(0, lenght))
 }

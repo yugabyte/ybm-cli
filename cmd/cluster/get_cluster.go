@@ -16,69 +16,27 @@
 package cluster
 
 import (
-	"os"
-
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
-	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-// getClusterCmd represents the cluster command
 var getClusterCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get clusters",
 	Long:  "Get clusters",
 	Run: func(cmd *cobra.Command, args []string) {
-		authApi, err := ybmAuthClient.NewAuthApiClient()
-		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
-		}
-		authApi.GetInfo("", "")
-		clusterListRequest := authApi.ListClusters()
-		isGetByName := false
-		// if user filters by name, add it to the request
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		if clusterName != "" {
-			clusterListRequest = clusterListRequest.Name(clusterName)
-			isGetByName = true
+			describeClusterCmd.Run(cmd, args)
+			logrus.Warnln("\nThe command `ybm cluster get --cluster-name` is deprecated. Please use `ybm cluster describe --cluster-name` instead.")
+		} else {
+			listClusterCmd.Run(cmd, args)
+			logrus.Warnln("\nThe command `ybm cluster get` is deprecated. Please use `ybm cluster list` instead.")
 		}
-
-		resp, r, err := clusterListRequest.Execute()
-
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		if isGetByName && len(resp.GetData()) > 0 {
-			fullClusterContext := *formatter.NewFullClusterContext()
-			fullClusterContext.Output = os.Stdout
-			fullClusterContext.Format = formatter.NewFullClusterFormat(viper.GetString("output"))
-			fullClusterContext.SetFullCluster(*authApi, resp.GetData()[0])
-			fullClusterContext.Write()
-			return
-		}
-		clustersCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewClusterFormat(viper.GetString("output")),
-		}
-		formatter.ClusterWrite(clustersCtx, resp.GetData())
 	},
 }
 
 func init() {
 	ClusterCmd.AddCommand(getClusterCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	getClusterCmd.Flags().String("cluster-name", "", "[OPTIONAL] The name of the cluster to get details.")
 }

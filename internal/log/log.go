@@ -23,9 +23,16 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
 
 func SetFormatter() {
+	logrus.SetFormatter(&easy.Formatter{
+		LogFormat: "%msg%",
+	})
+}
+
+func SetDebugFormatter() {
 	logrus.SetReportCaller(true)
 	logrus.SetFormatter(&logrus.TextFormatter{
 		DisableColors:          viper.GetBool("no-color"),
@@ -41,6 +48,7 @@ func SetLogLevel(logLevel string, debug bool) {
 
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
+		SetDebugFormatter()
 		return
 	}
 	if logLevel != "" {

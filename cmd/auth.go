@@ -18,15 +18,17 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
+
+	"github.com/yugabyte/ybm-cli/cmd/util"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
-// configureCmd represents the configure command
-var configureCmd = &cobra.Command{
+var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authenticate ybm CLI",
 	Long:  "Authenticate the ybm CLI through this command by providing the API Key.",
@@ -35,13 +37,37 @@ var configureCmd = &cobra.Command{
 		var apiKey string
 		var host string
 		var data []byte
-		data, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		data, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
-			logrus.Fatalln("could not read apiKey: ", err)
+			logrus.Fatalln("Could not read apiKey: ", err)
 		}
 		apiKey = string(data)
+
+		// Validate that apiKey is a valid JWT token and that the token is not expired
+		if strings.TrimSpace(apiKey) == "" {
+			logrus.Fatalln("ApiKey cannot be empty")
+		}
+		expired, err := util.IsJwtTokenExpired(apiKey)
+		if err != nil {
+			logrus.Fatalln("ApiKey is invalid")
+		}
+		if expired {
+			logrus.Fatalln("ApiKey is expired")
+		}
+
 		viper.GetViper().Set("apikey", &apiKey)
-		host = "cloud.yugabyte.com"
+
+		// If the feature flag is enabled, prompt the user for URL
+		if util.IsFeatureFlagEnabled(util.CONFIGURE_URL) {
+			fmt.Print("Enter Host (leave empty for default cloud.yugabyte.com): ")
+			fmt.Scanln(&host)
+			if strings.TrimSpace(host) == "" {
+				host = "cloud.yugabyte.com"
+
+			}
+		} else {
+			host = "cloud.yugabyte.com"
+		}
 		viper.GetViper().Set("host", &host)
 		err = viper.WriteConfig()
 		if err != nil {
@@ -50,14 +76,13 @@ var configureCmd = &cobra.Command{
 				//Try to create the file
 				err = viper.SafeWriteConfig()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error when writing new config file: %v", err)
+					logrus.Fatalf("Error when writing new config file: %v", err)
 
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "Error when writing config file: %v", err)
-				return
+				logrus.Fatalf("Error when writing config file: %v", err)
 			}
 		}
-		fmt.Println("\nConfiguration file sucessfully updated.")
+		logrus.Infof("Configuration file '%v' sucessfully updated.", viper.GetViper().ConfigFileUsed())
 	},
 }

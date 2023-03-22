@@ -13,7 +13,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package vpcpeering
+package peering
 
 import (
 	"errors"
@@ -23,13 +23,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 var VPCPeeringCmd = &cobra.Command{
-	Use:   "vpc-peering",
+	Use:   "peering",
 	Short: "Manage VPC Peerings",
 	Long:  "Manage VPC Peerings",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -48,8 +49,18 @@ func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmcli
 
 var getVpcPeeringCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get VPC peerings in YugabyteDB Managed",
+	Short: "Get VPC peerings",
 	Long:  "Get VPC peerings in YugabyteDB Managed",
+	Run: func(cmd *cobra.Command, args []string) {
+		listVpcPeeringCmd.Run(cmd, args)
+		logrus.Warnln("\nThe command `ybm vpc-peering get` is deprecated. Please use `ybm vpc-peering list` instead.")
+	},
+}
+
+var listVpcPeeringCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List VPC peerings",
+	Long:  "List VPC peerings in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -60,7 +71,7 @@ var getVpcPeeringCmd = &cobra.Command{
 		resp, r, err := authApi.ListVpcPeerings().Execute()
 		if err != nil {
 			logrus.Errorf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		vpcPeeringCtx := formatter.Context{
@@ -85,7 +96,7 @@ var getVpcPeeringCmd = &cobra.Command{
 
 var createVpcPeeringCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create VPC peering in YugabyteDB Managed",
+	Short: "Create VPC peering",
 	Long:  "Create VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
@@ -117,6 +128,9 @@ var createVpcPeeringCmd = &cobra.Command{
 				logrus.Fatal("Could not create VPC peering: app-vpc-cidr is required for AWS.")
 				return
 			}
+			if valid, err := util.ValidateCIDR(appVpcCidr); !valid {
+				logrus.Fatal(err)
+			}
 			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcID, appAccountID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
 			applicationVPCSpec.CloudInfo.SetRegion(appVpcRegion)
 			applicationVPCSpec.SetCidr(appVpcCidr)
@@ -136,6 +150,9 @@ var createVpcPeeringCmd = &cobra.Command{
 			// app vpc cidr is optional for GCP
 			appVpcCidr, _ := cmd.Flags().GetString("app-vpc-cidr")
 			if appVpcCidr != "" {
+				if valid, err := util.ValidateCIDR(appVpcCidr); !valid {
+					logrus.Fatal(err)
+				}
 				applicationVPCSpec.SetCidr(appVpcCidr)
 			}
 
@@ -157,7 +174,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		ybVpcResp, resp, err := authApi.GetSingleTenantVpc(ybVpcId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf("Error when calling `GetSingleTenantVpc`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		ybVpcCloud := string(ybVpcResp.Data.Spec.GetCloud())
 
@@ -170,7 +187,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		vpcPeeringResp, response, err := authApi.CreateVpcPeering().VpcPeeringSpec(vpcPeeringSpec).Execute()
 		if err != nil {
 			logrus.Errorf("Full HTTP response: %v", response)
-			logrus.Fatalf("Error when calling `NetworkApi.CreateVpcPeering`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		vpcPeeringID := vpcPeeringResp.GetData().Info.Id
@@ -178,7 +195,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		msg := fmt.Sprintf("The VPC Peering %s is being created", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(ybVpcId, "", "CREATE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 1800)
+			returnStatus, err := authApi.WaitForTaskCompletion(ybVpcId, "", ybmclient.TASKTYPEENUM_CREATE_VPC_PEERING, []string{"FAILED", "SUCCEEDED"}, msg, 1800)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -190,7 +207,7 @@ var createVpcPeeringCmd = &cobra.Command{
 			vpcPeeringResp, response, err = authApi.GetVpcPeering(vpcPeeringID).Execute()
 			if err != nil {
 				logrus.Errorf("Full HTTP response: %v", response)
-				logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 		} else {
@@ -208,7 +225,7 @@ var createVpcPeeringCmd = &cobra.Command{
 
 var deleteVpcPeeringCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete VPC peering in YugabyteDB Managed",
+	Short: "Delete VPC peering",
 	Long:  "Delete VPC peering in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
@@ -222,7 +239,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 		resp, r, err := authApi.ListVpcPeerings().Execute()
 		if err != nil {
 			logrus.Errorf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		// check vpcPeeringName exists
@@ -236,12 +253,12 @@ var deleteVpcPeeringCmd = &cobra.Command{
 		response, err := authApi.DeleteVpcPeering(vpcPeeringId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf("Error when calling `NetworkApi.ListVpcPeerings`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("VPC peering %s is being terminated", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(ybvpcID, "", "DELETE_VPC_PEERING", []string{"FAILED", "SUCCEEDED"}, msg, 600)
+			returnStatus, err := authApi.WaitForTaskCompletion(ybvpcID, "", ybmclient.TASKTYPEENUM_DELETE_VPC_PEERING, []string{"FAILED", "SUCCEEDED"}, msg, 600)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
@@ -258,6 +275,9 @@ var deleteVpcPeeringCmd = &cobra.Command{
 func init() {
 	VPCPeeringCmd.AddCommand(getVpcPeeringCmd)
 	getVpcPeeringCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC peering.")
+
+	VPCPeeringCmd.AddCommand(listVpcPeeringCmd)
+	listVpcPeeringCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC peering.")
 
 	VPCPeeringCmd.AddCommand(createVpcPeeringCmd)
 	createVpcPeeringCmd.Flags().SortFlags = false

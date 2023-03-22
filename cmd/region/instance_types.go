@@ -13,7 +13,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cluster
+package region
 
 import (
 	"os"
@@ -26,10 +26,19 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
+var InstanceCmd = &cobra.Command{
+	Use:   "instance",
+	Short: "Manage instance types",
+	Long:  "Manage instance types for your YBM clusters",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
 var getInstanceTypesCmd = &cobra.Command{
-	Use:   "describe-instances",
-	Short: "Get Instance Types",
-	Long:  `Get Instance Types`,
+	Use:   "list",
+	Short: "List the Instance Types for a region",
+	Long:  `List the Instance Types for a region`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -48,7 +57,7 @@ var getInstanceTypesCmd = &cobra.Command{
 		instanceTypesResp, resp, err := authApi.GetSupportedInstanceTypes(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf("Error when calling `ClusterApi.GetSupportedInstanceTypes`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		instanceTypeData := instanceTypesResp.GetData()[cloudRegion]
@@ -63,13 +72,15 @@ var getInstanceTypesCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand(getInstanceTypesCmd)
+	CloudRegionsCmd.AddCommand(InstanceCmd)
+	InstanceCmd.AddCommand(getInstanceTypesCmd)
+
 	getInstanceTypesCmd.Flags().SortFlags = false
 	getInstanceTypesCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
 	getInstanceTypesCmd.MarkFlagRequired("cloud-provider")
 	getInstanceTypesCmd.Flags().String("region", "", "[REQUIRED] The region in the cloud provider for which the instance types have to fetched.")
 	getInstanceTypesCmd.MarkFlagRequired("region")
 	getInstanceTypesCmd.Flags().String("tier", "Dedicated", "[OPTIONAL] Tier. Sandbox or Dedicated.")
-	getInstanceTypesCmd.Flags().Bool("show-disabled", false, "[OPTIONAL] Whether to show disabled instance types. true or false.")
+	getInstanceTypesCmd.Flags().Bool("show-disabled", true, "[OPTIONAL] Whether to show disabled instance types. true or false.")
 
 }

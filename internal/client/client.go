@@ -67,6 +67,12 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	configuration.Scheme = url.Scheme
 	apiClient := ybmclient.NewAPIClient(configuration)
 	apiKey := viper.GetString("apiKey")
+
+	// If the api key is empty, then tell the user to run the auth command.
+	if len(apiKey) == 0 {
+		logrus.Fatalln("No valid API key detected. Please run `ybm auth` to authenticate with YugabyteDB Managed.")
+	}
+
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
 	ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -319,7 +325,7 @@ func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
 		return clusterData[0].Info.GetId(), nil
 	}
 
-	return "", fmt.Errorf("could no get cluster data for cluster name: %s", clusterName)
+	return "", fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {
@@ -352,6 +358,17 @@ func (a *AuthApiClient) GetClusterCloudById(clusterId string) (ybmclient.CloudEn
 	return clusterCloud, nil
 }
 
+func (a *AuthApiClient) GetConnectionCertificate() (string, error) {
+	certResp, resp, err := a.ApiClient.ClusterApi.GetConnectionCertificate(a.ctx).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return "", err
+	}
+	certData := certResp.GetData()
+	return certData, nil
+}
+
 func (a *AuthApiClient) EditCluster(clusterId string) ybmclient.ApiEditClusterRequest {
 	return a.ApiClient.ClusterApi.EditCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
@@ -370,6 +387,43 @@ func (a *AuthApiClient) PauseCluster(clusterId string) ybmclient.ApiPauseCluster
 
 func (a *AuthApiClient) ResumeCluster(clusterId string) ybmclient.ApiResumeClusterRequest {
 	return a.ApiClient.ClusterApi.ResumeCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) GetPrivateServiceEndpoint(clusterId string, endpointId string) ybmclient.ApiGetPrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.GetPrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId, endpointId)
+}
+
+func (a *AuthApiClient) EditPrivateServiceEndpoint(clusterId string, endpointId string) ybmclient.ApiEditPrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.EditPrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId, endpointId)
+}
+
+func (a *AuthApiClient) DeletePrivateServiceEndpoint(clusterId string, endpointId string) ybmclient.ApiDeletePrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.DeletePrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId, endpointId)
+}
+
+func (a *AuthApiClient) CreatePrivateServiceEndpoint(clusterId string) ybmclient.ApiCreatePrivateServiceEndpointRequest {
+	return a.ApiClient.ClusterApi.CreatePrivateServiceEndpoint(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) CreatePrivateServiceEndpointRegionSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointRegionSpec {
+	pseSpecs := []ybmclient.PrivateServiceEndpointRegionSpec{}
+
+	for regionId, arnList := range regionArnMap {
+		local := *ybmclient.NewPrivateServiceEndpointRegionSpec(regionId, arnList)
+		pseSpecs = append(pseSpecs, local)
+	}
+	return pseSpecs
+}
+
+func (a *AuthApiClient) CreatePrivateServiceEndpointSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointSpec {
+	pseSpecs := []ybmclient.PrivateServiceEndpointSpec{}
+
+	for regionId, arnList := range regionArnMap {
+		regionSpec := *ybmclient.NewPrivateServiceEndpointRegionSpec(regionId, arnList)
+		local := *ybmclient.NewPrivateServiceEndpointSpec([]ybmclient.PrivateServiceEndpointRegionSpec{regionSpec})
+		pseSpecs = append(pseSpecs, local)
+	}
+	return pseSpecs
 }
 
 func (a *AuthApiClient) CreateReadReplica(clusterId string) ybmclient.ApiCreateReadReplicaRequest {
@@ -420,7 +474,7 @@ func (a *AuthApiClient) GetVpcIdByName(vpcName string) (string, error) {
 		return vpcData[0].Info.GetId(), nil
 	}
 
-	return "", fmt.Errorf("could no get vpc data for vpc name: %s", vpcName)
+	return "", fmt.Errorf("could not get vpc data for vpc name: %s", vpcName)
 }
 
 func (a *AuthApiClient) GetSingleTenantVpc(vpcId string) ybmclient.ApiGetSingleTenantVpcRequest {
@@ -637,6 +691,14 @@ func (a *AuthApiClient) GetCdcSinkIDBySinkName(cdcSinkName string) (string, erro
 	return "", fmt.Errorf("couldn't find any cdcSink with the given name")
 }
 
+func (a *AuthApiClient) GetClusterNode(clusterId string) ybmclient.ApiGetClusterNodesRequest {
+	return a.ApiClient.ClusterApi.GetClusterNodes(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) PerformNodeOperation(clusterId string) ybmclient.ApiPerformNodeOperationRequest {
+	return a.ApiClient.ClusterApi.PerformNodeOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsRequest {
 	return a.ApiClient.ClusterApi.GetSupportedCloudRegions(a.ctx)
 }
@@ -794,7 +856,7 @@ func GetApiErrorDetails(err error) string {
 	case ybmclient.GenericOpenAPIError:
 		if v := getAPIError(castedError.Body()); v != nil {
 			if d, ok := v.GetErrorOk(); ok {
-				return fmt.Sprintf("%s-%s", err.Error(), d.GetDetail())
+				return fmt.Sprintf("%s%s", d.GetDetail(), "\n")
 			}
 		}
 	}
