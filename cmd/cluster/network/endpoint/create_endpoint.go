@@ -38,7 +38,12 @@ var createEndpointCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		clusterData := getCluster(cmd, authApi)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterData, err := authApi.GetClusterByName(clusterName)
+		if err != nil {
+			logrus.Fatalf("Could not get cluster data: %s", err.Error())
+		}
+
 		accessibilityType, _ := cmd.Flags().GetString("accessibility-type")
 		reg, _ := cmd.Flags().GetString("region")
 

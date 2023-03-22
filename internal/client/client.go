@@ -312,17 +312,60 @@ func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID stri
 	}
 }
 
-func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
+func (a *AuthApiClient) GetClusterByName(clusterName string) (ybmclient.ClusterData, error) {
 	clusterResp, resp, err := a.ListClusters().Name(clusterName).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(string(b))
-		return "", err
+		return ybmclient.ClusterData{}, err
 	}
 	clusterData := clusterResp.GetData()
 
 	if len(clusterData) != 0 {
-		return clusterData[0].Info.GetId(), nil
+		return clusterData[0], nil
+	}
+
+	return ybmclient.ClusterData{}, fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
+}
+
+func (a *AuthApiClient) GetEndpointsForClusterByName(clusterName string) ([]ybmclient.Endpoint, string, error) {
+	clusterData, err := a.GetClusterByName(clusterName)
+	if err != nil {
+		return nil, "", err
+	}
+	clusterId := clusterData.Info.GetId()
+	clusterEndpoints := clusterData.Info.GetClusterEndpoints()
+	jsonEndpoints, _ := json.Marshal(clusterEndpoints)
+	logrus.Debugf("Found endpoints: %v\n", string(jsonEndpoints))
+
+	return clusterEndpoints, clusterId, nil
+}
+
+func (a *AuthApiClient) GetEndpointByIdForClusterByName(clusterName string, endpointId string) (ybmclient.Endpoint, string, error) {
+	endpoints, clusterId, err := a.GetEndpointsForClusterByName(clusterName)
+	if err != nil {
+		// return the error
+		return ybmclient.Endpoint{}, "", err
+	}
+
+	endpoints = util.Filter(endpoints, func(endpoint ybmclient.Endpoint) bool {
+		return endpoint.GetId() == endpointId || endpoint.GetPseId() == endpointId
+	})
+
+	if len(endpoints) == 0 {
+		logrus.Fatalf("Endpoint not found\n")
+	}
+	if len(endpoints) > 1 {
+		logrus.Fatalf("Multiple endpoints found\n")
+	}
+
+	return endpoints[0], clusterId, nil
+}
+
+func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
+	clusterData, err := a.GetClusterByName(clusterName)
+	if err == nil {
+		return clusterData.Info.GetId(), nil
 	}
 
 	return "", fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)

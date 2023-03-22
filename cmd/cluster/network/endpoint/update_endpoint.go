@@ -36,10 +36,15 @@ var updateEndpointCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		clusterEndpoints, clusterId, endpointId := getEndpointById(cmd, authApi)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		endpointId, _ := cmd.Flags().GetString("endpoint-id")
+		clusterEndpoint, clusterId, err := authApi.GetEndpointByIdForClusterByName(clusterName, endpointId)
+		if err != nil {
+			logrus.Fatalf("Error when calling `ClusterApi.GetEndpointByIdForClusterByName`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+		}
 
 		// We currently support fetching just Private Service Endpoints
-		switch clusterEndpoints[0].GetAccessibilityType() {
+		switch clusterEndpoint.GetAccessibilityType() {
 
 		case ybmclient.ACCESSIBILITYTYPE_PRIVATE_SERVICE_ENDPOINT:
 			if !cmd.Flags().Changed("security-principals") {

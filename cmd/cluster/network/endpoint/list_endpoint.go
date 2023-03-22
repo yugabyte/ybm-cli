@@ -39,7 +39,11 @@ var listEndpointCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		clusterEndpoints, _ := getEndpoints(cmd, authApi)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterEndpoints, _, err := authApi.GetEndpointsForClusterByName(clusterName)
+		if err != nil {
+			logrus.Fatalf("Could not get cluster data: %s\n", err.Error())
+		}
 
 		region, _ := cmd.Flags().GetString("region")
 		if region != "" {
