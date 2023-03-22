@@ -35,14 +35,14 @@ var listEndpointCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s\n", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterEndpoints, _, err := authApi.GetEndpointsForClusterByName(clusterName)
 		if err != nil {
-			logrus.Fatalf("Could not get cluster data: %s\n", err.Error())
+			logrus.Fatalf("Could not get cluster data: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		region, _ := cmd.Flags().GetString("region")

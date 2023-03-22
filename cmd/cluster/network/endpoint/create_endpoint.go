@@ -34,14 +34,14 @@ var createEndpointCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		clusterData, err := authApi.GetClusterByName(clusterName)
 		if err != nil {
-			logrus.Fatalf("Could not get cluster data: %s", err.Error())
+			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		accessibilityType, _ := cmd.Flags().GetString("accessibility-type")
@@ -80,7 +80,7 @@ var createEndpointCmd = &cobra.Command{
 			createResp, r, err := authApi.CreatePrivateServiceEndpoint(clusterData.Info.Id).PrivateServiceEndpointSpec(createPseSpec[0]).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Could not create private service endpoint: %s", err.Error())
+				logrus.Fatalf("Could not create private service endpoint: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			psEps := util.Filter(createResp.GetData(), func(ep ybmclient.PrivateServiceEndpointRegionData) bool {
