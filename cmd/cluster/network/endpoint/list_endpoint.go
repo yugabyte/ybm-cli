@@ -73,6 +73,6 @@ var listEndpointCmd = &cobra.Command{
 
 func init() {
 	EndpointCmd.AddCommand(listEndpointCmd)
-	listEndpointCmd.Flags().String("accessibility", "", "[OPTIONAL] Accessibility of the endpoint")
-	listEndpointCmd.Flags().String("region", "", "[OPTIONAL] Region of the endpoint")
+	listEndpointCmd.Flags().String("accessibility-type", "", "[OPTIONAL] Accessibility of the endpoint. Valid options are PUBLIC, PRIVATE and PRIVATE_SERVICE_ENDPOINT.")
+	listEndpointCmd.Flags().String("region", "", "[OPTIONAL] The region of the endpoint.")
 }

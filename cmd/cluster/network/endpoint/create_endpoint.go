@@ -104,9 +104,9 @@ var createEndpointCmd = &cobra.Command{
 
 func init() {
 	EndpointCmd.AddCommand(createEndpointCmd)
-	createEndpointCmd.Flags().String("accessibility-type", "", "[REQUIRED] The accessibility of the endpoint.")
+	createEndpointCmd.Flags().String("accessibility-type", "", "[REQUIRED] The accessibility of the endpoint. Valid options are PUBLIC, PRIVATE and PRIVATE_SERVICE_ENDPOINT.")
 	createEndpointCmd.MarkFlagRequired("accessibility-type")
 	createEndpointCmd.Flags().String("region", "", "[REQUIRED] The region of the endpoint.")
 	createEndpointCmd.MarkFlagRequired("region")
-	createEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The security principals of the endpoint.")
+	createEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The list of security principals that have access to this endpoint. Required for private service endpoints.  Accepts a comma separated list. E.g.: `arn:aws:iam::account_id1:root,arn:aws:iam::account_id2:root`")
 }

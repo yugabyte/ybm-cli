@@ -87,5 +87,5 @@ func init() {
 	EndpointCmd.AddCommand(updateEndpointCmd)
 	updateEndpointCmd.Flags().String("endpoint-id", "", "[REQUIRED] The ID of the endpoint")
 	updateEndpointCmd.MarkFlagRequired("endpoint-id")
-	updateEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The list of security principals that have access to this endpoint (comma separated). Required for private service endpoints")
+	updateEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The list of security principals that have access to this endpoint. Required for private service endpoints.  Accepts a comma separated list. E.g.: `arn:aws:iam::account_id1:root,arn:aws:iam::account_id2:root`")
 }
