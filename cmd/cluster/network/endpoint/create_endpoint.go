@@ -16,6 +16,7 @@
 package endpoint
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -47,31 +48,31 @@ var createEndpointCmd = &cobra.Command{
 			if cmd.Flags().Changed("security-principals") {
 				logrus.Debugln("Security principals are set, attempting to create")
 			} else {
-				logrus.Fatalln("Security principals are not set and are mandatory for Private Service Endpoints.")
+				logrus.Fatalln("Security principals are not set and are mandatory for Private Service Endpoints.\n")
 			}
 			securityPrincipalsString, _ := cmd.Flags().GetString("security-principals")
 			securityPrincipalsList := strings.Split(securityPrincipalsString, ",")
 
 			allClusterRegions := clusterData.Info.ClusterRegionInfoDetails
-			desiredRegions := util.Filter(allClusterRegions, func(region ybmclient.ClusterRegionInfoDetails) bool {
-				return region.Region == reg
+			desiredRegions := util.Filter(allClusterRegions, func(regionInfo ybmclient.ClusterRegionInfoDetails) bool {
+				return regionInfo.Region == reg
 			})
 
 			if len(desiredRegions) == 0 {
-				logrus.Fatalf("No region found for cluster %s with name %s", clusterData.Spec.Name, reg)
+				logrus.Fatalf("No region found for cluster %s with name %s\n", clusterData.Spec.Name, reg)
 			}
 			if len(desiredRegions) > 1 {
-				logrus.Fatalf("Multiple regions found for cluster %s with name %s", clusterData.Spec.Name, reg)
+				logrus.Fatalf("Multiple regions found for cluster %s with name %s\n", clusterData.Spec.Name, reg)
 			}
 
 			regionArnMap := make(map[string][]string)
 			regionArnMap[desiredRegions[0].Id] = securityPrincipalsList
 			createPseSpec := authApi.CreatePrivateServiceEndpointSpec(regionArnMap)
 
-			createPseRequest := authApi.CreatePrivateServiceEndpoint(clusterData.Info.Id)
-			createPseRequest.PrivateServiceEndpointSpec(createPseSpec[0])
+			jsonSpec, _ := json.Marshal(createPseSpec[0])
+			logrus.Debugf("Private service endpoint spec: %s", jsonSpec)
 
-			createResp, r, err := createPseRequest.Execute()
+			createResp, r, err := authApi.CreatePrivateServiceEndpoint(clusterData.Info.Id).PrivateServiceEndpointSpec(createPseSpec[0]).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
 				logrus.Fatalf("Could not create private service endpoint: %s", err.Error())
@@ -82,14 +83,14 @@ var createEndpointCmd = &cobra.Command{
 			})
 
 			if len(psEps) == 0 {
-				logrus.Fatalf("No private service endpoint found for cluster %s with region %s", clusterData.Spec.Name, reg)
+				logrus.Fatalf("No private service endpoint found for cluster %s with region %s\n", clusterData.Spec.Name, reg)
 			}
 
-			msg := fmt.Sprintf("Created private service endpoint in region %v", reg)
+			msg := fmt.Sprintf("Created private service endpoint in region %v\n", reg)
 			fmt.Println(msg)
 
 		default:
-			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.")
+			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.\n")
 
 		}
 

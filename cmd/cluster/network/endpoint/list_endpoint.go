@@ -35,26 +35,11 @@ var listEndpointCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s\n", err.Error())
 		}
 		authApi.GetInfo("", "")
 
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterListRequest := authApi.ListClusters()
-		// if user filters by name, add it to the request
-		clusterListRequest = clusterListRequest.Name(clusterName)
-
-		resp, r, err := clusterListRequest.Execute()
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		if len(resp.GetData()) == 0 {
-			logrus.Fatalf("Cluster not found")
-		}
-
-		clusterEndpoints := resp.GetData()[0].Info.ClusterEndpoints
+		clusterEndpoints, _ := getEndpoints(cmd, authApi)
 
 		region, _ := cmd.Flags().GetString("region")
 		if region != "" {
@@ -71,7 +56,7 @@ var listEndpointCmd = &cobra.Command{
 		}
 
 		if len(clusterEndpoints) == 0 {
-			logrus.Fatalf("No endpoints found")
+			logrus.Fatalf("No endpoints found\n")
 		}
 
 		endpointsCtx := formatter.Context{

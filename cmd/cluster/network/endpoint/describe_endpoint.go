@@ -33,7 +33,7 @@ var describeEndpointCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s\n", err.Error())
 		}
 		authApi.GetInfo("", "")
 
@@ -47,7 +47,7 @@ var describeEndpointCmd = &cobra.Command{
 			pseGetResponse, r, err := authApi.GetPrivateServiceEndpoint(clusterId, endpointId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.GetPrivateServiceEndpoint`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf("Error when calling `ClusterApi.GetPrivateServiceEndpoint`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 			}
 			if viper.GetString("output") == "table" {
 				psEndpointContext := *formatter.NewPSEndpointContext()
@@ -65,7 +65,7 @@ var describeEndpointCmd = &cobra.Command{
 			formatter.PSEndpointWrite(psEndpointContext, pseGetResponse.GetData(), clusterEndpoints[0])
 
 		default:
-			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.")
+			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.\n")
 		}
 	},
 }

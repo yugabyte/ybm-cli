@@ -31,7 +31,7 @@ var deleteEndpointCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s\n", err.Error())
 		}
 		authApi.GetInfo("", "")
 
@@ -45,14 +45,14 @@ var deleteEndpointCmd = &cobra.Command{
 			r, err := authApi.DeletePrivateServiceEndpoint(clusterId, endpointId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.DeletePrivateServiceEndpoint`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf("Error when calling `ClusterApi.DeletePrivateServiceEndpoint`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			msg := fmt.Sprintf("Deleted endpoint %s", endpointId)
 			fmt.Println(msg)
 
 		default:
-			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.")
+			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.\n")
 		}
 
 	},

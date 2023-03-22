@@ -32,7 +32,7 @@ var updateEndpointCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s\n", err.Error())
 		}
 		authApi.GetInfo("", "")
 
@@ -43,13 +43,13 @@ var updateEndpointCmd = &cobra.Command{
 
 		case ybmclient.ACCESSIBILITYTYPE_PRIVATE_SERVICE_ENDPOINT:
 			if !cmd.Flags().Changed("security-principals") {
-				logrus.Fatalf("security-principals is required for private service endpoints")
+				logrus.Fatalf("security-principals is required for private service endpoints\n")
 			}
 
 			pseGetResponse, r, err := authApi.GetPrivateServiceEndpoint(clusterId, endpointId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.GetPrivateServiceEndpoint`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf("Error when calling `ClusterApi.GetPrivateServiceEndpoint`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			securityPrincipalsString, _ := cmd.Flags().GetString("security-principals")
@@ -65,14 +65,14 @@ var updateEndpointCmd = &cobra.Command{
 			updateResp, r, err := authApi.EditPrivateServiceEndpoint(clusterId, endpointId).PrivateServiceEndpointRegionSpec(pseSpec[0]).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.EditPrivateServiceEndpoint`: %s", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf("Error when calling `ClusterApi.EditPrivateServiceEndpoint`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			msg := fmt.Sprintf("Updated endpoint %s", updateResp.Data.Info.Id)
 			fmt.Println(msg)
 
 		default:
-			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.")
+			logrus.Fatalf("Endpoint is not a private service endpoint. Only private service endpoints are currently supported.\n")
 		}
 
 	},

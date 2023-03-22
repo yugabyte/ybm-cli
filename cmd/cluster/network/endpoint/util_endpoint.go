@@ -34,11 +34,11 @@ func getCluster(cmd *cobra.Command, authApi *ybmAuthClient.AuthApiClient) ybmcli
 	resp, r, err := clusterListRequest.Execute()
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s", ybmAuthClient.GetApiErrorDetails(err))
+		logrus.Fatalf("Error when calling `ClusterApi.ListClusters`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 	}
 
 	if len(resp.GetData()) == 0 {
-		logrus.Fatalf("Cluster not found")
+		logrus.Fatalf("Cluster not found\n")
 	}
 
 	return resp.GetData()[0]
@@ -63,7 +63,7 @@ func getEndpointById(cmd *cobra.Command, authApi *ybmAuthClient.AuthApiClient) (
 	})
 
 	if len(clusterEndpoints) == 0 {
-		logrus.Fatalf("Endpoint not found")
+		logrus.Fatalf("Endpoint not found\n")
 	}
 
 	return clusterEndpoints, clusterId, endpointId
