@@ -48,7 +48,7 @@ var createEndpointCmd = &cobra.Command{
 			if cmd.Flags().Changed("security-principals") {
 				logrus.Debugln("Security principals are set, attempting to create")
 			} else {
-				logrus.Fatalln("Security principals are not set and are mandatory for Private Service Endpoints.\n")
+				logrus.Fatalln("Security principals are not set and are mandatory for Private Service Endpoints.")
 			}
 			securityPrincipalsString, _ := cmd.Flags().GetString("security-principals")
 			securityPrincipalsList := strings.Split(securityPrincipalsString, ",")
