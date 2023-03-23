@@ -18,6 +18,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/common-nighthawk/go-figure"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,11 +40,15 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ybm",
-	Short: "ybm is a CLI for YugabyteDB Managed",
-	Long:  `ybm is a CLI tool which  helps in managing database infrastructure on YugabyteDB Managed, the fully managed DBaaS offering of YugabyteDB.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!",
+	Long:  `ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		myFigure := figure.NewFigure("ybm", "", true)
+		myFigure.Print()
+		logrus.Printf("\n")
+		cmd.Help()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
