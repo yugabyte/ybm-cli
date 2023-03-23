@@ -108,5 +108,5 @@ func init() {
 	createEndpointCmd.MarkFlagRequired("accessibility-type")
 	createEndpointCmd.Flags().String("region", "", "[REQUIRED] The region of the endpoint.")
 	createEndpointCmd.MarkFlagRequired("region")
-	createEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The list of security principals that have access to this endpoint. Required for private service endpoints.  Accepts a comma separated list. E.g.: `arn:aws:iam::account_id1:root,arn:aws:iam::account_id2:root`")
+	createEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The list of security principals that have access to this endpoint. Required for private service endpoints.  Accepts a comma separated list. E.g.: arn:aws:iam::account_id1:root,arn:aws:iam::account_id2:root")
 }
