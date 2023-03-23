@@ -53,6 +53,10 @@ func SetVersion(version string) {
 	cliVersion = version
 }
 
+func GetVersion() string {
+	return cliVersion
+}
+
 // NewAuthClient function is returning a new AuthApiClient Client
 func NewAuthApiClient() (*AuthApiClient, error) {
 	configuration := ybmclient.NewConfiguration()
