@@ -13,11 +13,20 @@ const (
 
 func GetLatestRelease() (string, error) {
 	client := github.NewClient(nil)
-
-	githubRelease, _, err := client.Repositories.GetLatestRelease(context.Background(), org, repo)
+	// Fetching the latest 10 releases
+	opts := &github.ListOptions{
+		Page:    1,
+		PerPage: 10,
+	}
+	githubReleases, _, err := client.Repositories.ListReleases(context.Background(), org, repo, opts)
 	if err != nil {
 		return "", err
 	}
-	releaseVersion := githubRelease.GetTagName()
-	return releaseVersion, nil
+	for _, release := range githubReleases {
+		// Returning the first non-prerelease version
+		if !*release.Prerelease {
+			return release.GetTagName(), nil
+		}
+	}
+	return "", err
 }
