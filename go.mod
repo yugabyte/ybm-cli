@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/briandowns/spinner v1.21.0
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/enescakir/emoji v1.0.0
 	github.com/fatih/color v1.14.1
 	github.com/golang-jwt/jwt/v5 v5.0.0-rc.1
@@ -22,6 +23,7 @@ require (
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
 	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230316062908-5b0566196202
 	golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2
+	golang.org/x/mod v0.9.0
 	golang.org/x/term v0.6.0
 	gotest.tools/v3 v3.4.0
 )
@@ -29,7 +31,6 @@ require (
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
-	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/cloudflare/circl v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -59,7 +60,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect

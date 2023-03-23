@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 		myFigure.Print()
 		logrus.Printf("\n")
 		cmd.Help()
-	}
+	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if strings.HasPrefix(cmd.CommandPath(), "ybm completion") {
 			return
