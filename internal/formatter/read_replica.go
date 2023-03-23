@@ -16,6 +16,7 @@
 package formatter
 
 import (
+	"encoding/json"
 	"fmt"
 
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -105,4 +106,14 @@ func (c *ReadReplicaContext) Nodes() string {
 
 func (c *ReadReplicaContext) totalResource(resource int32) int32 {
 	return c.rrSpec.PlacementInfo.NumNodes * resource
+}
+
+func (c *ReadReplicaContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Spec     ybmclient.ReadReplicaSpec
+		Endpoint ybmclient.Endpoint
+	}{
+		Spec:     c.rrSpec,
+		Endpoint: c.rrEndpoint,
+	})
 }
