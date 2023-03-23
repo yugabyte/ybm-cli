@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -98,4 +99,15 @@ func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 		}
 	}
 	return
+}
+
+func SplitAndIgnoreEmpty(str string, sep string) []string {
+	split := Filter(strings.Split(str, sep), func(s string) bool {
+		return s != ""
+	})
+	// If the string is empty, we want to return an empty slice
+	if split == nil {
+		return []string{}
+	}
+	return split
 }

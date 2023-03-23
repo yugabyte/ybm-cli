@@ -17,10 +17,10 @@ package endpoint
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -58,7 +58,7 @@ var updateEndpointCmd = &cobra.Command{
 			}
 
 			securityPrincipalsString, _ := cmd.Flags().GetString("security-principals")
-			securityPrincipalsList := strings.Split(securityPrincipalsString, ",")
+			securityPrincipalsList := util.SplitAndIgnoreEmpty(securityPrincipalsString, ",")
 
 			regionArnMap := make(map[string][]string)
 			regionArnMap[pseGetResponse.Data.Spec.ClusterRegionInfoId] = securityPrincipalsList
