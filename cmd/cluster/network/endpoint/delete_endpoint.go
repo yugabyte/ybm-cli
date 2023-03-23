@@ -31,14 +31,19 @@ var deleteEndpointCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s\n", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
-		clusterEndpoints, clusterId, endpointId := getEndpointById(cmd, authApi)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		endpointId, _ := cmd.Flags().GetString("endpoint-id")
+		clusterEndpoint, clusterId, err := authApi.GetEndpointByIdForClusterByName(clusterName, endpointId)
+		if err != nil {
+			logrus.Fatalf("Error when calling `ClusterApi.GetEndpointByIdForClusterByName`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+		}
 
 		// We currently support fetching just Private Service Endpoints
-		switch clusterEndpoints[0].GetAccessibilityType() {
+		switch clusterEndpoint.GetAccessibilityType() {
 
 		case ybmclient.ACCESSIBILITYTYPE_PRIVATE_SERVICE_ENDPOINT:
 			logrus.Debugln("Endpoint is a private service endpoint, attempting to delete")
