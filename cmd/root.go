@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		myFigure := figure.NewFigure("ybm", "", true)
 		myFigure.Print()
-		logrus.Println("\n")
+		logrus.Printf("\n")
 		cmd.Help()
 	},
 }
