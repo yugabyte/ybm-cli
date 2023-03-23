@@ -29,8 +29,8 @@ import (
 
 var createEndpointCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a new endpoint",
-	Long:  `Create a new endpoint`,
+	Short: "Create a new network endpoint for a cluster",
+	Long:  `Create a new network endpoint for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

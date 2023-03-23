@@ -30,8 +30,8 @@ import (
 
 var listEndpointCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List endpoints for a cluster",
-	Long:  "List endpoints for a cluster",
+	Short: "List network endpoints for a cluster",
+	Long:  "List network endpoints for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

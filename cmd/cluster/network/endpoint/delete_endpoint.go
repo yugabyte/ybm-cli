@@ -26,8 +26,8 @@ import (
 
 var deleteEndpointCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete a private service endpoint",
-	Long:  `Delete a private service endpoint.`,
+	Short: "Delete a network endpoint for a cluster",
+	Long:  `Delete a network endpoint for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
