@@ -41,6 +41,7 @@ func GetLatestRelease() (string, error) {
 	}
 	githubReleases, _, err := client.Repositories.ListReleases(context.Background(), org, repo, opts)
 	if err != nil {
+		logrus.Debugf("Error while fetching the latest release: %v", err)
 		return "", err
 	}
 	for _, release := range githubReleases {
