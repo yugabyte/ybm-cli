@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/go-github/v50/github"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -23,8 +24,9 @@ func GetLatestRelease() (string, error) {
 		return "", err
 	}
 	for _, release := range githubReleases {
+		logrus.Debugf("Found Release: %s , Prerelease: %v", release.GetTagName(), release.GetPrerelease())
 		// Returning the first non-prerelease version
-		if !*release.Prerelease {
+		if !release.GetPrerelease() {
 			return release.GetTagName(), nil
 		}
 	}

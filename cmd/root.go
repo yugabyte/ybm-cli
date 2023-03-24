@@ -63,6 +63,12 @@ var rootCmd = &cobra.Command{
 		latestVersion, err := releases.GetLatestRelease()
 		if err == nil {
 			currentVersion := ybmAuthClient.GetVersion()
+			logrus.Debugf("Current version: %s, Latest version: %s\n", currentVersion, latestVersion)
+			// Strip the leading 'v' from the version string
+			currentVersion = strings.TrimLeft(currentVersion, "v")
+			latestVersion = strings.TrimLeft(latestVersion, "v")
+			logrus.Debugf("[Stripped] Current version: %s, Latest version: %s\n", currentVersion, latestVersion)
+
 			if semver.Compare(currentVersion, latestVersion) == -1 {
 				message := fmt.Sprintf("A newer version is available. Please upgrade to the latest version %s\n", latestVersion)
 				logrus.Println(formatter.Colorize(message, formatter.GREEN_COLOR))
