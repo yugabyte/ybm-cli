@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -57,6 +58,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 		releases.PrintUpgradeMessageIfNeeded()
+
 	},
 }
 
@@ -86,6 +88,8 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	setDefaults()
+	// Create the file to cache the latest version of the YBM CLI
+	initLatestVersionFile()
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ybm-cli.yaml)")
 	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YBM Api Key")
 	rootCmd.PersistentFlags().StringP("output", "o", "", "Select the desired output format (table, json, pretty). Default to table")
@@ -121,6 +125,18 @@ func init() {
 	rootCmd.AddCommand(region.CloudRegionsCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
+}
+
+func initLatestVersionFile() {
+	// Create file to cache latest version of the YBM CLI
+	latestVersionFile, err := releases.GetLatestVersionFile()
+	cobra.CheckErr(err)
+	_, err = os.Stat(latestVersionFile)
+	if errors.Is(err, os.ErrNotExist) {
+		// Storing data in the format 'timestamp,version'
+		err = os.WriteFile(latestVersionFile, []byte("0,v0.0.0"), 0666)
+		cobra.CheckErr(err)
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.

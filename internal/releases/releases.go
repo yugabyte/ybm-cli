@@ -18,7 +18,10 @@ package releases
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/sirupsen/logrus"
@@ -32,7 +35,54 @@ const (
 	repo = "ybm-cli"
 )
 
+func GetLatestVersionFile() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	latestVersionFile := home + "/.ybm-cli-latest"
+	return latestVersionFile, nil
+}
+
 func GetLatestRelease() (string, error) {
+
+	latestVersionFile, err := GetLatestVersionFile()
+	if err != nil {
+		return "", err
+	}
+	currentTimestamp := time.Now().Unix()
+	data, err := os.ReadFile(latestVersionFile)
+	if err != nil {
+		return "", err
+	}
+
+	dataSlice := strings.Split(string(data), ",")
+	timeStampString, version := dataSlice[0], dataSlice[1]
+	timeStamp, err := strconv.Atoi(timeStampString)
+	if err != nil {
+		return "", err
+	}
+	// Fetch the latest version from Github every hour and cache it
+	if currentTimestamp > int64(timeStamp) {
+		latestVersion, err := FetchLatestReleaseFromGithub()
+		if err != nil {
+			return "", err
+		}
+		// Storing the data in the format 'timestamp,version'
+		data := []byte(strconv.Itoa(int(currentTimestamp)+3600) + "," + latestVersion)
+		err = os.WriteFile(latestVersionFile, data, 0666)
+		if err != nil {
+			return "", nil
+		}
+		return latestVersion, nil
+	}
+
+	return version, nil
+
+}
+func FetchLatestReleaseFromGithub() (string, error) {
+
+	logrus.Debugln("Fetching the latest release from github")
 	client := github.NewClient(nil)
 	// Fetching the latest 10 releases
 	opts := &github.ListOptions{
