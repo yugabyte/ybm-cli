@@ -42,7 +42,7 @@ var ReadReplicaCmd = &cobra.Command{
 	},
 }
 
-func getDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmclient.ReadReplicaSpec {
+func GetDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmclient.ReadReplicaSpec {
 	n := int32(1)
 	numReplicas := ybmclient.NewNullableInt32(&n)
 	spec := ybmclient.ReadReplicaSpec{
@@ -63,7 +63,7 @@ func getDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmcl
 	return spec
 }
 
-func setMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.ReadReplicaSpec) error {
+func SetMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.ReadReplicaSpec) error {
 	cloud := string(spec.PlacementInfo.CloudInfo.Code)
 	tier := "PAID"
 	region := spec.PlacementInfo.CloudInfo.Region
@@ -84,22 +84,30 @@ func setMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.Read
 }
 
 // Parse array of read replica string to string params
-func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string, primaryClusterCloud ybmclient.CloudEnum, vpcId string) ([]ybmclient.ReadReplicaSpec, error) {
+func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string, primaryClusterCloud ybmclient.CloudEnum, vpcId string) ([]ybmclient.ReadReplicaSpec, error) {
+	var err error
 	readReplicaSpecs := []ybmclient.ReadReplicaSpec{}
-
-	defaultSpec := getDefaultSpec(primaryClusterCloud, vpcId)
+	defaultSpec := GetDefaultSpec(primaryClusterCloud, vpcId)
 
 	for _, replicaOpt := range replicaOpts {
 
-		spec := getDefaultSpec(primaryClusterCloud, vpcId)
+		spec := GetDefaultSpec(primaryClusterCloud, vpcId)
 
 		for _, subOpt := range strings.Split(replicaOpt, ",") {
 			kvp := strings.Split(subOpt, "=")
 			key := kvp[0]
 			val := kvp[1]
-			n, err := strconv.Atoi(val)
-			if err != nil {
-				return nil, err
+			n := 0
+			err = nil
+			switch key {
+			case "num-cores":
+			case "disk-size-gb":
+			case "num-nodes":
+			case "num-replicas":
+				n, err = strconv.Atoi(val)
+				if err != nil {
+					return nil, err
+				}
 			}
 			switch key {
 			case "num-cores":
@@ -147,14 +155,14 @@ func parseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 			}
 
 		}
-		if err := setMemoryAndDisk(authApi, &spec); err != nil {
+		if err := SetMemoryAndDisk(authApi, &spec); err != nil {
 			return nil, err
 		}
 		readReplicaSpecs = append(readReplicaSpecs, spec)
 	}
 
 	if len(readReplicaSpecs) == 0 {
-		if err := setMemoryAndDisk(authApi, &defaultSpec); err != nil {
+		if err := SetMemoryAndDisk(authApi, &defaultSpec); err != nil {
 			return nil, err
 		}
 		readReplicaSpecs = append(readReplicaSpecs, defaultSpec)
@@ -235,7 +243,7 @@ var createReadReplicaCmd = &cobra.Command{
 			logrus.Fatalf("Error while fetching the cloud provider of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud, vpcId)
+		readReplicaSpecs, err := ParseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud, vpcId)
 		if err != nil {
 			logrus.Fatalf("Error while parsing read replica options: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
@@ -299,7 +307,7 @@ var updateReadReplicaCmd = &cobra.Command{
 			logrus.Errorf("Error while fetching the cloud provider of the primary cluster: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 			return
 		}
-		readReplicaSpecs, err := parseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud, vpcId)
+		readReplicaSpecs, err := ParseReplicaOpts(authApi, allReplicaOpt, primaryClusterCloud, vpcId)
 		if err != nil {
 			logrus.Errorf("Error while parsing read replica options: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
