@@ -18,10 +18,13 @@ package releases
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	"golang.org/x/mod/semver"
@@ -32,7 +35,88 @@ const (
 	repo = "ybm-cli"
 )
 
+type ReleaseConfig struct {
+	LastCheckedTime      string
+	LastVersionAvailable string
+}
+
+func ShouldFetchLatestRelease(lastCheckedTime string, currentTimestamp int64) (bool, error) {
+	timeStamp, err := strconv.Atoi(lastCheckedTime)
+	if err != nil {
+		return false, err
+	}
+	// Fetch the latest version from Github every 24 hours and cache it
+	return currentTimestamp > int64(timeStamp)+(60*60*24), nil
+}
+
+func WriteReleaseConfig(currentTimestamp int64, latestVersion string) error {
+	if !semver.IsValid(latestVersion) {
+		return fmt.Errorf("the version %s is not a valid semantic version", latestVersion)
+	}
+	if currentTimestamp < 0 {
+		return fmt.Errorf("negative timestaps are not allowed")
+	}
+	viper.GetViper().Set("lastCheckedTime", &currentTimestamp)
+	viper.GetViper().Set("lastVersionAvailable", &latestVersion)
+	return viper.WriteConfig()
+}
+
+func GetReleaseConfig() (ReleaseConfig, error) {
+
+	lastCheckedTime := viper.GetString("lastCheckedTime")
+	if time, err := strconv.Atoi(lastCheckedTime); err != nil || time < 0 {
+		if err == nil {
+			err = fmt.Errorf("negative timestaps are not allowed")
+		}
+		return ReleaseConfig{}, err
+	}
+	lastAvailableVersion := viper.GetString("lastVersionAvailable")
+	if !semver.IsValid(lastAvailableVersion) {
+		return ReleaseConfig{}, fmt.Errorf("the version %s is not a valid semantic version", lastAvailableVersion)
+	}
+	releaseConfig := ReleaseConfig{
+		LastCheckedTime:      lastCheckedTime,
+		LastVersionAvailable: lastAvailableVersion,
+	}
+
+	return releaseConfig, nil
+}
+
 func GetLatestRelease() (string, error) {
+
+	if err := viper.ReadInConfig(); err == nil {
+		logrus.Debugf("Using config file: %s", viper.ConfigFileUsed())
+		releaseConfig, err := GetReleaseConfig()
+		if err != nil {
+			return "", err
+		}
+		currentTimestamp := time.Now().Unix()
+		fetchFromGithub, err := ShouldFetchLatestRelease(releaseConfig.LastCheckedTime, currentTimestamp)
+		if err != nil {
+			return "", err
+		}
+		if fetchFromGithub {
+			latestVersion, err := FetchLatestReleaseFromGithub()
+			if err != nil {
+				return "", err
+			}
+			err = WriteReleaseConfig(currentTimestamp, latestVersion)
+			if err != nil {
+				return "", err
+			}
+			return latestVersion, nil
+		}
+
+		return releaseConfig.LastVersionAvailable, nil
+	}
+
+	return FetchLatestReleaseFromGithub()
+
+}
+
+func FetchLatestReleaseFromGithub() (string, error) {
+
+	logrus.Debugln("Fetching the latest release from github")
 	client := github.NewClient(nil)
 	// Fetching the latest 10 releases
 	opts := &github.ListOptions{

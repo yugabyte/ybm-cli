@@ -57,6 +57,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 		releases.PrintUpgradeMessageIfNeeded()
+
 	},
 }
 
@@ -77,6 +78,8 @@ func setDefaults() {
 	viper.SetDefault("debug", false)
 	viper.SetDefault("no-color", false)
 	viper.SetDefault("wait", false)
+	viper.SetDefault("lastVersionAvailable", "v0.0.0")
+	viper.SetDefault("lastCheckedTime", 0)
 }
 
 func init() {
