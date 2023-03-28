@@ -18,13 +18,13 @@ package releases
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	"golang.org/x/mod/semver"
@@ -35,49 +35,36 @@ const (
 	repo = "ybm-cli"
 )
 
-func GetLatestVersionFile() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	latestVersionFile := home + "/.ybm-cli-latest"
-	return latestVersionFile, nil
-}
-
 func GetLatestRelease() (string, error) {
 
-	latestVersionFile, err := GetLatestVersionFile()
-	if err != nil {
-		return "", err
-	}
-	currentTimestamp := time.Now().Unix()
-	data, err := os.ReadFile(latestVersionFile)
-	if err != nil {
-		return "", err
-	}
-
-	dataSlice := strings.Split(string(data), ",")
-	timeStampString, version := dataSlice[0], dataSlice[1]
-	timeStamp, err := strconv.Atoi(timeStampString)
-	if err != nil {
-		return "", err
-	}
-	// Fetch the latest version from Github every hour and cache it
-	if currentTimestamp > int64(timeStamp) {
-		latestVersion, err := FetchLatestReleaseFromGithub()
+	if err := viper.ReadInConfig(); err == nil {
+		logrus.Debugf("Using config file: %s", viper.ConfigFileUsed())
+		lastCheckedTime := viper.GetString("lastCheckedTime")
+		lastAvailableVersion := viper.GetString("lastVersionAvailable")
+		timeStamp, err := strconv.Atoi(lastCheckedTime)
 		if err != nil {
 			return "", err
 		}
-		// Storing the data in the format 'timestamp,version'
-		data := []byte(strconv.Itoa(int(currentTimestamp)+3600) + "," + latestVersion)
-		err = os.WriteFile(latestVersionFile, data, 0666)
-		if err != nil {
-			return "", nil
+		currentTimestamp := time.Now().Unix()
+		// Fetch the latest version from Github every 24 hours and cache it
+		if currentTimestamp > int64(timeStamp)+(60*60*24) {
+			latestVersion, err := FetchLatestReleaseFromGithub()
+			if err != nil {
+				return "", err
+			}
+			viper.GetViper().Set("lastCheckedTime", &currentTimestamp)
+			viper.GetViper().Set("lastVersionAvailable", &latestVersion)
+			err = viper.WriteConfig()
+			if err != nil {
+				return "", err
+			}
+			return latestVersion, nil
 		}
-		return latestVersion, nil
+
+		return lastAvailableVersion, nil
 	}
 
-	return version, nil
+	return FetchLatestReleaseFromGithub()
 
 }
 func FetchLatestReleaseFromGithub() (string, error) {
