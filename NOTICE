@@ -31,11 +31,32 @@ The following subcomponents are used:
 * License: [MIT](https://github.com/Masterminds/sprig/blob/v3.2.3/LICENSE.txt)
 
 
+## github.com/ProtonMail/go-crypto
+
+* Name: github.com/ProtonMail/go-crypto
+* Version: v0.0.0-20230217124315-7d5c6f04bbb8
+* License: [BSD-3-Clause](https://github.com/ProtonMail/go-crypto/blob/7d5c6f04bbb8/LICENSE)
+
+
 ## github.com/briandowns/spinner
 
 * Name: github.com/briandowns/spinner
 * Version: v1.21.0
 * License: [Apache-2.0](https://github.com/briandowns/spinner/blob/v1.21.0/LICENSE)
+
+
+## github.com/cloudflare/circl
+
+* Name: github.com/cloudflare/circl
+* Version: v1.1.0
+* License: [BSD-3-Clause](https://github.com/cloudflare/circl/blob/v1.1.0/LICENSE)
+
+
+## github.com/common-nighthawk/go-figure
+
+* Name: github.com/common-nighthawk/go-figure
+* Version: v0.0.0-20210622060536-734e95fb86be
+* License: [MIT](https://github.com/common-nighthawk/go-figure/blob/734e95fb86be/LICENSE)
 
 
 ## github.com/enescakir/emoji
@@ -78,6 +99,20 @@ The following subcomponents are used:
 * Name: github.com/google/go-cmp/cmp
 * Version: v0.5.9
 * License: [BSD-3-Clause](https://github.com/google/go-cmp/blob/v0.5.9/LICENSE)
+
+
+## github.com/google/go-github/v50/github
+
+* Name: github.com/google/go-github/v50/github
+* Version: v50.2.0
+* License: [BSD-3-Clause](https://github.com/google/go-github/blob/v50.2.0/LICENSE)
+
+
+## github.com/google/go-querystring/query
+
+* Name: github.com/google/go-querystring/query
+* Version: v1.1.0
+* License: [BSD-3-Clause](https://github.com/google/go-querystring/blob/v1.1.0/LICENSE)
 
 
 ## github.com/google/uuid
@@ -174,15 +209,15 @@ The following subcomponents are used:
 ## github.com/onsi/ginkgo/v2
 
 * Name: github.com/onsi/ginkgo/v2
-* Version: v2.9.1
-* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.9.1/LICENSE)
+* Version: v2.9.2
+* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.9.2/LICENSE)
 
 
 ## github.com/onsi/gomega
 
 * Name: github.com/onsi/gomega
-* Version: v1.27.4
-* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.4/LICENSE)
+* Version: v1.27.5
+* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.5/LICENSE)
 
 
 ## github.com/pelletier/go-toml/v2
@@ -318,6 +353,13 @@ The following subcomponents are used:
 * License: [BSD-3-Clause](https://cs.opensource.google/go/x/exp/+/c95f2b4c:LICENSE)
 
 
+## golang.org/x/mod/semver
+
+* Name: golang.org/x/mod/semver
+* Version: v0.9.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.9.0:LICENSE)
+
+
 ## golang.org/x/net
 
 * Name: golang.org/x/net
@@ -328,8 +370,8 @@ The following subcomponents are used:
 ## golang.org/x/oauth2
 
 * Name: golang.org/x/oauth2
-* Version: v0.5.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/oauth2/+/v0.5.0:LICENSE)
+* Version: v0.6.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/oauth2/+/v0.6.0:LICENSE)
 
 
 ## golang.org/x/sys/unix
