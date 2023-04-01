@@ -168,6 +168,7 @@ func init() {
 	// is called directly, e.g.:
 	updateClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster.")
 	updateClusterCmd.MarkFlagRequired("cluster-name")
+	updateClusterCmd.Flags().String("new-name", "", "[OPTIONAL] The new name to be given to the cluster.")
 	updateClusterCmd.Flags().String("cloud-type", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")

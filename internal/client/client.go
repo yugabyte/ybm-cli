@@ -157,6 +157,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	var trackId string
 	var trackName string
 	var regionInfoProvided bool
+	var err error
 
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
@@ -210,6 +211,9 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	isProduction := false
 
 	clusterName, _ := cmd.Flags().GetString("cluster-name")
+	if cmd.Flags().Changed("new-name") {
+		clusterName, _ = cmd.Flags().GetString("new-name")
+	}
 	cloudInfo := *ybmclient.NewCloudInfoWithDefaults()
 	if cmd.Flags().Changed("cloud-type") {
 		cloudType, _ := cmd.Flags().GetString("cloud-type")
@@ -259,7 +263,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	tier := string(clusterInfo.GetClusterTier())
 	numCores := clusterInfo.NodeInfo.GetNumCores()
 
-	memoryMb, err := a.GetFromInstanceType("memory", cloud, tier, region, int32(numCores))
+	memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, int32(numCores))
 	if err != nil {
 		return nil, err
 	}
