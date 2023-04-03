@@ -100,10 +100,7 @@ func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 			n := 0
 			err = nil
 			switch key {
-			case "num-cores":
-			case "disk-size-gb":
-			case "num-nodes":
-			case "num-replicas":
+			case "num-cores", "disk-size-gb", "num-nodes", "num-replicas":
 				n, err = strconv.Atoi(val)
 				if err != nil {
 					return nil, err
