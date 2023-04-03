@@ -280,6 +280,22 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	if err != nil {
 		return nil, err
 	}
+
+	//Some region for example us-west2 do not offer same instances as other regions, so we take the lower memory from all regions with the same number of core.
+	// if we have more than 1 region
+	if len(clusterRegionInfo) > 1 {
+		for _, v := range clusterRegionInfo {
+			newMb, err := a.GetFromInstanceType("memory", cloud, tier, v.PlacementInfo.CloudInfo.Region, int32(numCores))
+			if err != nil {
+				return nil, err
+			}
+
+			if newMb < memoryMb {
+				memoryMb = newMb
+			}
+		}
+	}
+
 	clusterInfo.NodeInfo.SetMemoryMb(memoryMb)
 
 	// Computing the default disk size if it is not provided
