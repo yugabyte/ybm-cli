@@ -158,7 +158,7 @@ func init() {
 	createClusterCmd.MarkFlagRequired("cluster-name")
 	createClusterCmd.Flags().StringToString("credentials", nil, `[REQUIRED] Credentials to login to the cluster. Please provide key value pairs username=<user-name>,password=<password>.`)
 	createClusterCmd.MarkFlagRequired("credentials")
-	createClusterCmd.Flags().String("cloud-type", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP. Default AWS.")
+	createClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP. Default AWS.")
 	createClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.")
 	createClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value. If specified  num-cores is mandatory, disk-size-gb is optional.")
 	createClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If specified, region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified by using multiple --region-info arguments. Default if not specified is us-west-2 AWS region.`)

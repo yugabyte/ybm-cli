@@ -171,9 +171,9 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		totalNodes += int(regionNodes)
 		cloudInfo := *ybmclient.NewCloudInfoWithDefaults()
 		cloudInfo.SetRegion(region)
-		if cmd.Flags().Changed("cloud-type") {
-			cloudType, _ := cmd.Flags().GetString("cloud-type")
-			cloudInfo.SetCode(ybmclient.CloudEnum(cloudType))
+		if cmd.Flags().Changed("cloud-provider") {
+			cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
+			cloudInfo.SetCode(ybmclient.CloudEnum(cloudProvider))
 		}
 		info := *ybmclient.NewClusterRegionInfo(
 			*ybmclient.NewPlacementInfo(cloudInfo, int32(regionNodes)),
@@ -215,9 +215,9 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		clusterName, _ = cmd.Flags().GetString("new-name")
 	}
 	cloudInfo := *ybmclient.NewCloudInfoWithDefaults()
-	if cmd.Flags().Changed("cloud-type") {
-		cloudType, _ := cmd.Flags().GetString("cloud-type")
-		cloudInfo.SetCode(ybmclient.CloudEnum(cloudType))
+	if cmd.Flags().Changed("cloud-provider") {
+		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
+		cloudInfo.SetCode(ybmclient.CloudEnum(cloudProvider))
 	}
 	if regionInfoProvided {
 		cloudInfo.SetRegion(region)
