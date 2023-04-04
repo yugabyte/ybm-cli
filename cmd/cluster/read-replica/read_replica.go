@@ -118,7 +118,8 @@ func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 					/* #nosec G109 */
 					spec.NodeInfo.DiskSizeGb = int32(n)
 				}
-			case "code":
+			// Keeping code as temp. backward compatibility
+			case "code", "cloud-provider":
 				if string(primaryClusterCloud) != val {
 					return nil, fmt.Errorf("all the read replicas must be in the same cloud provider as the primary cluster")
 				}
@@ -382,10 +383,10 @@ func init() {
 	ReadReplicaCmd.AddCommand(listReadReplicaCmd)
 
 	ReadReplicaCmd.AddCommand(createReadReplicaCmd)
-	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
+	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(updateReadReplicaCmd)
-	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,code=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
+	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(deleteReadReplicaCmd)
 }

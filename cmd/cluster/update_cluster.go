@@ -169,7 +169,7 @@ func init() {
 	updateClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster.")
 	updateClusterCmd.MarkFlagRequired("cluster-name")
 	updateClusterCmd.Flags().String("new-name", "", "[OPTIONAL] The new name to be given to the cluster.")
-	updateClusterCmd.Flags().String("cloud-type", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP.")
+	updateClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb> as the value.  num-cores is mandatory, disk-size-gb is optional.")
 	updateClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If provided, region and num-nodes are mandatory, vpc is optional.`)
@@ -180,9 +180,9 @@ func init() {
 }
 
 func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, trackName string, authApi *ybmAuthClient.AuthApiClient) {
-	if !cmd.Flags().Changed("cloud-type") {
-		cmd.Flag("cloud-type").Value.Set(string(originalSpec.CloudInfo.GetCode()))
-		cmd.Flag("cloud-type").Changed = true
+	if !cmd.Flags().Changed("cloud-provider") {
+		cmd.Flag("cloud-provider").Value.Set(string(originalSpec.CloudInfo.GetCode()))
+		cmd.Flag("cloud-provider").Changed = true
 	}
 	if !cmd.Flags().Changed("cluster-type") {
 		cmd.Flag("cluster-type").Value.Set(string(originalSpec.ClusterInfo.GetClusterType()))

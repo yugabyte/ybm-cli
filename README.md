@@ -45,7 +45,7 @@ This will use configured default values to spawn the cluster. A single node sync
 ybm cluster create
     --cluster-name=test-cluster \
     --credentials=username=admin,password=YBM.Is.Always.Great! \
-    --cloud-type=[AWS or GCP] \
+    --cloud-provider=[AWS or GCP] \
     --cluster-type=[SYNCHRONOUS or GEO_PARTITIONED] \
     --node-config=num-cores=<num-cores>,disk-size-gb=<disk-size-gb> \
     --region-info=region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> \

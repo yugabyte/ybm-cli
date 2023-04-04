@@ -27,7 +27,7 @@ import (
 
 var _ = Describe("Releases", func() {
 	BeforeEach(func() {
-		log.SetLogLevel("", true)
+		log.SetLogLevel("", false)
 		log.SetDebugFormatter()
 	})
 
