@@ -142,7 +142,7 @@ All the read replicas will be deleted. To delete only specific read replicas, us
 ```sh
 ybm vpc create \
     --name=demo-vpc \
-    --cloud=GCP \
+    --cloud-provider=GCP \
     --global-cidr=10.0.0.0/18
 ```
 
@@ -170,7 +170,7 @@ ybm vpc delete \
 ybm vpc peering create \
     --name=demo-peer \
     --vpc-name=demo-vpc \
-    --cloud=GCP \
+    --cloud-provider=GCP \
     --project=project \
     --vpc=vpc-name \
     --region=us-west1 \
