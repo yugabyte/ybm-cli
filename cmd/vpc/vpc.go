@@ -97,7 +97,7 @@ var createVpcCmd = &cobra.Command{
 		}
 
 		vpcName, _ := cmd.Flags().GetString("name")
-		cloud, _ := cmd.Flags().GetString("cloud")
+		cloud, _ := cmd.Flags().GetString("cloud-provider")
 		globalCidrRange, _ := cmd.Flags().GetString("global-cidr")
 
 		// global CIDR only works with GCP
@@ -233,8 +233,8 @@ func init() {
 	createVpcCmd.Flags().SortFlags = false
 	createVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	createVpcCmd.MarkFlagRequired("name")
-	createVpcCmd.Flags().String("cloud", "", "[REQUIRED] Cloud provider for the VPC.")
-	createVpcCmd.MarkFlagRequired("cloud")
+	createVpcCmd.Flags().String("cloud-provider", "", "[REQUIRED] Cloud provider for the VPC.")
+	createVpcCmd.MarkFlagRequired("cloud-provider")
 	createVpcCmd.Flags().String("global-cidr", "", "[OPTIONAL] Global CIDR for the VPC.")
 	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "[OPTIONAL] Region of the VPC.")
 	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "[OPTIONAL] CIDR of the VPC.")
