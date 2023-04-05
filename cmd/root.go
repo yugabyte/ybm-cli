@@ -29,6 +29,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/region"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
+	"github.com/yugabyte/ybm-cli/cmd/tools"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
 
@@ -122,6 +123,7 @@ func init() {
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(signup.SignUpCmd)
 	rootCmd.AddCommand(region.CloudRegionsCmd)
+	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
 }
