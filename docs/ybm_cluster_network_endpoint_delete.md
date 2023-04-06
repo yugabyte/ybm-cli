@@ -14,6 +14,7 @@ ybm cluster network endpoint delete [flags]
 
 ```
       --endpoint-id string   [REQUIRED] THe ID of the endpoint
+  -f, --force                Bypass the prompt for non-interactive usage
   -h, --help                 help for delete
 ```
 

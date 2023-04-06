@@ -14,6 +14,7 @@ ybm backup delete [flags]
 
 ```
       --backup-id string   [REQUIRED] The backup ID.
+  -f, --force              Bypass the prompt for non-interactive usage
   -h, --help               help for delete
 ```
 

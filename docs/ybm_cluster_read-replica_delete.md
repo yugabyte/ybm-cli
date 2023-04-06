@@ -13,7 +13,8 @@ ybm cluster read-replica delete [flags]
 ### Options
 
 ```
-  -h, --help   help for delete
+  -f, --force   Bypass the prompt for non-interactive usage
+  -h, --help    help for delete
 ```
 
 ### Options inherited from parent commands
