@@ -22,6 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -200,6 +201,14 @@ var deleteBackupCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete backup for a cluster in YugabyteDB Managed",
 	Long:  "Delete backup for a cluster in YugabyteDB Managed",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		backupID, _ := cmd.Flags().GetString("backup-id")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "backup", backupID), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		backupID, _ := cmd.Flags().GetString("backup-id")
 
@@ -241,4 +250,6 @@ func init() {
 	BackupCmd.AddCommand(deleteBackupCmd)
 	deleteBackupCmd.Flags().String("backup-id", "", "[REQUIRED] The backup ID.")
 	deleteBackupCmd.MarkFlagRequired("backup-id")
+	deleteBackupCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+
 }

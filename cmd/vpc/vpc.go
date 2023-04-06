@@ -183,6 +183,14 @@ var deleteVpcCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a VPC in YugabyteDB Managed",
 	Long:  "Delete a VPC in YugabyteDB Managed",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		vpcName, _ := cmd.Flags().GetString("name")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "vpc", vpcName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -244,4 +252,5 @@ func init() {
 	VPCCmd.AddCommand(deleteVpcCmd)
 	deleteVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	deleteVpcCmd.MarkFlagRequired("name")
+	deleteVpcCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }

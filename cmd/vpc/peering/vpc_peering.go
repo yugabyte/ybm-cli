@@ -227,6 +227,14 @@ var deleteVpcPeeringCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete VPC peering",
 	Long:  "Delete VPC peering in YugabyteDB Managed",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		vpcPeeringName, _ := cmd.Flags().GetString("name")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "VPC peering", vpcPeeringName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
 
@@ -297,4 +305,5 @@ func init() {
 	VPCPeeringCmd.AddCommand(deleteVpcPeeringCmd)
 	deleteVpcPeeringCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC peering.")
 	deleteVpcPeeringCmd.MarkFlagRequired("name")
+	deleteVpcPeeringCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }
