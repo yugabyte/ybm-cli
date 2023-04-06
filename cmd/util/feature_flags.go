@@ -28,6 +28,7 @@ const (
 	CDC           FeatureFlag = "CDC"
 	CONFIGURE_URL FeatureFlag = "CONFIGURE_URL"
 	NODE_OP       FeatureFlag = "NODE_OPS"
+	TOOLS         FeatureFlag = "TOOLS"
 )
 
 func (f FeatureFlag) String() string {

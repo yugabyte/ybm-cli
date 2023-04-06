@@ -11,6 +11,8 @@ test:
 	go get github.com/onsi/gomega/...
 	ginkgo run -r -v
 
+doc:
+	YBM_FF_TOOLS=true  go run main.go tools gen-doc --format markdown
 
 build:
 	go build -ldflags="-X 'main.version=v${VERSION}'" -o ${BINARY}

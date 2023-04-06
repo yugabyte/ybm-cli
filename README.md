@@ -27,6 +27,11 @@ just add it to the host `http://cloud.yugabyte.com`
 
 ![Demo of the CLI](./resources/demo.gif)
 
+## Commands list
+You can find all command documentation [here](./docs/ybm.md)
+
+
+
 ## Sample Commands:
 
 ### Cluster

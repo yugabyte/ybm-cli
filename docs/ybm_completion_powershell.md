@@ -1,0 +1,43 @@
+## ybm completion powershell
+
+Generate the autocompletion script for powershell
+
+### Synopsis
+
+Generate the autocompletion script for powershell.
+
+To load completions in your current shell session:
+
+	ybm completion powershell | Out-String | Invoke-Expression
+
+To load completions for every new session, add the output of the above command
+to your powershell profile.
+
+
+```
+ybm completion powershell [flags]
+```
+
+### Options
+
+```
+  -h, --help              help for powershell
+      --no-descriptions   disable completion descriptions
+```
+
+### Options inherited from parent commands
+
+```
+  -a, --apiKey string     YBM Api Key
+      --config string     config file (default is $HOME/.ybm-cli.yaml)
+      --debug             Use debug mode, same as --logLevel debug
+  -l, --logLevel string   Select the desired log level format(info). Default to info
+      --no-color          Disable colors in output , default to false
+  -o, --output string     Select the desired output format (table, json, pretty). Default to table
+      --wait              Wait until the task is completed, otherwise it will exit immediately, default to false
+```
+
+### SEE ALSO
+
+* [ybm completion](ybm_completion.md)	 - Generate the autocompletion script for the specified shell
+

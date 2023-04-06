@@ -1,0 +1,38 @@
+## ybm network-allow-list
+
+Manage Network Allow Lists
+
+### Synopsis
+
+Manage Network ALlow Lists
+
+```
+ybm network-allow-list [flags]
+```
+
+### Options
+
+```
+  -h, --help   help for network-allow-list
+```
+
+### Options inherited from parent commands
+
+```
+  -a, --apiKey string     YBM Api Key
+      --config string     config file (default is $HOME/.ybm-cli.yaml)
+      --debug             Use debug mode, same as --logLevel debug
+  -l, --logLevel string   Select the desired log level format(info). Default to info
+      --no-color          Disable colors in output , default to false
+  -o, --output string     Select the desired output format (table, json, pretty). Default to table
+      --wait              Wait until the task is completed, otherwise it will exit immediately, default to false
+```
+
+### SEE ALSO
+
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm network-allow-list create](ybm_network-allow-list_create.md)	 - Create network allow lists in YugabyteDB Managed
+* [ybm network-allow-list delete](ybm_network-allow-list_delete.md)	 - Delete network allow list from YugabyteDB Managed
+* [ybm network-allow-list get](ybm_network-allow-list_get.md)	 - Get network allow list in YugabyteDB Managed
+* [ybm network-allow-list list](ybm_network-allow-list_list.md)	 - List network allow lists in YugabyteDB Managed
+
