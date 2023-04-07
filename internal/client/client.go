@@ -685,11 +685,12 @@ func (a *AuthApiClient) GetCdcStreamIDByStreamName(cdcStreamName string) (string
 	return "", fmt.Errorf("couldn't find any cdcStream with the given name")
 }
 
-func (a *AuthApiClient) GetSupportedInstanceTypes(cloud string, tier string, region string) ybmclient.ApiGetSupportedInstanceTypesRequest {
-	return a.ApiClient.ClusterApi.GetSupportedInstanceTypes(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Region(region)
+func (a *AuthApiClient) GetSupportedNodeConfigurations(cloud string, tier string, region string) ybmclient.ApiGetSupportedNodeConfigurationsRequest {
+	return a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions([]string{region})
 }
+
 func (a *AuthApiClient) GetFromInstanceType(resource string, cloud string, tier string, region string, numCores int32) (int32, error) {
-	instanceResp, resp, err := a.GetSupportedInstanceTypes(cloud, tier, region).Execute()
+	instanceResp, resp, err := a.GetSupportedNodeConfigurations(cloud, tier, region).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(b)
