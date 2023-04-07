@@ -21,6 +21,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -31,6 +32,14 @@ var deleteClusterCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a cluster",
 	Long:  "Delete a cluster",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "cluster", clusterName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -79,4 +88,5 @@ func init() {
 	// is called directly, e.g.:
 	deleteClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be deleted.")
 	deleteClusterCmd.MarkFlagRequired("cluster-name")
+	deleteClusterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }

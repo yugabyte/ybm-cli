@@ -13,6 +13,7 @@ ybm vpc delete [flags]
 ### Options
 
 ```
+  -f, --force         Bypass the prompt for non-interactive usage
   -h, --help          help for delete
       --name string   [REQUIRED] Name for the VPC.
 ```

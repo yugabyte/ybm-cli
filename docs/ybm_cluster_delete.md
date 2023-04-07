@@ -14,6 +14,7 @@ ybm cluster delete [flags]
 
 ```
       --cluster-name string   [REQUIRED] The name of the cluster to be deleted.
+  -f, --force                 Bypass the prompt for non-interactive usage
   -h, --help                  help for delete
 ```
 

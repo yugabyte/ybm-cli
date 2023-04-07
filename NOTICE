@@ -10,6 +10,20 @@ subcomponent's license, as noted in the LICENSE file.
 
 The following subcomponents are used:
 
+## github.com/AlecAivazis/survey/v2
+
+* Name: github.com/AlecAivazis/survey/v2
+* Version: v2.3.6
+* License: [MIT](https://github.com/AlecAivazis/survey/blob/v2.3.6/LICENSE)
+
+
+## github.com/AlecAivazis/survey/v2/terminal
+
+* Name: github.com/AlecAivazis/survey/v2/terminal
+* Version: v2.3.6
+* License: [MIT](https://github.com/AlecAivazis/survey/blob/v2.3.6/terminal/LICENSE.txt)
+
+
 ## github.com/Masterminds/goutils
 
 * Name: github.com/Masterminds/goutils
@@ -164,6 +178,13 @@ The following subcomponents are used:
 * License: [MIT](https://github.com/jayco/go-emoji-flag/blob/01604da018da/LICENSE)
 
 
+## github.com/kballard/go-shellquote
+
+* Name: github.com/kballard/go-shellquote
+* Version: v0.0.0-20180428030007-95032a82bc51
+* License: [MIT](https://github.com/kballard/go-shellquote/blob/95032a82bc51/LICENSE)
+
+
 ## github.com/magiconair/properties
 
 * Name: github.com/magiconair/properties
@@ -190,6 +211,13 @@ The following subcomponents are used:
 * Name: github.com/mattn/go-runewidth
 * Version: v0.0.14
 * License: [MIT](https://github.com/mattn/go-runewidth/blob/v0.0.14/LICENSE)
+
+
+## github.com/mgutz/ansi
+
+* Name: github.com/mgutz/ansi
+* Version: v0.0.0-20170206155736-9520e82c474b
+* License: [MIT](https://github.com/mgutz/ansi/blob/9520e82c474b/LICENSE)
 
 
 ## github.com/mitchellh/copystructure

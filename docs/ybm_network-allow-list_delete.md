@@ -13,6 +13,7 @@ ybm network-allow-list delete [flags]
 ### Options
 
 ```
+  -f, --force         Bypass the prompt for non-interactive usage
   -h, --help          help for delete
   -n, --name string   [REQUIRED] The name of the Network Allow List.
 ```

@@ -20,6 +20,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -28,6 +30,16 @@ var deleteEndpointCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a network endpoint for a cluster",
 	Long:  `Delete a network endpoint for a cluster`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		endpointId, _ := cmd.Flags().GetString("endpoint-id")
+		msg := fmt.Sprintf("Are you sure you want to delete endpoint-id: %s for cluster: %s", endpointId, clusterName)
+		err := util.ConfirmCommand(msg, viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -67,4 +79,6 @@ func init() {
 	EndpointCmd.AddCommand(deleteEndpointCmd)
 	deleteEndpointCmd.Flags().String("endpoint-id", "", "[REQUIRED] THe ID of the endpoint")
 	deleteEndpointCmd.MarkFlagRequired("endpoint-id")
+	deleteEndpointCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+
 }
