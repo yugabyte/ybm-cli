@@ -130,6 +130,13 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete network allow list from YugabyteDB Managed",
 	Long:  "Delete network allow list from YugabyteDB Managed",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "network-allow-list", nalName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -176,4 +183,5 @@ func init() {
 	NalCmd.AddCommand(deleteNetworkAllowListCmd)
 	deleteNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[REQUIRED] The name of the Network Allow List.")
 	deleteNetworkAllowListCmd.MarkFlagRequired("name")
+	deleteNetworkAllowListCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }

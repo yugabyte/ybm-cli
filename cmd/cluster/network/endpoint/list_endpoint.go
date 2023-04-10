@@ -30,16 +30,20 @@ import (
 
 var listEndpointCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List endpoints for a cluster",
-	Long:  "List endpoints for a cluster",
+	Short: "List network endpoints for a cluster",
+	Long:  "List network endpoints for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s\n", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
-		clusterEndpoints, _ := getEndpoints(cmd, authApi)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterEndpoints, _, err := authApi.GetEndpointsForClusterByName(clusterName)
+		if err != nil {
+			logrus.Fatalf("Could not get cluster data: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+		}
 
 		region, _ := cmd.Flags().GetString("region")
 		if region != "" {
@@ -69,6 +73,6 @@ var listEndpointCmd = &cobra.Command{
 
 func init() {
 	EndpointCmd.AddCommand(listEndpointCmd)
-	listEndpointCmd.Flags().String("accessibility", "", "[OPTIONAL] Accessibility of the endpoint")
-	listEndpointCmd.Flags().String("region", "", "[OPTIONAL] Region of the endpoint")
+	listEndpointCmd.Flags().String("accessibility-type", "", "[OPTIONAL] Accessibility of the endpoint. Valid options are PUBLIC, PRIVATE and PRIVATE_SERVICE_ENDPOINT.")
+	listEndpointCmd.Flags().String("region", "", "[OPTIONAL] The region of the endpoint.")
 }

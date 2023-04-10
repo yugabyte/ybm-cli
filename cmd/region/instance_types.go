@@ -54,7 +54,7 @@ var getInstanceTypesCmd = &cobra.Command{
 			logrus.Fatalln(err)
 		}
 		showDisabled, _ := cmd.Flags().GetBool("show-disabled")
-		instanceTypesResp, resp, err := authApi.GetSupportedInstanceTypes(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
+		instanceTypesResp, resp, err := authApi.GetSupportedNodeConfigurations(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))

@@ -19,8 +19,10 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/golang-jwt/jwt/v5"
 
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -98,4 +100,35 @@ func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 		}
 	}
 	return
+}
+
+func SplitAndIgnoreEmpty(str string, sep string) []string {
+	split := Filter(strings.Split(str, sep), func(s string) bool {
+		return s != ""
+	})
+	// If the string is empty, we want to return an empty slice
+	if split == nil {
+		return []string{}
+	}
+	return split
+}
+
+// this function will add an interactive comfirmation with the message provided
+func ConfirmCommand(message string, bypass bool) error {
+	errAborted := errors.New("command aborted")
+	if bypass {
+		return nil
+	}
+	response := false
+	prompt := &survey.Confirm{
+		Message: message,
+	}
+	err := survey.AskOne(prompt, &response)
+	if err != nil {
+		return err
+	}
+	if !response {
+		return errAborted
+	}
+	return nil
 }

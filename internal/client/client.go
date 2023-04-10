@@ -53,6 +53,10 @@ func SetVersion(version string) {
 	cliVersion = version
 }
 
+func GetVersion() string {
+	return cliVersion
+}
+
 // NewAuthClient function is returning a new AuthApiClient Client
 func NewAuthApiClient() (*AuthApiClient, error) {
 	configuration := ybmclient.NewConfiguration()
@@ -153,6 +157,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	var trackId string
 	var trackName string
 	var regionInfoProvided bool
+	var err error
 
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
@@ -166,9 +171,9 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		totalNodes += int(regionNodes)
 		cloudInfo := *ybmclient.NewCloudInfoWithDefaults()
 		cloudInfo.SetRegion(region)
-		if cmd.Flags().Changed("cloud-type") {
-			cloudType, _ := cmd.Flags().GetString("cloud-type")
-			cloudInfo.SetCode(ybmclient.CloudEnum(cloudType))
+		if cmd.Flags().Changed("cloud-provider") {
+			cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
+			cloudInfo.SetCode(ybmclient.CloudEnum(cloudProvider))
 		}
 		info := *ybmclient.NewClusterRegionInfo(
 			*ybmclient.NewPlacementInfo(cloudInfo, int32(regionNodes)),
@@ -206,10 +211,13 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	isProduction := false
 
 	clusterName, _ := cmd.Flags().GetString("cluster-name")
+	if cmd.Flags().Changed("new-name") {
+		clusterName, _ = cmd.Flags().GetString("new-name")
+	}
 	cloudInfo := *ybmclient.NewCloudInfoWithDefaults()
-	if cmd.Flags().Changed("cloud-type") {
-		cloudType, _ := cmd.Flags().GetString("cloud-type")
-		cloudInfo.SetCode(ybmclient.CloudEnum(cloudType))
+	if cmd.Flags().Changed("cloud-provider") {
+		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
+		cloudInfo.SetCode(ybmclient.CloudEnum(cloudProvider))
 	}
 	if regionInfoProvided {
 		cloudInfo.SetRegion(region)
@@ -255,7 +263,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	tier := string(clusterInfo.GetClusterTier())
 	numCores := clusterInfo.NodeInfo.GetNumCores()
 
-	memoryMb, err := a.GetFromInstanceType("memory", cloud, tier, region, int32(numCores))
+	memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, int32(numCores))
 	if err != nil {
 		return nil, err
 	}
@@ -312,17 +320,60 @@ func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID stri
 	}
 }
 
-func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
+func (a *AuthApiClient) GetClusterByName(clusterName string) (ybmclient.ClusterData, error) {
 	clusterResp, resp, err := a.ListClusters().Name(clusterName).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(string(b))
-		return "", err
+		return ybmclient.ClusterData{}, err
 	}
 	clusterData := clusterResp.GetData()
 
 	if len(clusterData) != 0 {
-		return clusterData[0].Info.GetId(), nil
+		return clusterData[0], nil
+	}
+
+	return ybmclient.ClusterData{}, fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
+}
+
+func (a *AuthApiClient) GetEndpointsForClusterByName(clusterName string) ([]ybmclient.Endpoint, string, error) {
+	clusterData, err := a.GetClusterByName(clusterName)
+	if err != nil {
+		return nil, "", err
+	}
+	clusterId := clusterData.Info.GetId()
+	clusterEndpoints := clusterData.Info.GetClusterEndpoints()
+	jsonEndpoints, _ := json.Marshal(clusterEndpoints)
+	logrus.Debugf("Found endpoints: %v\n", string(jsonEndpoints))
+
+	return clusterEndpoints, clusterId, nil
+}
+
+func (a *AuthApiClient) GetEndpointByIdForClusterByName(clusterName string, endpointId string) (ybmclient.Endpoint, string, error) {
+	endpoints, clusterId, err := a.GetEndpointsForClusterByName(clusterName)
+	if err != nil {
+		// return the error
+		return ybmclient.Endpoint{}, "", err
+	}
+
+	endpoints = util.Filter(endpoints, func(endpoint ybmclient.Endpoint) bool {
+		return endpoint.GetId() == endpointId || endpoint.GetPseId() == endpointId
+	})
+
+	if len(endpoints) == 0 {
+		logrus.Fatalf("Endpoint not found\n")
+	}
+	if len(endpoints) > 1 {
+		logrus.Fatalf("Multiple endpoints found\n")
+	}
+
+	return endpoints[0], clusterId, nil
+}
+
+func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
+	clusterData, err := a.GetClusterByName(clusterName)
+	if err == nil {
+		return clusterData.Info.GetId(), nil
 	}
 
 	return "", fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
@@ -634,11 +685,12 @@ func (a *AuthApiClient) GetCdcStreamIDByStreamName(cdcStreamName string) (string
 	return "", fmt.Errorf("couldn't find any cdcStream with the given name")
 }
 
-func (a *AuthApiClient) GetSupportedInstanceTypes(cloud string, tier string, region string) ybmclient.ApiGetSupportedInstanceTypesRequest {
-	return a.ApiClient.ClusterApi.GetSupportedInstanceTypes(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Region(region)
+func (a *AuthApiClient) GetSupportedNodeConfigurations(cloud string, tier string, region string) ybmclient.ApiGetSupportedNodeConfigurationsRequest {
+	return a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions([]string{region})
 }
+
 func (a *AuthApiClient) GetFromInstanceType(resource string, cloud string, tier string, region string, numCores int32) (int32, error) {
-	instanceResp, resp, err := a.GetSupportedInstanceTypes(cloud, tier, region).Execute()
+	instanceResp, resp, err := a.GetSupportedNodeConfigurations(cloud, tier, region).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(b)

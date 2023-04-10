@@ -17,7 +17,9 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
+	"github.com/common-nighthawk/go-figure"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -27,9 +29,12 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/region"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
+	"github.com/yugabyte/ybm-cli/cmd/tools"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
+
 	"github.com/yugabyte/ybm-cli/internal/log"
+	"github.com/yugabyte/ybm-cli/internal/releases"
 )
 
 var (
@@ -39,11 +44,22 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ybm",
-	Short: "ybm is a CLI for YugabyteDB Managed",
-	Long:  `ybm is a CLI tool which  helps in managing database infrastructure on YugabyteDB Managed, the fully managed DBaaS offering of YugabyteDB.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!",
+	Long:  `ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		myFigure := figure.NewFigure("ybm", "", true)
+		myFigure.Print()
+		logrus.Printf("\n")
+		cmd.Help()
+	},
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if strings.HasPrefix(cmd.CommandPath(), "ybm completion") {
+			return
+		}
+		releases.PrintUpgradeMessageIfNeeded()
+
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -63,6 +79,8 @@ func setDefaults() {
 	viper.SetDefault("debug", false)
 	viper.SetDefault("no-color", false)
 	viper.SetDefault("wait", false)
+	viper.SetDefault("lastVersionAvailable", "v0.0.0")
+	viper.SetDefault("lastCheckedTime", 0)
 }
 
 func init() {
@@ -105,6 +123,7 @@ func init() {
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(signup.SignUpCmd)
 	rootCmd.AddCommand(region.CloudRegionsCmd)
+	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
 }

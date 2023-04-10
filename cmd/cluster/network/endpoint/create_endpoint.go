@@ -29,16 +29,21 @@ import (
 
 var createEndpointCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a new endpoint",
-	Long:  `Create a new endpoint`,
+	Short: "Create a new network endpoint for a cluster",
+	Long:  `Create a new network endpoint for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+			logrus.Fatalf("Could not initiate api client: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
-		clusterData := getCluster(cmd, authApi)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterData, err := authApi.GetClusterByName(clusterName)
+		if err != nil {
+			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
+		}
+
 		accessibilityType, _ := cmd.Flags().GetString("accessibility-type")
 		reg, _ := cmd.Flags().GetString("region")
 
@@ -75,7 +80,7 @@ var createEndpointCmd = &cobra.Command{
 			createResp, r, err := authApi.CreatePrivateServiceEndpoint(clusterData.Info.Id).PrivateServiceEndpointSpec(createPseSpec[0]).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Could not create private service endpoint: %s", err.Error())
+				logrus.Fatalf("Could not create private service endpoint: %s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			psEps := util.Filter(createResp.GetData(), func(ep ybmclient.PrivateServiceEndpointRegionData) bool {
@@ -99,9 +104,9 @@ var createEndpointCmd = &cobra.Command{
 
 func init() {
 	EndpointCmd.AddCommand(createEndpointCmd)
-	createEndpointCmd.Flags().String("accessibility-type", "", "[REQUIRED] The accessibility of the endpoint.")
+	createEndpointCmd.Flags().String("accessibility-type", "", "[REQUIRED] The accessibility of the endpoint. Valid options are PUBLIC, PRIVATE and PRIVATE_SERVICE_ENDPOINT.")
 	createEndpointCmd.MarkFlagRequired("accessibility-type")
 	createEndpointCmd.Flags().String("region", "", "[REQUIRED] The region of the endpoint.")
 	createEndpointCmd.MarkFlagRequired("region")
-	createEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The security principals of the endpoint.")
+	createEndpointCmd.Flags().String("security-principals", "", "[OPTIONAL] The list of security principals that have access to this endpoint. Required for private service endpoints.  Accepts a comma separated list. E.g.: arn:aws:iam::account_id1:root,arn:aws:iam::account_id2:root")
 }

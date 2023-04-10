@@ -27,6 +27,11 @@ just add it to the host `http://cloud.yugabyte.com`
 
 ![Demo of the CLI](./resources/demo.gif)
 
+## Commands list
+You can find all command documentation [here](./docs/ybm.md)
+
+
+
 ## Sample Commands:
 
 ### Cluster
@@ -45,7 +50,7 @@ This will use configured default values to spawn the cluster. A single node sync
 ybm cluster create
     --cluster-name=test-cluster \
     --credentials=username=admin,password=YBM.Is.Always.Great! \
-    --cloud-type=[AWS or GCP] \
+    --cloud-provider=[AWS or GCP] \
     --cluster-type=[SYNCHRONOUS or GEO_PARTITIONED] \
     --node-config=num-cores=<num-cores>,disk-size-gb=<disk-size-gb> \
     --region-info=region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> \
@@ -142,7 +147,7 @@ All the read replicas will be deleted. To delete only specific read replicas, us
 ```sh
 ybm vpc create \
     --name=demo-vpc \
-    --cloud=GCP \
+    --cloud-provider=GCP \
     --global-cidr=10.0.0.0/18
 ```
 
@@ -170,7 +175,7 @@ ybm vpc delete \
 ybm vpc peering create \
     --name=demo-peer \
     --vpc-name=demo-vpc \
-    --cloud=GCP \
+    --cloud-provider=GCP \
     --project=project \
     --vpc=vpc-name \
     --region=us-west1 \

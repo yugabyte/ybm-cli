@@ -21,8 +21,8 @@ import (
 
 var EndpointCmd = &cobra.Command{
 	Use:   "endpoint",
-	Short: "Manage endpoints for a cluster",
-	Long:  "Manage endpoints for a cluster",
+	Short: "Manage network endpoints for a cluster",
+	Long:  "Manage network endpoints for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

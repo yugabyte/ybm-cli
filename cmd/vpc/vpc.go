@@ -97,7 +97,7 @@ var createVpcCmd = &cobra.Command{
 		}
 
 		vpcName, _ := cmd.Flags().GetString("name")
-		cloud, _ := cmd.Flags().GetString("cloud")
+		cloud, _ := cmd.Flags().GetString("cloud-provider")
 		globalCidrRange, _ := cmd.Flags().GetString("global-cidr")
 
 		// global CIDR only works with GCP
@@ -183,6 +183,14 @@ var deleteVpcCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a VPC in YugabyteDB Managed",
 	Long:  "Delete a VPC in YugabyteDB Managed",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		vpcName, _ := cmd.Flags().GetString("name")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "vpc", vpcName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -233,8 +241,8 @@ func init() {
 	createVpcCmd.Flags().SortFlags = false
 	createVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	createVpcCmd.MarkFlagRequired("name")
-	createVpcCmd.Flags().String("cloud", "", "[REQUIRED] Cloud provider for the VPC.")
-	createVpcCmd.MarkFlagRequired("cloud")
+	createVpcCmd.Flags().String("cloud-provider", "", "[REQUIRED] Cloud provider for the VPC.")
+	createVpcCmd.MarkFlagRequired("cloud-provider")
 	createVpcCmd.Flags().String("global-cidr", "", "[OPTIONAL] Global CIDR for the VPC.")
 	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "[OPTIONAL] Region of the VPC.")
 	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "[OPTIONAL] CIDR of the VPC.")
@@ -244,4 +252,5 @@ func init() {
 	VPCCmd.AddCommand(deleteVpcCmd)
 	deleteVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	deleteVpcCmd.MarkFlagRequired("name")
+	deleteVpcCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }
