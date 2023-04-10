@@ -758,23 +758,23 @@ func (a *AuthApiClient) ListTasks() ybmclient.ApiListTasksRequest {
 	return a.ApiClient.TaskApi.ListTasks(a.ctx, a.AccountID)
 }
 
-func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string, timeOutInSec int) (string, error) {
+func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 
 	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {
-		return a.WaitForTaskCompletionCI(entityId, entityType, taskType, completionStatus, message, timeOutInSec)
+		return a.WaitForTaskCompletionCI(entityId, entityType, taskType, completionStatus, message)
 	}
-	return a.WaitForTaskCompletionFull(entityId, entityType, taskType, completionStatus, message, timeOutInSec)
+	return a.WaitForTaskCompletionFull(entityId, entityType, taskType, completionStatus, message)
 
 }
 
-func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string, timeOutInSec int) (string, error) {
+func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 	var taskList ybmclient.TaskListResponse
 	var resp *http.Response
 	var err error
 	currentStatus := "UNKNOWN"
 	previousStatus := "UNKNOWN"
 	output := fmt.Sprintf(" %s: %s", message, currentStatus)
-	timeout := time.After(time.Duration(timeOutInSec) * time.Second)
+	timeout := time.After(viper.GetDuration("timeout"))
 	checkEveryInSec := time.Tick(2 * time.Second)
 	fmt.Println(output)
 	for {
@@ -822,7 +822,7 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmc
 
 }
 
-func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string, timeOutInSec int) (string, error) {
+func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 	var taskList ybmclient.TaskListResponse
 	var resp *http.Response
 	var err error
@@ -836,7 +836,7 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType yb
 	s.Suffix = " " + output
 	s.FinalMSG = ""
 	defer s.Stop()
-	timeout := time.After(time.Duration(timeOutInSec) * time.Second)
+	timeout := time.After(viper.GetDuration("timeout"))
 	checkEveryInSec := time.Tick(2 * time.Second)
 
 	for {
@@ -963,4 +963,8 @@ func getErrorMessage(response *http.Response, err error) string {
 		}
 	}
 	return errMsg
+}
+
+func GetTimeout() {
+
 }
