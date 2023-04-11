@@ -212,6 +212,16 @@ ybm cluster delete \
 If you are using the CLI with the `--wait` flag in your CI system you can specify the environment variable `YBM_CI` to `true` to avoid 
  generating unnecessary logs lines.
 
+By default, the `--wait` option timeout after 7 days, you can reduce or increase this timeout by using the `--timeout` option like 
+
+
+```sh
+ybm cluster delete \
+    --cluster-name=test-cluster \
+    --wait
+    --timeout 24h
+```
+
 ## Update REST API Client
 - make update-cli
 
