@@ -964,7 +964,3 @@ func getErrorMessage(response *http.Response, err error) string {
 	}
 	return errMsg
 }
-
-func GetTimeout() {
-
-}
