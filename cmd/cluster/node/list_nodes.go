@@ -63,6 +63,4 @@ var listNodeCmd = &cobra.Command{
 
 func init() {
 	NodeCmd.AddCommand(listNodeCmd)
-	listNodeCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
-	listNodeCmd.MarkFlagRequired("cluster-name")
 }

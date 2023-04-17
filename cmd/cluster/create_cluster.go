@@ -23,6 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	ear "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -91,50 +92,13 @@ var createClusterCmd = &cobra.Command{
 			}
 		}
 
-		var cmkSpec *ybmclient.CMKSpec = nil
-		if cmd.Flags().Changed("cmk-spec") {
-			cmkString, _ := cmd.Flags().GetString("cmk-spec")
-			cmkProvider := ""
-			cmkAwsSecretKey := ""
-			cmkAwsAccessKey := ""
-			cmkAwsArnList := []string{}
-
-			for _, cmkInfo := range strings.Split(cmkString, ",") {
-				kvp := strings.Split(cmkInfo, "=")
-				if len(kvp) != 2 {
-					logrus.Fatalln("Incorrect format in cmk spec")
-				}
-				key := kvp[0]
-				val := kvp[1]
-				switch key {
-				case "provider":
-					if len(strings.TrimSpace(val)) != 0 {
-						cmkProvider = val
-					}
-				case "aws-secret-key":
-					if len(strings.TrimSpace(val)) != 0 {
-						cmkAwsSecretKey = val
-					}
-				case "aws-access-key":
-					if len(strings.TrimSpace(val)) != 0 {
-						cmkAwsAccessKey = val
-					}
-				case "aws-arn":
-					if len(strings.TrimSpace(val)) != 0 {
-						cmkAwsArnList = append(cmkAwsArnList, val)
-					}
-				}
-			}
-
-			if cmkProvider == "" ||
-				(cmkProvider == "AWS" && (cmkAwsSecretKey == "" || cmkAwsAccessKey == "" || len(cmkAwsArnList) == 0)) {
-				logrus.Fatalln("Incorrect format in cmk spec")
-			}
-
-			cmkSpec = ybmclient.NewCMKSpec(cmkProvider)
-			if cmkProvider == "AWS" {
-				cmkSpec.AwsCmkSpec = ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList)
-			}
+		cmkSpec, err := ear.GetCmkSpecFromCommand(cmd)
+		if err != nil {
+			logrus.Fatalf("Error while getting CMK spec: %s", err)
+		}
+		// Validate cmkSpec.ProviderType is not null/empty
+		if cmkSpec != nil && cmkSpec.ProviderType == "" {
+			logrus.Fatalf("CMK provider cannot be empty")
 		}
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
@@ -216,6 +180,6 @@ func init() {
 	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION. Default NONE.")
 	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.")
-	createClusterCmd.Flags().String("cmk-spec", "", "[OPTIONAL] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> . If specified, all parameters for that provider are mandatory.")
+	createClusterCmd.Flags().String("encryption-spec", "", "[OPTIONAL] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> . If specified, all parameters for that provider are mandatory.")
 
 }

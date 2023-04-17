@@ -22,6 +22,7 @@ import (
 	"sort"
 	"text/template"
 
+	"github.com/sirupsen/logrus"
 	"github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/cluster"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -33,7 +34,7 @@ const (
 	defaultVPCListingCluster        = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
 	defaultDefaultFullClusterRegion = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
 	defaultFullClusterNalListing    = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
-	defaultFullClusterCMK           = "table {{.Provider}}\t{{.Key Alias}}\t{{.ARNs}}"
+	defaultFullClusterCMK           = "table {{.Provider}}\t{{.KeyAlias}}\t{{.SecurityPrincipals}}"
 	defaultFullClusterEndpoints     = "table {{.Region}}\t{{.Accessibility}}\t{{.State}}\t{{.Host}}"
 	faultToleranceHeader            = "Fault Tolerance"
 	dataDistributionHeader          = "Data Distribution"
@@ -79,6 +80,7 @@ type fullClusterContext struct {
 	NalContext      []*NetworkAllowListContext
 	EndpointContext []*EndpointContext
 	NodeContext     []*NodeContext
+	CmkContext      []*CMKContext
 }
 
 func (c *FullClusterContext) Write() error {
@@ -89,6 +91,7 @@ func (c *FullClusterContext) Write() error {
 		NalContext:      make([]*NetworkAllowListContext, 0, len(c.fullCluster.AllowList)),
 		EndpointContext: make([]*EndpointContext, 0, len(c.fullCluster.Cluster.Info.ClusterEndpoints)),
 		NodeContext:     make([]*NodeContext, 0, len(c.fullCluster.Nodes)),
+		CmkContext:      make([]*CMKContext, 0, len(c.fullCluster.CMK)),
 	}
 
 	fcc.Cluster.c = c.fullCluster.Cluster
@@ -121,6 +124,11 @@ func (c *FullClusterContext) Write() error {
 	//Adding AllowList
 	for _, nal := range c.fullCluster.AllowList {
 		fcc.NalContext = append(fcc.NalContext, &NetworkAllowListContext{c: nal})
+	}
+
+	// Add CMK data
+	for _, cmk := range c.fullCluster.CMK {
+		fcc.CmkContext = append(fcc.CmkContext, &CMKContext{c: cmk})
 	}
 
 	//Adding Node
@@ -209,6 +217,22 @@ func (c *FullClusterContext) Write() error {
 			}
 		}
 		c.postFormat(tmpl, NewVPCContext())
+	}
+
+	// CMK subsection if any
+	if len(fcc.CmkContext) > 0 {
+		tmpl, err = c.startSubsection(defaultFullClusterCMK)
+		if err != nil {
+			return err
+		}
+		c.SubSection("Encryption at Rest")
+		for _, v := range fcc.CmkContext {
+			if err := c.contextFormat(tmpl, v); err != nil {
+				logrus.Fatal(err)
+				return err
+			}
+		}
+		c.postFormat(tmpl, NewCMKContext())
 	}
 
 	//Node subsection if any
