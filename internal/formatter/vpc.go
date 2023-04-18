@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -52,6 +53,7 @@ func VPCWrite(ctx Context, VPCs []ybmclient.SingleTenantVpcDataResponse) error {
 		for _, VPC := range VPCs {
 			err := format(&VPCContext{c: VPC})
 			if err != nil {
+				logrus.Debugf("Error rendering VPC: %v", err)
 				return err
 			}
 		}

@@ -21,6 +21,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/sirupsen/logrus"
 	"github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -70,6 +71,7 @@ func PSEndpointWrite(ctx Context, pseData ybmclient.PrivateServiceEndpointRegion
 			endpoint:   endpoint,
 		})
 		if err != nil {
+			logrus.Debugf("Error while rendering PSE: %v", err)
 			return err
 		}
 		return nil

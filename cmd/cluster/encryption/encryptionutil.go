@@ -27,8 +27,8 @@ import (
 
 func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 	var cmkSpec *ybmclient.CMKSpec = nil
-	if cmd.Flags().Changed("cmk-spec") {
-		cmkString, _ := cmd.Flags().GetString("cmk-spec")
+	if cmd.Flags().Changed("encryption-spec") {
+		cmkString, _ := cmd.Flags().GetString("encryption-spec")
 		cmkProvider := ""
 		cmkAwsSecretKey := ""
 		cmkAwsAccessKey := ""

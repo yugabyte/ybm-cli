@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -51,6 +52,7 @@ func ReadReplicaWrite(ctx Context, rrSpecs []ybmclient.ReadReplicaSpec, rrEndpoi
 		for index, rrSpec := range rrSpecs {
 			err := format(&ReadReplicaContext{rrSpec: rrSpec, rrEndpoint: rrEndpoints[index]})
 			if err != nil {
+				logrus.Debugf("Error rendering read replica: %v", err)
 				return err
 			}
 		}

@@ -19,11 +19,13 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
-	keyAliasHeader = "Key Alias"
+	keyAliasHeader   = "Key Alias"
+	defaultCmkFormat = "table {{.Provider}}\t{{.KeyAlias}}\t{{.SecurityPrincipals}}"
 )
 
 type CMKContext struct {
@@ -40,6 +42,28 @@ func NewCMKContext() *CMKContext {
 		"SecurityPrincipals": securityPrincipalsHeader,
 	}
 	return &cmkContext
+}
+
+func NewCMKFormat(source string) Format {
+	switch source {
+	case "table", "":
+		format := defaultCmkFormat
+		return Format(format)
+	default: // custom format or json or pretty
+		return Format(source)
+	}
+}
+
+func CMKWrite(ctx Context, cmkSpec ybmclient.CMKSpec) error {
+	render := func(format func(subContext SubContext) error) error {
+		err := format(&CMKContext{c: cmkSpec})
+		if err != nil {
+			logrus.Debug(err)
+			return err
+		}
+		return nil
+	}
+	return ctx.Write(NewCMKContext(), render)
 }
 
 func (c *CMKContext) Provider() string {

@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -55,6 +56,7 @@ func BackupWrite(ctx Context, Backups []ybmclient.BackupData) error {
 		for _, Backup := range Backups {
 			err := format(&BackupContext{c: Backup})
 			if err != nil {
+				logrus.Debugf("Error in rendering backup context: %v", err)
 				return err
 			}
 		}

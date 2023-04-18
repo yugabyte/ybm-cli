@@ -15,6 +15,7 @@
 package ear
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -25,7 +26,7 @@ import (
 )
 
 var EncryptionCmd = &cobra.Command{
-	Use:   "ear",
+	Use:   "encryption",
 	Short: "Manage Encryption at Rest (EaR) for a cluster",
 	Long:  "Manage Encryption at Rest (EaR) for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -62,9 +63,9 @@ var listCmk = &cobra.Command{
 
 		cmkCtx := formatter.Context{
 			Output: os.Stdout,
-			Format: formatter.NewClusterFormat(viper.GetString("output")),
+			Format: formatter.NewCMKFormat(viper.GetString("output")),
 		}
-		formatter.ClusterWrite(cmkCtx, resp.GetData())
+		formatter.CMKWrite(cmkCtx, resp.GetData())
 	},
 }
 
@@ -95,11 +96,28 @@ var updateCmk = &cobra.Command{
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
 
+		oldCmkSpec := resp.GetData()
+
+		newCmkSpec, err := GetCmkSpecFromCommand(cmd)
+		if err != nil {
+			logrus.Fatalf("Unable to parse new CMK spec: %v", err)
+		}
+
+		// Need to copy over the AWS ARNs
+		newCmkSpec.AwsCmkSpec.ArnList = oldCmkSpec.AwsCmkSpec.ArnList
+
+		resp, r, err = authApi.EditClusterCMKs(clusterId).CMKSpec(*newCmkSpec).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		fmt.Printf("Successfully updated encryption spec for cluster %s\n", clusterName)
 	},
 }
 
 func init() {
 	EncryptionCmd.AddCommand(listCmk)
 	EncryptionCmd.AddCommand(updateCmk)
-	updateCmk.Flags().String("encryption-spec", "", "[OPTIONAL] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>. If specified, all parameters for that provider are mandatory.")
+	updateCmk.Flags().String("encryption-spec", "", "[REQUIRED] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>. If specified, all parameters for that provider are mandatory.")
 }

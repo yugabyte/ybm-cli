@@ -59,6 +59,7 @@ func ClusterWrite(ctx Context, clusters []ybmclient.ClusterData) error {
 		for _, cluster := range clusters {
 			err := format(&ClusterContext{c: cluster})
 			if err != nil {
+				logrus.Debugf("Error rendering cluster: %v", err)
 				return err
 			}
 		}

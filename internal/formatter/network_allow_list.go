@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -49,6 +50,7 @@ func NetworkAllowListWrite(ctx Context, nals []ybmclient.NetworkAllowListData) e
 		for _, nal := range nals {
 			err := format(&NetworkAllowListContext{c: nal})
 			if err != nil {
+				logrus.Debugf("Error rendering network allow list: %v", err)
 				return err
 			}
 		}

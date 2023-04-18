@@ -61,6 +61,7 @@ func NodeWrite(ctx Context, node []ybmclient.NodeData) error {
 		for _, node := range node {
 			err := format(&NodeContext{n: node})
 			if err != nil {
+				logrus.Debugf("Error rendering node: %v", err)
 				return err
 			}
 		}
