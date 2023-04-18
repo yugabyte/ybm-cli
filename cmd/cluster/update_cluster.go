@@ -166,7 +166,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	updateClusterCmd.Flags().StringP("cluster-name", "c", "", "[REQUIRED] Name of the cluster.")
+	updateClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster.")
 	updateClusterCmd.MarkFlagRequired("cluster-name")
 	updateClusterCmd.Flags().String("new-name", "", "[OPTIONAL] The new name to be given to the cluster.")
 	updateClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP.")

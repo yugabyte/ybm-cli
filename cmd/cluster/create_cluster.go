@@ -169,7 +169,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	createClusterCmd.Flags().SortFlags = false
-	createClusterCmd.Flags().StringP("cluster-name", "c", "", "[REQUIRED] Name of the cluster.")
+	createClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster.")
 	createClusterCmd.MarkFlagRequired("cluster-name")
 	createClusterCmd.Flags().StringToString("credentials", nil, `[REQUIRED] Credentials to login to the cluster. Please provide key value pairs username=<user-name>,password=<password>.`)
 	createClusterCmd.MarkFlagRequired("credentials")
