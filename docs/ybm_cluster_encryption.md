@@ -1,20 +1,20 @@
-## ybm cluster node
+## ybm cluster encryption
 
-Manage nodes for a cluster
+Manage Encryption at Rest (EaR) for a cluster
 
 ### Synopsis
 
-Manage nodes for a cluster
+Manage Encryption at Rest (EaR) for a cluster
 
 ```
-ybm cluster node [flags]
+ybm cluster encryption [flags]
 ```
 
 ### Options
 
 ```
   -c, --cluster-name string   [REQUIRED] The name of the cluster.
-  -h, --help                  help for node
+  -h, --help                  help for encryption
 ```
 
 ### Options inherited from parent commands
@@ -32,5 +32,6 @@ ybm cluster node [flags]
 ### SEE ALSO
 
 * [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
-* [ybm cluster node list](ybm_cluster_node_list.md)	 - List nodes for a cluster
+* [ybm cluster encryption list](ybm_cluster_encryption_list.md)	 - List Encryption at Rest (EaR) configurations for a cluster
+* [ybm cluster encryption update](ybm_cluster_encryption_update.md)	 - Update Encryption at Rest (EaR) configurations for a cluster
 

@@ -22,6 +22,7 @@ ybm cluster create [flags]
       --cluster-tier string          [OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.
       --fault-tolerance string       [OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION. Default NONE.
       --database-version string      [OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.
+      --encryption-spec string       [OPTIONAL] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> . If specified, all parameters for that provider are mandatory.
   -h, --help                         help for create
 ```
 
