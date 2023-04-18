@@ -86,7 +86,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	deleteClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be deleted.")
+	deleteClusterCmd.Flags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster to be deleted.")
 	deleteClusterCmd.MarkFlagRequired("cluster-name")
 	deleteClusterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }

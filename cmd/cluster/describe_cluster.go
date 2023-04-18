@@ -69,6 +69,6 @@ var describeClusterCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand(describeClusterCmd)
-	describeClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
+	describeClusterCmd.Flags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster to get details.")
 	describeClusterCmd.MarkFlagRequired("cluster-name")
 }
