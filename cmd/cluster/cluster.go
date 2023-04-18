@@ -46,10 +46,10 @@ func init() {
 	readreplica.ReadReplicaCmd.MarkPersistentFlagRequired("cluster-name")
 
 	ClusterCmd.AddCommand(node.NodeCmd)
-	node.NodeCmd.PersistentFlags().StringVarP(&network.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	node.NodeCmd.PersistentFlags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	node.NodeCmd.MarkPersistentFlagRequired("cluster-name")
 
 	ClusterCmd.AddCommand(encryption.EncryptionCmd)
-	encryption.EncryptionCmd.PersistentFlags().StringVarP(&network.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	encryption.EncryptionCmd.PersistentFlags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	encryption.EncryptionCmd.MarkPersistentFlagRequired("cluster-name")
 }
