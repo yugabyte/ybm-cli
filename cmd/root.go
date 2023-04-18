@@ -18,6 +18,7 @@ package cmd
 import (
 	"os"
 	"strings"
+	"time"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/sirupsen/logrus"
@@ -79,6 +80,7 @@ func setDefaults() {
 	viper.SetDefault("debug", false)
 	viper.SetDefault("no-color", false)
 	viper.SetDefault("wait", false)
+	viper.SetDefault("timeout", time.Duration(7*24*time.Hour))
 	viper.SetDefault("lastVersionAvailable", "v0.0.0")
 	viper.SetDefault("lastCheckedTime", 0)
 }
@@ -97,6 +99,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("debug", false, "Use debug mode, same as --logLevel debug")
 	rootCmd.PersistentFlags().Bool("no-color", false, "Disable colors in output , default to false")
 	rootCmd.PersistentFlags().Bool("wait", false, "Wait until the task is completed, otherwise it will exit immediately, default to false")
+	rootCmd.PersistentFlags().Duration("timeout", 7*24*time.Hour, "Wait command timeout, example: 5m, 1h.")
 
 	//Bind peristents flags to viper
 	viper.BindPFlag("apiKey", rootCmd.PersistentFlags().Lookup("apiKey"))
@@ -105,6 +108,7 @@ func init() {
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("no-color", rootCmd.PersistentFlags().Lookup("no-color"))
 	viper.BindPFlag("wait", rootCmd.PersistentFlags().Lookup("wait"))
+	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
 
 	// Make host configurable only if the CONFIGURE_URL feature flag is set to true
 	if util.IsFeatureFlagEnabled(util.CONFIGURE_URL) {

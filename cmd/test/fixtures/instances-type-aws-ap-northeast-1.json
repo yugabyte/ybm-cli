@@ -1,0 +1,62 @@
+{
+    "data": {
+        "ap-northeast-1": [
+            {
+                "memory_mb": 8192,
+                "num_cores": 2,
+                "included_disk_size_gb": 100,
+                "num_azs": 3,
+                "is_enabled": true
+            },
+            {
+                "memory_mb": 16384,
+                "num_cores": 4,
+                "included_disk_size_gb": 200,
+                "num_azs": 3,
+                "is_enabled": true
+            },
+            {
+                "memory_mb": 32768,
+                "num_cores": 8,
+                "included_disk_size_gb": 400,
+                "num_azs": 3,
+                "is_enabled": true
+            },
+            {
+                "memory_mb": 65536,
+                "num_cores": 16,
+                "included_disk_size_gb": 800,
+                "num_azs": 3,
+                "is_enabled": true
+            },
+            {
+                "memory_mb": 131072,
+                "num_cores": 32,
+                "included_disk_size_gb": 1600,
+                "num_azs": 3,
+                "is_enabled": false
+            },
+            {
+                "memory_mb": 196608,
+                "num_cores": 48,
+                "included_disk_size_gb": 2400,
+                "num_azs": 3,
+                "is_enabled": false
+            },
+            {
+                "memory_mb": 262144,
+                "num_cores": 64,
+                "included_disk_size_gb": 3200,
+                "num_azs": 3,
+                "is_enabled": false
+            },
+            {
+                "memory_mb": 393216,
+                "num_cores": 96,
+                "included_disk_size_gb": 4800,
+                "num_azs": 3,
+                "is_enabled": false
+            }
+        ]
+    }
+}
