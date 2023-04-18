@@ -119,5 +119,5 @@ var updateCmk = &cobra.Command{
 func init() {
 	EncryptionCmd.AddCommand(listCmk)
 	EncryptionCmd.AddCommand(updateCmk)
-	updateCmk.Flags().String("encryption-spec", "", "[REQUIRED] The customer managed key spec for the cluster. Please provide key value pairs provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>. If specified, all parameters for that provider are mandatory.")
+	updateCmk.Flags().String("encryption-spec", "", "[REQUIRED] The customer managed key spec for the cluster. Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>. If specified, all parameters for that provider are mandatory.")
 }

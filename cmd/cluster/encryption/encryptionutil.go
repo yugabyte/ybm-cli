@@ -42,7 +42,7 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 			key := kvp[0]
 			val := kvp[1]
 			switch key {
-			case "provider":
+			case "cloud-provider":
 				if len(strings.TrimSpace(val)) != 0 {
 					cmkProvider = val
 				}
@@ -68,8 +68,8 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 		// The password/secret was not provided.
 		if cmkProvider == "AWS" && cmkAwsSecretKey == "" {
 			// We should first check the environment variables.
-			env_var_name := "YBM_AWS_SECRET_KEY"
-			value, exists := os.LookupEnv(env_var_name)
+			envVarName := "YBM_AWS_SECRET_KEY"
+			value, exists := os.LookupEnv(envVarName)
 			if exists {
 				cmkAwsSecretKey = value
 			} else {
