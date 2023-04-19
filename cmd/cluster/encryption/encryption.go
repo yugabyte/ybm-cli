@@ -104,7 +104,7 @@ var updateCmk = &cobra.Command{
 		}
 
 		// Need to copy over the AWS ARNs
-		newCmkSpec.AwsCmkSpec.ArnList = oldCmkSpec.AwsCmkSpec.ArnList
+		newCmkSpec.AwsCmkSpec.Get().ArnList = oldCmkSpec.AwsCmkSpec.Get().ArnList
 
 		resp, r, err = authApi.EditClusterCMKs(clusterId).CMKSpec(*newCmkSpec).Execute()
 		if err != nil {
@@ -119,5 +119,9 @@ var updateCmk = &cobra.Command{
 func init() {
 	EncryptionCmd.AddCommand(listCmk)
 	EncryptionCmd.AddCommand(updateCmk)
-	updateCmk.Flags().String("encryption-spec", "", "[REQUIRED] The customer managed key spec for the cluster. Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>. If specified, all parameters for that provider are mandatory.")
+	updateCmk.Flags().String("encryption-spec", "", `[REQUIRED] The customer managed key spec for the cluster.
+	Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>.
+	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set.
+	If the environment variable is not set, the user will be prompted to enter the value.`)
+
 }

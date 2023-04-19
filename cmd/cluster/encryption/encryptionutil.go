@@ -92,7 +92,7 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 
 		cmkSpec = ybmclient.NewCMKSpec(cmkProvider)
 		if cmkProvider == "AWS" {
-			cmkSpec.AwsCmkSpec = ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList)
+			cmkSpec.AwsCmkSpec.Set(ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList))
 		}
 	}
 

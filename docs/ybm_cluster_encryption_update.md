@@ -13,7 +13,10 @@ ybm cluster encryption update [flags]
 ### Options
 
 ```
-      --encryption-spec string   [REQUIRED] The customer managed key spec for the cluster. Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>. If specified, all parameters for that provider are mandatory.
+      --encryption-spec string   [REQUIRED] The customer managed key spec for the cluster.
+                                 	Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>.
+                                 	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set.
+                                 	If the environment variable is not set, the user will be prompted to enter the value.
   -h, --help                     help for update
 ```
 

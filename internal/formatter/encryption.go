@@ -72,12 +72,12 @@ func (c *CMKContext) Provider() string {
 
 func (c *CMKContext) KeyAlias() string {
 	//TODO: fix this with extracting GCP values when we support that
-	return c.c.AwsCmkSpec.GetAliasName()
+	return c.c.AwsCmkSpec.Get().GetAliasName()
 }
 
 func (c *CMKContext) SecurityPrincipals() string {
 	// TODO: fix this to pick up GCP later
-	return strings.Join(c.c.AwsCmkSpec.GetArnList(), ", ")
+	return strings.Join(c.c.AwsCmkSpec.Get().GetArnList(), ", ")
 }
 
 func (c *CMKContext) MarshalJSON() ([]byte, error) {
