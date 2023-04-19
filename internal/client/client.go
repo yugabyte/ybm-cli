@@ -597,6 +597,14 @@ func (a *AuthApiClient) ListClusterNetworkAllowLists(clusterId string) ybmclient
 	return a.ApiClient.ClusterApi.ListClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) ListClusterCMKs(clusterId string) ybmclient.ApiGetClusterCMKRequest {
+	return a.ApiClient.ClusterApi.GetClusterCMK(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) EditClusterCMKs(clusterId string) ybmclient.ApiEditClusterCMKRequest {
+	return a.ApiClient.ClusterApi.EditClusterCMK(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
 	return a.ApiClient.BackupApi.ListBackups(a.ctx, a.AccountID, a.ProjectID)
 }

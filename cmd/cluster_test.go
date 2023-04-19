@@ -42,6 +42,7 @@ var _ = Describe("Cluster", func() {
 		responseError            openapi.ApiError
 		responseCluster          openapi.ClusterData
 		responseNodes            openapi.ClusterNodesResponse
+		responseCMK              openapi.CMKResponse
 	)
 
 	BeforeEach(func() {
@@ -221,6 +222,8 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1   
 				Expect(err).ToNot(HaveOccurred())
 				err = loadJson("./test/fixtures/nodes.json", &responseNodes)
 				Expect(err).ToNot(HaveOccurred())
+				err = loadJson("./test/fixtures/cmk.json", &responseCMK)
+				Expect(err).ToNot(HaveOccurred())
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/allow-lists"),
@@ -229,6 +232,10 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1   
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/nodes"),
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNodes),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/cmks"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCMK),
 					),
 				)
 				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")
@@ -257,6 +264,11 @@ us-west-2   PUBLIC          ACTIVE    us-west-2.a49ee751-6c5d-490f-8d38-347cefc9
 Network AllowList
 Name              Description       Allow List
 device-ip-gween   device-ip-gween   152.165.26.42/32
+
+
+Encryption at Rest
+Provider   Key Alias                              Security Principals
+AWS        0a80e409-e890-42fc-b209-bafb69931b2c   arn:aws:kms:us-east-1:745846189716:key/db373c8d-1592-4c73-bfa3-420d05922933
 
 
 Nodes

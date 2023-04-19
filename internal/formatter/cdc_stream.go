@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -52,6 +53,7 @@ func CdcStreamWrite(ctx Context, cdcStreams []ybmclient.CdcStreamData) error {
 		for _, cdcStream := range cdcStreams {
 			err := format(&CdcStreamContext{c: cdcStream})
 			if err != nil {
+				logrus.Debugf("Error rendering cdc stream: %v", err)
 				return err
 			}
 		}

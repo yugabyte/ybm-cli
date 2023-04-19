@@ -18,6 +18,7 @@ package formatter
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -49,6 +50,7 @@ func EndpointWrite(ctx Context, endpoints []ybmclient.Endpoint) error {
 		for _, endpoint := range endpoints {
 			err := format(&EndpointContext{e: endpoint})
 			if err != nil {
+				logrus.Debugf("Error rendering endpoint: %v", err)
 				return err
 			}
 		}

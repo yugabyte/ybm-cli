@@ -251,8 +251,8 @@ The following subcomponents are used:
 ## github.com/onsi/gomega
 
 * Name: github.com/onsi/gomega
-* Version: v1.27.5
-* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.5/LICENSE)
+* Version: v1.27.6
+* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.6/LICENSE)
 
 
 ## github.com/pelletier/go-toml/v2

@@ -31,6 +31,8 @@ type FullCluster struct {
 	AllowList []ybmclient.NetworkAllowListData
 	//Nodes of the cluster
 	Nodes []ybmclient.NodeData
+	//CMK of the cluster
+	CMK []ybmclient.CMKSpec
 }
 
 func NewFullCluster(authApi ybmAuthClient.AuthApiClient, clusterData ybmclient.ClusterData) *FullCluster {
@@ -42,7 +44,25 @@ func NewFullCluster(authApi ybmAuthClient.AuthApiClient, clusterData ybmclient.C
 	fc.SetVPCs(authApi)
 	fc.SetAllowLists(authApi)
 	fc.SetNodes(authApi)
+	fc.SetCMK(authApi)
 	return fc
+}
+
+func (f *FullCluster) SetCMK(authApi ybmAuthClient.AuthApiClient) {
+	resp, r, err := authApi.ListClusterCMKs(f.Cluster.Info.Id).Execute()
+	if err != nil {
+		if err.Error() == "409 Conflict" {
+			logrus.Debugf("Failed to get CMK spec because cluster %s is not ready yet", f.Cluster.Info.Id)
+		} else {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+	}
+	if _, ok := resp.GetDataOk(); ok {
+		// Make an array here with a single element.
+		// In the future, we will support CMK per region.
+		f.CMK = append(f.CMK, resp.GetData())
+	}
 }
 
 func (f *FullCluster) SetVPCs(authApi ybmAuthClient.AuthApiClient) {

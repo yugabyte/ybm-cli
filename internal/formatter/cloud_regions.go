@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 
 	emoji "github.com/jayco/go-emoji-flag"
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -51,6 +52,7 @@ func CloudRegionWrite(ctx Context, cloudRegions []ybmclient.RegionListResponseDa
 		for _, cloudRegion := range cloudRegions {
 			err := format(&CloudRegionContext{c: cloudRegion})
 			if err != nil {
+				logrus.Debugf("Error rendering cloud region: %v", err)
 				return err
 			}
 		}

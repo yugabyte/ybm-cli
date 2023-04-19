@@ -18,6 +18,7 @@ package formatter
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -49,6 +50,7 @@ func CdcSinkWrite(ctx Context, cdcSinks []ybmclient.CdcSinkData) error {
 		for _, cdcSink := range cdcSinks {
 			err := format(&CdcSinkContext{c: cdcSink})
 			if err != nil {
+				logrus.Debugf("Error rendering cdc sink: %v", err)
 				return err
 			}
 		}

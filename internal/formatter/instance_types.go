@@ -18,6 +18,7 @@ package formatter
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -52,6 +53,7 @@ func InstanceTypeWrite(ctx Context, instanceTypes []ybmclient.NodeConfigurationR
 		for _, instanceType := range instanceTypes {
 			err := format(&InstanceTypeContext{c: instanceType})
 			if err != nil {
+				logrus.Debugf("Error rendering instance type: %v", err)
 				return err
 			}
 		}

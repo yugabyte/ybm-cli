@@ -1,13 +1,13 @@
-## ybm cluster node list
+## ybm cluster encryption list
 
-List nodes for a cluster
+List Encryption at Rest (EaR) configurations for a cluster
 
 ### Synopsis
 
-List nodes for a cluster
+List Encryption at Rest (EaR) configurations for a cluster
 
 ```
-ybm cluster node list [flags]
+ybm cluster encryption list [flags]
 ```
 
 ### Options
@@ -32,5 +32,5 @@ ybm cluster node list [flags]
 
 ### SEE ALSO
 
-* [ybm cluster node](ybm_cluster_node.md)	 - Manage nodes for a cluster
+* [ybm cluster encryption](ybm_cluster_encryption.md)	 - Manage Encryption at Rest (EaR) for a cluster
 

@@ -18,6 +18,7 @@ package cluster
 import (
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
+	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
@@ -45,4 +46,10 @@ func init() {
 	readreplica.ReadReplicaCmd.MarkPersistentFlagRequired("cluster-name")
 
 	ClusterCmd.AddCommand(node.NodeCmd)
+	node.NodeCmd.PersistentFlags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	node.NodeCmd.MarkPersistentFlagRequired("cluster-name")
+
+	ClusterCmd.AddCommand(encryption.EncryptionCmd)
+	encryption.EncryptionCmd.PersistentFlags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	encryption.EncryptionCmd.MarkPersistentFlagRequired("cluster-name")
 }

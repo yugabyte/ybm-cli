@@ -18,6 +18,7 @@ package formatter
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -50,6 +51,7 @@ func VPCPeeringWrite(ctx Context, VPCPeerings []ybmclient.VpcPeeringData) error 
 		for _, VPCPeering := range VPCPeerings {
 			err := format(&VPCPeeringContext{c: VPCPeering})
 			if err != nil {
+				logrus.Debugf("Error rendering VPC Peering: %v", err)
 				return err
 			}
 		}

@@ -23,6 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -91,6 +92,15 @@ var createClusterCmd = &cobra.Command{
 			}
 		}
 
+		cmkSpec, err := encryption.GetCmkSpecFromCommand(cmd)
+		if err != nil {
+			logrus.Fatalf("Error while getting CMK spec: %s", err)
+		}
+		// Validate cmkSpec.ProviderType is not null/empty
+		if cmkSpec != nil && cmkSpec.ProviderType == "" {
+			logrus.Fatalf("CMK provider cannot be empty")
+		}
+
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
@@ -101,6 +111,11 @@ var createClusterCmd = &cobra.Command{
 		dbCredentials.Ysql = *ybmclient.NewDBCredentials(username, password)
 
 		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec, *dbCredentials)
+
+		if cmkSpec != nil {
+			logrus.Debug("Setting up CMK spec for cluster creation")
+			createClusterRequest.SecurityCmkSpec = cmkSpec
+		}
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
@@ -165,5 +180,9 @@ func init() {
 	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.")
 	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION. Default NONE.")
 	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.")
+	createClusterCmd.Flags().String("encryption-spec", "", `[OPTIONAL] The customer managed key spec for the cluster.
+	Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> .
+	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set. If the environment variable is not set, the user will be prompted to enter the value.
+	If specified, all parameters for that provider are mandatory.`)
 
 }

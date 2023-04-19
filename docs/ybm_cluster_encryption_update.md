@@ -1,19 +1,23 @@
-## ybm cluster node list
+## ybm cluster encryption update
 
-List nodes for a cluster
+Update Encryption at Rest (EaR) configurations for a cluster
 
 ### Synopsis
 
-List nodes for a cluster
+Update Encryption at Rest (EaR) configurations for a cluster
 
 ```
-ybm cluster node list [flags]
+ybm cluster encryption update [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for list
+      --encryption-spec string   [REQUIRED] The customer managed key spec for the cluster.
+                                 	Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>.
+                                 	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set.
+                                 	If the environment variable is not set, the user will be prompted to enter the value.
+  -h, --help                     help for update
 ```
 
 ### Options inherited from parent commands
@@ -32,5 +36,5 @@ ybm cluster node list [flags]
 
 ### SEE ALSO
 
-* [ybm cluster node](ybm_cluster_node.md)	 - Manage nodes for a cluster
+* [ybm cluster encryption](ybm_cluster_encryption.md)	 - Manage Encryption at Rest (EaR) for a cluster
 
