@@ -123,5 +123,5 @@ func init() {
 	Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>.
 	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set.
 	If the environment variable is not set, the user will be prompted to enter the value.`)
-
+	updateCmk.MarkFlagRequired("encryption-spec")
 }
