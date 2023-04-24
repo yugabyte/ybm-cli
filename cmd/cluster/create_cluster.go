@@ -96,10 +96,6 @@ var createClusterCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatalf("Error while getting CMK spec: %s", err)
 		}
-		// Validate cmkSpec.ProviderType is not null/empty
-		if cmkSpec != nil && cmkSpec.ProviderType == "" {
-			logrus.Fatalf("CMK provider cannot be empty")
-		}
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {

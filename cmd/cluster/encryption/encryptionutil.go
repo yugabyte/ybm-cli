@@ -37,7 +37,7 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 		for _, cmkInfo := range strings.Split(cmkString, ",") {
 			kvp := strings.Split(cmkInfo, "=")
 			if len(kvp) != 2 {
-				logrus.Fatalln("Incorrect format in cmk spec")
+				logrus.Fatalln("Incorrect format in cmk spec: configuration not provided as key=value pairs.")
 			}
 			key := kvp[0]
 			val := kvp[1]
@@ -61,8 +61,12 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 			}
 		}
 
+		if cmkProvider == "" {
+			logrus.Fatalln("Incorrect format in cmk spec: please provide a cloud-provider.")
+		}
+
 		if cmkProvider == "AWS" && cmkAwsAccessKey == "" {
-			logrus.Fatalln("Incorrect format in cmk spec")
+			logrus.Fatalln("Incorrect format in cmk spec: AWS provider specified, but no aws-access-key provided.")
 		}
 
 		// The password/secret was not provided.
@@ -74,11 +78,11 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 				cmkAwsSecretKey = value
 			} else {
 				// If not found, prompt the user.
-				fmt.Print("Please provide the AWS Secret Key: ")
+				fmt.Print("Please provide the AWS Secret Key for Encryption at Rest: ")
 
 				data, err := term.ReadPassword(int(os.Stdin.Fd()))
 				if err != nil {
-					logrus.Fatalln("Could not read apiKey: ", err)
+					logrus.Fatalln("Could not read AWS Secret key: ", err)
 				}
 				cmkAwsSecretKey = string(data)
 

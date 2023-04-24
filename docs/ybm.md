@@ -21,7 +21,6 @@ ybm [flags]
       --no-color           Disable colors in output , default to false
   -o, --output string      Select the desired output format (table, json, pretty). Default to table
       --timeout duration   Wait command timeout, example: 5m, 1h. (default 168h0m0s)
-  -t, --toggle             Help message for toggle
       --wait               Wait until the task is completed, otherwise it will exit immediately, default to false
 ```
 
