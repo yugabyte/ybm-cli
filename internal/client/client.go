@@ -101,8 +101,8 @@ func (a *AuthApiClient) ListProjects() ybmclient.ApiListProjectsRequest {
 	return a.ApiClient.ProjectApi.ListProjects(a.ctx, a.AccountID)
 }
 
-func (a *AuthApiClient) GetUser() ybmclient.ApiGetUserRequest {
-	return a.ApiClient.UserApi.GetUser(a.ctx)
+func (a *AuthApiClient) Ping() ybmclient.ApiGetPingRequest {
+	return a.ApiClient.HealthCheckApi.GetPing(a.ctx)
 }
 
 func (a *AuthApiClient) GetAccountID(accountID string) (string, error) {

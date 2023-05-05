@@ -79,13 +79,19 @@ var authCmd = &cobra.Command{
 		}
 
 		authApi, _ := ybmAuthClient.NewAuthApiClientCustomUrlKey(url, apiKey)
-		resp, r, err := authApi.GetUser().Execute()
+		_, r, err := authApi.Ping().Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
+		logrus.Debugf("Ping response without error")
 
-		logrus.Debugf("User data: %v", resp.GetData())
+		_, _, err = authApi.ListAccounts().Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		logrus.Debugf("ListAccounts response without error")
 
 		err = viper.WriteConfig()
 		if err != nil {
