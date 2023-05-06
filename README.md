@@ -9,7 +9,7 @@ A CLI implementation for YB Managed.
 This CLI support 3 possibles configurations: 
 * Passing values as flags 
   ```sh
-  ybm --apiKey AWERDFSSS --host cloud.yugabyte.com cluster get
+  ybm --apiKey AWERDFSSS --host cloud.yugabyte.com cluster list
   ```
 
 * Using a configuration file called `.ybm-cli.yaml` under your `$HOME` directory.
@@ -19,7 +19,7 @@ This CLI support 3 possibles configurations:
   ```sh
   export YBM_APIKEY=AWERDFSSS
   export YBM_HOST=cloud.yugabyte.com
-  ybm cluster get
+  ybm cluster list
   ```
 
 By default, `https` will be added to the host if no scheme are provided if you want to use `http` 

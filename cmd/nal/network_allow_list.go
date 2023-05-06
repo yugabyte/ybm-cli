@@ -41,16 +41,6 @@ var NalCmd = &cobra.Command{
 	},
 }
 
-var getNetworkAllowListCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get network allow list in YugabyteDB Managed",
-	Long:  `Get network allow list in YugabyteDB Managed`,
-	Run: func(cmd *cobra.Command, args []string) {
-		listNetworkAllowListCmd.Run(cmd, args)
-		logrus.Warnln("\nThe command `ybm network-allow-list get` is deprecated. Please use `ybm network-allow-list list` instead.")
-	},
-}
-
 var listNetworkAllowListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List network allow lists in YugabyteDB Managed",
@@ -166,9 +156,6 @@ var deleteNetworkAllowListCmd = &cobra.Command{
 }
 
 func init() {
-	NalCmd.AddCommand(getNetworkAllowListCmd)
-	getNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[OPTIONAL] The name of the Network Allow List.")
-
 	NalCmd.AddCommand(listNetworkAllowListCmd)
 	listNetworkAllowListCmd.Flags().StringVarP(&nalName, "name", "n", "", "[OPTIONAL] The name of the Network Allow List.")
 

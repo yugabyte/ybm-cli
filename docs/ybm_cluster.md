@@ -37,7 +37,6 @@ ybm cluster [flags]
 * [ybm cluster delete](ybm_cluster_delete.md)	 - Delete a cluster
 * [ybm cluster describe](ybm_cluster_describe.md)	 - Describe a cluster
 * [ybm cluster encryption](ybm_cluster_encryption.md)	 - Manage Encryption at Rest (EaR) for a cluster
-* [ybm cluster get](ybm_cluster_get.md)	 - Get clusters
 * [ybm cluster list](ybm_cluster_list.md)	 - List clusters
 * [ybm cluster network](ybm_cluster_network.md)	 - Manage network operations
 * [ybm cluster node](ybm_cluster_node.md)	 - Manage nodes for a cluster

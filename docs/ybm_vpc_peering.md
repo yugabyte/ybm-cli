@@ -34,6 +34,5 @@ ybm vpc peering [flags]
 * [ybm vpc](ybm_vpc.md)	 - Manage VPCs
 * [ybm vpc peering create](ybm_vpc_peering_create.md)	 - Create VPC peering
 * [ybm vpc peering delete](ybm_vpc_peering_delete.md)	 - Delete VPC peering
-* [ybm vpc peering get](ybm_vpc_peering_get.md)	 - Get VPC peerings
 * [ybm vpc peering list](ybm_vpc_peering_list.md)	 - List VPC peerings
 

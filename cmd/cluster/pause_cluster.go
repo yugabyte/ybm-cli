@@ -50,7 +50,6 @@ var pauseClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		clusterData := []ybmclient.ClusterData{resp.GetData()}
-
 		msg := fmt.Sprintf("The cluster %s is being paused", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {

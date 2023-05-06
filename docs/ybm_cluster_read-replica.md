@@ -35,7 +35,6 @@ ybm cluster read-replica [flags]
 * [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
 * [ybm cluster read-replica create](ybm_cluster_read-replica_create.md)	 - Create read replica
 * [ybm cluster read-replica delete](ybm_cluster_read-replica_delete.md)	 - Delete read replica
-* [ybm cluster read-replica get](ybm_cluster_read-replica_get.md)	 - Get read replica
 * [ybm cluster read-replica list](ybm_cluster_read-replica_list.md)	 - List read replicas
 * [ybm cluster read-replica update](ybm_cluster_read-replica_update.md)	 - Edit read replica
 
