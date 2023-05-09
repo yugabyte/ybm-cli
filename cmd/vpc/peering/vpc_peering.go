@@ -47,16 +47,6 @@ func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmcli
 	return ybmclient.VpcPeeringData{}, errors.New("Unable to find VpcPeering " + name)
 }
 
-var getVpcPeeringCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get VPC peerings",
-	Long:  "Get VPC peerings in YugabyteDB Managed",
-	Run: func(cmd *cobra.Command, args []string) {
-		listVpcPeeringCmd.Run(cmd, args)
-		logrus.Warnln("\nThe command `ybm vpc-peering get` is deprecated. Please use `ybm vpc-peering list` instead.")
-	},
-}
-
 var listVpcPeeringCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List VPC peerings",
@@ -281,9 +271,6 @@ var deleteVpcPeeringCmd = &cobra.Command{
 }
 
 func init() {
-	VPCPeeringCmd.AddCommand(getVpcPeeringCmd)
-	getVpcPeeringCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC peering.")
-
 	VPCPeeringCmd.AddCommand(listVpcPeeringCmd)
 	listVpcPeeringCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC peering.")
 

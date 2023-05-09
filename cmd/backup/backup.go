@@ -37,16 +37,6 @@ var BackupCmd = &cobra.Command{
 	},
 }
 
-var getBackupCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get list of existing backups available for a cluster in YugabyteDB Managed",
-	Long:  "Get list of existing backups available for a cluster in YugabyteDB Managed",
-	Run: func(cmd *cobra.Command, args []string) {
-		listBackupCmd.Run(cmd, args)
-		logrus.Warnln("\nThe command `ybm backup get` is deprecated. Please use `ybm backup list` instead.")
-	},
-}
-
 var listBackupCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List existing backups available for a cluster in YugabyteDB Managed",
@@ -229,9 +219,6 @@ var deleteBackupCmd = &cobra.Command{
 }
 
 func init() {
-	BackupCmd.AddCommand(getBackupCmd)
-	getBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
-
 	BackupCmd.AddCommand(listBackupCmd)
 	listBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
 

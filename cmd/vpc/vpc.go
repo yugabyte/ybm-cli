@@ -38,16 +38,6 @@ var VPCCmd = &cobra.Command{
 	},
 }
 
-var getVpcCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get VPC in YugabyteDB Managed",
-	Long:  `Get VPC in YugabyteDB Managed`,
-	Run: func(cmd *cobra.Command, args []string) {
-		listVpcCmd.Run(cmd, args)
-		logrus.Warnln("\nThe command `ybm vpc get` is deprecated. Please use `ybm vpc list` instead.")
-	},
-}
-
 // vpcCmd represents the vpc command
 var listVpcCmd = &cobra.Command{
 	Use:   "list",
@@ -230,9 +220,6 @@ var deleteVpcCmd = &cobra.Command{
 
 func init() {
 	VPCCmd.AddCommand(peering.VPCPeeringCmd)
-
-	VPCCmd.AddCommand(getVpcCmd)
-	getVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
 
 	VPCCmd.AddCommand(listVpcCmd)
 	listVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")

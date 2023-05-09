@@ -34,7 +34,6 @@ ybm backup [flags]
 * [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
 * [ybm backup create](ybm_backup_create.md)	 - Create backup for a cluster in YugabyteDB Managed
 * [ybm backup delete](ybm_backup_delete.md)	 - Delete backup for a cluster in YugabyteDB Managed
-* [ybm backup get](ybm_backup_get.md)	 - Get list of existing backups available for a cluster in YugabyteDB Managed
 * [ybm backup list](ybm_backup_list.md)	 - List existing backups available for a cluster in YugabyteDB Managed
 * [ybm backup restore](ybm_backup_restore.md)	 - Restore backups into a cluster in YugabyteDB Managed
 

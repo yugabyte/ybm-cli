@@ -179,16 +179,6 @@ func printReadReplicaOutput(resp ybmclient.ReadReplicaListResponse) {
 	formatter.ReadReplicaWrite(readReplicaCtx, resp.Data.GetSpec(), resp.Data.Info.GetEndpoints())
 }
 
-var getReadReplicaCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get read replica",
-	Long:  "Get read replica in YugabyteDB Managed",
-	Run: func(cmd *cobra.Command, args []string) {
-		listReadReplicaCmd.Run(cmd, args)
-		logrus.Warnln("\nThe command `ybm cluster read-replica get` is deprecated. Please use `ybm cluster read-replica list` instead.")
-	},
-}
-
 var listReadReplicaCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List read replicas",
@@ -387,8 +377,6 @@ var deleteReadReplicaCmd = &cobra.Command{
 }
 
 func init() {
-	ReadReplicaCmd.AddCommand(getReadReplicaCmd)
-
 	ReadReplicaCmd.AddCommand(listReadReplicaCmd)
 
 	ReadReplicaCmd.AddCommand(createReadReplicaCmd)
