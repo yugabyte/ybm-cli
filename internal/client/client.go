@@ -59,23 +59,28 @@ func GetVersion() string {
 
 // NewAuthClient function is returning a new AuthApiClient Client
 func NewAuthApiClient() (*AuthApiClient, error) {
-	configuration := ybmclient.NewConfiguration()
-	//Configure the client
-
 	url, err := ParseURL(viper.GetString("host"))
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-	configuration.Host = url.Host
-	configuration.Scheme = url.Scheme
-	apiClient := ybmclient.NewAPIClient(configuration)
-	apiKey := viper.GetString("apiKey")
 
+	apiKey := viper.GetString("apiKey")
 	// If the api key is empty, then tell the user to run the auth command.
 	if len(apiKey) == 0 {
 		logrus.Fatalln("No valid API key detected. Please run `ybm auth` to authenticate with YugabyteDB Managed.")
 	}
+
+	return NewAuthApiClientCustomUrlKey(url, apiKey)
+}
+
+func NewAuthApiClientCustomUrlKey(url *url.URL, apiKey string) (*AuthApiClient, error) {
+	configuration := ybmclient.NewConfiguration()
+	//Configure the client
+
+	configuration.Host = url.Host
+	configuration.Scheme = url.Scheme
+	apiClient := ybmclient.NewAPIClient(configuration)
 
 	apiClient.GetConfig().AddDefaultHeader("Authorization", "Bearer "+apiKey)
 	apiClient.GetConfig().UserAgent = "ybm-cli/" + cliVersion
@@ -94,6 +99,10 @@ func (a *AuthApiClient) ListAccounts() ybmclient.ApiListAccountsRequest {
 
 func (a *AuthApiClient) ListProjects() ybmclient.ApiListProjectsRequest {
 	return a.ApiClient.ProjectApi.ListProjects(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) Ping() ybmclient.ApiGetPingRequest {
+	return a.ApiClient.HealthCheckApi.GetPing(a.ctx)
 }
 
 func (a *AuthApiClient) GetAccountID(accountID string) (string, error) {

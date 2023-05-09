@@ -25,6 +25,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"golang.org/x/term"
 )
 
@@ -33,10 +34,25 @@ var authCmd = &cobra.Command{
 	Short: "Authenticate ybm CLI",
 	Long:  "Authenticate the ybm CLI through this command by providing the API Key.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print("Enter API Key: ")
 		var apiKey string
 		var host string
 		var data []byte
+
+		// If the feature flag is enabled, prompt the user for URL
+		if util.IsFeatureFlagEnabled(util.CONFIGURE_URL) {
+			fmt.Print("Enter Host (leave empty for default cloud.yugabyte.com): ")
+			fmt.Scanln(&host)
+			if strings.TrimSpace(host) == "" {
+				host = "cloud.yugabyte.com"
+
+			}
+		} else {
+			host = "cloud.yugabyte.com"
+		}
+		viper.GetViper().Set("host", &host)
+
+		// Now prompt for the API key
+		fmt.Print("Enter API Key: ")
 		data, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			logrus.Fatalln("Could not read apiKey: ", err)
@@ -54,21 +70,29 @@ var authCmd = &cobra.Command{
 		if expired {
 			logrus.Fatalln("ApiKey is expired")
 		}
-
 		viper.GetViper().Set("apikey", &apiKey)
 
-		// If the feature flag is enabled, prompt the user for URL
-		if util.IsFeatureFlagEnabled(util.CONFIGURE_URL) {
-			fmt.Print("Enter Host (leave empty for default cloud.yugabyte.com): ")
-			fmt.Scanln(&host)
-			if strings.TrimSpace(host) == "" {
-				host = "cloud.yugabyte.com"
-
-			}
-		} else {
-			host = "cloud.yugabyte.com"
+		// Before writing the config, validate that the data is correct
+		url, err := ybmAuthClient.ParseURL(host)
+		if err != nil {
+			logrus.Fatal(err)
 		}
-		viper.GetViper().Set("host", &host)
+
+		authApi, _ := ybmAuthClient.NewAuthApiClientCustomUrlKey(url, apiKey)
+		_, r, err := authApi.Ping().Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		logrus.Debugf("Ping response without error")
+
+		_, _, err = authApi.ListAccounts().Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		logrus.Debugf("ListAccounts response without error")
+
 		err = viper.WriteConfig()
 		if err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
