@@ -66,7 +66,7 @@ func CMKWrite(ctx Context, cmkSpec ybmclient.CMKSpec) error {
 	return ctx.Write(NewCMKContext(), render)
 }
 
-func (c *CMKContext) Provider() string {
+func (c *CMKContext) Provider() ybmclient.CMKProviderEnum {
 	return c.c.ProviderType
 }
 

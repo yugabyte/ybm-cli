@@ -110,7 +110,7 @@ var createClusterCmd = &cobra.Command{
 
 		if cmkSpec != nil {
 			logrus.Debug("Setting up CMK spec for cluster creation")
-			createClusterRequest.SecurityCmkSpec = cmkSpec
+			createClusterRequest.SecurityCmkSpec = *ybmclient.NewNullableCMKSpec(cmkSpec)
 		}
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
