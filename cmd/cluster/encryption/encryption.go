@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 var EncryptionCmd = &cobra.Command{
@@ -57,7 +58,7 @@ var listCmk = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		if resp.Data == nil {
+		if resp.Data == (ybmclient.NullableCMKSpec{}) {
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
 
@@ -92,7 +93,7 @@ var updateCmk = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		if resp.Data == nil {
+		if resp.Data == (ybmclient.NullableCMKSpec{}) {
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
 
