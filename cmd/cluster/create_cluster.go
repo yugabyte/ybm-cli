@@ -23,7 +23,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -92,10 +91,10 @@ var createClusterCmd = &cobra.Command{
 			}
 		}
 
-		cmkSpec, err := encryption.GetCmkSpecFromCommand(cmd)
-		if err != nil {
-			logrus.Fatalf("Error while getting CMK spec: %s", err)
-		}
+		// cmkSpec, err := encryption.GetCmkSpecFromCommand(cmd)
+		// if err != nil {
+		// 	logrus.Fatalf("Error while getting CMK spec: %s", err)
+		// }
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
@@ -108,10 +107,17 @@ var createClusterCmd = &cobra.Command{
 
 		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec, *dbCredentials)
 
+<<<<<<< Updated upstream
 		if cmkSpec != nil {
 			logrus.Debug("Setting up CMK spec for cluster creation")
 			createClusterRequest.SecurityCmkSpec = *ybmclient.NewNullableCMKSpec(cmkSpec)
 		}
+=======
+		// if cmkSpec != nil {
+		// 	logrus.Debug("Setting up CMK spec for cluster creation")
+		// 	createClusterRequest.SecurityCmkSpec = cmkSpec
+		// }
+>>>>>>> Stashed changes
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {

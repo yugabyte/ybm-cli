@@ -66,8 +66,13 @@ func CMKWrite(ctx Context, cmkSpec ybmclient.CMKSpec) error {
 	return ctx.Write(NewCMKContext(), render)
 }
 
+<<<<<<< Updated upstream
 func (c *CMKContext) Provider() ybmclient.CMKProviderEnum {
 	return c.c.ProviderType
+=======
+func (c *CMKContext) Provider() string {
+	return "c.c.ProviderType"
+>>>>>>> Stashed changes
 }
 
 func (c *CMKContext) KeyAlias() string {

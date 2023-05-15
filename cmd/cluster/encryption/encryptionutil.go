@@ -94,10 +94,17 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 
 		}
 
+<<<<<<< Updated upstream
 		cmkSpec = ybmclient.NewCMKSpec(ybmclient.CMKProviderEnum(cmkProvider))
 		if cmkProvider == "AWS" {
 			cmkSpec.AwsCmkSpec.Set(ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList))
 		}
+=======
+		// cmkSpec = ybmclient.NewCMKSpec(cmkProvider)
+		// if cmkProvider == "AWS" {
+		// 	cmkSpec.AwsCmkSpec.Set(ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList))
+		// }
+>>>>>>> Stashed changes
 	}
 
 	return cmkSpec, nil

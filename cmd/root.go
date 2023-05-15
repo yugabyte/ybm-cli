@@ -28,7 +28,9 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
+	"github.com/yugabyte/ybm-cli/cmd/permissions"
 	"github.com/yugabyte/ybm-cli/cmd/region"
+	"github.com/yugabyte/ybm-cli/cmd/role"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
 	"github.com/yugabyte/ybm-cli/cmd/tools"
 	"github.com/yugabyte/ybm-cli/cmd/util"
@@ -123,6 +125,8 @@ func init() {
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(signup.SignUpCmd)
 	rootCmd.AddCommand(region.CloudRegionsCmd)
+	rootCmd.AddCommand(permissions.RolePermissionsCmd)
+	rootCmd.AddCommand(role.RoleCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 

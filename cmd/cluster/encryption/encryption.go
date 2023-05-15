@@ -58,9 +58,15 @@ var listCmk = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
+<<<<<<< Updated upstream
 		if resp.Data == (ybmclient.NullableCMKSpec{}) {
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
+=======
+		// if resp.Data == nil {
+		// 	logrus.Fatalf("No Encryption at rest configuration found for this cluster")
+		// }
+>>>>>>> Stashed changes
 
 		cmkCtx := formatter.Context{
 			Output: os.Stdout,
@@ -93,9 +99,15 @@ var updateCmk = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
+<<<<<<< Updated upstream
 		if resp.Data == (ybmclient.NullableCMKSpec{}) {
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
+=======
+		// if resp.Data == nil {
+		// 	logrus.Fatalf("No Encryption at rest configuration found for this cluster")
+		// }
+>>>>>>> Stashed changes
 
 		oldCmkSpec := resp.GetData()
 
