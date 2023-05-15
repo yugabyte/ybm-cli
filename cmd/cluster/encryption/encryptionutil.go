@@ -15,6 +15,7 @@
 package ear
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -25,7 +26,20 @@ import (
 	"golang.org/x/term"
 )
 
+func parseKMSKeyResourceID(resourceID string) (keyRingName string, keyName string, location string, protectionLevel string) {
+	parts := strings.Split(resourceID, "/")
+	if len(parts) != 8 || parts[0] != "projects" || parts[2] != "locations" || parts[4] != "keyRings" || parts[6] != "cryptoKeys" {
+		logrus.Fatalln("Invalid resource ID. Expected format: projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY_NAME")
+	}
+	keyRingName = parts[5]
+	keyName = parts[7]
+	location = parts[3]
+	protectionLevel = parts[1] + "/" + parts[4] + "/" + parts[5] + "/cryptoKeyVersions/1"
+	return keyRingName, keyName, location, protectionLevel
+}
+
 func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
+
 	var cmkSpec *ybmclient.CMKSpec = nil
 	if cmd.Flags().Changed("encryption-spec") {
 		cmkString, _ := cmd.Flags().GetString("encryption-spec")
@@ -33,6 +47,8 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 		cmkAwsSecretKey := ""
 		cmkAwsAccessKey := ""
 		cmkAwsArnList := []string{}
+		cmkGcpResourceId := ""
+		cmkGcpServiceAccountPath := ""
 
 		for _, cmkInfo := range strings.Split(cmkString, ",") {
 			kvp := strings.Split(cmkInfo, "=")
@@ -58,6 +74,14 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 				if len(strings.TrimSpace(val)) != 0 {
 					cmkAwsArnList = append(cmkAwsArnList, val)
 				}
+			case "gcp-resource-id":
+				if len(strings.TrimSpace(val)) != 0 {
+					cmkGcpResourceId = val
+				}
+			case "gcp-service-account-path":
+				if len(strings.TrimSpace(val)) != 0 {
+					cmkGcpServiceAccountPath = val
+				}
 			}
 		}
 
@@ -65,40 +89,64 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 			logrus.Fatalln("Incorrect format in cmk spec: please provide a cloud-provider.")
 		}
 
-		if cmkProvider == "AWS" && cmkAwsAccessKey == "" {
-			logrus.Fatalln("Incorrect format in cmk spec: AWS provider specified, but no aws-access-key provided.")
-		}
+		cmkSpec = ybmclient.NewCMKSpec(ybmclient.CMKProviderEnum(cmkProvider))
 
-		// The password/secret was not provided.
-		if cmkProvider == "AWS" && cmkAwsSecretKey == "" {
-			// We should first check the environment variables.
-			envVarName := "YBM_AWS_SECRET_KEY"
-			value, exists := os.LookupEnv(envVarName)
-			if exists {
-				cmkAwsSecretKey = value
-			} else {
-				// If not found, prompt the user.
-				fmt.Print("Please provide the AWS Secret Key for Encryption at Rest: ")
-
-				data, err := term.ReadPassword(int(os.Stdin.Fd()))
-				if err != nil {
-					logrus.Fatalln("Could not read AWS Secret key: ", err)
-				}
-				cmkAwsSecretKey = string(data)
-
-				// Validate non-empty key
-				if strings.TrimSpace(cmkAwsSecretKey) == "" {
-					logrus.Fatalln("The AWS Secret Key cannot be empty")
-				}
+		switch cmkProvider {
+		case "AWS":
+			if cmkAwsAccessKey == "" {
+				logrus.Fatalln("Incorrect format in cmk spec: AWS provider specified, but no aws-access-key provided.")
 			}
 
-		}
+			// The password/secret was not provided.
+			if cmkAwsSecretKey == "" {
+				// We should first check the environment variables.
+				envVarName := "YBM_AWS_SECRET_KEY"
+				value, exists := os.LookupEnv(envVarName)
+				if exists {
+					cmkAwsSecretKey = value
+				} else {
+					// If not found, prompt the user.
+					fmt.Print("Please provide the AWS Secret Key for Encryption at Rest: ")
 
-		cmkSpec = ybmclient.NewCMKSpec(ybmclient.CMKProviderEnum(cmkProvider))
-		if cmkProvider == "AWS" {
+					data, err := term.ReadPassword(int(os.Stdin.Fd()))
+					if err != nil {
+						logrus.Fatalln("Could not read AWS Secret key: ", err)
+					}
+					cmkAwsSecretKey = string(data)
+
+					// Validate non-empty key
+					if strings.TrimSpace(cmkAwsSecretKey) == "" {
+						logrus.Fatalln("The AWS Secret Key cannot be empty")
+					}
+				}
+			}
 			cmkSpec.AwsCmkSpec.Set(ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList))
+		case "GCP":
+			if cmkGcpResourceId == "" {
+				logrus.Fatalln("Incorrect format in CMK spec: GCP provider specified, but no gcp-resource-id provided")
+			}
+			keyRingName, keyName, location, protectionLevel := parseKMSKeyResourceID(cmkGcpResourceId)
+
+			if cmkGcpServiceAccountPath == "" {
+				logrus.Fatalln("Incorrect format in CMK spec: GCP provider specified, but no gcp-service-account-path provided")
+			}
+			cmkGcpServiceAccount, err := os.ReadFile(cmkGcpServiceAccountPath)
+			if err != nil {
+				logrus.Fatal("Incorrect file path for gcp service account file: ", err)
+			}
+			gcpCmkSpec := ybmclient.NewGCPCMKSpec(keyRingName, keyName, location, protectionLevel)
+
+			var gcpServiceAccount ybmclient.GCPServiceAccount
+			err = json.Unmarshal([]byte(cmkGcpServiceAccount), &gcpServiceAccount)
+
+			if err != nil {
+				logrus.Fatal("Failed to parse GCP service account credentials: invalid JSON format")
+			}
+			gcpCmkSpec.SetGcpServiceAccount(gcpServiceAccount)
+			cmkSpec.SetGcpCmkSpec(*gcpCmkSpec)
+		default:
+			logrus.Fatalln("Incorrect format in CMK spec: invalid cloud-provider")
 		}
 	}
-
 	return cmkSpec, nil
 }
