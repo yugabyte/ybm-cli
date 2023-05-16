@@ -1,0 +1,88 @@
+// Licensed to Yugabyte, Inc. under one or more contributor license
+// agreements. See the NOTICE file distributed with this work for
+// additional information regarding copyright ownership. Yugabyte
+// licenses this file to you under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+package role
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
+)
+
+var RoleCmd = &cobra.Command{
+	Use:   "role",
+	Short: "Manage roles",
+	Long:  "Manage roles",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+var describeRoleCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe a role",
+	Long:  "Describe a role in YugabyteDB Managed",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		roleListRequest := authApi.ListRbacRolesWithPermissions()
+		roleName, _ := cmd.Flags().GetString("role-name")
+		roleListRequest = roleListRequest.DisplayName(roleName)
+
+		resp, r, err := roleListRequest.Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		if len(resp.GetData()) < 1 {
+			fmt.Println("No role found")
+			return
+		}
+
+		if viper.GetString("output") == "table" {
+			fullRoleContext := *formatter.NewFullRoleContext()
+			fullRoleContext.Output = os.Stdout
+			fullRoleContext.Format = formatter.NewFullRoleFormat(viper.GetString("output"))
+			fullRoleContext.SetFullRole(resp.GetData()[0])
+			fullRoleContext.Write()
+			return
+		}
+
+
+		rolesCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewFullRoleFormat(viper.GetString("output")),
+		}
+
+		formatter.SingleRoleWrite(rolesCtx, resp.GetData()[0])
+	},
+}
+
+func init() {
+	RoleCmd.AddCommand(describeRoleCmd)
+	describeRoleCmd.Flags().String("role-name", "", "[REQUIRED] The name of the role to be deleted.")
+	describeRoleCmd.MarkFlagRequired("role-name")
+}
