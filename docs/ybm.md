@@ -32,6 +32,7 @@ ybm [flags]
 * [ybm completion](ybm_completion.md)	 - Generate the autocompletion script for the specified shell
 * [ybm network-allow-list](ybm_network-allow-list.md)	 - Manage Network Allow Lists
 * [ybm region](ybm_region.md)	 - Manage cloud regions
+* [ybm role](ybm_role.md)	 - Manage roles
 * [ybm signup](ybm_signup.md)	 - Open a browser to sign up for YugabyteDB Managed
 * [ybm tools](ybm_tools.md)	 - Tools command
 * [ybm vpc](ybm_vpc.md)	 - Manage VPCs

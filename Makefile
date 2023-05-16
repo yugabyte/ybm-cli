@@ -9,6 +9,7 @@ vet:
 test:
 	go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
 	go get github.com/onsi/gomega/...
+	go mod tidy
 	ginkgo run -r -v
 
 doc:
