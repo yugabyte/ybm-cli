@@ -82,6 +82,7 @@ var updateCmk = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
+
 		clusterId, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
@@ -105,7 +106,9 @@ var updateCmk = &cobra.Command{
 		}
 
 		// Need to copy over the AWS ARNs
-		newCmkSpec.AwsCmkSpec.Get().ArnList = oldCmkSpec.AwsCmkSpec.Get().ArnList
+		if newCmkSpec.GetProviderType() == "AWS" {
+			newCmkSpec.AwsCmkSpec.Get().ArnList = oldCmkSpec.AwsCmkSpec.Get().ArnList
+		}
 
 		resp, r, err = authApi.EditClusterCMKs(clusterId).CMKSpec(*newCmkSpec).Execute()
 		if err != nil {
@@ -121,8 +124,11 @@ func init() {
 	EncryptionCmd.AddCommand(listCmk)
 	EncryptionCmd.AddCommand(updateCmk)
 	updateCmk.Flags().String("encryption-spec", "", `[REQUIRED] The customer managed key spec for the cluster.
-	Please provide key value pairs cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>.
-	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set.
-	If the environment variable is not set, the user will be prompted to enter the value.`)
+	Please provide key value pairs as follows:
+	For AWS: 
+	cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> .
+	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set. If the environment variable is not set, the user will be prompted to enter the value.
+	For GCP:
+	cloud-provider=GCP,gcp-resource-id=<resource-id>,gcp-service-account-path=<service-account-path>.`)
 	updateCmk.MarkFlagRequired("encryption-spec")
 }
