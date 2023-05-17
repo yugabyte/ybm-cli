@@ -783,6 +783,88 @@ func (a *AuthApiClient) ListSystemRbacRoles() ybmclient.ApiListRbacRolesRequest 
 	return a.ApiClient.RoleApi.ListRbacRoles(a.ctx, a.AccountID).RoleTypes("SYSTEM").Limit(100)
 }
 
+func (a *AuthApiClient) ListRbacRolesWithPermissions() ybmclient.ApiListRbacRolesRequest {
+	return a.ApiClient.RoleApi.ListRbacRoles(a.ctx, a.AccountID).RoleTypes("ALL").Limit(100).IncludePermissions(true)
+}
+
+func (a *AuthApiClient) ListSystemRbacRolesWithPermissions() ybmclient.ApiListRbacRolesRequest {
+	return a.ApiClient.RoleApi.ListRbacRoles(a.ctx, a.AccountID).RoleTypes("SYSTEM").Limit(100).IncludePermissions(true)
+}
+
+func (a *AuthApiClient) CreateRoleSpec(cmd *cobra.Command, name string, permissionsMap map[string][]string) (*ybmclient.RoleSpec, error) {
+
+	rolePermissions := []ybmclient.ResourcePermissionInfo{}
+	for resource, ops := range permissionsMap {
+		operationGroups := []ybmclient.ResourceOperationGroup{}
+		for _, op := range ops {
+			operationGroups = append(operationGroups, *ybmclient.NewResourceOperationGroup(ybmclient.ResourceOperationGroupEnum(op)))
+
+		}
+		rolePermissions = append(rolePermissions, *ybmclient.NewResourcePermissionInfo(ybmclient.ResourceTypeEnum(resource), operationGroups))
+	}
+
+	roleSpec := ybmclient.NewRoleSpec(
+		name,
+		rolePermissions)
+
+	if cmd.Flags().Changed("description") {
+		description, _ := cmd.Flags().GetString("description")
+		roleSpec.SetDescription(description)
+	}
+
+	return roleSpec, nil
+}
+
+func (a *AuthApiClient) CreateRole() ybmclient.ApiCreateRoleRequest {
+	return a.ApiClient.RoleApi.CreateRole(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) UpdateRole(roleId string) ybmclient.ApiUpdateRoleRequest {
+	return a.ApiClient.RoleApi.UpdateRole(a.ctx, a.AccountID, roleId)
+}
+
+func (a *AuthApiClient) DeleteRole(roleId string) ybmclient.ApiDeleteRoleRequest {
+	return a.ApiClient.RoleApi.DeleteRole(a.ctx, a.AccountID, roleId)
+}
+
+func (a *AuthApiClient) GetRoleIdByName(roleName string) (string, error) {
+	roleData, err := a.GetRoleByName(roleName)
+	if err == nil {
+		return roleData.Info.GetId(), nil
+	}
+
+	return "", fmt.Errorf("Could not get role data for role name: %s", roleName)
+}
+
+func (a *AuthApiClient) GetRoleByName(roleName string) (ybmclient.RoleData, error) {
+	roleResp, resp, err := a.ListRbacRoles().DisplayName(roleName).Execute()
+	if err != nil {
+		if strings.TrimSpace(GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError())  {
+			roleRespTwo, respTwo, errTwo := a.ListSystemRbacRoles().DisplayName(roleName).Execute()
+
+			if errTwo != nil {
+				b, _ := httputil.DumpResponse(respTwo, true)
+				logrus.Debug(string(b))
+				return ybmclient.RoleData{}, errTwo
+			} else {
+				roleResp = roleRespTwo
+			}
+		} else {
+			c, _ := httputil.DumpResponse(resp, true)
+			logrus.Debug(string(c))
+			return ybmclient.RoleData{}, err
+		}
+	}
+
+	roleData := roleResp.GetData()
+
+	if len(roleData) != 0 {
+		return roleData[0], nil
+	} 
+	
+	return ybmclient.RoleData{}, fmt.Errorf("Could not get role data for role name: %s", roleName)
+}
+
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 
 	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {

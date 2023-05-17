@@ -1,19 +1,20 @@
-## ybm role
+## ybm role describe
 
-Manage roles
+Describe a role
 
 ### Synopsis
 
-Manage roles
+Describe a role in YugabyteDB Managed
 
 ```
-ybm role [flags]
+ybm role describe [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for role
+  -h, --help               help for describe
+      --role-name string   [REQUIRED] The name of the role.
 ```
 
 ### Options inherited from parent commands
@@ -31,10 +32,5 @@ ybm role [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm role create](ybm_role_create.md)	 - Create a custom role
-* [ybm role delete](ybm_role_delete.md)	 - Delete a custom role in YugabyteDB Managed
-* [ybm role describe](ybm_role_describe.md)	 - Describe a role
-* [ybm role list](ybm_role_list.md)	 - List roles
-* [ybm role update](ybm_role_update.md)	 - Update a custom role
+* [ybm role](ybm_role.md)	 - Manage roles
 

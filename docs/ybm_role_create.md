@@ -1,19 +1,22 @@
-## ybm role
+## ybm role create
 
-Manage roles
+Create a custom role
 
 ### Synopsis
 
-Manage roles
+Create a custom role in YB Managed
 
 ```
-ybm role [flags]
+ybm role create [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for role
+      --description string        [OPTIONAL] Description of the role to be created.
+  -h, --help                      help for create
+      --permissions stringArray   [REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.
+      --role-name string          [REQUIRED] Name of the role to be created.
 ```
 
 ### Options inherited from parent commands
@@ -31,10 +34,5 @@ ybm role [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm role create](ybm_role_create.md)	 - Create a custom role
-* [ybm role delete](ybm_role_delete.md)	 - Delete a custom role in YugabyteDB Managed
-* [ybm role describe](ybm_role_describe.md)	 - Describe a role
-* [ybm role list](ybm_role_list.md)	 - List roles
-* [ybm role update](ybm_role_update.md)	 - Update a custom role
+* [ybm role](ybm_role.md)	 - Manage roles
 

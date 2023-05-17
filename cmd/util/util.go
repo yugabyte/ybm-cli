@@ -28,6 +28,8 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
+const customRoleFeatureFlagDisabled string = "Requested API not found"
+
 func FindNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (ybmclient.NetworkAllowListData, error) {
 	for _, allowList := range nals {
 		if allowList.Spec.Name == name {
@@ -131,4 +133,8 @@ func ConfirmCommand(message string, bypass bool) error {
 		return errAborted
 	}
 	return nil
+}
+
+func GetCustomRoleFeatureFlagDisabledError() string {
+	return customRoleFeatureFlagDisabled
 }
