@@ -58,7 +58,7 @@ var listRolesCmd = &cobra.Command{
 		resp, r, err := roleListRequest.Execute()
 
 		if err != nil {
-			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError())  {
+			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
 				systemRoleListRequest := authApi.ListSystemRbacRoles()
 				if roleName != "" {
 					systemRoleListRequest = systemRoleListRequest.DisplayName(roleName)
@@ -107,7 +107,7 @@ var describeRoleCmd = &cobra.Command{
 		resp, r, err := roleListRequest.Execute()
 
 		if err != nil {
-			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError())  {
+			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
 				systemRoleListRequest := authApi.ListSystemRbacRolesWithPermissions()
 				systemRoleListRequest = systemRoleListRequest.DisplayName(roleName)
 				respTwo, rTwo, errTwo := systemRoleListRequest.Execute()
@@ -124,7 +124,6 @@ var describeRoleCmd = &cobra.Command{
 			}
 		}
 
-
 		if len(resp.GetData()) < 1 {
 			fmt.Println("No role found")
 			return
@@ -138,7 +137,6 @@ var describeRoleCmd = &cobra.Command{
 			fullRoleContext.Write()
 			return
 		}
-
 
 		rolesCtx := formatter.Context{
 			Output: os.Stdout,
@@ -174,31 +172,19 @@ var createRoleCmd = &cobra.Command{
 			}
 
 			kvpOne := strings.Split(permission[0], "=")
-				if len(kvpOne) != 2 {
-					logrus.Fatalln("Incorrect format in permissions fields")
+			if len(kvpOne) != 2 {
+				logrus.Fatalln("Incorrect format in permissions fields")
 			}
 
 			kvpTwo := strings.Split(permission[1], "=")
-				if len(kvpTwo) != 2 {
-					logrus.Fatalln("Incorrect format in permissions fields")
+			if len(kvpTwo) != 2 {
+				logrus.Fatalln("Incorrect format in permissions fields")
 			}
 
-			if(kvpOne[0]=="resource-type" && kvpTwo[0]=="operation-group"){
+			if kvpOne[0] == "resource-type" && kvpTwo[0] == "operation-group" {
 				CreatePermissionsMap(kvpOne[1], kvpTwo[1], permissionsMap)
-				// if ops, ok := permissionsMap[kvpOne[1]]; ok {
-				// 	ops = append(ops, kvpTwo[1])
-				// 	permissionsMap[kvpOne[1]] = ops
-				// } else {
-				// 	permissionsMap[kvpOne[1]] = []string{kvpTwo[1]}
-				// }
-			} else if (kvpTwo[0]=="resource-type" && kvpOne[0]=="operation-group") {
+			} else if kvpTwo[0] == "resource-type" && kvpOne[0] == "operation-group" {
 				CreatePermissionsMap(kvpTwo[1], kvpOne[1], permissionsMap)
-				// if ops, ok := permissionsMap[kvpTwo[1]]; ok {
-				// 	ops = append(ops, kvpOne[1])
-				// 	permissionsMap[kvpTwo[1]] = ops
-				// } else {
-				// 	permissionsMap[kvpTwo[1]] = []string{kvpOne[1]}
-				// }
 			} else {
 				logrus.Fatalln("Resource type and Operation group must be specified in permissions")
 			}
@@ -270,31 +256,19 @@ var updateRoleCmd = &cobra.Command{
 			}
 
 			kvpOne := strings.Split(permission[0], "=")
-				if len(kvpOne) != 2 {
-					logrus.Fatalln("Incorrect format in permissions fields")
+			if len(kvpOne) != 2 {
+				logrus.Fatalln("Incorrect format in permissions fields")
 			}
 
 			kvpTwo := strings.Split(permission[1], "=")
-				if len(kvpTwo) != 2 {
-					logrus.Fatalln("Incorrect format in permissions fields")
+			if len(kvpTwo) != 2 {
+				logrus.Fatalln("Incorrect format in permissions fields")
 			}
 
-			if(kvpOne[0]=="resource-type" && kvpTwo[0]=="operation-group"){
+			if kvpOne[0] == "resource-type" && kvpTwo[0] == "operation-group" {
 				CreatePermissionsMap(kvpOne[1], kvpTwo[1], permissionsMap)
-				// if ops, ok := permissionsMap[kvpOne[1]]; ok {
-				// 	ops = append(ops, kvpTwo[1])
-				// 	permissionsMap[kvpOne[1]] = ops
-				// } else {
-				// 	permissionsMap[kvpOne[1]] = []string{kvpTwo[1]}
-				// }
-			} else if (kvpTwo[0]=="resource-type" && kvpOne[0]=="operation-group") {
+			} else if kvpTwo[0] == "resource-type" && kvpOne[0] == "operation-group" {
 				CreatePermissionsMap(kvpTwo[1], kvpOne[1], permissionsMap)
-				// if ops, ok := permissionsMap[kvpTwo[1]]; ok {
-				// 	ops = append(ops, kvpOne[1])
-				// 	permissionsMap[kvpTwo[1]] = ops
-				// } else {
-				// 	permissionsMap[kvpTwo[1]] = []string{kvpOne[1]}
-				// }
 			} else {
 				logrus.Fatalln("Resource type and Operation group must be specified in permissions")
 			}
@@ -333,7 +307,6 @@ var updateRoleCmd = &cobra.Command{
 		formatter.SingleRoleWrite(rolesCtx, updatedResp.GetData())
 	},
 }
-
 
 var deleteRoleCmd = &cobra.Command{
 	Use:   "delete",

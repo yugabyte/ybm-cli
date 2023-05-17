@@ -16,8 +16,8 @@
 package formatter
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -25,16 +25,16 @@ import (
 
 const (
 	defaultResourcePermissionListing = "table {{.ResourceName}}\t{{.OperationDescription}}\t{{.ResourceType}}\t{{.OperationType}}"
-	resourceNameHeader         		= "Resource Name"
-	resourceTypeHeader         		= "Resource Type"
-	operationDescriptionHeader 		= "Operation Description"
-	operationTypeHeader        		= "Operation Group Type"
+	resourceNameHeader               = "Resource Name"
+	resourceTypeHeader               = "Resource Type"
+	operationDescriptionHeader       = "Operation Description"
+	operationTypeHeader              = "Operation Group Type"
 )
 
 type ResourcePermissionContext struct {
 	HeaderContext
 	Context
-	r ybmclient.ResourcePermissionsData
+	r        ybmclient.ResourcePermissionsData
 	opsIndex int
 }
 
@@ -52,7 +52,7 @@ func NewResourcePermissionFormat(source string) Format {
 func ResourcePermissionWrite(ctx Context, resourcePermissions []ybmclient.ResourcePermissionsData) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, resourcePermission := range resourcePermissions {
-			for i := 0 ; i < len(resourcePermission.Info.OperationGroups); i++ { 
+			for i := 0; i < len(resourcePermission.Info.OperationGroups); i++ {
 				err := format(&ResourcePermissionContext{r: resourcePermission, opsIndex: i})
 				if err != nil {
 					logrus.Debugf("Error rendering available resource permissions: %v", err)
@@ -69,10 +69,10 @@ func ResourcePermissionWrite(ctx Context, resourcePermissions []ybmclient.Resour
 func NewResourcePermissionContext() *ResourcePermissionContext {
 	resourcePermissionCtx := ResourcePermissionContext{}
 	resourcePermissionCtx.Header = SubHeaderContext{
-		"ResourceName":  resourceNameHeader,
-		"ResourceType":  resourceTypeHeader,
-		"OperationDescription":  operationDescriptionHeader,
-		"OperationType":  operationTypeHeader,
+		"ResourceName":         resourceNameHeader,
+		"ResourceType":         resourceTypeHeader,
+		"OperationDescription": operationDescriptionHeader,
+		"OperationType":        operationTypeHeader,
 	}
 	return &resourcePermissionCtx
 }
@@ -92,7 +92,6 @@ func (r *ResourcePermissionContext) OperationDescription() string {
 func (r *ResourcePermissionContext) OperationType() string {
 	return fmt.Sprintf("%s", r.r.Info.OperationGroups[r.opsIndex].GetOperationGroup())
 }
-
 
 func (r *ResourcePermissionContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.r)

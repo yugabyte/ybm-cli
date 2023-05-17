@@ -839,7 +839,7 @@ func (a *AuthApiClient) GetRoleIdByName(roleName string) (string, error) {
 func (a *AuthApiClient) GetRoleByName(roleName string) (ybmclient.RoleData, error) {
 	roleResp, resp, err := a.ListRbacRoles().DisplayName(roleName).Execute()
 	if err != nil {
-		if strings.TrimSpace(GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError())  {
+		if strings.TrimSpace(GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
 			roleRespTwo, respTwo, errTwo := a.ListSystemRbacRoles().DisplayName(roleName).Execute()
 
 			if errTwo != nil {
@@ -860,8 +860,8 @@ func (a *AuthApiClient) GetRoleByName(roleName string) (ybmclient.RoleData, erro
 
 	if len(roleData) != 0 {
 		return roleData[0], nil
-	} 
-	
+	}
+
 	return ybmclient.RoleData{}, fmt.Errorf("Could not get role data for role name: %s", roleName)
 }
 

@@ -26,10 +26,10 @@ import (
 )
 
 const (
-	defaultRoleListing	= "table {{.Name}}\t{{.Description}}\t{{.IsUserDefined}}\t{{.UsersCount}}\t{{.ApiKeysCount}}"
+	defaultRoleListing  = "table {{.Name}}\t{{.Description}}\t{{.IsUserDefined}}\t{{.UsersCount}}\t{{.ApiKeysCount}}"
 	isUserDefinedHeader = "User Defined"
-	usersCountHeader 	= "Users Count"
-	apiKeysCountHeader 	= "API Keys Count"
+	usersCountHeader    = "Users Count"
+	apiKeysCountHeader  = "API Keys Count"
 )
 
 type RoleContext struct {
@@ -42,12 +42,12 @@ type RoleContext struct {
 func NewRoleContext() *RoleContext {
 	roleCtx := RoleContext{}
 	roleCtx.Header = SubHeaderContext{
-		"Name":             nameHeader,
-		"ID":				"ID",
-		"Description":      descriptionHeader,
-		"IsUserDefined":    isUserDefinedHeader,
-		"UsersCount": 		usersCountHeader,
-		"ApiKeysCount":		apiKeysCountHeader,
+		"Name":          nameHeader,
+		"ID":            "ID",
+		"Description":   descriptionHeader,
+		"IsUserDefined": isUserDefinedHeader,
+		"UsersCount":    usersCountHeader,
+		"ApiKeysCount":  apiKeysCountHeader,
 	}
 	return &roleCtx
 }
@@ -76,7 +76,6 @@ func RoleWrite(ctx Context, roles []ybmclient.RoleData) error {
 	}
 	return ctx.Write(NewRoleContext(), render)
 }
-
 
 func (r *RoleContext) ID() string {
 	return r.r.Info.Id

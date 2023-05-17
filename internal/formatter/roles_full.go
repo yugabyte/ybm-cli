@@ -27,18 +27,17 @@ import (
 )
 
 const (
-	defaultFullRoleListing 			= "table {{.Name}}\t{{.ID}}\t{{.Description}}\t{{.IsUserDefined}}"
-	defaultRoleUsersListing 		= "table {{.UserEmail}}\t{{.UserFirstName}}\t{{.UserLastName}}\t{{.UserState}}"
-	userEmailHeader 				= "Email"
-	userFirstNameHeader 			= "First Name"
-	userLastNameHeader 				= "Last Name"
-	userStateHeader 				= "User State"
-	defaultRoleApiKeysListing 		= "table {{.ApiKeyName}}\t{{.ApiKeyIssuer}}\t{{.ApiKeyStatus}}"
-	apiKeyNameHeader 				= "API Key Name"
-	apiKeyIssuerHeader 				= "Issuer"
-	apiKeyStatusHeader  			= "Status"
+	defaultFullRoleListing    = "table {{.Name}}\t{{.ID}}\t{{.Description}}\t{{.IsUserDefined}}"
+	defaultRoleUsersListing   = "table {{.UserEmail}}\t{{.UserFirstName}}\t{{.UserLastName}}\t{{.UserState}}"
+	userEmailHeader           = "Email"
+	userFirstNameHeader       = "First Name"
+	userLastNameHeader        = "Last Name"
+	userStateHeader           = "User State"
+	defaultRoleApiKeysListing = "table {{.ApiKeyName}}\t{{.ApiKeyIssuer}}\t{{.ApiKeyStatus}}"
+	apiKeyNameHeader          = "API Key Name"
+	apiKeyIssuerHeader        = "Issuer"
+	apiKeyStatusHeader        = "Status"
 )
-
 
 type FullRoleContext struct {
 	HeaderContext
@@ -50,10 +49,10 @@ type FullRoleContext struct {
 func NewFullRoleContext() *FullRoleContext {
 	roleCtx := FullRoleContext{}
 	roleCtx.Header = SubHeaderContext{
-	"Name":             nameHeader,
-	"ID":				"ID",
-	"Description":      descriptionHeader,
-	"IsUserDefined":    isUserDefinedHeader,}
+		"Name":          nameHeader,
+		"ID":            "ID",
+		"Description":   descriptionHeader,
+		"IsUserDefined": isUserDefinedHeader}
 	return &roleCtx
 }
 
@@ -81,10 +80,9 @@ func SingleRoleWrite(ctx Context, role ybmclient.RoleData) error {
 }
 
 func (r *FullRoleContext) SetFullRole(roleData ybmclient.RoleData) {
-	fr:= role.NewFullRole(roleData)
+	fr := role.NewFullRole(roleData)
 	r.fullRole = fr
 }
-
 
 func (fr *FullRoleContext) startSubsection(format string) (*template.Template, error) {
 	fr.buffer = bytes.NewBufferString("")
@@ -96,16 +94,16 @@ func (fr *FullRoleContext) startSubsection(format string) (*template.Template, e
 }
 
 type fullRoleContext struct {
-	Role         	*RoleContext
-	PermissionsContext      []*rolePermissionContext
-	EffectivePermissionsContext      []*rolePermissionContext
-	RoleUsersContext			[]*roleUsersContext
-	RoleApiKeysContext			[]*roleApiKeysContext
+	Role                        *RoleContext
+	PermissionsContext          []*rolePermissionContext
+	EffectivePermissionsContext []*rolePermissionContext
+	RoleUsersContext            []*roleUsersContext
+	RoleApiKeysContext          []*roleApiKeysContext
 }
 
 type rolePermissionContext struct {
 	HeaderContext
-	r ybmclient.ResourcePermissionInfo
+	r        ybmclient.ResourcePermissionInfo
 	opsIndex int
 }
 
@@ -122,10 +120,10 @@ func NewRolePermissionFormat(source string) Format {
 func NewRolePermissionContext() *rolePermissionContext {
 	rpCtx := rolePermissionContext{}
 	rpCtx.Header = SubHeaderContext{
-		"ResourceName":  resourceNameHeader,
-		"ResourceType":  resourceTypeHeader,
-		"OperationDescription":  operationDescriptionHeader,
-		"OperationType":  operationTypeHeader,
+		"ResourceName":         resourceNameHeader,
+		"ResourceType":         resourceTypeHeader,
+		"OperationDescription": operationDescriptionHeader,
+		"OperationType":        operationTypeHeader,
 	}
 	return &rpCtx
 }
@@ -146,7 +144,6 @@ func (r *rolePermissionContext) OperationType() string {
 	return fmt.Sprintf("%s", r.r.OperationGroups[r.opsIndex].GetOperationGroup())
 }
 
-
 func (r *rolePermissionContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.r)
 }
@@ -159,10 +156,10 @@ type roleUsersContext struct {
 func NewRoleUsersContext() *roleUsersContext {
 	roleUsersCtx := roleUsersContext{}
 	roleUsersCtx.Header = SubHeaderContext{
-		"UserEmail":  userEmailHeader,
-		"UserFirstName":  userFirstNameHeader,
+		"UserEmail":     userEmailHeader,
+		"UserFirstName": userFirstNameHeader,
 		"UserLastName":  userLastNameHeader,
-		"UserState":  userStateHeader,
+		"UserState":     userStateHeader,
 	}
 	return &roleUsersCtx
 }
@@ -183,7 +180,6 @@ func (r *roleUsersContext) UserState() string {
 	return fmt.Sprintf("%s", r.r.GetState())
 }
 
-
 func (r *roleUsersContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.r)
 }
@@ -196,9 +192,9 @@ type roleApiKeysContext struct {
 func NewRoleApiKeysContext() *roleApiKeysContext {
 	roleApiKeysCtx := roleApiKeysContext{}
 	roleApiKeysCtx.Header = SubHeaderContext{
-		"ApiKeyName":  apiKeyNameHeader,
-		"ApiKeyIssuer":  apiKeyIssuerHeader,
-		"ApiKeyStatus":  apiKeyStatusHeader,
+		"ApiKeyName":   apiKeyNameHeader,
+		"ApiKeyIssuer": apiKeyIssuerHeader,
+		"ApiKeyStatus": apiKeyStatusHeader,
 	}
 	return &roleApiKeysCtx
 }
@@ -215,7 +211,6 @@ func (r *roleApiKeysContext) ApiKeyStatus() string {
 	return fmt.Sprintf("%s", r.r.GetStatus())
 }
 
-
 func (r *roleApiKeysContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.r)
 }
@@ -226,28 +221,27 @@ func (r *FullRoleContext) SubSection(name string) {
 	r.Output.Write([]byte("\n"))
 }
 
-
 func (r *FullRoleContext) Write() error {
 	frc := &fullRoleContext{
-		Role:         					&RoleContext{},
-		PermissionsContext:      			make([]*rolePermissionContext, 0, len(r.fullRole.Permissions)),
-		EffectivePermissionsContext:      make([]*rolePermissionContext, 0, len(r.fullRole.EffectivePermissions)),
-		RoleUsersContext:      make([]*roleUsersContext, 0, len(r.fullRole.RoleUsers)),
-		RoleApiKeysContext: make([]*roleApiKeysContext, 0, len(r.fullRole.RoleApiKeys)),
+		Role:                        &RoleContext{},
+		PermissionsContext:          make([]*rolePermissionContext, 0, len(r.fullRole.Permissions)),
+		EffectivePermissionsContext: make([]*rolePermissionContext, 0, len(r.fullRole.EffectivePermissions)),
+		RoleUsersContext:            make([]*roleUsersContext, 0, len(r.fullRole.RoleUsers)),
+		RoleApiKeysContext:          make([]*roleApiKeysContext, 0, len(r.fullRole.RoleApiKeys)),
 	}
 
 	frc.Role.r = r.fullRole.Role
 
 	//Adding Permissions information
 	for _, permission := range r.fullRole.Permissions {
-		for i := 0 ; i < len(permission.OperationGroups); i++ { 
+		for i := 0; i < len(permission.OperationGroups); i++ {
 			frc.PermissionsContext = append(frc.PermissionsContext, &rolePermissionContext{r: permission, opsIndex: i})
 		}
 	}
 
 	//Adding Effective Permissions information
 	for _, effectivePermission := range r.fullRole.EffectivePermissions {
-		for i := 0 ; i < len(effectivePermission.OperationGroups); i++ { 
+		for i := 0; i < len(effectivePermission.OperationGroups); i++ {
 			frc.EffectivePermissionsContext = append(frc.EffectivePermissionsContext, &rolePermissionContext{r: effectivePermission, opsIndex: i})
 		}
 	}
@@ -274,7 +268,6 @@ func (r *FullRoleContext) Write() error {
 	}
 	r.postFormat(tmpl, NewFullRoleContext())
 
-
 	//Permissions Subsection
 	tmpl, err = r.startSubsection(defaultResourcePermissionListing)
 	if err != nil {
@@ -300,7 +293,6 @@ func (r *FullRoleContext) Write() error {
 		}
 	}
 	r.postFormat(tmpl, NewRolePermissionContext())
-
 
 	// Role Users
 	if len(frc.RoleUsersContext) > 0 {

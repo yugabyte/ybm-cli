@@ -21,20 +21,20 @@ import (
 
 // This struct is an attempt to consilidate Role information
 type FullRole struct {
-	Role ybmclient.RoleData
-	Permissions []ybmclient.ResourcePermissionInfo
+	Role                 ybmclient.RoleData
+	Permissions          []ybmclient.ResourcePermissionInfo
 	EffectivePermissions []ybmclient.ResourcePermissionInfo
-	RoleUsers []ybmclient.UserSpecWithStateInfo
-	RoleApiKeys []ybmclient.ApiKeyBasicInfo
+	RoleUsers            []ybmclient.UserSpecWithStateInfo
+	RoleApiKeys          []ybmclient.ApiKeyBasicInfo
 }
 
 func NewFullRole(roleData ybmclient.RoleData) *FullRole {
 	fr := &FullRole{
-		Role: roleData,
-		Permissions: roleData.Spec.Permissions,
+		Role:                 roleData,
+		Permissions:          roleData.Spec.Permissions,
 		EffectivePermissions: roleData.Info.GetEffectivePermissions(),
-		RoleUsers: roleData.Info.GetUsers(),
-		RoleApiKeys: roleData.Info.GetApiKeys(),
+		RoleUsers:            roleData.Info.GetUsers(),
+		RoleApiKeys:          roleData.Info.GetApiKeys(),
 	}
 
 	return fr
