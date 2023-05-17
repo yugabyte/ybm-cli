@@ -779,6 +779,10 @@ func (a *AuthApiClient) ListRbacRoles() ybmclient.ApiListRbacRolesRequest {
 	return a.ApiClient.RoleApi.ListRbacRoles(a.ctx, a.AccountID).RoleTypes("ALL").Limit(100)
 }
 
+func (a *AuthApiClient) ListSystemRbacRoles() ybmclient.ApiListRbacRolesRequest {
+	return a.ApiClient.RoleApi.ListRbacRoles(a.ctx, a.AccountID).RoleTypes("SYSTEM").Limit(100)
+}
+
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 
 	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {

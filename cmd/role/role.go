@@ -18,6 +18,7 @@ package role
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -25,6 +26,8 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
+
+const customRoleFeatureFlagDisabled string = "Requested API not found"
 
 var RoleCmd = &cobra.Command{
 	Use:   "role",
@@ -56,8 +59,20 @@ var listRolesCmd = &cobra.Command{
 		resp, r, err := roleListRequest.Execute()
 
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(customRoleFeatureFlagDisabled)  {
+				systemRoleListRequest := authApi.ListSystemRbacRoles()
+				respTwo, rTwo, errTwo := systemRoleListRequest.Execute()
+
+				if errTwo != nil {
+					logrus.Debugf("Full HTTP response: %v", rTwo)
+					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(errTwo))
+				} else {
+					resp = respTwo
+				}
+			} else {
+				logrus.Debugf("Full HTTP response: %v", r)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			}
 		}
 
 		rolesCtx := formatter.Context{
