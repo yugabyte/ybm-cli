@@ -26,6 +26,7 @@ ybm [flags]
 
 ### SEE ALSO
 
+* [ybm api-key](ybm_api-key.md)	 - Manage API Keys
 * [ybm auth](ybm_auth.md)	 - Authenticate ybm CLI
 * [ybm backup](ybm_backup.md)	 - Manage backup operations of a cluster
 * [ybm cluster](ybm_cluster.md)	 - Manage cluster operations

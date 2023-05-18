@@ -1,20 +1,24 @@
-## ybm role describe
+## ybm api-key create
 
-Describe a role
+Create an API Key
 
 ### Synopsis
 
-Describe a role in YugabyteDB Managed
+Create an API Key
 
 ```
-ybm role describe [flags]
+ybm api-key create [flags]
 ```
 
 ### Options
 
 ```
-      --role-name string   [REQUIRED] The name of the role.
-  -h, --help               help for describe
+      --name string          [REQUIRED] The name of the API Key.
+      --duration int32       [REQUIRED] The duration for which the API Key will be valid. 0 denotes that the key will never expire.
+      --unit string          [REQUIRED] The time units for which the API Key will be valid. Available options are Hours, Days, and Months.
+      --description string   [OPTIONAL] Description of the API Key to be created.
+      --role-name string     [OPTIONAL] The name of the role to be assigned to the API Key. If not provided, an Admin API Key will be generated.
+  -h, --help                 help for create
 ```
 
 ### Options inherited from parent commands
@@ -32,5 +36,5 @@ ybm role describe [flags]
 
 ### SEE ALSO
 
-* [ybm role](ybm_role.md)	 - Manage roles
+* [ybm api-key](ybm_api-key.md)	 - Manage API Keys
 

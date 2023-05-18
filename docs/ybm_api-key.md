@@ -1,20 +1,19 @@
-## ybm role describe
+## ybm api-key
 
-Describe a role
+Manage API Keys
 
 ### Synopsis
 
-Describe a role in YugabyteDB Managed
+Manage API Keys in your YBM account
 
 ```
-ybm role describe [flags]
+ybm api-key [flags]
 ```
 
 ### Options
 
 ```
-      --role-name string   [REQUIRED] The name of the role.
-  -h, --help               help for describe
+  -h, --help   help for api-key
 ```
 
 ### Options inherited from parent commands
@@ -32,5 +31,8 @@ ybm role describe [flags]
 
 ### SEE ALSO
 
-* [ybm role](ybm_role.md)	 - Manage roles
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm api-key create](ybm_api-key_create.md)	 - Create an API Key
+* [ybm api-key list](ybm_api-key_list.md)	 - List API Keys
+* [ybm api-key revoke](ybm_api-key_revoke.md)	 - Revoke an API Key
 
