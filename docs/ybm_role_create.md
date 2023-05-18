@@ -4,7 +4,7 @@ Create a custom role
 
 ### Synopsis
 
-Create a custom role in YB Managed
+Create a custom role in YugabyteDB Managed
 
 ```
 ybm role create [flags]

@@ -33,7 +33,7 @@ ybm role [flags]
 
 * [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
 * [ybm role create](ybm_role_create.md)	 - Create a custom role
-* [ybm role delete](ybm_role_delete.md)	 - Delete a custom role in YugabyteDB Managed
+* [ybm role delete](ybm_role_delete.md)	 - Delete a custom role
 * [ybm role describe](ybm_role_describe.md)	 - Describe a role
 * [ybm role list](ybm_role_list.md)	 - List roles
 * [ybm role update](ybm_role_update.md)	 - Update a custom role

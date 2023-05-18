@@ -151,7 +151,7 @@ var describeRoleCmd = &cobra.Command{
 var createRoleCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a custom role",
-	Long:  "Create a custom role in YB Managed",
+	Long:  "Create a custom role in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -231,7 +231,7 @@ func CreatePermissionsMap(resourceType string, operationGroup string, permission
 var updateRoleCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update a custom role",
-	Long:  "Update a custom role in YB Managed",
+	Long:  "Update a custom role in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -310,7 +310,7 @@ var updateRoleCmd = &cobra.Command{
 
 var deleteRoleCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete a custom role in YugabyteDB Managed",
+	Short: "Delete a custom role",
 	Long:  "Delete a custom role in YugabyteDB Managed",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))

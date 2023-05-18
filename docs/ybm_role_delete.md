@@ -1,6 +1,6 @@
 ## ybm role delete
 
-Delete a custom role in YugabyteDB Managed
+Delete a custom role
 
 ### Synopsis
 
