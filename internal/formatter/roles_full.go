@@ -32,9 +32,9 @@ const (
 	userEmailHeader           = "Email"
 	userFirstNameHeader       = "First Name"
 	userLastNameHeader        = "Last Name"
-	userStateHeader           = "User State"
+	userStateHeader           = "State"
 	defaultRoleApiKeysListing = "table {{.ApiKeyName}}\t{{.ApiKeyIssuer}}\t{{.ApiKeyStatus}}"
-	apiKeyNameHeader          = "API Key Name"
+	apiKeyNameHeader          = "Name"
 	apiKeyIssuerHeader        = "Issuer"
 	apiKeyStatusHeader        = "Status"
 )
@@ -301,7 +301,7 @@ func (r *FullRoleContext) Write() error {
 		if err != nil {
 			return err
 		}
-		r.SubSection("Role Users")
+		r.SubSection("Users")
 		for _, v := range frc.RoleUsersContext {
 			if err := r.contextFormat(tmpl, v); err != nil {
 				return err
@@ -316,7 +316,7 @@ func (r *FullRoleContext) Write() error {
 		if err != nil {
 			return err
 		}
-		r.SubSection("Role API Keys")
+		r.SubSection("API Keys")
 		for _, v := range frc.RoleApiKeysContext {
 			if err := r.contextFormat(tmpl, v); err != nil {
 				return err
