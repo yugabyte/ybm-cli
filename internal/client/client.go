@@ -840,14 +840,14 @@ func (a *AuthApiClient) GetRoleByName(roleName string) (ybmclient.RoleData, erro
 	roleResp, resp, err := a.ListRbacRoles().DisplayName(roleName).Execute()
 	if err != nil {
 		if strings.TrimSpace(GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
-			roleRespTwo, respTwo, errTwo := a.ListSystemRbacRoles().DisplayName(roleName).Execute()
+			systemRoleResponse, systemRoleResp, systemRoleErr := a.ListSystemRbacRoles().DisplayName(roleName).Execute()
 
-			if errTwo != nil {
-				b, _ := httputil.DumpResponse(respTwo, true)
+			if systemRoleErr != nil {
+				b, _ := httputil.DumpResponse(systemRoleResp, true)
 				logrus.Debug(string(b))
-				return ybmclient.RoleData{}, errTwo
+				return ybmclient.RoleData{}, systemRoleErr
 			} else {
-				roleResp = roleRespTwo
+				roleResp = systemRoleResponse
 			}
 		} else {
 			c, _ := httputil.DumpResponse(resp, true)

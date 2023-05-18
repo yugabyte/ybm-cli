@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	defaultFullRoleListing    = "table {{.Name}}\t{{.ID}}\t{{.Description}}\t{{.IsUserDefined}}"
+	defaultFullRoleListing    = "table {{.Name}}\t{{.ID}}\t{{.Description}}\t{{.RoleType}}"
 	defaultRoleUsersListing   = "table {{.UserEmail}}\t{{.UserFirstName}}\t{{.UserLastName}}\t{{.UserState}}"
 	userEmailHeader           = "Email"
 	userFirstNameHeader       = "First Name"
@@ -49,10 +49,11 @@ type FullRoleContext struct {
 func NewFullRoleContext() *FullRoleContext {
 	roleCtx := FullRoleContext{}
 	roleCtx.Header = SubHeaderContext{
-		"Name":          nameHeader,
-		"ID":            "ID",
-		"Description":   descriptionHeader,
-		"IsUserDefined": isUserDefinedHeader}
+		"Name":        nameHeader,
+		"ID":          "ID",
+		"Description": descriptionHeader,
+		"RoleType":    roleTypeHeader,
+	}
 	return &roleCtx
 }
 

@@ -18,18 +18,16 @@ package formatter
 import (
 	"encoding/json"
 	"fmt"
-	"runtime"
 
-	"github.com/enescakir/emoji"
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
-	defaultRoleListing  = "table {{.Name}}\t{{.Description}}\t{{.IsUserDefined}}\t{{.UsersCount}}\t{{.ApiKeysCount}}"
-	isUserDefinedHeader = "User Defined"
-	usersCountHeader    = "Users Count"
-	apiKeysCountHeader  = "API Keys Count"
+	defaultRoleListing = "table {{.Name}}\t{{.Description}}\t{{.RoleType}}\t{{.UsersCount}}\t{{.ApiKeysCount}}"
+	roleTypeHeader     = "Type"
+	usersCountHeader   = "Users Count"
+	apiKeysCountHeader = "API Keys Count"
 )
 
 type RoleContext struct {
@@ -42,12 +40,12 @@ type RoleContext struct {
 func NewRoleContext() *RoleContext {
 	roleCtx := RoleContext{}
 	roleCtx.Header = SubHeaderContext{
-		"Name":          nameHeader,
-		"ID":            "ID",
-		"Description":   descriptionHeader,
-		"IsUserDefined": isUserDefinedHeader,
-		"UsersCount":    usersCountHeader,
-		"ApiKeysCount":  apiKeysCountHeader,
+		"Name":         nameHeader,
+		"ID":           "ID",
+		"Description":  descriptionHeader,
+		"RoleType":     roleTypeHeader,
+		"UsersCount":   usersCountHeader,
+		"ApiKeysCount": apiKeysCountHeader,
 	}
 	return &roleCtx
 }
@@ -89,16 +87,13 @@ func (r *RoleContext) Description() string {
 	return r.r.GetDescription()
 }
 
-func (r *RoleContext) IsUserDefined() string {
+func (r *RoleContext) RoleType() string {
 	isUserDefined := r.r.Info.GetIsUserDefined()
-	if runtime.GOOS == "windows" {
-		return fmt.Sprintf("%t", isUserDefined)
-	}
 	switch isUserDefined {
 	case true:
-		return emoji.Parse(":white_check_mark:")
+		return fmt.Sprintf("Custom")
 	case false:
-		return emoji.CrossMark.String()
+		return fmt.Sprintf("Built-in")
 	default:
 		return fmt.Sprintf("%t", isUserDefined)
 	}

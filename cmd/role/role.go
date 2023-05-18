@@ -55,25 +55,25 @@ var listRolesCmd = &cobra.Command{
 			roleListRequest = roleListRequest.DisplayName(roleName)
 		}
 
-		resp, r, err := roleListRequest.Execute()
+		roleResponse, roleResp, roleErr := roleListRequest.Execute()
 
-		if err != nil {
+		if roleErr != nil {
 			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
 				systemRoleListRequest := authApi.ListSystemRbacRoles()
 				if roleName != "" {
 					systemRoleListRequest = systemRoleListRequest.DisplayName(roleName)
 				}
-				respTwo, rTwo, errTwo := systemRoleListRequest.Execute()
+				systemRoleResponse, systemRoleResp, systemRoleErr := systemRoleListRequest.Execute()
 
-				if errTwo != nil {
-					logrus.Debugf("Full HTTP response: %v", rTwo)
-					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(errTwo))
+				if systemRoleErr != nil {
+					logrus.Debugf("Full HTTP response: %v", systemRoleResp)
+					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(systemRoleErr))
 				} else {
-					resp = respTwo
+					roleResponse = systemRoleResponse
 				}
 			} else {
-				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", roleResp)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(roleErr))
 			}
 		}
 
@@ -81,11 +81,11 @@ var listRolesCmd = &cobra.Command{
 			Output: os.Stdout,
 			Format: formatter.NewRoleFormat(viper.GetString("output")),
 		}
-		if len(resp.GetData()) < 1 {
+		if len(roleResponse.GetData()) < 1 {
 			fmt.Println("No roles found")
 			return
 		}
-		formatter.RoleWrite(rolesCtx, resp.GetData())
+		formatter.RoleWrite(rolesCtx, roleResponse.GetData())
 	},
 }
 
@@ -104,27 +104,27 @@ var describeRoleCmd = &cobra.Command{
 		roleName, _ := cmd.Flags().GetString("role-name")
 		roleListRequest = roleListRequest.DisplayName(roleName)
 
-		resp, r, err := roleListRequest.Execute()
+		roleResponse, roleResp, roleErr := roleListRequest.Execute()
 
-		if err != nil {
+		if roleErr != nil {
 			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
 				systemRoleListRequest := authApi.ListSystemRbacRolesWithPermissions()
 				systemRoleListRequest = systemRoleListRequest.DisplayName(roleName)
-				respTwo, rTwo, errTwo := systemRoleListRequest.Execute()
+				systemRoleResponse, systemRoleResp, systemRoleErr := systemRoleListRequest.Execute()
 
-				if errTwo != nil {
-					logrus.Debugf("Full HTTP response: %v", rTwo)
-					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(errTwo))
+				if systemRoleErr != nil {
+					logrus.Debugf("Full HTTP response: %v", systemRoleResp)
+					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(systemRoleErr))
 				} else {
-					resp = respTwo
+					roleResponse = systemRoleResponse
 				}
 			} else {
-				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Debugf("Full HTTP response: %v", roleResp)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(roleErr))
 			}
 		}
 
-		if len(resp.GetData()) < 1 {
+		if len(roleResponse.GetData()) < 1 {
 			fmt.Println("No role found")
 			return
 		}
@@ -133,7 +133,7 @@ var describeRoleCmd = &cobra.Command{
 			fullRoleContext := *formatter.NewFullRoleContext()
 			fullRoleContext.Output = os.Stdout
 			fullRoleContext.Format = formatter.NewFullRoleFormat(viper.GetString("output"))
-			fullRoleContext.SetFullRole(resp.GetData()[0])
+			fullRoleContext.SetFullRole(roleResponse.GetData()[0])
 			fullRoleContext.Write()
 			return
 		}
@@ -143,7 +143,7 @@ var describeRoleCmd = &cobra.Command{
 			Format: formatter.NewFullRoleFormat(viper.GetString("output")),
 		}
 
-		formatter.SingleRoleWrite(rolesCtx, resp.GetData()[0])
+		formatter.SingleRoleWrite(rolesCtx, roleResponse.GetData()[0])
 	},
 }
 
