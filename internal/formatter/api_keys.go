@@ -24,10 +24,10 @@ import (
 )
 
 const (
-	defaultApiKeyListing = "table {{.ApiKeyName}}\t{{.RoleName}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}"
+	defaultApiKeyListing = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}"
 	createdAtHeader      = "Date Created"
 	expiryTimeHeader     = "Expiration"
-	roleNameHeader       = "Role"
+	apiKeyRoleHeader     = "Role"
 	lastUsedHeader       = "Last Used"
 )
 
@@ -82,7 +82,7 @@ func NewApiKeyContext() *ApiKeyContext {
 		"ExpiryTime":   expiryTimeHeader,
 		"ApiKeyStatus": apiKeyStatusHeader,
 		"ID":           "ID",
-		"RoleName":     roleNameHeader,
+		"ApiKeyRole":   apiKeyRoleHeader,
 		"Issuer":       apiKeyIssuerHeader,
 		"LastUsed":     lastUsedHeader,
 		"CreatedAt":    createdAtHeader,
@@ -106,7 +106,7 @@ func (a *ApiKeyContext) ID() string {
 	return a.a.Info.Id
 }
 
-func (a *ApiKeyContext) RoleName() string {
+func (a *ApiKeyContext) ApiKeyRole() string {
 	return a.a.Info.Role.Info.GetDisplayName()
 }
 

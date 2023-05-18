@@ -37,5 +37,6 @@ ybm [flags]
 * [ybm role](ybm_role.md)	 - Manage roles
 * [ybm signup](ybm_signup.md)	 - Open a browser to sign up for YugabyteDB Managed
 * [ybm tools](ybm_tools.md)	 - Tools command
+* [ybm user](ybm_user.md)	 - Manage users
 * [ybm vpc](ybm_vpc.md)	 - Manage VPCs
 
