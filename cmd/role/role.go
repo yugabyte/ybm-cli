@@ -58,7 +58,7 @@ var listRolesCmd = &cobra.Command{
 		roleResponse, roleResp, roleErr := roleListRequest.Execute()
 
 		if roleErr != nil {
-			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
+			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(roleErr)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
 				systemRoleListRequest := authApi.ListSystemRbacRoles()
 				if roleName != "" {
 					systemRoleListRequest = systemRoleListRequest.DisplayName(roleName)
@@ -107,7 +107,7 @@ var describeRoleCmd = &cobra.Command{
 		roleResponse, roleResp, roleErr := roleListRequest.Execute()
 
 		if roleErr != nil {
-			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(err)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
+			if strings.TrimSpace(ybmAuthClient.GetApiErrorDetails(roleErr)) == strings.TrimSpace(util.GetCustomRoleFeatureFlagDisabledError()) {
 				systemRoleListRequest := authApi.ListSystemRbacRolesWithPermissions()
 				systemRoleListRequest = systemRoleListRequest.DisplayName(roleName)
 				systemRoleResponse, systemRoleResp, systemRoleErr := systemRoleListRequest.Execute()
