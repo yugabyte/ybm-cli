@@ -71,12 +71,26 @@ func (c *CMKContext) Provider() ybmclient.CMKProviderEnum {
 }
 
 func (c *CMKContext) KeyAlias() string {
-	//TODO: fix this with extracting GCP values when we support that
+	if c.c.GcpCmkSpec.Get().GetKeyName() != "" {
+		return c.c.GcpCmkSpec.Get().GetKeyName()
+	}
 	return c.c.AwsCmkSpec.Get().GetAliasName()
 }
 
+func (c *CMKContext) ResourceId() string {
+	// Resource id: projects/{PROJECT_ID}/locations/{LOCATION}/keyRings/{KEY_RING_NAME}/cryptoKeys/{KEY_NAME}
+	keyName := c.c.GcpCmkSpec.Get().GetKeyName()
+	location := c.c.GcpCmkSpec.Get().GetLocation()
+	keyRingName := c.c.GcpCmkSpec.Get().GetKeyRingName()
+	projectId := c.c.GcpCmkSpec.Get().GetGcpServiceAccount().ProjectId
+	resourceId := "projects/" + projectId + "/locations/" + location + "/keyRings/" + keyRingName + "/cryptoKeys/" + keyName
+	return resourceId
+}
+
 func (c *CMKContext) SecurityPrincipals() string {
-	// TODO: fix this to pick up GCP later
+	if c.c.GcpCmkSpec.Get().GetKeyName() != "" {
+		return c.ResourceId()
+	}
 	return strings.Join(c.c.AwsCmkSpec.Get().GetArnList(), ", ")
 }
 
