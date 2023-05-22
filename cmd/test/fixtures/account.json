@@ -146,6 +146,19 @@
                             "permissions": null
                         }
                     }
+                ],
+                "projects": [
+                    {
+                        "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e",
+                        "name": "default",
+                        "spec": {
+                            "name": "default"
+                        },
+                        "info": {
+                            "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e"
+                        },
+                        "metadata": null
+                    }
                 ]
             },
             "spec": {
