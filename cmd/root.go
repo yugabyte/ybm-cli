@@ -28,6 +28,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
+	"github.com/yugabyte/ybm-cli/cmd/permission"
 	"github.com/yugabyte/ybm-cli/cmd/region"
 	"github.com/yugabyte/ybm-cli/cmd/role"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
@@ -120,6 +121,7 @@ func init() {
 	rootCmd.AddCommand(cluster.ClusterCmd)
 	rootCmd.AddCommand(backup.BackupCmd)
 	rootCmd.AddCommand(nal.NalCmd)
+	rootCmd.AddCommand(permission.ResourcePermissionsCmd)
 	rootCmd.AddCommand(vpc.VPCCmd)
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(signup.SignUpCmd)

@@ -865,6 +865,10 @@ func (a *AuthApiClient) GetRoleByName(roleName string) (ybmclient.RoleData, erro
 	return ybmclient.RoleData{}, fmt.Errorf("Could not get role data for role name: %s", roleName)
 }
 
+func (a *AuthApiClient) ListResourcePermissions() ybmclient.ApiListResourcePermissionsRequest {
+	return a.ApiClient.AuthApi.ListResourcePermissions(a.ctx)
+}
+
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 
 	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {
