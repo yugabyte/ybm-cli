@@ -911,6 +911,67 @@ func (a *AuthApiClient) GetApiKeyByName(name string) (ybmclient.ApiKeyData, erro
 	return ybmclient.ApiKeyData{}, fmt.Errorf("Could not get API Key data for name: %s", name)
 }
 
+func (a *AuthApiClient) ListAccountUsers() ybmclient.ApiListAccountUsersRequest {
+	return a.ApiClient.AccountApi.ListAccountUsers(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) CreateBatchInviteUserSpec(email string, roleName string) (*ybmclient.BatchInviteUserSpec, error) {
+	users := []ybmclient.InviteUserSpec{}
+	user := *ybmclient.NewInviteUserSpecWithDefaults()
+	user.SetEmail(email)
+
+	roleId, err := a.GetRoleIdByName(roleName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	user.SetRoleId(roleId)
+
+	users = append(users, user)
+
+	usersSpec := *ybmclient.NewBatchInviteUserSpecWithDefaults()
+	usersSpec.SetUserList(users)
+
+	return &usersSpec, nil
+}
+
+func (a *AuthApiClient) BatchInviteAccountUsers() ybmclient.ApiBatchInviteAccountUsersRequest {
+	return a.ApiClient.AccountApi.BatchInviteAccountUsers(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) ModifyUserRole(userId string) ybmclient.ApiModifyUserRoleRequest {
+	return a.ApiClient.AccountApi.ModifyUserRole(a.ctx, a.AccountID, userId)
+}
+
+func (a *AuthApiClient) RemoveAccountUser(userId string) ybmclient.ApiRemoveAccountUserRequest {
+	return a.ApiClient.AccountApi.RemoveAccountUser(a.ctx, a.AccountID, userId)
+}
+
+func (a *AuthApiClient) GetUserIdByEmail(email string) (string, error) {
+	userData, err := a.GetUserByEmail(email)
+	if err == nil {
+		return userData.Info.GetId(), nil
+	}
+
+	return "", fmt.Errorf("Could not get user data for email: %s", email)
+}
+
+func (a *AuthApiClient) GetUserByEmail(email string) (ybmclient.UserData, error) {
+	userResp, resp, err := a.ListAccountUsers().Email(email).Execute()
+	if err != nil {
+		c, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(c)
+		return ybmclient.UserData{}, err
+	}
+
+	userData := userResp.GetData()
+
+	if len(userData) != 0 {
+		return userData[0], nil
+	}
+
+	return ybmclient.UserData{}, fmt.Errorf("Could not get user data for email: %s", email)
+}
+
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {
 		return a.WaitForTaskCompletionCI(entityId, entityType, taskType, completionStatus, message)

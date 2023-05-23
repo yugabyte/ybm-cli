@@ -29,11 +29,10 @@ import (
 
 const (
 	defaultFullRoleListing    = "table {{.Name}}\t{{.ID}}\t{{.Description}}\t{{.RoleType}}"
-	defaultRoleUsersListing   = "table {{.UserEmail}}\t{{.UserFirstName}}\t{{.UserLastName}}\t{{.UserState}}"
+	defaultRoleUsersListing   = "table {{.UserEmail}}\t{{.UserName}}\t{{.UserState}}"
 	userEmailHeader           = "Email"
-	userFirstNameHeader       = "First Name"
-	userLastNameHeader        = "Last Name"
-	userStateHeader           = "State"
+	userNameHeader            = "Display Name"
+	userStateHeader           = "Status"
 	defaultRoleApiKeysListing = "table {{.ApiKeyName}}\t{{.ApiKeyIssuer}}\t{{.ApiKeyStatus}}"
 	apiKeyNameHeader          = "Name"
 	apiKeyIssuerHeader        = "Created By"
@@ -158,10 +157,9 @@ type roleUsersContext struct {
 func NewRoleUsersContext() *roleUsersContext {
 	roleUsersCtx := roleUsersContext{}
 	roleUsersCtx.Header = SubHeaderContext{
-		"UserEmail":     userEmailHeader,
-		"UserFirstName": userFirstNameHeader,
-		"UserLastName":  userLastNameHeader,
-		"UserState":     userStateHeader,
+		"UserEmail": userEmailHeader,
+		"UserName":  userNameHeader,
+		"UserState": userStateHeader,
 	}
 	return &roleUsersCtx
 }
@@ -170,12 +168,8 @@ func (r *roleUsersContext) UserEmail() string {
 	return fmt.Sprintf("%s", r.r.GetEmail())
 }
 
-func (r *roleUsersContext) UserFirstName() string {
-	return fmt.Sprintf("%s", r.r.GetFirstName())
-}
-
-func (r *roleUsersContext) UserLastName() string {
-	return fmt.Sprintf("%s", r.r.GetLastName())
+func (r *roleUsersContext) UserName() string {
+	return fmt.Sprintf("%s %s", r.r.GetFirstName(), r.r.GetLastName())
 }
 
 func (r *roleUsersContext) UserState() string {
