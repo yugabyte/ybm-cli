@@ -13,12 +13,12 @@ ybm role update [flags]
 ### Options
 
 ```
+      --role-name string          [REQUIRED] Name of the role.
+      --permissions stringArray   [REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.
       --description string        [OPTIONAL] New description of the role to be updated.
+      --new-name string           [OPTIONAL] New name of the role to be updated.
   -f, --force                     Bypass the prompt for non-interactive usage
   -h, --help                      help for update
-      --new-name string           [OPTIONAL] New name of the role to be updated.
-      --permissions stringArray   [REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.
-      --role-name string          [REQUIRED] Name of the role.
 ```
 
 ### Options inherited from parent commands

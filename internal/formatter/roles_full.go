@@ -36,7 +36,7 @@ const (
 	userStateHeader           = "State"
 	defaultRoleApiKeysListing = "table {{.ApiKeyName}}\t{{.ApiKeyIssuer}}\t{{.ApiKeyStatus}}"
 	apiKeyNameHeader          = "Name"
-	apiKeyIssuerHeader        = "Issuer"
+	apiKeyIssuerHeader        = "Created By"
 	apiKeyStatusHeader        = "Status"
 )
 

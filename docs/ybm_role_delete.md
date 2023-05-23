@@ -13,9 +13,9 @@ ybm role delete [flags]
 ### Options
 
 ```
+      --role-name string   [REQUIRED] The name of the role to be deleted.
   -f, --force              Bypass the prompt for non-interactive usage
   -h, --help               help for delete
-      --role-name string   [REQUIRED] The name of the role to be deleted.
 ```
 
 ### Options inherited from parent commands

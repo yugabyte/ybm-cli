@@ -868,8 +868,50 @@ func (a *AuthApiClient) ListResourcePermissions() ybmclient.ApiListResourcePermi
 	return a.ApiClient.AuthApi.ListResourcePermissions(a.ctx)
 }
 
-func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
+func (a *AuthApiClient) ListApiKeys() ybmclient.ApiListApiKeysRequest {
+	return a.ApiClient.AuthApi.ListApiKeys(a.ctx, a.AccountID)
+}
 
+func (a *AuthApiClient) RevokeApiKey(keyId string) ybmclient.ApiRevokeApiKeyRequest {
+	return a.ApiClient.AuthApi.RevokeApiKey(a.ctx, a.AccountID, keyId)
+}
+
+func (a *AuthApiClient) CreateApiKeySpec(name string, expiryHours int) (*ybmclient.ApiKeySpec, error) {
+	apiKeySpec := ybmclient.NewApiKeySpec(name, int32(expiryHours))
+	return apiKeySpec, nil
+}
+
+func (a *AuthApiClient) CreateApiKey() ybmclient.ApiCreateApiKeyRequest {
+	return a.ApiClient.AuthApi.CreateApiKey(a.ctx, a.AccountID)
+}
+
+func (a *AuthApiClient) GetKeyIdByName(name string) (string, error) {
+	apiKeyData, err := a.GetApiKeyByName(name)
+	if err == nil {
+		return apiKeyData.Info.GetId(), nil
+	}
+
+	return "", fmt.Errorf("Could not get API key data for name: %s", name)
+}
+
+func (a *AuthApiClient) GetApiKeyByName(name string) (ybmclient.ApiKeyData, error) {
+	keyResp, resp, err := a.ListApiKeys().ApiKeyName(name).Execute()
+	if err != nil {
+		c, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(c)
+		return ybmclient.ApiKeyData{}, err
+	}
+
+	keyData := keyResp.GetData()
+
+	if len(keyData) != 0 {
+		return keyData[0], nil
+	}
+
+	return ybmclient.ApiKeyData{}, fmt.Errorf("Could not get API Key data for name: %s", name)
+}
+
+func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
 	if strings.ToLower(os.Getenv("YBM_CI")) == "true" {
 		return a.WaitForTaskCompletionCI(entityId, entityType, taskType, completionStatus, message)
 	}

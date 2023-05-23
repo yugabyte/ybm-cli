@@ -1,20 +1,21 @@
-## ybm role describe
+## ybm api-key revoke
 
-Describe a role
+Revoke an API Key
 
 ### Synopsis
 
-Describe a role in YugabyteDB Managed
+Revoke an API Key
 
 ```
-ybm role describe [flags]
+ybm api-key revoke [flags]
 ```
 
 ### Options
 
 ```
-      --role-name string   [REQUIRED] The name of the role.
-  -h, --help               help for describe
+      --name string   [REQUIRED] The name of the API Key.
+  -f, --force         Bypass the prompt for non-interactive usage
+  -h, --help          help for revoke
 ```
 
 ### Options inherited from parent commands
@@ -32,5 +33,5 @@ ybm role describe [flags]
 
 ### SEE ALSO
 
-* [ybm role](ybm_role.md)	 - Manage roles
+* [ybm api-key](ybm_api-key.md)	 - Manage API Keys
 

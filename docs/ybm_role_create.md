@@ -13,10 +13,10 @@ ybm role create [flags]
 ### Options
 
 ```
+      --role-name string          [REQUIRED] Name of the role to be created.
+      --permissions stringArray   [REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.
       --description string        [OPTIONAL] Description of the role to be created.
   -h, --help                      help for create
-      --permissions stringArray   [REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.
-      --role-name string          [REQUIRED] Name of the role to be created.
 ```
 
 ### Options inherited from parent commands

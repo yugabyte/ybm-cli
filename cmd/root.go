@@ -24,6 +24,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/api_key"
 	"github.com/yugabyte/ybm-cli/cmd/backup"
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
@@ -127,6 +128,7 @@ func init() {
 	rootCmd.AddCommand(signup.SignUpCmd)
 	rootCmd.AddCommand(region.CloudRegionsCmd)
 	rootCmd.AddCommand(role.RoleCmd)
+	rootCmd.AddCommand(api_key.ApiKeyCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 

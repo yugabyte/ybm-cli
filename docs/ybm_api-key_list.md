@@ -1,20 +1,21 @@
-## ybm role describe
+## ybm api-key list
 
-Describe a role
+List API Keys
 
 ### Synopsis
 
-Describe a role in YugabyteDB Managed
+List API Keys in your YBM account
 
 ```
-ybm role describe [flags]
+ybm api-key list [flags]
 ```
 
 ### Options
 
 ```
-      --role-name string   [REQUIRED] The name of the role.
-  -h, --help               help for describe
+      --name string     [OPTIONAL] To filter by API Key name.
+      --status string   [OPTIONAL] To filter by API Key status. Available options are ACTIVE, EXPIRED, REVOKED.
+  -h, --help            help for list
 ```
 
 ### Options inherited from parent commands
@@ -32,5 +33,5 @@ ybm role describe [flags]
 
 ### SEE ALSO
 
-* [ybm role](ybm_role.md)	 - Manage roles
+* [ybm api-key](ybm_api-key.md)	 - Manage API Keys
 

@@ -358,33 +358,35 @@ var deleteRoleCmd = &cobra.Command{
 
 func init() {
 	RoleCmd.AddCommand(listRolesCmd)
+	listRolesCmd.Flags().SortFlags = false
 	listRolesCmd.Flags().String("role-name", "", "[OPTIONAL] To filter by role name.")
-	listRolesCmd.Flags().String("type", "", "[OPTIONAL] To filter by role type. BUILT-IN and CUSTOM options are available to list only built-in or custom roles")
+	listRolesCmd.Flags().String("type", "", "[OPTIONAL] To filter by role type. BUILT-IN and CUSTOM options are available to list only built-in or custom roles.")
 
 	RoleCmd.AddCommand(describeRoleCmd)
+	describeRoleCmd.Flags().SortFlags = false
 	describeRoleCmd.Flags().String("role-name", "", "[REQUIRED] The name of the role.")
 	describeRoleCmd.MarkFlagRequired("role-name")
 
 	RoleCmd.AddCommand(createRoleCmd)
-
+	createRoleCmd.Flags().SortFlags = false
 	createRoleCmd.Flags().String("role-name", "", "[REQUIRED] Name of the role to be created.")
 	createRoleCmd.MarkFlagRequired("role-name")
-	createRoleCmd.Flags().String("description", "", "[OPTIONAL] Description of the role to be created.")
 	createRoleCmd.Flags().StringArray("permissions", []string{}, `[REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.`)
 	createRoleCmd.MarkFlagRequired("permissions")
+	createRoleCmd.Flags().String("description", "", "[OPTIONAL] Description of the role to be created.")
 
 	RoleCmd.AddCommand(updateRoleCmd)
-
+	updateRoleCmd.Flags().SortFlags = false
 	updateRoleCmd.Flags().String("role-name", "", "[REQUIRED] Name of the role.")
 	updateRoleCmd.MarkFlagRequired("role-name")
-	updateRoleCmd.Flags().String("new-name", "", "[OPTIONAL] New name of the role to be updated.")
-	updateRoleCmd.Flags().String("description", "", "[OPTIONAL] New description of the role to be updated.")
 	updateRoleCmd.Flags().StringArray("permissions", []string{}, `[REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.`)
 	updateRoleCmd.MarkFlagRequired("permissions")
+	updateRoleCmd.Flags().String("description", "", "[OPTIONAL] New description of the role to be updated.")
+	updateRoleCmd.Flags().String("new-name", "", "[OPTIONAL] New name of the role to be updated.")
 	updateRoleCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 	RoleCmd.AddCommand(deleteRoleCmd)
-
+	deleteRoleCmd.Flags().SortFlags = false
 	deleteRoleCmd.Flags().String("role-name", "", "[REQUIRED] The name of the role to be deleted.")
 	deleteRoleCmd.MarkFlagRequired("role-name")
 	deleteRoleCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
