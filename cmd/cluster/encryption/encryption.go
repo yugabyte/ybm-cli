@@ -105,6 +105,10 @@ var updateCmk = &cobra.Command{
 			logrus.Fatalf("Unable to parse new CMK spec: %v", err)
 		}
 
+		if newCmkSpec.GetProviderType() != oldCmkSpec.GetProviderType() {
+			logrus.Fatalf("Modifying KMS provider is not allowed.")
+		}
+
 		// Need to copy over the AWS ARNs
 		if newCmkSpec.GetProviderType() == "AWS" {
 			newCmkSpec.AwsCmkSpec.Get().ArnList = oldCmkSpec.AwsCmkSpec.Get().ArnList
