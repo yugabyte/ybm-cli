@@ -37,7 +37,7 @@ var _ = Describe("Backup", func() {
 		statusCode      int
 		args            []string
 		responseAccount openapi.AccountListResponse
-		responseProject openapi.AccountListResponse
+		responseProject openapi.ProjectListResponse
 		responseBackup  openapi.BackupListResponse
 		//cbr        *cobra.Command
 	)

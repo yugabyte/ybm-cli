@@ -36,7 +36,7 @@ var _ = Describe("VPC", func() {
 		statusCode      int
 		args            []string
 		responseAccount openapi.AccountListResponse
-		responseProject openapi.AccountListResponse
+		responseProject openapi.ProjectListResponse
 		responseVPC     openapi.SingleTenantVpcListResponse
 	)
 

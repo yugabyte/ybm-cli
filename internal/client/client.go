@@ -137,7 +137,7 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 		return projectID, nil
 	}
 
-	accountResp, resp, err := a.ListAccounts().Execute()
+	projectResp, resp, err := a.ListProjects().Execute()
 	if err != nil {
 		errMsg := getErrorMessage(resp, err)
 		if strings.Contains(err.Error(), "is not a valid") {
@@ -148,14 +148,14 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 			return "", fmt.Errorf(errMsg)
 		}
 	}
-	projectData := accountResp.GetData()[0].Info.GetProjects()
+	projectData := projectResp.GetData()
 	if len(projectData) == 0 {
 		return "", fmt.Errorf("the account is not associated with any projects")
 	}
 	if len(projectData) > 1 {
 		return "", fmt.Errorf("the account is associated with multiple projects, please provide a project id")
 	}
-	return projectData[0].Info.Id, nil
+	return projectData[0].Id, nil
 }
 
 func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string) (*ybmclient.ClusterSpec, error) {
