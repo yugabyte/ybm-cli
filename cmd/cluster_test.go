@@ -36,7 +36,7 @@ var _ = Describe("Cluster", func() {
 		statusCode               int
 		args                     []string
 		responseAccount          openapi.AccountListResponse
-		responseProject          openapi.AccountListResponse
+		responseProject          openapi.ProjectListResponse
 		responseListCluster      openapi.ClusterListResponse
 		responseNetworkAllowList openapi.NetworkAllowListListResponse
 		responseError            openapi.ApiError

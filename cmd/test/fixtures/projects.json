@@ -1,168 +1,24 @@
 {
-    "_metadata": {},
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "next": null,
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects"
+        }
+    },
     "data": [
         {
+            "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e",
             "info": {
-                "id": "340af43a-8a7c-4659-9258-4876fd6a207b",
-                "owner_id": "8bcbac89-b95e-454c-ad4d-c3167bb18462",
-                "roles": [
-                    {
-                        "account_id": "340af43a-8a7c-4659-9258-4876fd6a207b",
-                        "description": "Full access on cluster/backup - no billing or user management rights",
-                        "id": "cb6edae1-f2c7-4540-a870-521754e8a000",
-                        "info": {
-                            "id": ""
-                        },
-                        "is_active": true,
-                        "is_user_defined": false,
-                        "metadata": {
-                            "created_on": "2021-10-19T00:00Z",
-                            "updated_on": "2021-10-19T00:00Z"
-                        },
-                        "name": "account_dev",
-                        "permissions": [
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List or View alert rules"
-                                    },
-                                    {
-                                        "operation_group": "SEND_TEST_EMAIL",
-                                        "operation_group_description": "Send test emails for alerts"
-                                    },
-                                    {
-                                        "operation_group": "UPDATE",
-                                        "operation_group_description": "Update alert rules"
-                                    }
-                                ],
-                                "resource_name": "Alert Rules",
-                                "resource_type": "ALERT_RULE"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List Read Replicas of a cluster"
-                                    },
-                                    {
-                                        "operation_group": "UPDATE",
-                                        "operation_group_description": "Update/modify Read Replica of a cluster"
-                                    },
-                                    {
-                                        "operation_group": "DELETE",
-                                        "operation_group_description": "Delete Read Replicas"
-                                    },
-                                    {
-                                        "operation_group": "CREATE",
-                                        "operation_group_description": "Create Read Replica for a Cluster"
-                                    }
-                                ],
-                                "resource_name": "Read Replica",
-                                "resource_type": "READ_REPLICA"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List or View clusters"
-                                    }
-                                ],
-                                "resource_name": "Clusters",
-                                "resource_type": "CLUSTER"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List or view available database tracks"
-                                    }
-                                ],
-                                "resource_name": "Database Track",
-                                "resource_type": "TRACK"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List or View Maintenance Schedules"
-                                    },
-                                    {
-                                        "operation_group": "UPDATE",
-                                        "operation_group_description": "Update Maintenance Schedules"
-                                    }
-                                ],
-                                "resource_name": "Cluster Maintenance Schedule",
-                                "resource_type": "CLUSTER_MAINTENANCE_SCHEDULE"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List or View Maintenance Events of a cluster"
-                                    },
-                                    {
-                                        "operation_group": "UPDATE",
-                                        "operation_group_description": "Trigger or Delay Maintenance Events of a cluster"
-                                    }
-                                ],
-                                "resource_name": "Cluster Maintenance Event",
-                                "resource_type": "CLUSTER_MAINTENANCE_EVENT"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List or View Account related Tasks"
-                                    }
-                                ],
-                                "resource_name": "Tasks",
-                                "resource_type": "ACCOUNT_TASK"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "View Information of Users associated with the account"
-                                    }
-                                ],
-                                "resource_name": "Users",
-                                "resource_type": "ACCOUNT_USER"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
-                                        "operation_group_description": "List or View information related to an account"
-                                    }
-                                ],
-                                "resource_name": "Account Login Type",
-                                "resource_type": "ACCOUNT_LOGIN_TYPE"
-                            }
-                        ],
-                        "spec": {
-                            "description": "",
-                            "name": "",
-                            "permissions": null
-                        }
-                    }
-                ],
-                "projects": [
-                    {
-                        "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e",
-                        "name": "default",
-                        "spec": {
-                            "name": "default"
-                        },
-                        "info": {
-                            "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e"
-                        },
-                        "metadata": null
-                    }
-                ]
+                "id": "78d4459c-0f45-47a5-899a-45ddf43eba6e"
             },
+            "metadata": {
+                "created_on": "2022-03-11T07:19:48.072Z",
+                "updated_on": "2022-03-11T07:19:48.072Z"
+            },
+            "name": "default",
             "spec": {
-                "name": "ybcloud-473359"
+                "name": "default"
             }
         }
     ]
