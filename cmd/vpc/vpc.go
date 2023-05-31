@@ -228,7 +228,7 @@ func init() {
 	createVpcCmd.Flags().SortFlags = false
 	createVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
 	createVpcCmd.MarkFlagRequired("name")
-	createVpcCmd.Flags().String("cloud-provider", "", "[REQUIRED] Cloud provider for the VPC.")
+	createVpcCmd.Flags().String("cloud-provider", "", "[REQUIRED] Cloud provider for the VPC: AWS, AZURE or GCP.")
 	createVpcCmd.MarkFlagRequired("cloud-provider")
 	createVpcCmd.Flags().String("global-cidr", "", "[OPTIONAL] Global CIDR for the VPC.")
 	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "[OPTIONAL] Region of the VPC.")

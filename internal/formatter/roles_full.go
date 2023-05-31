@@ -130,19 +130,19 @@ func NewRolePermissionContext() *rolePermissionContext {
 }
 
 func (r *rolePermissionContext) ResourceName() string {
-	return fmt.Sprintf("%s", r.r.GetResourceName())
+	return r.r.GetResourceName()
 }
 
 func (r *rolePermissionContext) ResourceType() string {
-	return fmt.Sprintf("%s", r.r.GetResourceType())
+	return string(r.r.GetResourceType())
 }
 
 func (r *rolePermissionContext) OperationDescription() string {
-	return fmt.Sprintf("%s", r.r.OperationGroups[r.opsIndex].GetOperationGroupDescription())
+	return r.r.OperationGroups[r.opsIndex].GetOperationGroupDescription()
 }
 
 func (r *rolePermissionContext) OperationType() string {
-	return fmt.Sprintf("%s", r.r.OperationGroups[r.opsIndex].GetOperationGroup())
+	return string(r.r.OperationGroups[r.opsIndex].GetOperationGroup())
 }
 
 func (r *rolePermissionContext) MarshalJSON() ([]byte, error) {
@@ -165,7 +165,7 @@ func NewRoleUsersContext() *roleUsersContext {
 }
 
 func (r *roleUsersContext) UserEmail() string {
-	return fmt.Sprintf("%s", r.r.GetEmail())
+	return r.r.GetEmail()
 }
 
 func (r *roleUsersContext) UserName() string {
@@ -173,7 +173,7 @@ func (r *roleUsersContext) UserName() string {
 }
 
 func (r *roleUsersContext) UserState() string {
-	return fmt.Sprintf("%s", r.r.GetState())
+	return string(r.r.GetState())
 }
 
 func (r *roleUsersContext) MarshalJSON() ([]byte, error) {
@@ -196,15 +196,15 @@ func NewRoleApiKeysContext() *roleApiKeysContext {
 }
 
 func (r *roleApiKeysContext) ApiKeyName() string {
-	return fmt.Sprintf("%s", r.r.GetName())
+	return r.r.GetName()
 }
 
 func (r *roleApiKeysContext) ApiKeyIssuer() string {
-	return fmt.Sprintf("%s", r.r.GetIssuer())
+	return r.r.GetIssuer()
 }
 
 func (r *roleApiKeysContext) ApiKeyStatus() string {
-	return fmt.Sprintf("%s", r.r.GetStatus())
+	return string(r.r.GetStatus())
 }
 
 func (r *roleApiKeysContext) MarshalJSON() ([]byte, error) {

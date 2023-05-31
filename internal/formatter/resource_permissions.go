@@ -17,7 +17,6 @@ package formatter
 
 import (
 	"encoding/json"
-	"fmt"
 	"sort"
 
 	"github.com/sirupsen/logrus"
@@ -82,19 +81,19 @@ func NewResourcePermissionContext() *ResourcePermissionContext {
 }
 
 func (r *ResourcePermissionContext) ResourceName() string {
-	return fmt.Sprintf("%s", r.r.Info.GetResourceName())
+	return r.r.Info.GetResourceName()
 }
 
 func (r *ResourcePermissionContext) ResourceType() string {
-	return fmt.Sprintf("%s", r.r.Info.GetResourceType())
+	return string(r.r.Info.GetResourceType())
 }
 
 func (r *ResourcePermissionContext) OperationDescription() string {
-	return fmt.Sprintf("%s", r.r.Info.OperationGroups[r.opsIndex].GetOperationGroupDescription())
+	return r.r.Info.OperationGroups[r.opsIndex].GetOperationGroupDescription()
 }
 
 func (r *ResourcePermissionContext) OperationType() string {
-	return fmt.Sprintf("%s", r.r.Info.OperationGroups[r.opsIndex].GetOperationGroup())
+	return string(r.r.Info.OperationGroups[r.opsIndex].GetOperationGroup())
 }
 
 func (r *ResourcePermissionContext) MarshalJSON() ([]byte, error) {

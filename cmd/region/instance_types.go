@@ -76,7 +76,7 @@ func init() {
 	InstanceCmd.AddCommand(getInstanceTypesCmd)
 
 	getInstanceTypesCmd.Flags().SortFlags = false
-	getInstanceTypesCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
+	getInstanceTypesCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS, AZURE or GCP.")
 	getInstanceTypesCmd.MarkFlagRequired("cloud-provider")
 	getInstanceTypesCmd.Flags().String("region", "", "[REQUIRED] The region in the cloud provider for which the instance types have to fetched.")
 	getInstanceTypesCmd.MarkFlagRequired("region")
