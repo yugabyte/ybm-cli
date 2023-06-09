@@ -210,9 +210,10 @@ var _ = Describe("Cluster", func() {
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say(
-					`Name            Tier        Version       State     Health    Regions     Nodes     Total Res.\(Vcpu/Mem/Disk\)
-stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8GB / 100GB`))
+				o := string(session.Out.Contents()[:])
+				expected := `Name            Tier        Version       State     Health    Regions     Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
+stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8GB / 100GB / -` + "\n"
+				Expect(o).Should(Equal(expected))
 				session.Kill()
 			})
 
@@ -242,13 +243,12 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1   
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say(
-					`General
+				expected :=	`General
 Name            ID                                     Version       State     Health
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
-Provider   Tier        Fault Tolerance   Nodes     Total Res.\(Vcpu/Mem/Disk\)
-AWS        Dedicated   NONE              1         2 / 8GB / 100GB
+Provider   Tier        Fault Tolerance   Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
+AWS        Dedicated   NONE              1         2 / 8GB / 100GB / -
 
 
 Regions
@@ -272,10 +272,12 @@ AWS        0a80e409-e890-42fc-b209-bafb69931b2c   arn:aws:kms:us-east-1:74584618
 
 
 Nodes
-Name            Region\[zone\]            Health    Master    Tserver   ReadReplica   Used Memory\(MB\)
-test-cli-2-n1   us-west-2\[us-west-2c\]   💚        ✅        ✅        ❌            43MB
-test-cli-2-n2   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌            27MB
-test-cli-2-n3   us-west-2\[us-west-2c\]   💚        ❌        ✅        ❌            29MB`))
+Name            Region[zone]            Health    Master    Tserver   ReadReplica   Used Memory(MB)
+test-cli-2-n1   us-west-2[us-west-2c]   💚        ✅        ✅        ❌            43MB
+test-cli-2-n2   us-west-2[us-west-2c]   💚        ❌        ✅        ❌            27MB
+test-cli-2-n3   us-west-2[us-west-2c]   💚        ❌        ✅        ❌            29MB` + "\n"
+				o := string(session.Out.Contents()[:])
+				Expect(o).Should(Equal(expected))
 				session.Kill()
 			})
 			It("should return no cluster found when cluster-name is wrong", func() {

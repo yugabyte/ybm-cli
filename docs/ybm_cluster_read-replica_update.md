@@ -14,7 +14,7 @@ ybm cluster read-replica update [flags]
 
 ```
   -h, --help                  help for update
-  -r, --replica stringArray   [OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.
+  -r, --replica stringArray   [OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.
 ```
 
 ### Options inherited from parent commands

@@ -101,7 +101,7 @@ func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 			n := 0
 			err = nil
 			switch key {
-			case "num-cores", "disk-size-gb", "num-nodes", "num-replicas":
+			case "num-cores", "disk-size-gb", "num-nodes", "num-replicas", "disk-iops":
 				n, err = strconv.Atoi(val)
 				if err != nil {
 					return nil, err
@@ -118,6 +118,11 @@ func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 				if n > 0 && n <= math.MaxInt32 {
 					/* #nosec G109 */
 					spec.NodeInfo.DiskSizeGb = int32(n)
+				}
+			case "disk-iops":
+				if n > 0 && n <= math.MaxInt32 {
+					iops := int32(n)
+					spec.NodeInfo.DiskIops.Set(&iops)
 				}
 			// Keeping code as temp. backward compatibility
 			case "code", "cloud-provider":
@@ -380,10 +385,10 @@ func init() {
 	ReadReplicaCmd.AddCommand(listReadReplicaCmd)
 
 	ReadReplicaCmd.AddCommand(createReadReplicaCmd)
-	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
+	createReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(updateReadReplicaCmd)
-	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
+	updateReadReplicaCmd.Flags().StringArrayVarP(&allReplicaOpt, "replica", "r", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops>,cloud-provider=<GCP or AWS>,region=<region>,num-nodes=<num-nodes>,vpc=<vpc-name>,num-replicas=<num-replicas>,multi-zone=<multi-zone>.`)
 
 	ReadReplicaCmd.AddCommand(deleteReadReplicaCmd)
 	deleteReadReplicaCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")

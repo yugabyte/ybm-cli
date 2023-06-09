@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/enescakir/emoji"
@@ -32,7 +33,7 @@ import (
 const (
 	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
 	numNodesHeader        = "Nodes"
-	nodeInfoHeader        = "Total Res.(Vcpu/Mem/Disk)"
+	nodeInfoHeader        = "Node Res.(Vcpu/Mem/DiskGB/IOPS)"
 	healthStateHeader     = "Health"
 	tierHeader            = "Tier"
 )
@@ -135,10 +136,15 @@ func (c *ClusterContext) HealthState() string {
 }
 
 func (c *ClusterContext) NodesSpec() string {
-	return fmt.Sprintf("%d / %s / %dGB",
-		c.totalResource(c.c.GetSpec().ClusterInfo.NodeInfo.NumCores),
-		convertMbtoGb(c.totalResource(c.c.GetSpec().ClusterInfo.NodeInfo.MemoryMb)),
-		c.totalResource(c.c.GetSpec().ClusterInfo.NodeInfo.DiskSizeGb))
+	iops := "-"
+	if c.c.GetSpec().ClusterInfo.NodeInfo.DiskIops.Get() != nil {
+		iops = strconv.Itoa(int(*c.c.GetSpec().ClusterInfo.NodeInfo.DiskIops.Get()))
+	}
+	return fmt.Sprintf("%d / %s / %dGB / %s",
+		c.c.GetSpec().ClusterInfo.NodeInfo.NumCores,
+		convertMbtoGb(c.c.GetSpec().ClusterInfo.NodeInfo.MemoryMb),
+		c.c.GetSpec().ClusterInfo.NodeInfo.DiskSizeGb,
+		iops)
 }
 
 func (c *ClusterContext) Nodes() string {
@@ -147,10 +153,6 @@ func (c *ClusterContext) Nodes() string {
 
 func (c *ClusterContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.c)
-}
-
-func (c *ClusterContext) totalResource(resource int32) int32 {
-	return c.c.GetSpec().ClusterInfo.NumNodes * resource
 }
 
 func (c *ClusterContext) Provider() string {

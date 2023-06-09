@@ -13,15 +13,15 @@ require (
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/jayco/go-emoji-flag v0.0.0-20190810054606-01604da018da
 	github.com/mattn/go-runewidth v0.0.14
-	github.com/onsi/ginkgo/v2 v2.9.5
-	github.com/onsi/gomega v1.27.7
+	github.com/onsi/ginkgo/v2 v2.9.7
+	github.com/onsi/gomega v1.27.8
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
-	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230602121742-5be626bd9a29
+	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230612170114-34eb470a0c39
 	golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2
 	golang.org/x/mod v0.10.0
 	golang.org/x/term v0.8.0
