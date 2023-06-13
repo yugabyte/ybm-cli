@@ -77,38 +77,56 @@ var createVpcCmd = &cobra.Command{
 	Short: "Create a VPC in YugabyteDB Managed",
 	Long:  "Create a VPC in YugabyteDB Managed",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Validations
-		if !cmd.Flags().Changed("global-cidr") && !cmd.Flags().Changed("cidr") {
-			logrus.Fatal("Either global-cidr or cidr must be specified")
-		}
-
-		if len(createRegions) != len(createCidrs) {
-			logrus.Fatal("Number of regions and cidrs must be equal")
-		}
-
 		vpcName, _ := cmd.Flags().GetString("name")
 		cloud, _ := cmd.Flags().GetString("cloud-provider")
 		globalCidrRange, _ := cmd.Flags().GetString("global-cidr")
 
-		// global CIDR only works with GCP
-		if cloud != "GCP" && cmd.Flags().Changed("global-cidr") {
-			logrus.Fatal("global-cidr is only supported for GCP")
+		// If the cloud is Azure and the FF is off, then the customer must NOT specify a CIDR
+		if cloud == "AZURE" && !util.IsFeatureFlagEnabled(util.AZURE_CIDR_PROVIDE) {
+			if cmd.Flags().Changed("cidr") {
+				logrus.Fatal("cidr is auto-assigned for Azure. Please remove the cidr flag")
+			}
+		}
+
+		// Validations
+		if cloud != "AZURE" {
+			if !cmd.Flags().Changed("global-cidr") && !cmd.Flags().Changed("cidr") {
+				logrus.Fatal("Either global-cidr or cidr must be specified")
+			}
+
+			// global CIDR only works with GCP
+			if cloud != "GCP" && cmd.Flags().Changed("global-cidr") {
+				logrus.Fatal("global-cidr is only supported for GCP")
+			}
+
+			if len(createRegions) != len(createCidrs) {
+				logrus.Fatal("Number of regions and cidrs must be equal")
+			}
+		} else {
+			if cmd.Flags().Changed("global-cidr") {
+				logrus.Fatal("global-cidr is not supported for Azure")
+			}
 		}
 
 		// If non-global CIDR, validate that there are different regions specified
 		regionMap := map[string]int{}
 		vpcRegionSpec := []ybmclient.VpcRegionSpec{}
 
-		if cmd.Flags().Changed("cidr") {
+		if !cmd.Flags().Changed("global-cidr") {
 			for index, region := range createRegions {
-				cidr := createCidrs[index]
-				if valid, err := util.ValidateCIDR(cidr); !valid {
-					logrus.Fatal(err)
-				}
 				spec := *ybmclient.NewVpcRegionSpecWithDefaults()
 				regionMap[region] = index
 				spec.SetRegion(region)
-				spec.SetCidr(cidr)
+
+				// CIDR might not be specified for Azure
+				var cidr string
+				if len(createCidrs) != 0 {
+					cidr = createCidrs[index]
+					if valid, err := util.ValidateCIDR(cidr); !valid {
+						logrus.Fatal(err)
+					}
+					spec.SetCidr(cidr)
+				}
 				vpcRegionSpec = append(vpcRegionSpec, spec)
 			}
 			if len(regionMap) != len(createRegions) {
@@ -233,7 +251,6 @@ func init() {
 	createVpcCmd.Flags().String("global-cidr", "", "[OPTIONAL] Global CIDR for the VPC.")
 	createVpcCmd.Flags().StringSliceVar(&createRegions, "region", []string{}, "[OPTIONAL] Region of the VPC.")
 	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "[OPTIONAL] CIDR of the VPC.")
-	createVpcCmd.MarkFlagsRequiredTogether("region", "cidr")
 	createVpcCmd.MarkFlagsMutuallyExclusive("global-cidr", "cidr")
 
 	VPCCmd.AddCommand(deleteVpcCmd)

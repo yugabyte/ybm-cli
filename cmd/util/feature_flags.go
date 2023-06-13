@@ -25,10 +25,11 @@ import (
 type FeatureFlag string
 
 const (
-	CDC           FeatureFlag = "CDC"
-	CONFIGURE_URL FeatureFlag = "CONFIGURE_URL"
-	NODE_OP       FeatureFlag = "NODE_OPS"
-	TOOLS         FeatureFlag = "TOOLS"
+	CDC                FeatureFlag = "CDC"
+	CONFIGURE_URL      FeatureFlag = "CONFIGURE_URL"
+	NODE_OP            FeatureFlag = "NODE_OPS"
+	TOOLS              FeatureFlag = "TOOLS"
+	AZURE_CIDR_PROVIDE FeatureFlag = "AZURE_CIDR_PROVIDE"
 )
 
 func (f FeatureFlag) String() string {
