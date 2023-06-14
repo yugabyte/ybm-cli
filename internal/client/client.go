@@ -161,6 +161,7 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string) (*ybmclient.ClusterSpec, error) {
 
 	var diskSizeGb int32
+	var diskIops int32
 	var memoryMb int32
 	var trackId string
 	var trackName string
@@ -264,6 +265,10 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 			diskSizeGb = int32(diskSize)
 		}
 
+		if diskIopsInt, ok := nodeConfig["disk-iops"]; ok {
+			diskIops = int32(diskIopsInt)
+		}
+
 	}
 
 	cloud := string(cloudInfo.GetCode())
@@ -271,7 +276,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	tier := string(clusterInfo.GetClusterTier())
 	numCores := clusterInfo.NodeInfo.GetNumCores()
 
-	memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, int32(numCores))
+	memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, numCores)
 	if err != nil {
 		return nil, err
 	}
@@ -279,12 +284,16 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 
 	// Computing the default disk size if it is not provided
 	if diskSizeGb == 0 {
-		diskSizeGb, err = a.GetFromInstanceType("disk", cloud, tier, region, int32(numCores))
+		diskSizeGb, err = a.GetFromInstanceType("disk", cloud, tier, region, numCores)
 		if err != nil {
 			return nil, err
 		}
 	}
 	clusterInfo.NodeInfo.SetDiskSizeGb(diskSizeGb)
+
+	if diskIops > 0 {
+		clusterInfo.NodeInfo.SetDiskIops(diskIops)
+	}
 
 	if cmd.Flags().Changed("cluster-type") {
 		clusterType, _ := cmd.Flags().GetString("cluster-type")

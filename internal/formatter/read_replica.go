@@ -18,6 +18,7 @@ package formatter
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -96,18 +97,19 @@ func (c *ReadReplicaContext) Endpoint() string {
 }
 
 func (c *ReadReplicaContext) NodesSpec() string {
-	return fmt.Sprintf("%d / %s / %dGB",
-		c.totalResource(c.rrSpec.NodeInfo.NumCores),
-		convertMbtoGb(c.totalResource(c.rrSpec.NodeInfo.MemoryMb)),
-		c.totalResource(c.rrSpec.NodeInfo.DiskSizeGb))
+	iops := "-"
+	if c.rrSpec.NodeInfo.DiskIops.Get() != nil {
+		iops = strconv.Itoa(int(*c.rrSpec.NodeInfo.DiskIops.Get()))
+	}
+	return fmt.Sprintf("%d / %s / %dGB / %s",
+		c.rrSpec.NodeInfo.NumCores,
+		convertMbtoGb(c.rrSpec.NodeInfo.MemoryMb),
+		c.rrSpec.NodeInfo.DiskSizeGb,
+		iops)
 }
 
 func (c *ReadReplicaContext) Nodes() string {
 	return fmt.Sprintf("%d", c.rrSpec.PlacementInfo.NumNodes)
-}
-
-func (c *ReadReplicaContext) totalResource(resource int32) int32 {
-	return c.rrSpec.PlacementInfo.NumNodes * resource
 }
 
 func (c *ReadReplicaContext) MarshalJSON() ([]byte, error) {
