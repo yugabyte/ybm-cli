@@ -91,9 +91,9 @@ func (r *RoleContext) RoleType() string {
 	isUserDefined := r.r.Info.GetIsUserDefined()
 	switch isUserDefined {
 	case true:
-		return fmt.Sprintf("Custom")
+		return "Custom"
 	case false:
-		return fmt.Sprintf("Built-in")
+		return "Built-in"
 	default:
 		return fmt.Sprintf("%t", isUserDefined)
 	}

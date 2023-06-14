@@ -17,7 +17,6 @@ package formatter
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -91,15 +90,15 @@ func NewApiKeyContext() *ApiKeyContext {
 }
 
 func (a *ApiKeyContext) ApiKeyName() string {
-	return fmt.Sprintf("%s", a.a.Spec.GetName())
+	return a.a.Spec.GetName()
 }
 
 func (a *ApiKeyContext) ExpiryTime() string {
-	return fmt.Sprintf("%s", a.a.Info.ExpiryTime)
+	return a.a.Info.ExpiryTime
 }
 
 func (a *ApiKeyContext) ApiKeyStatus() string {
-	return fmt.Sprintf("%s", a.a.Info.Status)
+	return string(a.a.Info.Status)
 }
 
 func (a *ApiKeyContext) ID() string {

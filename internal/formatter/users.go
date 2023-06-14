@@ -17,7 +17,6 @@ package formatter
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -80,7 +79,7 @@ func (u *UserContext) UserName() string {
 }
 
 func (u *UserContext) UserState() string {
-	return fmt.Sprintf("%s", u.u.Info.State)
+	return string(u.u.Info.State)
 }
 
 func (u *UserContext) UserRole() string {

@@ -66,6 +66,6 @@ var listCloudRegionsCmd = &cobra.Command{
 func init() {
 	CloudRegionsCmd.AddCommand(listCloudRegionsCmd)
 
-	listCloudRegionsCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.")
+	listCloudRegionsCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS, AZURE or GCP.")
 	listCloudRegionsCmd.MarkFlagRequired("cloud-provider")
 }
