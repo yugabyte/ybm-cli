@@ -18,6 +18,7 @@ ybm api-key create [flags]
       --unit string          [REQUIRED] The time units for which the API Key will be valid. Available options are Hours, Days, and Months.
       --description string   [OPTIONAL] Description of the API Key to be created.
       --role-name string     [OPTIONAL] The name of the role to be assigned to the API Key. If not provided, an Admin API Key will be generated.
+  -f, --force                Bypass the prompt for non-interactive usage
   -h, --help                 help for create
 ```
 

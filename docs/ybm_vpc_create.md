@@ -14,7 +14,7 @@ ybm vpc create [flags]
 
 ```
       --name string             [REQUIRED] Name for the VPC.
-      --cloud-provider string   [REQUIRED] Cloud provider for the VPC.
+      --cloud-provider string   [REQUIRED] Cloud provider for the VPC: AWS, AZURE or GCP.
       --global-cidr string      [OPTIONAL] Global CIDR for the VPC.
       --region strings          [OPTIONAL] Region of the VPC.
       --cidr strings            [OPTIONAL] CIDR of the VPC.

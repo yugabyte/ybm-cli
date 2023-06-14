@@ -13,7 +13,7 @@ ybm cluster update [flags]
 ### Options
 
 ```
-      --cloud-provider string     [OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP.
+      --cloud-provider string     [OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP.
       --cluster-name string       [REQUIRED] Name of the cluster.
       --cluster-tier string       [OPTIONAL] The tier of the cluster. Sandbox or Dedicated.
       --cluster-type string       [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.

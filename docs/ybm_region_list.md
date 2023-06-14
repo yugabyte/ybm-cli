@@ -13,7 +13,7 @@ ybm region list [flags]
 ### Options
 
 ```
-      --cloud-provider string   [REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.
+      --cloud-provider string   [REQUIRED] The cloud provider for which the regions have to be fetched. AWS, AZURE or GCP.
   -h, --help                    help for list
 ```
 

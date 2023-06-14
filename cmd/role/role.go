@@ -186,8 +186,19 @@ var createRoleCmd = &cobra.Command{
 		permissionsMap := map[string][]string{}
 
 		permissionsList, _ := cmd.Flags().GetStringArray("permissions")
-
 		CreatePermissionsMap(permissionsList, permissionsMap)
+
+		containsSensitivePermissions, err := authApi.ContainsSensitivePermissions(permissionsMap)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		if containsSensitivePermissions {
+			viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+			err := util.ConfirmCommand(fmt.Sprintf(util.GetSensitivePermissionsConfirmationMessage()+" Are you sure you want to proceed with role creation?", roleName), viper.GetBool("force"))
+			if err != nil {
+				logrus.Fatal(err)
+			}
+		}
 
 		roleSpec, err := authApi.CreateRoleSpec(cmd, roleName, permissionsMap)
 		if err != nil {
@@ -286,6 +297,18 @@ var updateRoleCmd = &cobra.Command{
 		permissionsList, _ := cmd.Flags().GetStringArray("permissions")
 		CreatePermissionsMap(permissionsList, permissionsMap)
 
+		containsSensitivePermissions, err := authApi.ContainsSensitivePermissions(permissionsMap)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		if containsSensitivePermissions {
+			err := util.ConfirmCommand(fmt.Sprintf(util.GetSensitivePermissionsConfirmationMessage()+" Are you sure you want to proceed with updating this role?", roleName), viper.GetBool("force"))
+			if err != nil {
+				logrus.Fatal(err)
+			}
+
+		}
+
 		roleSpec, err := authApi.CreateRoleSpec(cmd, roleName, permissionsMap)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
@@ -374,6 +397,7 @@ func init() {
 	createRoleCmd.Flags().StringArray("permissions", []string{}, `[REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.`)
 	createRoleCmd.MarkFlagRequired("permissions")
 	createRoleCmd.Flags().String("description", "", "[OPTIONAL] Description of the role to be created.")
+	createRoleCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 	RoleCmd.AddCommand(updateRoleCmd)
 	updateRoleCmd.Flags().SortFlags = false

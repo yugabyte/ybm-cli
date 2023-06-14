@@ -13,7 +13,7 @@ ybm region instance list [flags]
 ### Options
 
 ```
-      --cloud-provider string   [REQUIRED] The cloud provider for which the regions have to be fetched. AWS or GCP.
+      --cloud-provider string   [REQUIRED] The cloud provider for which the regions have to be fetched. AWS, AZURE or GCP.
       --region string           [REQUIRED] The region in the cloud provider for which the instance types have to fetched.
       --tier string             [OPTIONAL] Tier. Sandbox or Dedicated. (default "Dedicated")
       --show-disabled           [OPTIONAL] Whether to show disabled instance types. true or false. (default true)

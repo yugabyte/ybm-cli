@@ -14,6 +14,7 @@ ybm user invite [flags]
 
 ```
       --email string       [REQUIRED] The email of the user to be invited.
+  -f, --force              Bypass the prompt for non-interactive usage
   -h, --help               help for invite
       --role-name string   [REQUIRED] The name of the role to be assigned to the user.
 ```

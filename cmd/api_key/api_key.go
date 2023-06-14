@@ -104,7 +104,6 @@ func GetKeyTimeConversionMap() map[string]int {
 	}
 }
 
-// inviteUsersCmd represents the create role command
 var createApiKeyCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create an API Key",
@@ -148,6 +147,20 @@ var createApiKeyCmd = &cobra.Command{
 			if err != nil {
 				logrus.Fatal(err)
 			}
+
+			roleContainsSensitivePermissions, err := authApi.RoleContainsSensitivePermissions(roleId)
+			if err != nil {
+				logrus.Fatal(err)
+			}
+
+			if roleContainsSensitivePermissions {
+				viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+				err := util.ConfirmCommand(fmt.Sprintf(util.GetSensitivePermissionsConfirmationMessage()+" Are you sure you want to proceed with creating API Key '%s' with this role?", roleName, name), viper.GetBool("force"))
+				if err != nil {
+					logrus.Fatal(err)
+				}
+			}
+
 			apiKeySpec.SetRoleId(roleId)
 		}
 
@@ -221,6 +234,7 @@ func init() {
 	createApiKeyCmd.MarkFlagRequired("unit")
 	createApiKeyCmd.Flags().String("description", "", "[OPTIONAL] Description of the API Key to be created.")
 	createApiKeyCmd.Flags().String("role-name", "", "[OPTIONAL] The name of the role to be assigned to the API Key. If not provided, an Admin API Key will be generated.")
+	createApiKeyCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 	ApiKeyCmd.AddCommand(revokeApiKeyCmd)
 	revokeApiKeyCmd.Flags().SortFlags = false

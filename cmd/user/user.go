@@ -90,8 +90,24 @@ var inviteUserCmd = &cobra.Command{
 
 		email, _ := cmd.Flags().GetString("email")
 		roleName, _ := cmd.Flags().GetString("role-name")
+		roleId, err := authApi.GetRoleIdByName(roleName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
 
-		usersSpec, err := authApi.CreateBatchInviteUserSpec(email, roleName)
+		roleContainsSensitivePermissions, err := authApi.RoleContainsSensitivePermissions(roleId)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		if roleContainsSensitivePermissions {
+			viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+			err := util.ConfirmCommand(fmt.Sprintf(util.GetSensitivePermissionsConfirmationMessage()+" Are you sure you want to proceed with inviting user '%s' with this role?", roleName, email), viper.GetBool("force"))
+			if err != nil {
+				logrus.Fatal(err)
+			}
+		}
+
+		usersSpec, err := authApi.CreateBatchInviteUserSpec(email, roleId)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -143,6 +159,17 @@ var updateUserCmd = &cobra.Command{
 		roleId, err := authApi.GetRoleIdByName(roleName)
 		if err != nil {
 			logrus.Fatal(err)
+		}
+
+		roleContainsSensitivePermissions, err := authApi.RoleContainsSensitivePermissions(roleId)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		if roleContainsSensitivePermissions {
+			err := util.ConfirmCommand(fmt.Sprintf(util.GetSensitivePermissionsConfirmationMessage()+" Are you sure you want to proceed with modifying role of user '%s'?", roleName, email), viper.GetBool("force"))
+			if err != nil {
+				logrus.Fatal(err)
+			}
 		}
 
 		modifyUserRoleRequest := *ybmclient.NewModifyUserRoleRequest(roleId)
@@ -207,6 +234,7 @@ func init() {
 	inviteUserCmd.MarkFlagRequired("email")
 	inviteUserCmd.Flags().String("role-name", "", "[REQUIRED] The name of the role to be assigned to the user.")
 	inviteUserCmd.MarkFlagRequired("role-name")
+	inviteUserCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 	UserCmd.AddCommand(updateUserCmd)
 	updateUserCmd.Flags().String("email", "", "[REQUIRED] The email of the user whose role is to be modified.")
