@@ -53,7 +53,7 @@ func GetDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmcl
 		PlacementInfo: ybmclient.PlacementInfo{
 			CloudInfo: ybmclient.CloudInfo{
 				Code:   primaryClusterCloud,
-				Region: "us-west2",
+				Region: ,
 			},
 			VpcId:       *ybmclient.NewNullableString(&vpcId),
 			NumNodes:    1,
@@ -69,17 +69,13 @@ func SetMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.Read
 	tier := "PAID"
 	region := spec.PlacementInfo.CloudInfo.Region
 	numCores := spec.NodeInfo.NumCores
-	memoryMb, err := authApi.GetFromInstanceType("memory", cloud, tier, region, numCores)
+	nodeConfig, err := authApi.GetNodeConfiguration(cloud, tier, region, numCores)
 	if err != nil {
 		return err
 	}
-	spec.NodeInfo.MemoryMb = memoryMb
+	spec.NodeInfo.MemoryMb = (*nodeConfig).MemoryMb
 	if spec.NodeInfo.DiskSizeGb == 0 {
-		diskSizeGb, err := authApi.GetFromInstanceType("disk", cloud, tier, region, numCores)
-		if err != nil {
-			return err
-		}
-		spec.NodeInfo.DiskSizeGb = diskSizeGb
+		spec.NodeInfo.DiskSizeGb = (*nodeConfig).IncludedDiskSizeGb
 	}
 	return nil
 }
@@ -87,6 +83,7 @@ func SetMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.Read
 // Parse array of read replica string to string params
 func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string, primaryClusterCloud ybmclient.CloudEnum, vpcId string) ([]ybmclient.ReadReplicaSpec, error) {
 	var err error
+	var regions []string
 	readReplicaSpecs := []ybmclient.ReadReplicaSpec{}
 	defaultSpec := GetDefaultSpec(primaryClusterCloud, vpcId)
 
@@ -159,10 +156,10 @@ func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 			}
 
 		}
-		if err := SetMemoryAndDisk(authApi, &spec); err != nil {
-			return nil, err
-		}
 		readReplicaSpecs = append(readReplicaSpecs, spec)
+	}
+	if err := SetMemoryAndDisk(authApi, &spec); err != nil {
+		return nil, err
 	}
 
 	if len(readReplicaSpecs) == 0 {

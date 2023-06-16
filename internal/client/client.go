@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/exp/maps"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -726,24 +727,31 @@ func (a *AuthApiClient) GetCdcStreamIDByStreamName(cdcStreamName string) (string
 	return "", fmt.Errorf("couldn't find any cdcStream with the given name")
 }
 
-func (a *AuthApiClient) GetSupportedNodeConfigurations(cloud string, tier string, region string) ybmclient.ApiGetSupportedNodeConfigurationsRequest {
-	return a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions([]string{region})
+func (a *AuthApiClient) GetSupportedNodeConfigurations(cloud string, tier string, regions []string) ybmclient.ApiGetSupportedNodeConfigurationsRequest {
+	return a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions(regions).IsMultiRegion(len(regions) > 1)
 }
 
-func (a *AuthApiClient) GetFromInstanceType(resource string, cloud string, tier string, region string, numCores int32) (int32, error) {
-	instanceResp, resp, err := a.GetSupportedNodeConfigurations(cloud, tier, region).Execute()
+func (a *AuthApiClient) GetNodeConfiguration(cloud string, tier string, regions []string, numCores int32) (*ybmclient.NodeConfigurationResponseItem, error) {
+	instanceResp, resp, err := a.GetSupportedNodeConfigurations(cloud, tier, regions).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(b)
-		return 0, err
+		return nil, err
 	}
 	instanceData := instanceResp.GetData()
-	nodeConfigList, ok := instanceData[region]
+	fmt.Println("instanceData: ", instanceData)
+	fmt.Println("joined regions key: ", strings.Join(regions[:], ","))
+	nodeConfigList, ok := instanceData[strings.Join(regions[:], ",")]
 	if !ok || len(nodeConfigList) == 0 {
-		return 0, fmt.Errorf("no instances configured for the given region")
+		return nil, fmt.Errorf("no instances configured for the given region")
 	}
 
-	return getFromNodeConfig(resource, numCores, nodeConfigList)
+	for _, nodeConfig := range nodeConfigList {
+		if nodeConfig.GetNumCores() == numCores {
+			return &nodeConfig, nil
+		}
+	}
+	return nil, fmt.Errorf("node with the given number of CPU cores doesn't exist in the given region")
 
 }
 
@@ -1119,22 +1127,6 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType yb
 		}
 	}
 
-}
-
-func getFromNodeConfig(resource string, numCores int32, nodeConfigList []ybmclient.NodeConfigurationResponseItem) (int32, error) {
-	resourceValue := int32(0)
-	for _, nodeConfig := range nodeConfigList {
-		if nodeConfig.GetNumCores() == numCores {
-			switch resource {
-			case "disk":
-				resourceValue = nodeConfig.GetIncludedDiskSizeGb()
-			case "memory":
-				resourceValue = nodeConfig.GetMemoryMb()
-			}
-			return resourceValue, nil
-		}
-	}
-	return 0, fmt.Errorf("node with the given number of CPU cores doesn't exist in the given region")
 }
 
 // Utils functions

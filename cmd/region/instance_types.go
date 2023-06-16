@@ -16,7 +16,9 @@
 package region
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -25,6 +27,8 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
+
+var allRegionOpt []string
 
 var InstanceCmd = &cobra.Command{
 	Use:   "instance",
@@ -47,20 +51,21 @@ var getInstanceTypesCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
-		cloudRegion, _ := cmd.Flags().GetString("region")
+		//cloudRegion, _ := cmd.Flags().GetString("region")
 		tierCli, _ := cmd.Flags().GetString("tier")
 		tier, err := util.GetClusterTier(tierCli)
 		if err != nil {
 			logrus.Fatalln(err)
 		}
 		showDisabled, _ := cmd.Flags().GetBool("show-disabled")
-		instanceTypesResp, resp, err := authApi.GetSupportedNodeConfigurations(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
+
+		instanceTypesResp, resp, err := authApi.GetSupportedNodeConfigurations(cloudProvider, tier, allRegionOpt).ShowDisabled(showDisabled).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-
-		instanceTypeData := instanceTypesResp.GetData()[cloudRegion]
+		fmt.Println("instance types resp data: ", instanceTypesResp.GetData())
+		instanceTypeData := instanceTypesResp.GetData()[strings.Join(allRegionOpt, ",")]
 
 		instanceTypeCtx := formatter.Context{
 			Output: os.Stdout,
@@ -78,7 +83,8 @@ func init() {
 	getInstanceTypesCmd.Flags().SortFlags = false
 	getInstanceTypesCmd.Flags().String("cloud-provider", "", "[REQUIRED] The cloud provider for which the regions have to be fetched. AWS, AZURE or GCP.")
 	getInstanceTypesCmd.MarkFlagRequired("cloud-provider")
-	getInstanceTypesCmd.Flags().String("region", "", "[REQUIRED] The region in the cloud provider for which the instance types have to fetched.")
+	//getInstanceTypesCmd.Flags().String("region", "", "[REQUIRED] The region in the cloud provider for which the instance types have to fetched.")
+	getInstanceTypesCmd.Flags().StringArrayVarP(&allRegionOpt, "region", "r", []string{}, "[] The region(s) in the cloud provider for which to fetch instance types. Providing multiple regions fetches the instance types needed for a multi-region deployment.")
 	getInstanceTypesCmd.MarkFlagRequired("region")
 	getInstanceTypesCmd.Flags().String("tier", "Dedicated", "[OPTIONAL] Tier. Sandbox or Dedicated.")
 	getInstanceTypesCmd.Flags().Bool("show-disabled", true, "[OPTIONAL] Whether to show disabled instance types. true or false.")
