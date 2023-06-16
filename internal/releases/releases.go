@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v53/github"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
