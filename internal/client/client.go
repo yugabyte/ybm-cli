@@ -622,6 +622,10 @@ func (a *AuthApiClient) EditClusterCMKs(clusterId string) ybmclient.ApiEditClust
 	return a.ApiClient.ClusterApi.EditClusterCMK(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) UpdateClusterCmkState(clusterId string, cmkId string) ybmclient.ApiUpdateClusterCmkStateRequest {
+	return a.ApiClient.ClusterApi.UpdateClusterCmkState(a.ctx, a.AccountID, a.ProjectID, clusterId, cmkId)
+}
+
 func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
 	return a.ApiClient.BackupApi.ListBackups(a.ctx, a.AccountID, a.ProjectID)
 }
