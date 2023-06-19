@@ -120,6 +120,9 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 					}
 				}
 			}
+			if cmkAwsArnList == nil {
+				logrus.Fatalln("Incorrect format in cmk spec: AWS ARN list specified, but no aws-arn provided.")
+			}
 			cmkSpec.AwsCmkSpec.Set(ybmclient.NewAWSCMKSpec(cmkAwsAccessKey, cmkAwsSecretKey, cmkAwsArnList))
 		case "GCP":
 			if cmkGcpResourceId == "" {

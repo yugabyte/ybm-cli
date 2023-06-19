@@ -23,7 +23,6 @@ import (
 	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
-	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 var EncryptionCmd = &cobra.Command{
@@ -58,7 +57,7 @@ var listCmk = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		if resp.Data == (ybmclient.NullableCMKSpec{}) {
+		if resp.Data.Get() == nil {
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
 
@@ -71,6 +70,7 @@ var listCmk = &cobra.Command{
 }
 
 var updateCmk = &cobra.Command{
+	// This API creates new EAR configuration if not found, else updates the current one
 	Use:   "update",
 	Short: "Update Encryption at Rest (EaR) configurations for a cluster",
 	Long:  "Update Encryption at Rest (EaR) configurations for a cluster",
@@ -88,38 +88,16 @@ var updateCmk = &cobra.Command{
 			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		resp, r, err := authApi.ListClusterCMKs(clusterId).Execute()
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		if resp.Data == (ybmclient.NullableCMKSpec{}) {
-			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
-		}
-
-		oldCmkSpec := resp.GetData()
-
-		newCmkSpec, err := GetCmkSpecFromCommand(cmd)
+		cmkSpec, err := GetCmkSpecFromCommand(cmd)
 		if err != nil {
 			logrus.Fatalf("Unable to parse new CMK spec: %v", err)
 		}
 
-		if newCmkSpec.GetProviderType() != oldCmkSpec.GetProviderType() {
-			logrus.Fatalf("Modifying KMS provider is not allowed.")
-		}
-
-		// Need to copy over the AWS ARNs
-		if newCmkSpec.GetProviderType() == "AWS" {
-			newCmkSpec.AwsCmkSpec.Get().ArnList = oldCmkSpec.AwsCmkSpec.Get().ArnList
-		}
-
-		resp, r, err = authApi.EditClusterCMKs(clusterId).CMKSpec(*newCmkSpec).Execute()
+		_, res, err := authApi.EditClusterCMKs(clusterId).CMKSpec(*cmkSpec).Execute()
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Debugf("Full HTTP response: %v", res)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-
 		fmt.Printf("Successfully updated encryption spec for cluster %s\n", clusterName)
 	},
 }
