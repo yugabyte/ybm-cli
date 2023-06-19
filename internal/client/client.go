@@ -1149,7 +1149,7 @@ func getAPIError(b []byte) *ybmclient.ApiError {
 
 func ParseURL(host string) (*url.URL, error) {
 	if strings.HasPrefix(strings.ToLower(host), "http://") {
-		logrus.Warnf("you are using insecure api endpoint %s", host)
+		logrus.Warnf("you are using insecure api endpoint %s\n", host)
 	} else if !strings.HasPrefix(strings.ToLower(host), "https://") {
 		host = "https://" + host
 	}
