@@ -29,7 +29,7 @@ const (
 	CONFIGURE_URL      FeatureFlag = "CONFIGURE_URL"
 	NODE_OP            FeatureFlag = "NODE_OPS"
 	TOOLS              FeatureFlag = "TOOLS"
-	AZURE_CIDR_PROVIDE FeatureFlag = "AZURE_CIDR_PROVIDE"
+	AZURE_CIDR_ALLOWED FeatureFlag = "AZURE_CIDR_ALLOWED"
 )
 
 func (f FeatureFlag) String() string {

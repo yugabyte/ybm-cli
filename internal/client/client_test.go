@@ -34,7 +34,7 @@ var _ = Describe("Client", func() {
 			buffer := gbytes.NewBuffer()
 			logrus.SetOutput(buffer)
 			url, err := client.ParseURL("http://myurl.com")
-			Expect(buffer).To(gbytes.Say("level=warning msg=\"you are using insecure api endpoint http://myurl.com\""))
+			Expect(buffer).To(gbytes.Say("level=warning msg=\"you are using insecure api endpoint http://myurl.com\"\n"))
 			Expect(err).ToNot(HaveOccurred())
 			Expect(url.String()).To(Equal("http://myurl.com"))
 		})

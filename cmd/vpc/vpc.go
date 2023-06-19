@@ -81,13 +81,6 @@ var createVpcCmd = &cobra.Command{
 		cloud, _ := cmd.Flags().GetString("cloud-provider")
 		globalCidrRange, _ := cmd.Flags().GetString("global-cidr")
 
-		// If the cloud is Azure and the FF is off, then the customer must NOT specify a CIDR
-		if cloud == "AZURE" && !util.IsFeatureFlagEnabled(util.AZURE_CIDR_PROVIDE) {
-			if cmd.Flags().Changed("cidr") {
-				logrus.Fatal("cidr is auto-assigned for Azure. Please remove the cidr flag")
-			}
-		}
-
 		// Validations
 		if cloud != "AZURE" {
 			if !cmd.Flags().Changed("global-cidr") && !cmd.Flags().Changed("cidr") {
@@ -103,6 +96,13 @@ var createVpcCmd = &cobra.Command{
 				logrus.Fatal("Number of regions and cidrs must be equal")
 			}
 		} else {
+			// If the cloud is Azure and the FF is off, then the customer must NOT specify a CIDR
+			if cloud == "AZURE" && !util.IsFeatureFlagEnabled(util.AZURE_CIDR_ALLOWED) {
+				if cmd.Flags().Changed("cidr") {
+					logrus.Fatal("cidr is auto-assigned for Azure. Please remove the cidr flag")
+				}
+			}
+
 			if cmd.Flags().Changed("global-cidr") {
 				logrus.Fatal("global-cidr is not supported for Azure")
 			}
