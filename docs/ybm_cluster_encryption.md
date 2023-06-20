@@ -35,4 +35,5 @@ ybm cluster encryption [flags]
 * [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
 * [ybm cluster encryption list](ybm_cluster_encryption_list.md)	 - List Encryption at Rest (EaR) configurations for a cluster
 * [ybm cluster encryption update](ybm_cluster_encryption_update.md)	 - Update Encryption at Rest (EaR) configurations for a cluster
+* [ybm cluster encryption update-state](ybm_cluster_encryption_update-state.md)	 - Update Encryption at Rest (EaR) state for a cluster
 

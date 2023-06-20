@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 var EncryptionCmd = &cobra.Command{
@@ -69,6 +70,61 @@ var listCmk = &cobra.Command{
 	},
 }
 
+var updateCmkState = &cobra.Command{
+	Use:   "update-state",
+	Short: "Update Encryption at Rest (EaR) state for a cluster",
+	Long:  "Update Encryption at Rest (EaR) state for a cluster",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("Could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterId, err := authApi.GetClusterIdByName(clusterName)
+		if err != nil {
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		resp, r, err := authApi.ListClusterCMKs(clusterId).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		enableFlag, _ := cmd.Flags().GetBool("enable")
+		disableFlag, _ := cmd.Flags().GetBool("disable")
+
+		if enableFlag == disableFlag {
+			logrus.Fatalf("Please enter valid input. Specify either enable or disable flag.")
+		}
+
+		if resp.Data.Get() == nil {
+			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
+		}
+
+		cmkId := resp.Data.Get().GetCmkId()
+
+		cmkStatus := true
+		if disableFlag {
+			cmkStatus = false
+		}
+
+		updateCMKStateSpec := ybmclient.NewUpdateCMKStateSpec(cmkStatus)
+		resp, r, err = authApi.UpdateClusterCmkState(clusterId, cmkId).UpdateCMKStateSpec(*updateCMKStateSpec).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		cmkStatusDisplay := "DISABLED"
+		if cmkStatus {
+			cmkStatusDisplay = "ENABLED"
+		}
+
+		fmt.Printf("Successfully %s encryption spec status for cluster %s\n", formatter.Colorize(cmkStatusDisplay, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+	},
+}
+
 var updateCmk = &cobra.Command{
 	// This API creates new EAR configuration if not found, else updates the current one
 	Use:   "update",
@@ -105,6 +161,7 @@ var updateCmk = &cobra.Command{
 func init() {
 	EncryptionCmd.AddCommand(listCmk)
 	EncryptionCmd.AddCommand(updateCmk)
+	EncryptionCmd.AddCommand(updateCmkState)
 	updateCmk.Flags().String("encryption-spec", "", `[REQUIRED] The customer managed key spec for the cluster.
 	Please provide key value pairs as follows:
 	For AWS: 
@@ -113,4 +170,6 @@ func init() {
 	For GCP:
 	cloud-provider=GCP,gcp-resource-id=<resource-id>,gcp-service-account-path=<service-account-path>.`)
 	updateCmk.MarkFlagRequired("encryption-spec")
+	updateCmkState.Flags().Bool("enable", false, "Enable EAR")
+	updateCmkState.Flags().Bool("disable", false, "Disable EAR")
 }

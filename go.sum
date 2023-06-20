@@ -278,6 +278,8 @@ github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816 h1
 github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816/go.mod h1:tzym/CEb5jnFI+Q0k4Qq3+LvRF4gO3E2pxS8fHP8jcA=
 github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230612170114-34eb470a0c39 h1:ckc1DYAEq9zNMWCMV32T0mqdposIa03zhhkYHPeDfgw=
 github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230612170114-34eb470a0c39/go.mod h1:5vW0xIzIZw+1djkiWKx0qqNmqbRBSf4mjc4qw8lIMik=
+github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230616084337-3e2516a65d09 h1:B5fnbQTEbM0QX8R77NYCiGVlEzOq66V+lN2OYb+THTI=
+github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20230616084337-3e2516a65d09/go.mod h1:5vW0xIzIZw+1djkiWKx0qqNmqbRBSf4mjc4qw8lIMik=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
