@@ -881,6 +881,82 @@ func (a *AuthApiClient) ListResourcePermissions() ybmclient.ApiListResourcePermi
 	return a.ApiClient.AuthApi.ListResourcePermissions(a.ctx)
 }
 
+func (a *AuthApiClient) GetSensitivePermissions() (map[string][]string, error) {
+	resourcePermissionsResp, resp, err := a.ListResourcePermissions().Execute()
+	if err != nil {
+		c, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(c)
+		return nil, err
+	}
+
+	permissions := resourcePermissionsResp.GetData()
+	sensitivePermissionsMap := map[string][]string{}
+	for _, permission := range permissions {
+		resourceType := string(permission.Info.GetResourceType())
+		for i := 0; i < len(permission.Info.OperationGroups); i++ {
+			operationGroup := string(permission.Info.OperationGroups[i].GetOperationGroup())
+			tags := permission.Info.OperationGroups[i].GetTags()
+			if len(tags) == 0 || tags[0] != "SENSITIVE" {
+				continue
+			}
+			sensitivePermissionsMap[resourceType] = append(sensitivePermissionsMap[resourceType], operationGroup)
+		}
+	}
+	return sensitivePermissionsMap, nil
+}
+
+func (a *AuthApiClient) ContainsSensitivePermissions(permissionsMap map[string][]string) (bool, error) {
+	sensitivePermissions, err := a.GetSensitivePermissions()
+	if err != nil {
+		return false, err
+	}
+	for sensitiveResourceType, sensitiveOps := range sensitivePermissions {
+		if ops, ok := permissionsMap[sensitiveResourceType]; ok {
+			for _, op := range ops {
+				for _, sensitiveOp := range sensitiveOps {
+					if op == sensitiveOp {
+						return true, nil
+					}
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
+func (a *AuthApiClient) RoleContainsSensitivePermissions(roleId string) (bool, error) {
+	sensitivePermissions, err := a.GetSensitivePermissions()
+	if err != nil {
+		return false, err
+	}
+
+	roleResp, _, err := a.GetRole(roleId).Execute()
+	if err != nil {
+		return false, err
+	}
+
+	rolePermissions := roleResp.Data.Info.GetEffectivePermissions()
+	for _, rolePermission := range rolePermissions {
+		roleResourceType := string(rolePermission.GetResourceType())
+		for i := 0; i < len(rolePermission.OperationGroups); i++ {
+			roleOp := string(rolePermission.OperationGroups[i].GetOperationGroup())
+			if sensitiveOps, ok := sensitivePermissions[roleResourceType]; ok {
+				for _, sensitiveOp := range sensitiveOps {
+					if sensitiveOp == roleOp {
+						return true, nil
+					}
+				}
+			}
+		}
+	}
+
+	return false, nil
+}
+
+func (a *AuthApiClient) GetRole(roleId string) ybmclient.ApiGetRoleRequest {
+	return a.ApiClient.RoleApi.GetRole(a.ctx, a.AccountID, roleId)
+}
+
 func (a *AuthApiClient) ListApiKeys() ybmclient.ApiListApiKeysRequest {
 	return a.ApiClient.AuthApi.ListApiKeys(a.ctx, a.AccountID)
 }
@@ -928,15 +1004,11 @@ func (a *AuthApiClient) ListAccountUsers() ybmclient.ApiListAccountUsersRequest 
 	return a.ApiClient.AccountApi.ListAccountUsers(a.ctx, a.AccountID)
 }
 
-func (a *AuthApiClient) CreateBatchInviteUserSpec(email string, roleName string) (*ybmclient.BatchInviteUserSpec, error) {
+func (a *AuthApiClient) CreateBatchInviteUserSpec(email string, roleId string) (*ybmclient.BatchInviteUserSpec, error) {
 	users := []ybmclient.InviteUserSpec{}
 	user := *ybmclient.NewInviteUserSpecWithDefaults()
 	user.SetEmail(email)
 
-	roleId, err := a.GetRoleIdByName(roleName)
-	if err != nil {
-		logrus.Fatal(err)
-	}
 	user.SetRoleId(roleId)
 
 	users = append(users, user)

@@ -15,7 +15,7 @@ ybm cluster create [flags]
 ```
       --cluster-name string          [REQUIRED] Name of the cluster.
       --credentials stringToString   [REQUIRED] Credentials to login to the cluster. Please provide key value pairs username=<user-name>,password=<password>. (default [])
-      --cloud-provider string        [OPTIONAL] The cloud provider where database needs to be deployed. AWS or GCP. Default AWS.
+      --cloud-provider string        [OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP. Default AWS.
       --cluster-tier string          [OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.
       --cluster-type string          [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.
       --database-version string      [OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.

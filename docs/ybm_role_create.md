@@ -16,6 +16,7 @@ ybm role create [flags]
       --role-name string          [REQUIRED] Name of the role to be created.
       --permissions stringArray   [REQUIRED] Permissions for the role. Please provide key value pairs resource-type=<resource-type>,operation-group=<operation-group> as the value. Both resource-type and operation-group are mandatory. Information about multiple permissions can be specified by using multiple --permissions arguments.
       --description string        [OPTIONAL] Description of the role to be created.
+  -f, --force                     Bypass the prompt for non-interactive usage
   -h, --help                      help for create
 ```
 

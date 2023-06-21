@@ -29,6 +29,7 @@ import (
 )
 
 const customRoleFeatureFlagDisabled string = "Requested API not found"
+const sensitivePermissionsConfirmationMessage string = "Some of the permissions assigned to role '%s' have security implications (such as user, API key, and role management operations)."
 
 func FindNetworkAllowList(nals []ybmclient.NetworkAllowListData, name string) (ybmclient.NetworkAllowListData, error) {
 	for _, allowList := range nals {
@@ -137,4 +138,8 @@ func ConfirmCommand(message string, bypass bool) error {
 
 func GetCustomRoleFeatureFlagDisabledError() string {
 	return customRoleFeatureFlagDisabled
+}
+
+func GetSensitivePermissionsConfirmationMessage() string {
+	return sensitivePermissionsConfirmationMessage
 }

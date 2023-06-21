@@ -113,16 +113,6 @@
                                 "operation_groups": [
                                     {
                                         "operation_group": "READ",
-                                        "operation_group_description": "List or View Account related Tasks"
-                                    }
-                                ],
-                                "resource_name": "Tasks",
-                                "resource_type": "ACCOUNT_TASK"
-                            },
-                            {
-                                "operation_groups": [
-                                    {
-                                        "operation_group": "READ",
                                         "operation_group_description": "View Information of Users associated with the account"
                                     }
                                 ],
