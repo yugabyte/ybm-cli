@@ -18,6 +18,8 @@ package tools
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -50,6 +52,12 @@ var generateDocsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		cmd.Root().DisableAutoGenTag = true
+		// Remove the docs contains to avoid having old command still
+		// been there as this happen by the past with the get command
+		err = RemoveContents("./docs")
+		if err != nil {
+			log.Fatal(err)
+		}
 		switch viper.GetString("format") {
 		case "markdown":
 			err = doc.GenMarkdownTree(cmd.Root(), "./docs")
@@ -66,6 +74,7 @@ var generateDocsCmd = &cobra.Command{
 }
 
 func init() {
+	ToolsCmd.Hidden = true
 	ToolsCmd.AddCommand(generateDocsCmd)
 
 	generateDocsCmd.Flags().SortFlags = false
@@ -73,4 +82,18 @@ func init() {
 	viper.BindPFlag("format", generateDocsCmd.Flags().Lookup("format"))
 	viper.SetDefault("format", "markdown")
 
+}
+
+func RemoveContents(dir string) error {
+	files, err := filepath.Glob(filepath.Join(dir, "*"))
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		err = os.RemoveAll(file)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
