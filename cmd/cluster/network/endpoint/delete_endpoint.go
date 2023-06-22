@@ -51,7 +51,7 @@ var deleteEndpointCmd = &cobra.Command{
 		endpointId, _ := cmd.Flags().GetString("endpoint-id")
 		clusterEndpoint, clusterId, err := authApi.GetEndpointByIdForClusterByName(clusterName, endpointId)
 		if err != nil {
-			logrus.Fatalf("Error when calling `ClusterApi.GetEndpointByIdForClusterByName`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		// We currently support fetching just Private Service Endpoints
@@ -62,7 +62,7 @@ var deleteEndpointCmd = &cobra.Command{
 			r, err := authApi.DeletePrivateServiceEndpoint(clusterId, endpointId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.DeletePrivateServiceEndpoint`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			msg := fmt.Sprintf("Deleted endpoint %s", endpointId)

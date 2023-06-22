@@ -40,7 +40,7 @@ var updateEndpointCmd = &cobra.Command{
 		endpointId, _ := cmd.Flags().GetString("endpoint-id")
 		clusterEndpoint, clusterId, err := authApi.GetEndpointByIdForClusterByName(clusterName, endpointId)
 		if err != nil {
-			logrus.Fatalf("Error when calling `ClusterApi.GetEndpointByIdForClusterByName`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		// We currently support fetching just Private Service Endpoints
@@ -54,7 +54,7 @@ var updateEndpointCmd = &cobra.Command{
 			pseGetResponse, r, err := authApi.GetPrivateServiceEndpoint(clusterId, endpointId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.GetPrivateServiceEndpoint`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			securityPrincipalsString, _ := cmd.Flags().GetString("security-principals")
@@ -70,7 +70,7 @@ var updateEndpointCmd = &cobra.Command{
 			updateResp, r, err := authApi.EditPrivateServiceEndpoint(clusterId, endpointId).PrivateServiceEndpointRegionSpec(pseSpec[0]).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf("Error when calling `ClusterApi.EditPrivateServiceEndpoint`: %s\n", ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 			msg := fmt.Sprintf("Updated endpoint %s", updateResp.Data.Info.Id)

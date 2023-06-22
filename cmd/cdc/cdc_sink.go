@@ -67,7 +67,7 @@ var listCdcSinkCmd = &cobra.Command{
 		resp, r, err := cdcSinkRequest.Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `CdcApi.GetCdcSink`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		printCdcSinkOutput(resp.GetData())
@@ -119,7 +119,7 @@ var createCdcSinkCmd = &cobra.Command{
 		resp, r, err := authApi.CreateCdcSink().CreateCdcSinkRequest(*createSinkRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `CdcApi.CreateCdcSink`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		printCdcSinkOutput([]ybmclient.CdcSinkData{resp.GetData()})
@@ -172,7 +172,7 @@ var editCdcSinkCmd = &cobra.Command{
 		resp, r, err := authApi.EditCdcSink(cdcSinkID).EditCdcSinkRequest(*editCdcSinkRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `CdcApi.EditCdcSink`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		printCdcSinkOutput([]ybmclient.CdcSinkData{resp.GetData()})
@@ -200,7 +200,7 @@ var deleteCdcSinkCmd = &cobra.Command{
 		resp, err := authApi.DeleteCdcSink(cdcSinkID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf("Error when calling `CdcApi.DeleteCdcSink`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Fprintf(os.Stdout, "CDC sink deleted successfully")
