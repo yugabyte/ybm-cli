@@ -845,7 +845,7 @@ func (a *AuthApiClient) GetRoleIdByName(roleName string) (string, error) {
 		return roleData.Info.GetId(), nil
 	}
 
-	return "", fmt.Errorf("Could not get role data for role name: %s", roleName)
+	return "", fmt.Errorf("could not get role data for role name: %s", roleName)
 }
 
 func (a *AuthApiClient) GetRoleByName(roleName string) (ybmclient.RoleData, error) {
@@ -874,7 +874,7 @@ func (a *AuthApiClient) GetRoleByName(roleName string) (ybmclient.RoleData, erro
 		return roleData[0], nil
 	}
 
-	return ybmclient.RoleData{}, fmt.Errorf("Could not get role data for role name: %s", roleName)
+	return ybmclient.RoleData{}, fmt.Errorf("could not get role data for role name: %s", roleName)
 }
 
 func (a *AuthApiClient) ListResourcePermissions() ybmclient.ApiListResourcePermissionsRequest {
@@ -980,7 +980,7 @@ func (a *AuthApiClient) GetKeyIdByName(name string) (string, error) {
 		return apiKeyData.Info.GetId(), nil
 	}
 
-	return "", fmt.Errorf("Could not get API key data for name: %s", name)
+	return "", fmt.Errorf("could not get API key data for name: %s", name)
 }
 
 func (a *AuthApiClient) GetApiKeyByName(name string) (ybmclient.ApiKeyData, error) {
@@ -997,7 +997,7 @@ func (a *AuthApiClient) GetApiKeyByName(name string) (ybmclient.ApiKeyData, erro
 		return keyData[0], nil
 	}
 
-	return ybmclient.ApiKeyData{}, fmt.Errorf("Could not get API Key data for name: %s", name)
+	return ybmclient.ApiKeyData{}, fmt.Errorf("could not get API Key data for name: %s", name)
 }
 
 func (a *AuthApiClient) ListAccountUsers() ybmclient.ApiListAccountUsersRequest {
@@ -1037,7 +1037,7 @@ func (a *AuthApiClient) GetUserIdByEmail(email string) (string, error) {
 		return userData.Info.GetId(), nil
 	}
 
-	return "", fmt.Errorf("Could not get user data for email: %s", email)
+	return "", fmt.Errorf("could not get user data for email: %s", email)
 }
 
 func (a *AuthApiClient) GetUserByEmail(email string) (ybmclient.UserData, error) {
@@ -1054,7 +1054,7 @@ func (a *AuthApiClient) GetUserByEmail(email string) (ybmclient.UserData, error)
 		return userData[0], nil
 	}
 
-	return ybmclient.UserData{}, fmt.Errorf("Could not get user data for email: %s", email)
+	return ybmclient.UserData{}, fmt.Errorf("could not get user data for email: %s", email)
 }
 
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
@@ -1090,7 +1090,7 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmc
 			taskList, resp, err = apiRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", resp)
-				return "", fmt.Errorf("error when calling `TaskApi.ListTasks`: %s", GetApiErrorDetails(err))
+				return "", fmt.Errorf(GetApiErrorDetails(err))
 			}
 
 			if v, ok := taskList.GetDataOk(); ok && v != nil {
@@ -1154,7 +1154,7 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType yb
 			taskList, resp, err = apiRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", resp)
-				return "", fmt.Errorf("error when calling `TaskApi.ListTasks`: %s", GetApiErrorDetails(err))
+				return "", fmt.Errorf(GetApiErrorDetails(err))
 			}
 
 			if v, ok := taskList.GetDataOk(); ok && v != nil {

@@ -72,7 +72,7 @@ var listCdcStreamCmd = &cobra.Command{
 		resp, r, err := cdcStreamRequest.Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `CdcApi.GetCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		printCdcStreamOutput(resp.GetData())
 	},
@@ -120,7 +120,7 @@ var createCdcStreamCmd = &cobra.Command{
 		resp, r, err := authApi.CreateCdcStream(clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `CdcApi.CreateCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being created", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -178,7 +178,7 @@ var editCdcStreamCmd = &cobra.Command{
 		resp, r, err := authApi.EditCdcStream(cdcStreamID, clusterID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf("Error when calling `CdcApi.EditCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being updated", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -232,7 +232,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 		resp, err := authApi.DeleteCdcStream(cdcStreamID, clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf("Error when calling `CdcApi.DeleteCdcStream`: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being deleted", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
