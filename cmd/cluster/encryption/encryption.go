@@ -21,6 +21,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -161,7 +162,7 @@ var updateCmk = &cobra.Command{
 func init() {
 	EncryptionCmd.AddCommand(listCmk)
 	EncryptionCmd.AddCommand(updateCmk)
-	EncryptionCmd.AddCommand(updateCmkState)
+	util.AddCommandIfFeatureFlag(EncryptionCmd, updateCmkState, util.CLUSTER_CMK_UPDATE)
 	updateCmk.Flags().String("encryption-spec", "", `[REQUIRED] The customer managed key spec for the cluster.
 	Please provide key value pairs as follows:
 	For AWS: 
