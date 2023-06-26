@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
 	numNodesHeader        = "Nodes"
 	nodeInfoHeader        = "Node Res.(Vcpu/Mem/DiskGB/IOPS)"
 	healthStateHeader     = "Health"

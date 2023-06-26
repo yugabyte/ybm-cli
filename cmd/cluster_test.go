@@ -211,8 +211,8 @@ var _ = Describe("Cluster", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-				expected := `Name            Tier        Version       State     Health    Regions     Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
-stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1         2 / 8GB / 100GB / -` + "\n"
+				expected := `Name            Tier        Version       State     Health    Provider   Regions     Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
+stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-west-2   1         2 / 8GB / 100GB / -` + "\n"
 				Expect(o).Should(Equal(expected))
 				session.Kill()
 			})
@@ -243,7 +243,7 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        us-west-2   1   
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				expected :=	`General
+				expected := `General
 Name            ID                                     Version       State     Health
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
