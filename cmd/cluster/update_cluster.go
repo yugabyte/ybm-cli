@@ -58,7 +58,7 @@ var updateClusterCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-
+		isNameChange := isNameUpdateOnly(cmd)
 		populateFlags(cmd, originalSpec, trackName, authApi)
 
 		regionInfoMapList := []map[string]string{}
@@ -125,7 +125,7 @@ var updateClusterCmd = &cobra.Command{
 
 		msg := fmt.Sprintf("The cluster %s is being updated", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
-		if viper.GetBool("wait") {
+		if viper.GetBool("wait") && !isNameChange {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_EDIT_CLUSTER, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
@@ -179,6 +179,12 @@ func init() {
 
 }
 
+func isNameUpdateOnly(cmd *cobra.Command) bool {
+	return !cmd.Flags().Changed("cloud-provider") && !cmd.Flags().Changed("cluster-type") && !cmd.Flags().Changed("cluster-tier") &&
+		!cmd.Flags().Changed("fault-tolerance") && !cmd.Flags().Changed("database-version") && !cmd.Flags().Changed("node-config") &&
+		!cmd.Flags().Changed("region-info") && cmd.Flags().Changed("new-name")
+}
+
 func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, trackName string, authApi *ybmAuthClient.AuthApiClient) {
 	if !cmd.Flags().Changed("cloud-provider") {
 		cmd.Flag("cloud-provider").Value.Set(string(originalSpec.CloudInfo.GetCode()))
@@ -211,7 +217,9 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 			nodeConfig += "disk-size-gb=" + strconv.Itoa(int(*diskSizeGb))
 		}
 		if diskIops, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskIopsOk(); ok {
-			nodeConfig += "disk-iops=" + strconv.Itoa(int(*diskIops))
+			if diskIops != nil {
+				nodeConfig += "disk-iops=" + strconv.Itoa(int(*diskIops))
+			}
 		}
 		if numCores, ok := originalSpec.ClusterInfo.NodeInfo.GetNumCoresOk(); ok {
 			nodeConfig += ",num-cores=" + strconv.Itoa(int(*numCores))
