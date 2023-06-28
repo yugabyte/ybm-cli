@@ -63,11 +63,16 @@ var listEndpointCmd = &cobra.Command{
 			logrus.Fatalf("No endpoints found\n")
 		}
 
+		providers, err := authApi.ExtractProviderFromClusterName(clusterName)
+		if err != nil {
+			logrus.Fatalf("could not fetch provider for cluster %s : %s\n", clusterName, ybmAuthClient.GetApiErrorDetails(err))
+		}
+
 		endpointsCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewEndpointFormat(viper.GetString("output")),
 		}
-		formatter.EndpointWrite(endpointsCtx, clusterEndpoints)
+		formatter.EndpointWrite(endpointsCtx, clusterEndpoints, providers)
 	},
 }
 

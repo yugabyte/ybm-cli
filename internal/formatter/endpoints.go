@@ -20,6 +20,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -45,9 +46,12 @@ func NewEndpointFormat(source string) Format {
 	}
 }
 
-func EndpointWrite(ctx Context, endpoints []ybmclient.Endpoint) error {
+func EndpointWrite(ctx Context, endpoints []ybmclient.Endpoint, provider []string) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, endpoint := range endpoints {
+			if slices.Contains(provider, string(ybmclient.CLOUDENUM_AZURE)) && endpoint.AccessibilityType == ybmclient.ACCESSIBILITYTYPE_PRIVATE {
+				continue
+			}
 			err := format(&EndpointContext{e: endpoint})
 			if err != nil {
 				logrus.Debugf("Error rendering endpoint: %v", err)

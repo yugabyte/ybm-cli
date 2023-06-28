@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -353,6 +354,28 @@ func (a *AuthApiClient) GetClusterByName(clusterName string) (ybmclient.ClusterD
 	return ybmclient.ClusterData{}, fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
+func (a *AuthApiClient) ExtractProviderFromClusterName(clusterName string) ([]string, error) {
+	clusterData, err := a.GetClusterByName(clusterName)
+	providers := []string{}
+	if err != nil {
+		return nil, err
+	}
+
+	if ok := clusterData.Spec.HasClusterRegionInfo(); ok {
+		if len(clusterData.GetSpec().ClusterRegionInfo) > 0 {
+			sort.Slice(clusterData.GetSpec().ClusterRegionInfo, func(i, j int) bool {
+				return string(clusterData.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code) < string(clusterData.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code)
+			})
+			for _, p := range clusterData.GetSpec().ClusterRegionInfo {
+				//Check uniqueness of Cloud (in case multi cloud with strange distribution, AWS, GCP,AWS)
+				if !slices.Contains(providers, string(p.PlacementInfo.CloudInfo.Code)) {
+					providers = append(providers, string(p.PlacementInfo.CloudInfo.Code))
+				}
+			}
+		}
+	}
+	return providers, nil
+}
 func (a *AuthApiClient) GetEndpointsForClusterByName(clusterName string) ([]ybmclient.Endpoint, string, error) {
 	clusterData, err := a.GetClusterByName(clusterName)
 	if err != nil {
