@@ -225,6 +225,8 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-we
 				Expect(err).ToNot(HaveOccurred())
 				err = loadJson("./test/fixtures/cmk.json", &responseCMK)
 				Expect(err).ToNot(HaveOccurred())
+				err = loadJson("./test/fixtures/one-cluster.json", &responseCluster)
+				Expect(err).ToNot(HaveOccurred())
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/allow-lists"),
@@ -237,6 +239,10 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-we
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/cmks"),
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCMK),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
 					),
 				)
 				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")

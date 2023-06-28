@@ -40,7 +40,7 @@ var listEndpointCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterEndpoints, _, err := authApi.GetEndpointsForClusterByName(clusterName)
+		clusterEndpoints, clusterId, err := authApi.GetEndpointsForClusterByName(clusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s\n", ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -63,11 +63,16 @@ var listEndpointCmd = &cobra.Command{
 			logrus.Fatalf("No endpoints found\n")
 		}
 
+		providers, err := authApi.ExtractProviderFromClusterName(clusterId)
+		if err != nil {
+			logrus.Fatalf("could not fetch provider for cluster %s : %s\n", clusterName, ybmAuthClient.GetApiErrorDetails(err))
+		}
+
 		endpointsCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewEndpointFormat(viper.GetString("output")),
 		}
-		formatter.EndpointWrite(endpointsCtx, clusterEndpoints)
+		formatter.EndpointWrite(endpointsCtx, clusterEndpoints, providers)
 	},
 }
 
