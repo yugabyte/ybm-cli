@@ -354,8 +354,9 @@ func (a *AuthApiClient) GetClusterByName(clusterName string) (ybmclient.ClusterD
 	return ybmclient.ClusterData{}, fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
-func (a *AuthApiClient) ExtractProviderFromClusterName(clusterName string) ([]string, error) {
-	clusterData, err := a.GetClusterByName(clusterName)
+func (a *AuthApiClient) ExtractProviderFromClusterName(clusterId string) ([]string, error) {
+	clusterResp, _, err := a.GetCluster(clusterId).Execute()
+	clusterData := clusterResp.GetData()
 	providers := []string{}
 	if err != nil {
 		return nil, err

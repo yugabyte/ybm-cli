@@ -70,7 +70,7 @@ func (f *FullCluster) SetCMK(authApi ybmAuthClient.AuthApiClient) {
 }
 
 func (f *FullCluster) SetProviders(authApi ybmAuthClient.AuthApiClient) {
-	providers, err := authApi.ExtractProviderFromClusterName(f.Cluster.Spec.Name)
+	providers, err := authApi.ExtractProviderFromClusterName(f.Cluster.Info.Id)
 	if err != nil {
 		logrus.Fatalf("could not fetch provider for cluster %s : %s\n", f.Cluster.Spec.Name, ybmAuthClient.GetApiErrorDetails(err))
 	}
