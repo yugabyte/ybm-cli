@@ -33,18 +33,22 @@ type FullCluster struct {
 	Nodes []ybmclient.NodeData
 	//CMK of the cluster
 	CMK []ybmclient.CMKSpec
+	//Helpful to filter by provider
+	Providers []string
 }
 
 func NewFullCluster(authApi ybmAuthClient.AuthApiClient, clusterData ybmclient.ClusterData) *FullCluster {
 	fc := &FullCluster{
-		Cluster: clusterData,
-		Vpc:     map[string]ybmclient.SingleTenantVpcDataResponse{},
+		Cluster:   clusterData,
+		Vpc:       map[string]ybmclient.SingleTenantVpcDataResponse{},
+		Providers: []string{},
 	}
 	// Add VPC information
 	fc.SetVPCs(authApi)
 	fc.SetAllowLists(authApi)
 	fc.SetNodes(authApi)
 	fc.SetCMK(authApi)
+	fc.SetProviders(authApi)
 	return fc
 }
 
@@ -63,6 +67,14 @@ func (f *FullCluster) SetCMK(authApi ybmAuthClient.AuthApiClient) {
 		// In the future, we will support CMK per region.
 		f.CMK = append(f.CMK, resp.GetData())
 	}
+}
+
+func (f *FullCluster) SetProviders(authApi ybmAuthClient.AuthApiClient) {
+	providers, err := authApi.ExtractProviderFromClusterName(f.Cluster.Spec.Name)
+	if err != nil {
+		logrus.Fatalf("could not fetch provider for cluster %s : %s\n", f.Cluster.Spec.Name, ybmAuthClient.GetApiErrorDetails(err))
+	}
+	f.Providers = providers
 }
 
 func (f *FullCluster) SetVPCs(authApi ybmAuthClient.AuthApiClient) {

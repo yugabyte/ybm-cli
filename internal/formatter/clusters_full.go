@@ -26,6 +26,7 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/cluster"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -116,6 +117,9 @@ func (c *FullClusterContext) Write() error {
 
 	//Adding Endpoints
 	for _, ep := range c.fullCluster.Cluster.Info.ClusterEndpoints {
+		if slices.Contains(c.fullCluster.Providers, string(ybmclient.CLOUDENUM_AZURE)) && ep.AccessibilityType == ybmclient.ACCESSIBILITYTYPE_PRIVATE {
+			continue
+		}
 		fcc.EndpointContext = append(fcc.EndpointContext, &EndpointContext{
 			e: ep,
 		})
