@@ -50,7 +50,7 @@ func NewCloudRegionFormat(source string) Format {
 // CloudRegionWrite renders the context for a list of cloud regions
 func CloudRegionWrite(ctx Context, cloudRegions []ybmclient.RegionListResponseDataItem) error {
 	sort.Slice(cloudRegions, func(i, j int) bool {
-		return string(cloudRegions[i].Name) < string(cloudRegions[j].Name)
+		return string(cloudRegions[i].CountryCode) < string(cloudRegions[j].CountryCode)
 	})
 	render := func(format func(subContext SubContext) error) error {
 		for _, cloudRegion := range cloudRegions {
