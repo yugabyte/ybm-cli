@@ -84,7 +84,7 @@ func (r *RoleContext) Name() string {
 }
 
 func (r *RoleContext) Description() string {
-	return r.r.GetDescription()
+	return r.r.Spec.GetDescription()
 }
 
 func (r *RoleContext) RoleType() string {
