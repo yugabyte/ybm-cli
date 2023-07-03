@@ -62,8 +62,8 @@ The following subcomponents are used:
 ## github.com/cloudflare/circl
 
 * Name: github.com/cloudflare/circl
-* Version: v1.1.0
-* License: [BSD-3-Clause](https://github.com/cloudflare/circl/blob/v1.1.0/LICENSE)
+* Version: v1.3.3
+* License: [BSD-3-Clause](https://github.com/cloudflare/circl/blob/v1.3.3/LICENSE)
 
 
 ## github.com/common-nighthawk/go-figure
@@ -104,8 +104,8 @@ The following subcomponents are used:
 ## github.com/go-logr/logr
 
 * Name: github.com/go-logr/logr
-* Version: v1.2.3
-* License: [Apache-2.0](https://github.com/go-logr/logr/blob/v1.2.3/LICENSE)
+* Version: v1.2.4
+* License: [Apache-2.0](https://github.com/go-logr/logr/blob/v1.2.4/LICENSE)
 
 
 ## github.com/golang-jwt/jwt/v5
@@ -122,11 +122,11 @@ The following subcomponents are used:
 * License: [BSD-3-Clause](https://github.com/google/go-cmp/blob/v0.5.9/LICENSE)
 
 
-## github.com/google/go-github/v50/github
+## github.com/google/go-github/v53/github
 
-* Name: github.com/google/go-github/v50/github
-* Version: v50.2.0
-* License: [BSD-3-Clause](https://github.com/google/go-github/blob/v50.2.0/LICENSE)
+* Name: github.com/google/go-github/v53/github
+* Version: v53.1.0
+* License: [BSD-3-Clause](https://github.com/google/go-github/blob/v53.1.0/LICENSE)
 
 
 ## github.com/google/go-querystring/query
@@ -244,15 +244,15 @@ The following subcomponents are used:
 ## github.com/onsi/ginkgo/v2
 
 * Name: github.com/onsi/ginkgo/v2
-* Version: v2.9.2
-* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.9.2/LICENSE)
+* Version: v2.9.7
+* License: [MIT](https://github.com/onsi/ginkgo/blob/v2.9.7/LICENSE)
 
 
 ## github.com/onsi/gomega
 
 * Name: github.com/onsi/gomega
-* Version: v1.27.6
-* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.6/LICENSE)
+* Version: v1.27.8
+* License: [MIT](https://github.com/onsi/gomega/blob/v1.27.8/LICENSE)
 
 
 ## github.com/pelletier/go-toml/v2
@@ -398,22 +398,22 @@ The following subcomponents are used:
 ## golang.org/x/mod/semver
 
 * Name: golang.org/x/mod/semver
-* Version: v0.9.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.9.0:LICENSE)
+* Version: v0.10.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/mod/+/v0.10.0:LICENSE)
 
 
 ## golang.org/x/net
 
 * Name: golang.org/x/net
-* Version: v0.8.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/net/+/v0.8.0:LICENSE)
+* Version: v0.10.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/net/+/v0.10.0:LICENSE)
 
 
 ## golang.org/x/oauth2
 
 * Name: golang.org/x/oauth2
-* Version: v0.6.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/oauth2/+/v0.6.0:LICENSE)
+* Version: v0.8.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/oauth2/+/v0.8.0:LICENSE)
 
 
 ## golang.org/x/sys/unix
@@ -426,8 +426,8 @@ The following subcomponents are used:
 ## golang.org/x/term
 
 * Name: golang.org/x/term
-* Version: v0.6.0
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/term/+/v0.6.0:LICENSE)
+* Version: v0.8.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/term/+/v0.8.0:LICENSE)
 
 
 ## golang.org/x/text
