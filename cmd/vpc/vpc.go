@@ -241,6 +241,31 @@ func init() {
 
 	VPCCmd.AddCommand(listVpcCmd)
 	listVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
+	listVpcCmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		vpcListRequest := authApi.ListSingleTenantVpcsByName("")
+
+		resp, r, err := vpcListRequest.Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		if len(resp.GetData()) < 1 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		// make a string array of cluster names
+		var vpcNames []string
+		for _, cluster := range resp.GetData() {
+			vpcNames = append(vpcNames, cluster.Spec.Name)
+		}
+		return vpcNames, cobra.ShellCompDirectiveNoFileComp
+	})
 
 	VPCCmd.AddCommand(createVpcCmd)
 	createVpcCmd.Flags().SortFlags = false

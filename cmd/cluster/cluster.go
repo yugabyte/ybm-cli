@@ -16,12 +16,14 @@
 package cluster
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 )
 
 // getCmd represents the list command
@@ -40,6 +42,30 @@ func init() {
 	ClusterCmd.AddCommand(network.NetworkCmd)
 	network.NetworkCmd.PersistentFlags().StringVarP(&network.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	network.NetworkCmd.MarkPersistentFlagRequired("cluster-name")
+	network.NetworkCmd.RegisterFlagCompletionFunc("cluster-name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+		clusterListRequest := authApi.ListClusters()
+		resp, r, err := clusterListRequest.Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		if len(resp.GetData()) < 1 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		// make a string array of cluster names
+		var clusterNames []string
+		for _, cluster := range resp.GetData() {
+			clusterNames = append(clusterNames, cluster.Spec.Name)
+		}
+		return clusterNames, cobra.ShellCompDirectiveNoFileComp
+	})
 
 	ClusterCmd.AddCommand(readreplica.ReadReplicaCmd)
 	readreplica.ReadReplicaCmd.PersistentFlags().StringVarP(&readreplica.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
