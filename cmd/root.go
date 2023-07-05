@@ -28,6 +28,9 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/backup"
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
+	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
+	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
+	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/permission"
 	"github.com/yugabyte/ybm-cli/cmd/region"
@@ -133,6 +136,21 @@ func init() {
 	rootCmd.AddCommand(user.UserCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
+
+	//Completion
+	if strings.ToLower(os.Getenv("YBM_CI")) != "true" {
+		cluster.DescribeClusterCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+		cluster.DeleteClusterCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+		cluster.PauseClusterCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+		cluster.ResumeClusterCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+		cluster.UpdateClusterCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+		readreplica.ReadReplicaCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+		network.NetworkCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+		node.NodeCmd.RegisterFlagCompletionFunc("cluster-name", AutocompleteClusterName)
+
+		vpc.ListVpcCmd.RegisterFlagCompletionFunc("name", AutocompleteVPCName)
+		vpc.DeleteVpcCmd.RegisterFlagCompletionFunc("name", AutocompleteVPCName)
+	}
 
 }
 

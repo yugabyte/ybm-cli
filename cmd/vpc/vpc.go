@@ -39,7 +39,7 @@ var VPCCmd = &cobra.Command{
 }
 
 // vpcCmd represents the vpc command
-var listVpcCmd = &cobra.Command{
+var ListVpcCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List VPCs in YugabyteDB Managed",
 	Long:  "List VPCs in YugabyteDB Managed",
@@ -187,7 +187,7 @@ var createVpcCmd = &cobra.Command{
 	},
 }
 
-var deleteVpcCmd = &cobra.Command{
+var DeleteVpcCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a VPC in YugabyteDB Managed",
 	Long:  "Delete a VPC in YugabyteDB Managed",
@@ -239,8 +239,8 @@ var deleteVpcCmd = &cobra.Command{
 func init() {
 	VPCCmd.AddCommand(peering.VPCPeeringCmd)
 
-	VPCCmd.AddCommand(listVpcCmd)
-	listVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
+	VPCCmd.AddCommand(ListVpcCmd)
+	ListVpcCmd.Flags().String("name", "", "[OPTIONAL] Name for the VPC.")
 
 	VPCCmd.AddCommand(createVpcCmd)
 	createVpcCmd.Flags().SortFlags = false
@@ -253,8 +253,8 @@ func init() {
 	createVpcCmd.Flags().StringSliceVar(&createCidrs, "cidr", []string{}, "[OPTIONAL] CIDR of the VPC.")
 	createVpcCmd.MarkFlagsMutuallyExclusive("global-cidr", "cidr")
 
-	VPCCmd.AddCommand(deleteVpcCmd)
-	deleteVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
-	deleteVpcCmd.MarkFlagRequired("name")
-	deleteVpcCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+	VPCCmd.AddCommand(DeleteVpcCmd)
+	DeleteVpcCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC.")
+	DeleteVpcCmd.MarkFlagRequired("name")
+	DeleteVpcCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }

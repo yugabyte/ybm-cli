@@ -27,8 +27,8 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-// pauseClusterCmd represents the cluster command
-var pauseClusterCmd = &cobra.Command{
+// PauseClusterCmd represents the cluster command
+var PauseClusterCmd = &cobra.Command{
 	Use:   "pause",
 	Short: "Pause a cluster",
 	Long:  "Pause a cluster",
@@ -83,17 +83,17 @@ var pauseClusterCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand(pauseClusterCmd)
+	ClusterCmd.AddCommand(PauseClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// pauseClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// PauseClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// pauseClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	pauseClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be paused.")
-	pauseClusterCmd.MarkFlagRequired("cluster-name")
+	// PauseClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	PauseClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be paused.")
+	PauseClusterCmd.MarkFlagRequired("cluster-name")
 }

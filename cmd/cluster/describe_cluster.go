@@ -26,7 +26,7 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 )
 
-var describeClusterCmd = &cobra.Command{
+var DescribeClusterCmd = &cobra.Command{
 	Use:   "describe",
 	Short: "Describe a cluster",
 	Long:  "Describe a cluster in YugabyteDB Managed",
@@ -68,7 +68,8 @@ var describeClusterCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand(describeClusterCmd)
-	describeClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
-	describeClusterCmd.MarkFlagRequired("cluster-name")
+	ClusterCmd.AddCommand(DescribeClusterCmd)
+	DescribeClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
+	DescribeClusterCmd.MarkFlagRequired("cluster-name")
+	// describeClusterCmd.RegisterFlagCompletionFunc("cluster-name", cmd.AutocompleteClusterName)
 }

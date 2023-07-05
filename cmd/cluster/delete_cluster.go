@@ -28,7 +28,7 @@ import (
 )
 
 // deleteClusterCmd represents the cluster command
-var deleteClusterCmd = &cobra.Command{
+var DeleteClusterCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a cluster",
 	Long:  "Delete a cluster",
@@ -76,7 +76,7 @@ var deleteClusterCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand(deleteClusterCmd)
+	ClusterCmd.AddCommand(DeleteClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -86,7 +86,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	deleteClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be deleted.")
-	deleteClusterCmd.MarkFlagRequired("cluster-name")
-	deleteClusterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+	DeleteClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be deleted.")
+	DeleteClusterCmd.MarkFlagRequired("cluster-name")
+	DeleteClusterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }

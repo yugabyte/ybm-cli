@@ -34,11 +34,15 @@ var (
 var _ = BeforeSuite(func() {
 	var err error
 	compiledCLIPath, err = gexec.Build("github.com/yugabyte/ybm-cli")
+	_ = os.Setenv("YBM_CI", "true")
+	_ = os.Setenv("YBM_WAIT", "false")
 	Expect(compiledCLIPath).ToNot(BeEmpty())
 	Expect(err).ToNot(HaveOccurred())
 })
 
 var _ = AfterSuite(func() {
+	_ = os.Unsetenv("YBM_CI")
+	_ = os.Unsetenv("YBM_WAIT")
 	gexec.CleanupBuildArtifacts()
 })
 

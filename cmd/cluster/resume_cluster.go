@@ -27,8 +27,8 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-// resumeClusterCmd represents the cluster command
-var resumeClusterCmd = &cobra.Command{
+// ResumeClusterCmd represents the cluster command
+var ResumeClusterCmd = &cobra.Command{
 	Use:   "resume",
 	Short: "Resume a cluster",
 	Long:  "Resume a cluster",
@@ -83,17 +83,17 @@ var resumeClusterCmd = &cobra.Command{
 }
 
 func init() {
-	ClusterCmd.AddCommand(resumeClusterCmd)
+	ClusterCmd.AddCommand(ResumeClusterCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// resumeClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// ResumeClusterCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// resumeClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	resumeClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be resumed.")
-	resumeClusterCmd.MarkFlagRequired("cluster-name")
+	// ResumeClusterCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	ResumeClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to be resumed.")
+	ResumeClusterCmd.MarkFlagRequired("cluster-name")
 }
