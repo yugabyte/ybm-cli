@@ -695,7 +695,8 @@ func (a *AuthApiClient) GetTrackIdByName(trackName string) (string, error) {
 	}
 
 	for _, track := range tracksNameResp.GetData() {
-		if track.Spec.GetName() == trackName {
+		// Temporary backwards compatibility between Stable and Production tracks.
+		if track.Spec.GetName() == trackName || (track.Spec.GetName() == "Production" && trackName == "Stable") {
 			return track.Info.GetId(), nil
 		}
 	}
