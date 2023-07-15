@@ -273,8 +273,8 @@ device-ip-gween   device-ip-gween   152.165.26.42/32
 
 
 Encryption at Rest
-Provider   Key Alias                              Security Principals
-AWS        0a80e409-e890-42fc-b209-bafb69931b2c   arn:aws:kms:us-east-1:745846189716:key/db373c8d-1592-4c73-bfa3-420d05922933
+Provider   Key Alias                              Security Principals                                                           CMK Status
+AWS        0a80e409-e890-42fc-b209-bafb69931b2c   arn:aws:kms:us-east-1:745846189716:key/db373c8d-1592-4c73-bfa3-420d05922933   ACTIVE
 
 
 Nodes

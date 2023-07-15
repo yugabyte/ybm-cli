@@ -25,7 +25,8 @@ import (
 
 const (
 	keyAliasHeader   = "Key Alias"
-	defaultCmkFormat = "table {{.Provider}}\t{{.KeyAlias}}\t{{.SecurityPrincipals}}"
+	cmkStatusHeader  = "CMK Status"
+	defaultCmkFormat = "table {{.Provider}}\t{{.KeyAlias}}\t{{.SecurityPrincipals}}\t{{.CMKStatus}}"
 )
 
 type CMKContext struct {
@@ -40,6 +41,7 @@ func NewCMKContext() *CMKContext {
 		"Provider":           providerHeader,
 		"KeyAlias":           keyAliasHeader,
 		"SecurityPrincipals": securityPrincipalsHeader,
+		"CMKStatus":          cmkStatusHeader,
 	}
 	return &cmkContext
 }
@@ -68,6 +70,10 @@ func CMKWrite(ctx Context, cmkSpec ybmclient.CMKSpec) error {
 
 func (c *CMKContext) Provider() ybmclient.CMKProviderEnum {
 	return c.c.ProviderType
+}
+
+func (c *CMKContext) CMKStatus() ybmclient.CMKStatusEnum {
+	return *c.c.Status.Get()
 }
 
 func (c *CMKContext) KeyAlias() string {

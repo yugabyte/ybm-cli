@@ -35,7 +35,7 @@ const (
 	defaultVPCListingCluster        = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
 	defaultDefaultFullClusterRegion = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
 	defaultFullClusterNalListing    = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
-	defaultFullClusterCMK           = "table {{.Provider}}\t{{.KeyAlias}}\t{{.SecurityPrincipals}}"
+	defaultFullClusterCMK           = "table {{.Provider}}\t{{.KeyAlias}}\t{{.SecurityPrincipals}}\t{{.CMKStatus}}"
 	defaultFullClusterEndpoints     = "table {{.Region}}\t{{.Accessibility}}\t{{.State}}\t{{.Host}}"
 	faultToleranceHeader            = "Fault Tolerance"
 	dataDistributionHeader          = "Data Distribution"
