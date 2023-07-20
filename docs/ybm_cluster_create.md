@@ -19,6 +19,7 @@ ybm cluster create [flags]
       --cluster-tier string          [OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.
       --cluster-type string          [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.
       --database-version string      [OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.
+      --enterprise-security          [OPTIONAL] The security level of cluster. Advanced security will have security checks for cluster.
       --encryption-spec string       [OPTIONAL] The customer managed key spec for the cluster.
                                      	Please provide key value pairs as follows:
                                      	For AWS: 
