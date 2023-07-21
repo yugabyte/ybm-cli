@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -173,7 +174,10 @@ func init() {
 	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.")
 	createClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.")
 	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.")
-	createClusterCmd.Flags().Bool("enterprise-security", false, "[OPTIONAL] The security level of cluster. Advanced security will have security checks for cluster. Default false.")
+	if util.IsFeatureFlagEnabled(util.ENTERPRISE_SECURITY) {
+		createClusterCmd.Flags().Bool("enterprise-security", false, "[OPTIONAL] The security level of cluster. Advanced security will have security checks for cluster. Default false.")
+
+	}
 	createClusterCmd.Flags().String("encryption-spec", "", `[OPTIONAL] The customer managed key spec for the cluster.
 	Please provide key value pairs as follows:
 	For AWS: 
