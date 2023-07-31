@@ -111,17 +111,11 @@ func (a *AuthApiClient) GetAccountID(accountID string) (string, error) {
 	if len(accountID) > 0 {
 		return accountID, nil
 	}
-	accountResp, resp, err := a.ListAccounts().Execute()
+	accountResp, _, err := a.ListAccounts().Execute()
 	if err != nil {
-		errMsg := getErrorMessage(resp, err)
-		if strings.Contains(err.Error(), "is not a valid") {
-			logrus.Debugln("The deserialization of the response failed due to following error. "+
-				"Skipping as this should not impact the functionality of the provider.",
-				map[string]interface{}{"errMsg": err.Error()})
-		} else {
-			return "", fmt.Errorf(errMsg)
-		}
+		return "", err
 	}
+
 	accountData := accountResp.GetData()
 	if len(accountData) == 0 {
 		return "", fmt.Errorf("the user is not associated with any accounts")
@@ -138,16 +132,9 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 		return projectID, nil
 	}
 
-	accountResp, resp, err := a.ListAccounts().Execute()
+	accountResp, _, err := a.ListAccounts().Execute()
 	if err != nil {
-		errMsg := getErrorMessage(resp, err)
-		if strings.Contains(err.Error(), "is not a valid") {
-			logrus.Debugln("The deserialization of the response failed due to following error. "+
-				"Skipping as this should not impact the functionality of the provider.",
-				map[string]interface{}{"errMsg": err.Error()})
-		} else {
-			return "", fmt.Errorf(errMsg)
-		}
+		return "", err
 	}
 	projectData := accountResp.GetData()[0].Info.GetProjects()
 	if len(projectData) == 0 {
@@ -334,12 +321,12 @@ func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID stri
 	var err error
 	a.AccountID, err = a.GetAccountID(providedAccountID)
 	if err != nil {
-		logrus.Errorf("could not initiate api client: %s", err.Error())
+		logrus.Errorf(GetApiErrorDetails(err))
 		os.Exit(1)
 	}
 	a.ProjectID, err = a.GetProjectID(providedProjectID)
 	if err != nil {
-		logrus.Errorf("could not initiate api client: %s", err.Error())
+		logrus.Errorf(GetApiErrorDetails(err))
 		os.Exit(1)
 	}
 }
@@ -1237,6 +1224,9 @@ func GetApiErrorDetails(err error) string {
 	case ybmclient.GenericOpenAPIError:
 		if v := getAPIError(castedError.Body()); v != nil {
 			if d, ok := v.GetErrorOk(); ok {
+				if slices.Contains([]string{"JWT has expired", "Invalid JWT"}, d.GetDetail()) && d.GetStatus() == http.StatusUnauthorized {
+					return fmt.Sprintf("%s. Please run \"ybm auth\" again and provide a new API key", d.GetDetail())
+				}
 				return fmt.Sprintf("%s%s", d.GetDetail(), "\n")
 			}
 		}
