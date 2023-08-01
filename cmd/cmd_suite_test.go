@@ -34,6 +34,7 @@ var (
 var _ = BeforeSuite(func() {
 	var err error
 	compiledCLIPath, err = gexec.Build("github.com/yugabyte/ybm-cli")
+	os.Setenv("YBM_WAIT", "false")
 	Expect(compiledCLIPath).ToNot(BeEmpty())
 	Expect(err).ToNot(HaveOccurred())
 })

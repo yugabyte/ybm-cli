@@ -39,7 +39,7 @@ var updateClusterCmd = &cobra.Command{
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(clusterName)
