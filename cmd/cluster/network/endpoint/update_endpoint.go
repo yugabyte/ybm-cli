@@ -61,7 +61,7 @@ var updateEndpointCmd = &cobra.Command{
 			securityPrincipalsList := util.SplitAndIgnoreEmpty(securityPrincipalsString, ",")
 
 			regionArnMap := make(map[string][]string)
-			regionArnMap[pseGetResponse.Data.Spec.ClusterRegionInfoId] = securityPrincipalsList
+			regionArnMap[*pseGetResponse.Data.Spec.Get().ClusterRegionInfoId.Get()] = securityPrincipalsList
 
 			// we create a spec that has a single element
 			pseSpec := authApi.CreatePrivateServiceEndpointRegionSpec(regionArnMap)

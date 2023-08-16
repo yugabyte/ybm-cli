@@ -118,7 +118,7 @@ func (a *ApiKeyContext) LastUsed() string {
 }
 
 func (a *ApiKeyContext) CreatedAt() string {
-	return a.a.Info.Metadata.GetCreatedOn()
+	return a.a.Info.Metadata.Get().GetCreatedOn()
 }
 
 func (a *ApiKeyContext) MarshalJSON() ([]byte, error) {

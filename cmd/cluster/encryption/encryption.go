@@ -59,7 +59,7 @@ var listCmk = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		if resp.Data.Get() == nil {
+		if resp.Data == nil {
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
 
@@ -67,7 +67,7 @@ var listCmk = &cobra.Command{
 			Output: os.Stdout,
 			Format: formatter.NewCMKFormat(viper.GetString("output")),
 		}
-		formatter.CMKWrite(cmkCtx, resp.GetData())
+		formatter.CMKWrite(cmkCtx, *resp.GetData().Spec.Get())
 	},
 }
 
@@ -99,11 +99,11 @@ var updateCmkState = &cobra.Command{
 			logrus.Fatalf("Please enter valid input. Specify either enable or disable flag.")
 		}
 
-		if resp.Data.Get() == nil {
+		if resp.Data == nil {
 			logrus.Fatalf("No Encryption at rest configuration found for this cluster")
 		}
 
-		cmkId := resp.Data.Get().GetCmkId()
+		cmkId := resp.Data.Info.GetCmkId()
 
 		cmkStatus := true
 		if disableFlag {
