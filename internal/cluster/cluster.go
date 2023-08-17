@@ -65,7 +65,7 @@ func (f *FullCluster) SetCMK(authApi ybmAuthClient.AuthApiClient) {
 	if _, ok := resp.GetDataOk(); ok {
 		// Make an array here with a single element.
 		// In the future, we will support CMK per region.
-		f.CMK = append(f.CMK, resp.GetData())
+		f.CMK = append(f.CMK, *resp.GetData().Spec.Get())
 	}
 }
 

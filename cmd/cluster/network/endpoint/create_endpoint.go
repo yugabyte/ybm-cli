@@ -84,7 +84,7 @@ var createEndpointCmd = &cobra.Command{
 			}
 
 			psEps := util.Filter(createResp.GetData(), func(ep ybmclient.PrivateServiceEndpointRegionData) bool {
-				return ep.GetSpec().ClusterRegionInfoId == desiredRegions[0].Id
+				return *ep.GetSpec().ClusterRegionInfoId.Get() == desiredRegions[0].Id
 			})
 
 			if len(psEps) == 0 {

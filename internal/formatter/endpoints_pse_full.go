@@ -151,7 +151,7 @@ func (ep *PSEndpointFullContext) Az() string {
 }
 
 func (ep *PSEndpointFullContext) SecurityPrincipals() string {
-	return strings.Join(ep.psEndpoint.Spec.SecurityPrincipals, ",")
+	return strings.Join(ep.psEndpoint.Spec.Get().SecurityPrincipals, ",")
 }
 
 func (ep *PSEndpointFullContext) ServiceName() string {

@@ -494,7 +494,8 @@ func (a *AuthApiClient) CreatePrivateServiceEndpointRegionSpec(regionArnMap map[
 	pseSpecs := []ybmclient.PrivateServiceEndpointRegionSpec{}
 
 	for regionId, arnList := range regionArnMap {
-		local := *ybmclient.NewPrivateServiceEndpointRegionSpec(regionId, arnList)
+		local := *ybmclient.NewPrivateServiceEndpointRegionSpec(arnList)
+		local.ClusterRegionInfoId = *ybmclient.NewNullableString(&regionId)
 		pseSpecs = append(pseSpecs, local)
 	}
 	return pseSpecs
@@ -504,7 +505,8 @@ func (a *AuthApiClient) CreatePrivateServiceEndpointSpec(regionArnMap map[string
 	pseSpecs := []ybmclient.PrivateServiceEndpointSpec{}
 
 	for regionId, arnList := range regionArnMap {
-		regionSpec := *ybmclient.NewPrivateServiceEndpointRegionSpec(regionId, arnList)
+		regionSpec := *ybmclient.NewPrivateServiceEndpointRegionSpec(arnList)
+		regionSpec.ClusterRegionInfoId = *ybmclient.NewNullableString(&regionId)
 		local := *ybmclient.NewPrivateServiceEndpointSpec([]ybmclient.PrivateServiceEndpointRegionSpec{regionSpec})
 		pseSpecs = append(pseSpecs, local)
 	}

@@ -93,11 +93,11 @@ func (c *BackupContext) ExpireOn() string {
 }
 
 func (c *BackupContext) CreatedOn() string {
-	if !c.c.GetInfo().Metadata.HasCreatedOn() {
+	if !c.c.GetInfo().Metadata.Get().HasCreatedOn() {
 		return ""
 
 	}
-	return FormatDate(c.c.GetInfo().Metadata.GetCreatedOn())
+	return FormatDate(c.c.GetInfo().Metadata.Get().GetCreatedOn())
 }
 
 func (c *BackupContext) ClusterName() string {
