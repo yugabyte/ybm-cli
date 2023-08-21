@@ -30,7 +30,6 @@ const (
 	NODE_OP             FeatureFlag = "NODE_OPS"
 	TOOLS               FeatureFlag = "TOOLS"
 	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
-	CLUSTER_CMK_UPDATE  FeatureFlag = "CLUSTER_CMK_UPDATE"
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
 )
 
