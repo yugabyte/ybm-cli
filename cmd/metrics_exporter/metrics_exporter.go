@@ -162,6 +162,35 @@ var deleteMetricsExporterCmd = &cobra.Command{
 	},
 }
 
+var removeMetricsExporterFromClusterCmd = &cobra.Command{
+	Use:   "remove-from-cluster",
+	Short: "Remove Metrics Exporter Config from Cluster",
+	Long:  "Remove Metrics Exporter Config from Cluster",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterId, err := authApi.GetClusterIdByName(clusterName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		r, err := authApi.RemoveMetricsExporterConfigFromCluster(clusterId).Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		fmt.Printf("Removing associated Metrics Exporter Config from cluster %s", clusterName)
+		fmt.Println()
+	},
+}
+
 func init() {
 	MetricsExporterCmd.AddCommand(createMetricsExporterCmd)
 	createMetricsExporterCmd.Flags().String("name", "", "[REQUIRED] The name of the cluster.")
@@ -175,4 +204,8 @@ func init() {
 	MetricsExporterCmd.AddCommand(deleteMetricsExporterCmd)
 	deleteMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter config")
 	deleteMetricsExporterCmd.MarkFlagRequired("config-name")
+
+	MetricsExporterCmd.AddCommand(removeMetricsExporterFromClusterCmd)
+	removeMetricsExporterFromClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster.")
+	removeMetricsExporterFromClusterCmd.MarkFlagRequired("cluster-name")
 }
