@@ -244,6 +244,35 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 	},
 }
 
+var stopMetricsExporterCmd = &cobra.Command{
+	Use:   "pause",
+	Short: "Stop Metrics Exporter",
+	Long:  "Stop Metrics Exporter",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterId, err := authApi.GetClusterIdByName(clusterName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		r, err := authApi.StopMetricsExporter(clusterId).Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		fmt.Printf("Stopping Metrics Exporter for cluster %s", clusterName)
+		fmt.Println()
+	},
+}
+
 func init() {
 	MetricsExporterCmd.AddCommand(createMetricsExporterCmd)
 	createMetricsExporterCmd.Flags().String("name", "", "[REQUIRED] The name of the cluster.")
@@ -267,4 +296,8 @@ func init() {
 	associateMetricsExporterWithClusterCmd.MarkFlagRequired("cluster-name")
 	associateMetricsExporterWithClusterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter config")
 	associateMetricsExporterWithClusterCmd.MarkFlagRequired("config-name")
+
+	MetricsExporterCmd.AddCommand(stopMetricsExporterCmd)
+	stopMetricsExporterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster.")
+	stopMetricsExporterCmd.MarkFlagRequired("cluster-name")
 }

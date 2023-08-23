@@ -1305,3 +1305,7 @@ func (a *AuthApiClient) RemoveMetricsExporterConfigFromCluster(clusterId string)
 func (a *AuthApiClient) AssociateMetricsExporterWithCluster(clusterId string) ybmclient.ApiAddMetricsExporterConfigToClusterRequest {
 	return a.ApiClient.MetricsExporterConfigApi.AddMetricsExporterConfigToCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
+
+func (a *AuthApiClient) StopMetricsExporter(clusterId string) ybmclient.ApiStopMetricsExporterRequest {
+	return a.ApiClient.MetricsExporterConfigApi.StopMetricsExporter(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
