@@ -75,6 +75,14 @@ var createMetricsExporterCmd = &cobra.Command{
 
 		fmt.Println(msg)
 
+		metricsExporterCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
+		}
+
+		respArr := [1]ybmclient.MetricsExporterConfigurationData{resp.GetData()}
+
+		formatter.MetricsExporterWrite(metricsExporterCtx, respArr[:])
 	},
 }
 
@@ -273,6 +281,73 @@ var stopMetricsExporterCmd = &cobra.Command{
 	},
 }
 
+var updateMetricsExporterCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update Metrics Exporter Config",
+	Long:  "Update Metrics Exporter Config",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		metricsExporterName, _ := cmd.Flags().GetString("config-name")
+		metricsSinkType, _ := cmd.Flags().GetString("type")
+		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
+
+		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(metricsSinkType)
+
+		apiKey := datadogSpecString["api-key"]
+		site := datadogSpecString["site"]
+
+		datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
+		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
+
+		metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
+
+		resp, r, err := authApi.ListMetricsExporterConfigs().Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		configId := ""
+
+		for _, metricsExporter := range resp.Data {
+			if metricsExporter.GetSpec().Name == metricsExporterName {
+				configId = metricsExporter.GetInfo().Id
+				break
+			}
+		}
+
+		if configId == "" {
+			logrus.Fatalf("Could not find config with name %s", metricsExporterName)
+		}
+
+		resp1, r, err := authApi.UpdateMetricsExporterConfig(configId).MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		msg := fmt.Sprintf("The metrics exporter config %s is being updated", formatter.Colorize(configId, formatter.GREEN_COLOR))
+
+		fmt.Println(msg)
+
+		metricsExporterCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
+		}
+
+		respArr := [1]ybmclient.MetricsExporterConfigurationData{resp1.GetData()}
+
+		formatter.MetricsExporterWrite(metricsExporterCtx, respArr[:])
+	},
+}
+
 func init() {
 	MetricsExporterCmd.AddCommand(createMetricsExporterCmd)
 	createMetricsExporterCmd.Flags().String("name", "", "[REQUIRED] The name of the cluster.")
@@ -300,4 +375,11 @@ func init() {
 	MetricsExporterCmd.AddCommand(stopMetricsExporterCmd)
 	stopMetricsExporterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster.")
 	stopMetricsExporterCmd.MarkFlagRequired("cluster-name")
+
+	MetricsExporterCmd.AddCommand(updateMetricsExporterCmd)
+	updateMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the cluster.")
+	updateMetricsExporterCmd.MarkFlagRequired("config-name")
+	updateMetricsExporterCmd.Flags().String("type", "", "[REQUIRED] The type of third party metrics sink")
+	updateMetricsExporterCmd.MarkFlagRequired("type")
+	updateMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, "Spec for datadog")
 }
