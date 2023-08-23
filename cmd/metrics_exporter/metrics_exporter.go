@@ -191,6 +191,59 @@ var removeMetricsExporterFromClusterCmd = &cobra.Command{
 	},
 }
 
+var associateMetricsExporterWithClusterCmd = &cobra.Command{
+	Use:   "attach",
+	Short: "Associate Metrics Exporter Config with Cluster",
+	Long:  "Associate Metrics Exporter Config with Cluster",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterId, err := authApi.GetClusterIdByName(clusterName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		configName, _ := cmd.Flags().GetString("config-name")
+
+		resp, r, err := authApi.ListMetricsExporterConfigs().Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		configId := ""
+
+		for _, metricsExporter := range resp.Data {
+			if metricsExporter.GetSpec().Name == configName {
+				configId = metricsExporter.GetInfo().Id
+				break
+			}
+		}
+
+		if configId == "" {
+			logrus.Fatalf("Could not find config with name %s", configName)
+		}
+
+		metricsExporterClusterConfigSpec := ybmclient.NewMetricsExporterClusterConfigurationSpec(configId)
+
+		resp1, r, err := authApi.AssociateMetricsExporterWithCluster(clusterId).MetricsExporterClusterConfigurationSpec(*metricsExporterClusterConfigSpec).Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		fmt.Printf("Attaching Metrics Exporter Config %s with cluster %s", resp1.Data.Spec.Name, clusterName)
+		fmt.Println()
+	},
+}
+
 func init() {
 	MetricsExporterCmd.AddCommand(createMetricsExporterCmd)
 	createMetricsExporterCmd.Flags().String("name", "", "[REQUIRED] The name of the cluster.")
@@ -208,4 +261,10 @@ func init() {
 	MetricsExporterCmd.AddCommand(removeMetricsExporterFromClusterCmd)
 	removeMetricsExporterFromClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster.")
 	removeMetricsExporterFromClusterCmd.MarkFlagRequired("cluster-name")
+
+	MetricsExporterCmd.AddCommand(associateMetricsExporterWithClusterCmd)
+	associateMetricsExporterWithClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster.")
+	associateMetricsExporterWithClusterCmd.MarkFlagRequired("cluster-name")
+	associateMetricsExporterWithClusterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter config")
+	associateMetricsExporterWithClusterCmd.MarkFlagRequired("config-name")
 }
