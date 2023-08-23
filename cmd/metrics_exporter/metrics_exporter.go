@@ -17,9 +17,11 @@ package metrics_exporter
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -75,6 +77,38 @@ var createMetricsExporterCmd = &cobra.Command{
 	},
 }
 
+var listMetricsExporterCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List Metrics Exporter Config",
+	Long:  "List Metrics Exporter Config",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+
+		resp, r, err := authApi.ListMetricsExporterConfigs().Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		metricsExporterCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
+		}
+
+		if len(resp.GetData()) < 1 {
+			fmt.Println("No metrics exporters found")
+			return
+		}
+
+		formatter.MetricsExporterWrite(metricsExporterCtx, resp.GetData())
+	},
+}
+
 func init() {
 	MetricsExporterCmd.AddCommand(createMetricsExporterCmd)
 
@@ -83,4 +117,6 @@ func init() {
 	createMetricsExporterCmd.Flags().String("type", "", "[REQUIRED] The type of third party metrics sink")
 	createMetricsExporterCmd.MarkFlagRequired("type")
 	createMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, "Spec for datadog")
+
+	MetricsExporterCmd.AddCommand(listMetricsExporterCmd)
 }
