@@ -23,7 +23,7 @@ var createMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -32,16 +32,18 @@ var createMetricsExporterCmd = &cobra.Command{
 		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
 
 		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(metricsSinkType)
+		if err != nil {
+			logrus.Fatalf(err.Error())
+		}
 
 		apiKey := datadogSpecString["api-key"]
 		site := datadogSpecString["site"]
 
 		datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
 		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
-
 		metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
 
-		resp, r, err := authApi.CreateMetricsExporterConfig().MetricsExporterConfigurationSpec(metricsExporterConfigSpec)
+		resp, r, err := authApi.CreateMetricsExporterConfig().MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)

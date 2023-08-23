@@ -1285,3 +1285,7 @@ func getErrorMessage(response *http.Response, err error) string {
 	}
 	return errMsg
 }
+
+func (a *AuthApiClient) CreateMetricsExporterConfig() ybmclient.ApiCreateMetricsExporterConfigRequest {
+	return a.ApiClient.MetricsExporterConfigApi.CreateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID)
+}
