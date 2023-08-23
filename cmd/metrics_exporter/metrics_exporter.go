@@ -22,6 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -109,9 +110,60 @@ var listMetricsExporterCmd = &cobra.Command{
 	},
 }
 
+var deleteMetricsExporterCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete Metrics Exporter Config",
+	Long:  "Delete Metrics Exporter Config",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		configName, _ := cmd.Flags().GetString("config-name")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "config", configName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf("could not initiate api client: %s", err.Error())
+		}
+		authApi.GetInfo("", "")
+		configName, _ := cmd.Flags().GetString("config-name")
+
+		resp, r, err := authApi.ListMetricsExporterConfigs().Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		configId := ""
+
+		for _, metricsExporter := range resp.Data {
+			if metricsExporter.GetSpec().Name == configName {
+				configId = metricsExporter.GetInfo().Id
+				break
+			}
+		}
+
+		if configId == "" {
+			logrus.Fatalf("Could not find config with name %s", configName)
+		}
+
+		r1, err := authApi.DeleteMetricsExporterConfig(configId).Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r1)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		fmt.Printf("Deleting Metrics Exporter Config %s", configName)
+		fmt.Println()
+	},
+}
+
 func init() {
 	MetricsExporterCmd.AddCommand(createMetricsExporterCmd)
-
 	createMetricsExporterCmd.Flags().String("name", "", "[REQUIRED] The name of the cluster.")
 	createMetricsExporterCmd.MarkFlagRequired("name")
 	createMetricsExporterCmd.Flags().String("type", "", "[REQUIRED] The type of third party metrics sink")
@@ -119,4 +171,8 @@ func init() {
 	createMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, "Spec for datadog")
 
 	MetricsExporterCmd.AddCommand(listMetricsExporterCmd)
+
+	MetricsExporterCmd.AddCommand(deleteMetricsExporterCmd)
+	deleteMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter config")
+	deleteMetricsExporterCmd.MarkFlagRequired("config-name")
 }

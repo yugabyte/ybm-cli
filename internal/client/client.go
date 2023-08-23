@@ -1293,3 +1293,7 @@ func (a *AuthApiClient) CreateMetricsExporterConfig() ybmclient.ApiCreateMetrics
 func (a *AuthApiClient) ListMetricsExporterConfigs() ybmclient.ApiListMetricsExporterConfigsRequest {
 	return a.ApiClient.MetricsExporterConfigApi.ListMetricsExporterConfigs(a.ctx, a.AccountID, a.ProjectID)
 }
+
+func (a *AuthApiClient) DeleteMetricsExporterConfig(configId string) ybmclient.ApiDeleteMetricsExporterConfigRequest {
+	return a.ApiClient.MetricsExporterConfigApi.DeleteMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId)
+}
