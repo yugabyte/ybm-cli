@@ -1,0 +1,29 @@
+{
+    "data": [
+        {
+            "spec": {
+                "name": "ff",
+                "type": "DATADOG",
+                "datadog_spec": {
+                    "api_key": "c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d",
+                    "site": "test"
+                }
+            },
+            "info": {
+                "id": "9e3fabbc-849c-4a77-bdb2-9422e712e7dc",
+                "cluster_ids": [],
+                "metadata": {
+                    "created_on": "2023-08-24T06:41:16.145Z",
+                    "updated_on": "2023-08-24T06:41:16.145Z"
+                }
+            }
+        }
+    ],
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/metrics-exporter-configs",
+            "next": null
+        }
+    }
+}

@@ -61,17 +61,13 @@ var createMetricsExporterCmd = &cobra.Command{
 		} else {
 			logrus.Fatal("only DATADOG is currently supported as third party sink")
 		}
-		valid, errMessage := ValidateDatadogApiKey(apiKey, site)
-		if !valid {
-			logrus.Fatal(errMessage)
-		}
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
-		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(metricsSinkType)
+		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(strings.ToUpper(metricsSinkType))
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -282,7 +278,7 @@ var updateMetricsExporterCmd = &cobra.Command{
 		metricsSinkType, _ := cmd.Flags().GetString("type")
 		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
 
-		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(metricsSinkType)
+		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(strings.ToUpper(metricsSinkType))
 
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))

@@ -79,6 +79,7 @@ func NewAuthApiClientCustomUrlKey(url *url.URL, apiKey string) (*AuthApiClient, 
 	//Configure the client
 
 	configuration.Host = url.Host
+	//configuration.Debug = true
 	configuration.Scheme = url.Scheme
 	apiClient := ybmclient.NewAPIClient(configuration)
 

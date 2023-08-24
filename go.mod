@@ -28,9 +28,6 @@ require (
 )
 
 require (
-	github.com/DataDog/datadog-api-client-go/v2 v2.16.0 // indirect
-	github.com/DataDog/zstd v1.5.2 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 )

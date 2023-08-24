@@ -57,7 +57,7 @@ func MetricsExporterWrite(ctx Context, metricsExporters []ybmclient.MetricsExpor
 		for _, metricsExporter := range metricsExporters {
 			err := format(&MetricsExporterContext{me: metricsExporter})
 			if err != nil {
-				logrus.Debugf("Error rendering metrics explorer: %v", err)
+				logrus.Debugf("Error rendering metrics exporter: %v", err)
 				return err
 			}
 		}

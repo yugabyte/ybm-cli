@@ -1,0 +1,20 @@
+{
+    "data": {
+        "spec": {
+            "name": "ff",
+            "type": "DATADOG",
+            "datadog_spec": {
+                "api_key": "c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d",
+                "site": "test"
+            }
+        },
+        "info": {
+            "id": "9e3fabbc-849c-4a77-bdb2-9422e712e7dc",
+            "cluster_ids": [],
+            "metadata": {
+                "created_on": "2023-08-24T06:41:16.145Z",
+                "updated_on": "2023-08-24T06:41:16.145Z"
+            }
+        }
+    }
+}
