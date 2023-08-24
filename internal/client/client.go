@@ -24,7 +24,6 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -1260,32 +1259,6 @@ func ParseURL(host string) (*url.URL, error) {
 	return endpoint, err
 }
 
-func getErrorMessage(response *http.Response, err error) string {
-	errMsg := err.Error()
-	if response != nil {
-		request, dumpErr := httputil.DumpRequest(response.Request, true)
-		if dumpErr != nil {
-			additional := "Error while dumping request: " + dumpErr.Error()
-			errMsg = errMsg + "\n\n\nDump error:" + additional
-		} else {
-			reqString := string(request)
-			// Replace the Authorization Bearer header with obfuscated value
-			re := regexp.MustCompile(`eyJ(.*)`)
-			reqString = re.ReplaceAllString(reqString, `***`)
-			errMsg = errMsg + "\n\nAPI Request:\n" + reqString
-		}
-
-		response, dumpErr := httputil.DumpResponse(response, true)
-		if dumpErr != nil {
-			additional := "Error while dumping response: " + dumpErr.Error()
-			errMsg = errMsg + "\n\n\nDump error:" + additional
-		} else {
-			errMsg = errMsg + "\n\nAPI Response:\n" + string(response)
-		}
-	}
-	return errMsg
-}
-
 func (a *AuthApiClient) CreateMetricsExporterConfig() ybmclient.ApiCreateMetricsExporterConfigRequest {
 	return a.ApiClient.MetricsExporterConfigApi.CreateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID)
 }
@@ -1312,4 +1285,27 @@ func (a *AuthApiClient) StopMetricsExporter(clusterId string) ybmclient.ApiStopM
 
 func (a *AuthApiClient) UpdateMetricsExporterConfig(configId string) ybmclient.ApiUpdateMetricsExporterConfigRequest {
 	return a.ApiClient.MetricsExporterConfigApi.UpdateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId)
+}
+
+func (a *AuthApiClient) GetConfigIdByName(configName string) (string, error) {
+	resp, r, err := a.ListMetricsExporterConfigs().Execute()
+
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		return "", err
+	}
+
+	configId := ""
+
+	for _, metricsExporter := range resp.Data {
+		if metricsExporter.GetSpec().Name == configName {
+			configId = metricsExporter.GetInfo().Id
+			break
+		}
+	}
+
+	if configId == "" {
+		return "", fmt.Errorf("could not find config with name %s", configName)
+	}
+	return configId, nil
 }

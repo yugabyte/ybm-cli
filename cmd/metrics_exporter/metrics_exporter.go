@@ -18,6 +18,7 @@ package metrics_exporter
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -42,20 +43,38 @@ var createMetricsExporterCmd = &cobra.Command{
 	Short: "Create Metrics Exporter Config",
 	Long:  "Create Metrics Exporter Config",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		metricsExporterName, _ := cmd.Flags().GetString("name")
+		metricsSinkType, _ := cmd.Flags().GetString("type")
+		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
+		apiKey := datadogSpecString["api-key"]
+		site := datadogSpecString["site"]
+
+		if strings.ToLower(metricsSinkType) == "datadog" {
+			if len(apiKey) < 1 {
+				logrus.Fatal("api-key is a required field for datadog-spec")
+			}
+			if len(site) < 1 {
+				site = "datadoghq.com"
+			}
+
+		} else {
+			logrus.Fatal("only DATADOG is currently supported as third party sink")
+		}
+		valid, errMessage := ValidateDatadogApiKey(apiKey, site)
+		if !valid {
+			logrus.Fatal(errMessage)
+		}
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf("could not initiate api client: %s", err.Error())
 		}
 		authApi.GetInfo("", "")
 
-		metricsExporterName, _ := cmd.Flags().GetString("name")
-		metricsSinkType, _ := cmd.Flags().GetString("type")
-		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
-
 		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(metricsSinkType)
-
-		apiKey := datadogSpecString["api-key"]
-		site := datadogSpecString["site"]
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
 
 		datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
 		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
@@ -80,9 +99,9 @@ var createMetricsExporterCmd = &cobra.Command{
 			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
 		}
 
-		respArr := [1]ybmclient.MetricsExporterConfigurationData{resp.GetData()}
+		respArr := []ybmclient.MetricsExporterConfigurationData{resp.GetData()}
 
-		formatter.MetricsExporterWrite(metricsExporterCtx, respArr[:])
+		formatter.MetricsExporterWrite(metricsExporterCtx, respArr)
 	},
 }
 
@@ -138,24 +157,9 @@ var deleteMetricsExporterCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 		configName, _ := cmd.Flags().GetString("config-name")
 
-		resp, r, err := authApi.ListMetricsExporterConfigs().Execute()
-
+		configId, err := authApi.GetConfigIdByName(configName)
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		configId := ""
-
-		for _, metricsExporter := range resp.Data {
-			if metricsExporter.GetSpec().Name == configName {
-				configId = metricsExporter.GetInfo().Id
-				break
-			}
-		}
-
-		if configId == "" {
-			logrus.Fatalf("Could not find config with name %s", configName)
 		}
 
 		r1, err := authApi.DeleteMetricsExporterConfig(configId).Execute()
@@ -194,8 +198,7 @@ var removeMetricsExporterFromClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Removing associated Metrics Exporter Config from cluster %s", clusterName)
-		fmt.Println()
+		fmt.Printf("Removing associated Metrics Exporter Config from cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -218,37 +221,21 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 
 		configName, _ := cmd.Flags().GetString("config-name")
 
-		resp, r, err := authApi.ListMetricsExporterConfigs().Execute()
-
+		configId, err := authApi.GetConfigIdByName(configName)
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		configId := ""
-
-		for _, metricsExporter := range resp.Data {
-			if metricsExporter.GetSpec().Name == configName {
-				configId = metricsExporter.GetInfo().Id
-				break
-			}
-		}
-
-		if configId == "" {
-			logrus.Fatalf("Could not find config with name %s", configName)
 		}
 
 		metricsExporterClusterConfigSpec := ybmclient.NewMetricsExporterClusterConfigurationSpec(configId)
 
-		resp1, r, err := authApi.AssociateMetricsExporterWithCluster(clusterId).MetricsExporterClusterConfigurationSpec(*metricsExporterClusterConfigSpec).Execute()
+		_, r, err := authApi.AssociateMetricsExporterWithCluster(clusterId).MetricsExporterClusterConfigurationSpec(*metricsExporterClusterConfigSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Attaching Metrics Exporter Config %s with cluster %s", resp1.Data.Spec.Name, clusterName)
-		fmt.Println()
+		fmt.Printf("Attaching Metrics Exporter Config %s with cluster %s\n", formatter.Colorize(configName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -276,8 +263,7 @@ var stopMetricsExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Stopping Metrics Exporter for cluster %s", clusterName)
-		fmt.Println()
+		fmt.Printf("Stopping Metrics Exporter for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -298,6 +284,10 @@ var updateMetricsExporterCmd = &cobra.Command{
 
 		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(metricsSinkType)
 
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
 		apiKey := datadogSpecString["api-key"]
 		site := datadogSpecString["site"]
 
@@ -306,27 +296,12 @@ var updateMetricsExporterCmd = &cobra.Command{
 
 		metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
 
-		resp, r, err := authApi.ListMetricsExporterConfigs().Execute()
-
+		configId, err := authApi.GetConfigIdByName(metricsExporterName)
 		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		configId := ""
-
-		for _, metricsExporter := range resp.Data {
-			if metricsExporter.GetSpec().Name == metricsExporterName {
-				configId = metricsExporter.GetInfo().Id
-				break
-			}
-		}
-
-		if configId == "" {
-			logrus.Fatalf("Could not find config with name %s", metricsExporterName)
-		}
-
-		resp1, r, err := authApi.UpdateMetricsExporterConfig(configId).MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
+		resp, r, err := authApi.UpdateMetricsExporterConfig(configId).MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
@@ -342,9 +317,9 @@ var updateMetricsExporterCmd = &cobra.Command{
 			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
 		}
 
-		respArr := [1]ybmclient.MetricsExporterConfigurationData{resp1.GetData()}
+		respArr := []ybmclient.MetricsExporterConfigurationData{resp.GetData()}
 
-		formatter.MetricsExporterWrite(metricsExporterCtx, respArr[:])
+		formatter.MetricsExporterWrite(metricsExporterCtx, respArr)
 	},
 }
 

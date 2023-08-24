@@ -16,18 +16,10 @@
 package formatter
 
 import (
-	// "encoding/json"
-	// "fmt"
-	// "runtime"
-	// "sort"
-	// "strconv"
-	// "strings"
+	"encoding/json"
 
-	// "github.com/enescakir/emoji"
-	// "github.com/inhies/go-bytesize"
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
-	// "golang.org/x/exp/maps"
 )
 
 const defaultMetricsExporterListing = "table {{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
@@ -65,7 +57,7 @@ func MetricsExporterWrite(ctx Context, metricsExporters []ybmclient.MetricsExpor
 		for _, metricsExporter := range metricsExporters {
 			err := format(&MetricsExporterContext{me: metricsExporter})
 			if err != nil {
-				logrus.Debugf("Error rendering cluster: %v", err)
+				logrus.Debugf("Error rendering metrics explorer: %v", err)
 				return err
 			}
 		}
@@ -98,4 +90,8 @@ func (me *MetricsExporterContext) ApiKey() string {
 		return me.me.Spec.DatadogSpec.ApiKey
 	}
 	return ""
+}
+
+func (me *MetricsExporterContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(me.me)
 }
