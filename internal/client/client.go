@@ -24,7 +24,6 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -80,6 +79,7 @@ func NewAuthApiClientCustomUrlKey(url *url.URL, apiKey string) (*AuthApiClient, 
 	//Configure the client
 
 	configuration.Host = url.Host
+	//configuration.Debug = true
 	configuration.Scheme = url.Scheme
 	apiClient := ybmclient.NewAPIClient(configuration)
 
@@ -1260,28 +1260,53 @@ func ParseURL(host string) (*url.URL, error) {
 	return endpoint, err
 }
 
-func getErrorMessage(response *http.Response, err error) string {
-	errMsg := err.Error()
-	if response != nil {
-		request, dumpErr := httputil.DumpRequest(response.Request, true)
-		if dumpErr != nil {
-			additional := "Error while dumping request: " + dumpErr.Error()
-			errMsg = errMsg + "\n\n\nDump error:" + additional
-		} else {
-			reqString := string(request)
-			// Replace the Authorization Bearer header with obfuscated value
-			re := regexp.MustCompile(`eyJ(.*)`)
-			reqString = re.ReplaceAllString(reqString, `***`)
-			errMsg = errMsg + "\n\nAPI Request:\n" + reqString
-		}
+func (a *AuthApiClient) CreateMetricsExporterConfig() ybmclient.ApiCreateMetricsExporterConfigRequest {
+	return a.ApiClient.MetricsExporterConfigApi.CreateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID)
+}
 
-		response, dumpErr := httputil.DumpResponse(response, true)
-		if dumpErr != nil {
-			additional := "Error while dumping response: " + dumpErr.Error()
-			errMsg = errMsg + "\n\n\nDump error:" + additional
-		} else {
-			errMsg = errMsg + "\n\nAPI Response:\n" + string(response)
+func (a *AuthApiClient) ListMetricsExporterConfigs() ybmclient.ApiListMetricsExporterConfigsRequest {
+	return a.ApiClient.MetricsExporterConfigApi.ListMetricsExporterConfigs(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) DeleteMetricsExporterConfig(configId string) ybmclient.ApiDeleteMetricsExporterConfigRequest {
+	return a.ApiClient.MetricsExporterConfigApi.DeleteMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId)
+}
+
+func (a *AuthApiClient) RemoveMetricsExporterConfigFromCluster(clusterId string) ybmclient.ApiRemoveMetricsExporterConfigFromClusterRequest {
+	return a.ApiClient.MetricsExporterConfigApi.RemoveMetricsExporterConfigFromCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) AssociateMetricsExporterWithCluster(clusterId string) ybmclient.ApiAddMetricsExporterConfigToClusterRequest {
+	return a.ApiClient.MetricsExporterConfigApi.AddMetricsExporterConfigToCluster(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) StopMetricsExporter(clusterId string) ybmclient.ApiStopMetricsExporterRequest {
+	return a.ApiClient.MetricsExporterConfigApi.StopMetricsExporter(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) UpdateMetricsExporterConfig(configId string) ybmclient.ApiUpdateMetricsExporterConfigRequest {
+	return a.ApiClient.MetricsExporterConfigApi.UpdateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId)
+}
+
+func (a *AuthApiClient) GetConfigIdByName(configName string) (string, error) {
+	resp, r, err := a.ListMetricsExporterConfigs().Execute()
+
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		return "", err
+	}
+
+	configId := ""
+
+	for _, metricsExporter := range resp.Data {
+		if metricsExporter.GetSpec().Name == configName {
+			configId = metricsExporter.GetInfo().Id
+			break
 		}
 	}
-	return errMsg
+
+	if configId == "" {
+		return "", fmt.Errorf("could not find config with name %s", configName)
+	}
+	return configId, nil
 }
