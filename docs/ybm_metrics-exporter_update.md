@@ -1,20 +1,24 @@
-## ybm cluster encryption
+## ybm metrics-exporter update
 
-Manage Encryption at Rest (EaR) for a cluster
+Update Metrics Exporter Config
 
 ### Synopsis
 
-Manage Encryption at Rest (EaR) for a cluster
+Update Metrics Exporter Config
 
 ```
-ybm cluster encryption [flags]
+ybm metrics-exporter update [flags]
 ```
 
 ### Options
 
 ```
-  -c, --cluster-name string   [REQUIRED] The name of the cluster.
-  -h, --help                  help for encryption
+      --config-name string            [REQUIRED] The name of the metrics exporter configuration
+      --type string                   [REQUIRED] The type of third party metrics sink
+      --datadog-spec stringToString   Configuration for Datadog. 
+                                      	Please provide key value pairs as follows: 
+                                      	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters> (default [])
+  -h, --help                          help for update
 ```
 
 ### Options inherited from parent commands
@@ -32,8 +36,5 @@ ybm cluster encryption [flags]
 
 ### SEE ALSO
 
-* [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
-* [ybm cluster encryption list](ybm_cluster_encryption_list.md)	 - List Encryption at Rest (EaR) configurations for a cluster
-* [ybm cluster encryption update](ybm_cluster_encryption_update.md)	 - Update Encryption at Rest (EaR) configurations for a cluster
-* [ybm cluster encryption update-state](ybm_cluster_encryption_update-state.md)	 - Update Encryption at Rest (EaR) state for a cluster
+* [ybm metrics-exporter](ybm_metrics-exporter.md)	 - Manage Metrics Exporter
 

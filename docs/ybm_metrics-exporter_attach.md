@@ -1,20 +1,21 @@
-## ybm cluster encryption
+## ybm metrics-exporter attach
 
-Manage Encryption at Rest (EaR) for a cluster
+Associate Metrics Exporter Config with Cluster
 
 ### Synopsis
 
-Manage Encryption at Rest (EaR) for a cluster
+Associate Metrics Exporter Config with Cluster
 
 ```
-ybm cluster encryption [flags]
+ybm metrics-exporter attach [flags]
 ```
 
 ### Options
 
 ```
-  -c, --cluster-name string   [REQUIRED] The name of the cluster.
-  -h, --help                  help for encryption
+      --cluster-name string   [REQUIRED] The name of the cluster.
+      --config-name string    [REQUIRED] The name of the metrics exporter configuration
+  -h, --help                  help for attach
 ```
 
 ### Options inherited from parent commands
@@ -32,8 +33,5 @@ ybm cluster encryption [flags]
 
 ### SEE ALSO
 
-* [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
-* [ybm cluster encryption list](ybm_cluster_encryption_list.md)	 - List Encryption at Rest (EaR) configurations for a cluster
-* [ybm cluster encryption update](ybm_cluster_encryption_update.md)	 - Update Encryption at Rest (EaR) configurations for a cluster
-* [ybm cluster encryption update-state](ybm_cluster_encryption_update-state.md)	 - Update Encryption at Rest (EaR) state for a cluster
+* [ybm metrics-exporter](ybm_metrics-exporter.md)	 - Manage Metrics Exporter
 

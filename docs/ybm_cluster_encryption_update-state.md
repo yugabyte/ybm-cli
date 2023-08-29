@@ -35,3 +35,4 @@ ybm cluster encryption update-state [flags]
 ### SEE ALSO
 
 * [ybm cluster encryption](ybm_cluster_encryption.md)	 - Manage Encryption at Rest (EaR) for a cluster
+
