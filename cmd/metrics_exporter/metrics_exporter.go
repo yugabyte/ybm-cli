@@ -44,38 +44,43 @@ var createMetricsExporterCmd = &cobra.Command{
 	Long:  "Create Metrics Exporter Config",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		metricsExporterName, _ := cmd.Flags().GetString("name")
+		metricsExporterName, _ := cmd.Flags().GetString("config-name")
 		metricsSinkType, _ := cmd.Flags().GetString("type")
-		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
-		apiKey := datadogSpecString["api-key"]
-		site := datadogSpecString["site"]
 
-		if strings.ToLower(metricsSinkType) == "datadog" {
-			if len(apiKey) < 1 {
-				logrus.Fatal("api-key is a required field for datadog-spec")
-			}
-			if len(site) < 1 {
-				site = "datadoghq.com"
-			}
-
-		} else {
-			logrus.Fatal("only DATADOG is currently supported as third party sink")
-		}
-		authApi, err := ybmAuthClient.NewAuthApiClient()
-		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
-		}
-		authApi.GetInfo("", "")
-
+		//We initialise here, even if we error out later
 		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(strings.ToUpper(metricsSinkType))
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-
-		datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
 		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
 
-		metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
+		switch *metricsSinkTypeEnum {
+		case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_DATADOG:
+			if !cmd.Flags().Changed("datadog-spec") {
+				logrus.Fatalf("datadog-spec is required for datadog sink")
+
+			}
+			datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
+			apiKey := datadogSpecString["api-key"]
+			site := datadogSpecString["site"]
+			if len(apiKey) < 1 {
+				logrus.Fatal("api-key is a required field for datadog-spec")
+			}
+			if len(site) < 1 {
+				logrus.Fatal("site is a required field for datadog-spec")
+			}
+			datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
+			metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
+		default:
+			//We should never go there normally
+			logrus.Fatalf("Only datadog is accepted as third party sink for now")
+		}
+
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
 
 		resp, r, err := authApi.CreateMetricsExporterConfig().MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
 
@@ -108,7 +113,7 @@ var listMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -148,7 +153,7 @@ var deleteMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		configName, _ := cmd.Flags().GetString("config-name")
@@ -165,8 +170,7 @@ var deleteMetricsExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Deleting Metrics Exporter Config %s", configName)
-		fmt.Println()
+		fmt.Printf("Deleting Metrics Exporter Config %s\n", formatter.Colorize(configName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -177,7 +181,7 @@ var removeMetricsExporterFromClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -205,7 +209,7 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -242,7 +246,7 @@ var stopMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -270,27 +274,41 @@ var updateMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf("could not initiate api client: %s", err.Error())
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
 		metricsExporterName, _ := cmd.Flags().GetString("config-name")
 		metricsSinkType, _ := cmd.Flags().GetString("type")
-		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
 
 		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(strings.ToUpper(metricsSinkType))
-
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		apiKey := datadogSpecString["api-key"]
-		site := datadogSpecString["site"]
-
-		datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
+		//We initialise this one here, even if we error out later
 		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
 
-		metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
+		switch *metricsSinkTypeEnum {
+		case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_DATADOG:
+			if !cmd.Flags().Changed("datadog-spec") {
+				logrus.Fatalf("datadog-spec is required for datadog sink")
+
+			}
+			datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
+			apiKey := datadogSpecString["api-key"]
+			site := datadogSpecString["site"]
+			if len(apiKey) < 1 {
+				logrus.Fatal("api-key is a required field for datadog-spec")
+			}
+			if len(site) < 1 {
+				logrus.Fatal("site is a required field for datadog-spec")
+			}
+			datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
+			metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
+		default:
+			logrus.Fatalf("Only datadog is accepted as third party sink for now")
+		}
 
 		configId, err := authApi.GetConfigIdByName(metricsExporterName)
 		if err != nil {
@@ -321,26 +339,29 @@ var updateMetricsExporterCmd = &cobra.Command{
 
 func init() {
 	MetricsExporterCmd.AddCommand(createMetricsExporterCmd)
-	createMetricsExporterCmd.Flags().String("name", "", "[REQUIRED] The name of the cluster.")
-	createMetricsExporterCmd.MarkFlagRequired("name")
+	createMetricsExporterCmd.Flags().SortFlags = false
+	createMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
+	createMetricsExporterCmd.MarkFlagRequired("config-name")
 	createMetricsExporterCmd.Flags().String("type", "", "[REQUIRED] The type of third party metrics sink")
 	createMetricsExporterCmd.MarkFlagRequired("type")
-	createMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, "Spec for datadog")
+	createMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, `Configuration for Datadog. 
+	Please provide key value pairs as follows: 
+	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
 
 	MetricsExporterCmd.AddCommand(listMetricsExporterCmd)
 
 	MetricsExporterCmd.AddCommand(deleteMetricsExporterCmd)
-	deleteMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter config")
+	deleteMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
 	deleteMetricsExporterCmd.MarkFlagRequired("config-name")
 
 	MetricsExporterCmd.AddCommand(removeMetricsExporterFromClusterCmd)
-	removeMetricsExporterFromClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster.")
+	removeMetricsExporterFromClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster")
 	removeMetricsExporterFromClusterCmd.MarkFlagRequired("cluster-name")
 
 	MetricsExporterCmd.AddCommand(associateMetricsExporterWithClusterCmd)
 	associateMetricsExporterWithClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster.")
 	associateMetricsExporterWithClusterCmd.MarkFlagRequired("cluster-name")
-	associateMetricsExporterWithClusterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter config")
+	associateMetricsExporterWithClusterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
 	associateMetricsExporterWithClusterCmd.MarkFlagRequired("config-name")
 
 	MetricsExporterCmd.AddCommand(stopMetricsExporterCmd)
@@ -348,9 +369,12 @@ func init() {
 	stopMetricsExporterCmd.MarkFlagRequired("cluster-name")
 
 	MetricsExporterCmd.AddCommand(updateMetricsExporterCmd)
-	updateMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the cluster.")
+	updateMetricsExporterCmd.Flags().SortFlags = false
+	updateMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
 	updateMetricsExporterCmd.MarkFlagRequired("config-name")
 	updateMetricsExporterCmd.Flags().String("type", "", "[REQUIRED] The type of third party metrics sink")
 	updateMetricsExporterCmd.MarkFlagRequired("type")
-	updateMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, "Spec for datadog")
+	updateMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, `Configuration for Datadog. 
+	Please provide key value pairs as follows: 
+	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
 }

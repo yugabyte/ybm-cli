@@ -62,7 +62,7 @@ var _ = Describe("Metrics Exporter", func() {
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseMetrics),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--name", "test", "--type", "datadog", "--datadog-spec", "site=test,api-key=c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d")
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "datadog", "--datadog-spec", "site=test,api-key=c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -77,11 +77,11 @@ ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"name\", \"type\" not set$)"))
+			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"config-name\", \"type\" not set$)"))
 			session.Kill()
 		})
 		It("should return required field when type is datadog", func() {
-			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--name", "test", "--type", "datadog", "--datadog-spec", "site=test")
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "datadog", "--datadog-spec", "site=test")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
