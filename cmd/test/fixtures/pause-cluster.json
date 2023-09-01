@@ -11,6 +11,7 @@
                 "cluster_type": "SYNCHRONOUS",
                 "num_nodes": 1,
                 "fault_tolerance": "NONE",
+                "num_faults_to_tolerate": 0,
                 "node_info": {
                     "num_cores": 2,
                     "memory_mb": 8192,
