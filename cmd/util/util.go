@@ -48,7 +48,27 @@ func GetClusterTier(tierCli string) (string, error) {
 		return "FREE", nil
 	}
 
-	return "", fmt.Errorf("The tier must be either 'Sandbox' or 'Dedicated'")
+	return "", fmt.Errorf("the tier must be either 'Sandbox' or 'Dedicated'")
+}
+
+func ValidateNumFaultsToTolerate(numFaultsToTolerate int32, faultTolerance ybmclient.ClusterFaultTolerance) (bool, error) {
+	if numFaultsToTolerate < 0 || numFaultsToTolerate > 3 {
+		return false, fmt.Errorf("number of faults to tolerate must be between 0 and 3")
+	}
+	if faultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_NONE && numFaultsToTolerate != 0 {
+		return false, fmt.Errorf("number of faults to tolerate must be 0 for fault tolerance level 'NONE'")
+	}
+	if faultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_NODE && numFaultsToTolerate < 1 {
+		return false, fmt.Errorf("number of faults to tolerate must be greater than 0 for fault tolerance level 'NODE'")
+	}
+	if faultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_REGION && numFaultsToTolerate < 1 {
+		return false, fmt.Errorf("number of faults to tolerate must be greater than 0 for fault tolerance level 'REGION'")
+	}
+	if faultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_ZONE && numFaultsToTolerate != 1 {
+		return false, fmt.Errorf("number of faults to tolerate must be 1 for fault tolerance level 'ZONE'")
+	}
+
+	return true, nil
 }
 
 func ValidateCIDR(cidr string) (bool, error) {
@@ -68,7 +88,7 @@ func ExtractJwtClaims(tokenStr string) (jwt.MapClaims, error) {
 	if _, ok := token.Claims.(jwt.MapClaims); ok {
 		return token.Claims.(jwt.MapClaims), nil
 	}
-	return nil, errors.New("Unable to extract claims from token")
+	return nil, errors.New("unable to extract claims from token")
 }
 
 func IsJwtTokenExpiredWithTime(tokenStr string, now time.Time) (bool, error) {

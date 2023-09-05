@@ -174,7 +174,7 @@ func init() {
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If provided, num-cores is mandatory, while disk-size-gb and disk-iops are optional.")
 	updateClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If provided, region and num-nodes are mandatory, vpc is optional.`)
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
-	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION.")
+	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, ZONE and REGION.")
 	updateClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Production or Innovation or Preview.")
 
 }

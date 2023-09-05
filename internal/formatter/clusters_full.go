@@ -19,9 +19,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"sort"
 	"text/template"
 
+	"github.com/enescakir/emoji"
 	"github.com/sirupsen/logrus"
 	"github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/cluster"
@@ -307,6 +309,10 @@ func (c *clusterInfoRegionsContext) DiskSizeGb() string {
 }
 
 func (c *clusterInfoRegionsContext) Region() string {
+	// If the fault tolerance is regional, check if there is an affinitized region
+	if c.clusterInfo.FaultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_REGION && c.clusterInfoRegion.IsAffinitized.IsSet() {
+		return fmt.Sprintf("%s %s", AffinitizedRegionToEmoji(*c.clusterInfoRegion.IsAffinitized.Get()), c.clusterInfoRegion.GetPlacementInfo().CloudInfo.Region)
+	}
 	return c.clusterInfoRegion.GetPlacementInfo().CloudInfo.Region
 }
 
@@ -315,4 +321,14 @@ func (c *clusterInfoRegionsContext) VpcName() string {
 }
 func (c *clusterInfoRegionsContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.clusterInfoRegion)
+}
+
+func AffinitizedRegionToEmoji(isAffinitized bool) string {
+	if isAffinitized {
+		if runtime.GOOS == "windows" {
+			return "*"
+		}
+		return emoji.Parse(":star:")
+	}
+	return ""
 }
