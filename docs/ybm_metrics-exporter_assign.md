@@ -1,4 +1,4 @@
-## ybm metrics-exporter attach
+## ybm metrics-exporter assign
 
 Associate Metrics Exporter Config with Cluster
 
@@ -7,7 +7,7 @@ Associate Metrics Exporter Config with Cluster
 Associate Metrics Exporter Config with Cluster
 
 ```
-ybm metrics-exporter attach [flags]
+ybm metrics-exporter assign [flags]
 ```
 
 ### Options
@@ -15,7 +15,7 @@ ybm metrics-exporter attach [flags]
 ```
       --cluster-name string   [REQUIRED] The name of the cluster.
       --config-name string    [REQUIRED] The name of the metrics exporter configuration
-  -h, --help                  help for attach
+  -h, --help                  help for assign
 ```
 
 ### Options inherited from parent commands

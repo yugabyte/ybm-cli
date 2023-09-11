@@ -175,9 +175,9 @@ var deleteMetricsExporterCmd = &cobra.Command{
 }
 
 var removeMetricsExporterFromClusterCmd = &cobra.Command{
-	Use:   "remove-from-cluster",
-	Short: "Remove Metrics Exporter Config from Cluster",
-	Long:  "Remove Metrics Exporter Config from Cluster",
+	Use:   "unassign",
+	Short: "Unassign Metrics Exporter Config from Cluster",
+	Long:  "Unassign Metrics Exporter Config from Cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -198,12 +198,12 @@ var removeMetricsExporterFromClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Removing associated Metrics Exporter Config from cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("Unassigning associated Metrics Exporter Config from cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
 var associateMetricsExporterWithClusterCmd = &cobra.Command{
-	Use:   "attach",
+	Use:   "assign",
 	Short: "Associate Metrics Exporter Config with Cluster",
 	Long:  "Associate Metrics Exporter Config with Cluster",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -235,7 +235,7 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Attaching Metrics Exporter Config %s with cluster %s\n", formatter.Colorize(configName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("Assigning Metrics Exporter Config %s with cluster %s\n", formatter.Colorize(configName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 

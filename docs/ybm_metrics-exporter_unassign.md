@@ -1,20 +1,20 @@
-## ybm metrics-exporter remove-from-cluster
+## ybm metrics-exporter unassign
 
-Remove Metrics Exporter Config from Cluster
+Unassign Metrics Exporter Config from Cluster
 
 ### Synopsis
 
-Remove Metrics Exporter Config from Cluster
+Unassign Metrics Exporter Config from Cluster
 
 ```
-ybm metrics-exporter remove-from-cluster [flags]
+ybm metrics-exporter unassign [flags]
 ```
 
 ### Options
 
 ```
       --cluster-name string   [REQUIRED] The name of the cluster
-  -h, --help                  help for remove-from-cluster
+  -h, --help                  help for unassign
 ```
 
 ### Options inherited from parent commands
