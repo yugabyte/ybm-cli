@@ -18,6 +18,9 @@ ybm metrics-exporter update [flags]
       --datadog-spec stringToString   Configuration for Datadog. 
                                       	Please provide key value pairs as follows: 
                                       	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters> (default [])
+      --grafana-spec stringToString   Configuration for Grafana. 
+                                      	Please provide key value pairs as follows: 
+                                      	api-key=<your-grafana-api-key>,endpoint=<your-grafana-enpoint-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug> (default [])
   -h, --help                          help for update
 ```
 
