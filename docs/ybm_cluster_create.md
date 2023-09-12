@@ -27,7 +27,7 @@ ybm cluster create [flags]
                                      	For GCP:
                                      	cloud-provider=GCP,gcp-resource-id=<resource-id>,gcp-service-account-path=<service-account-path>.
                                      	If specified, all parameters for that provider are mandatory.
-      --fault-tolerance string       [OPTIONAL] The fault tolerance of the cluster. The possible values are NONE, ZONE and REGION. Default NONE.
+      --fault-tolerance string       [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, ZONE and REGION. Default NONE.
       --node-config stringToInt      [OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If specified, num-cores is mandatory, while disk-size-gb and disk-iops are optional. (default [])
       --region-info stringArray      [OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If specified, region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified by using multiple --region-info arguments. Default if not specified is us-west-2 AWS region.
   -h, --help                         help for create
