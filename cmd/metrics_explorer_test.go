@@ -105,8 +105,9 @@ ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Name      Type      Site      ApiKey                             InstanceId   OrgSlug
-ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
+			Expect(session.Out).Should(gbytes.Say(`Name      Type      Site            ApiKey                             InstanceId   OrgSlug
+ff        DATADOG   test            c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d                
+grafana   GRAFANA   test-endpoint   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
 			session.Kill()
 		})
 

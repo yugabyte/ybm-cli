@@ -17,6 +17,7 @@ package formatter
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -93,7 +94,12 @@ func (me *MetricsExporterContext) ApiKey() string {
 	if string(me.me.Spec.GetType()) == "DATADOG" {
 		return me.me.Spec.GetDatadogSpec().ApiKey
 	} else if string(me.me.Spec.GetType()) == "GRAFANA" {
-		return me.me.Spec.GetGrafanaSpec().ApiKey
+		//Key is too long for Grafana we keep only the 32 char
+		apiKey := me.me.Spec.GetGrafanaSpec().ApiKey
+		if len(apiKey) > 32 {
+			return fmt.Sprintf("%s%s%s", apiKey[:12], "...", apiKey[len(apiKey)-17:])
+		}
+		return apiKey
 	}
 	return ""
 }
