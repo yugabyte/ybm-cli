@@ -175,9 +175,10 @@ var deleteMetricsExporterCmd = &cobra.Command{
 }
 
 var removeMetricsExporterFromClusterCmd = &cobra.Command{
-	Use:   "unassign",
-	Short: "Unassign Metrics Exporter Config from Cluster",
-	Long:  "Unassign Metrics Exporter Config from Cluster",
+	Use:     "unassign",
+	Aliases: []string{"remove-from-cluster"},
+	Short:   "Unassign Metrics Exporter Config from Cluster",
+	Long:    "Unassign Metrics Exporter Config from Cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -203,9 +204,10 @@ var removeMetricsExporterFromClusterCmd = &cobra.Command{
 }
 
 var associateMetricsExporterWithClusterCmd = &cobra.Command{
-	Use:   "assign",
-	Short: "Associate Metrics Exporter Config with Cluster",
-	Long:  "Associate Metrics Exporter Config with Cluster",
+	Use:     "assign",
+	Aliases: []string{"attach"},
+	Short:   "Associate Metrics Exporter Config with Cluster",
+	Long:    "Associate Metrics Exporter Config with Cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
