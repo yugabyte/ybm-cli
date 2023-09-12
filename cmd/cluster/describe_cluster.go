@@ -46,7 +46,10 @@ var describeClusterCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-
+		if len(resp.GetData()) < 1 {
+			fmt.Println("No cluster found")
+			return
+		}
 		if len(resp.GetData()) > 0 && viper.GetString("output") == "table" {
 			fullClusterContext := *formatter.NewFullClusterContext()
 			fullClusterContext.Output = os.Stdout
@@ -55,10 +58,7 @@ var describeClusterCmd = &cobra.Command{
 			fullClusterContext.Write()
 			return
 		}
-		if len(resp.GetData()) < 1 {
-			fmt.Println("No cluster found")
-			return
-		}
+
 		clustersCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewClusterFormat(viper.GetString("output")),

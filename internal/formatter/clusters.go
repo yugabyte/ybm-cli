@@ -29,6 +29,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -153,6 +154,16 @@ func (c *ClusterContext) Nodes() string {
 }
 
 func (c *ClusterContext) MarshalJSON() ([]byte, error) {
+	//Removing Azure Private endpoit from Json output
+	if len(c.c.Info.GetClusterEndpoints()) > 0 {
+		c.c.Info.ClusterEndpoints = slices.DeleteFunc(c.c.Info.ClusterEndpoints, func(ep ybmclient.Endpoint) bool {
+			if ep.AccessibilityType == ybmclient.ACCESSIBILITYTYPE_PRIVATE && c.c.Spec.CloudInfo.Code == ybmclient.CLOUDENUM_AZURE {
+				return true
+			}
+			return false
+		})
+
+	}
 	return json.Marshal(c.c)
 }
 
