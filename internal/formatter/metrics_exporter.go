@@ -17,12 +17,13 @@ package formatter
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-const defaultMetricsExporterListing = "table {{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
+const defaultMetricsExporterListing = "table {{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}\t{{.InstanceId}}\t{{.OrgSlug}}"
 
 type MetricsExporterContext struct {
 	HeaderContext
@@ -43,11 +44,13 @@ func NewMetricsExporterFormat(source string) Format {
 func NewMetricsExporterContext() *MetricsExporterContext {
 	metricsExporterCtx := MetricsExporterContext{}
 	metricsExporterCtx.Header = SubHeaderContext{
-		"Name":   nameHeader,
-		"ID":     "ID",
-		"Type":   "Type",
-		"Site":   "Site",
-		"ApiKey": "ApiKey",
+		"Name":       nameHeader,
+		"ID":         "ID",
+		"Type":       "Type",
+		"Site":       "Site",
+		"ApiKey":     "ApiKey",
+		"InstanceId": "InstanceId",
+		"OrgSlug":    "OrgSlug",
 	}
 	return &metricsExporterCtx
 }
@@ -80,14 +83,37 @@ func (me *MetricsExporterContext) Type() string {
 
 func (me *MetricsExporterContext) Site() string {
 	if string(me.me.Spec.GetType()) == "DATADOG" {
-		return me.me.Spec.DatadogSpec.Site
+		return me.me.Spec.GetDatadogSpec().Site
+	} else if string(me.me.Spec.GetType()) == "GRAFANA" {
+		return me.me.Spec.GetGrafanaSpec().Endpoint
 	}
 	return ""
 }
 
 func (me *MetricsExporterContext) ApiKey() string {
 	if string(me.me.Spec.GetType()) == "DATADOG" {
-		return me.me.Spec.DatadogSpec.ApiKey
+		return me.me.Spec.GetDatadogSpec().ApiKey
+	} else if string(me.me.Spec.GetType()) == "GRAFANA" {
+		//Key is too long for Grafana we keep only the 32 char
+		apiKey := me.me.Spec.GetGrafanaSpec().ApiKey
+		if len(apiKey) > 32 {
+			return fmt.Sprintf("%s%s%s", apiKey[:12], "...", apiKey[len(apiKey)-17:])
+		}
+		return apiKey
+	}
+	return ""
+}
+
+func (me *MetricsExporterContext) InstanceId() string {
+	if string(me.me.Spec.GetType()) == "GRAFANA" {
+		return me.me.Spec.GetGrafanaSpec().InstanceId
+	}
+	return ""
+}
+
+func (me *MetricsExporterContext) OrgSlug() string {
+	if string(me.me.Spec.GetType()) == "GRAFANA" {
+		return me.me.Spec.GetGrafanaSpec().OrgSlug
 	}
 	return ""
 }

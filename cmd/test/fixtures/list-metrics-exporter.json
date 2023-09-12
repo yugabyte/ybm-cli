@@ -7,14 +7,36 @@
                 "datadog_spec": {
                     "api_key": "c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d",
                     "site": "test"
+                },
+                "grafana_spec": null
+            },
+            "info": {
+                "id": "129f7c97-81ae-47c7-8f9e-40ab4390093f",
+                "cluster_ids": [],
+                "metadata": {
+                    "created_on": "2023-09-12T02:25:55.804Z",
+                    "updated_on": "2023-09-12T02:25:55.804Z"
+                }
+            }
+        },
+        {
+            "spec": {
+                "name": "grafana",
+                "type": "GRAFANA",
+                "datadog_spec": null,
+                "grafana_spec": {
+                    "api_key": "glXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==",
+                    "endpoint": "test-endpoint",
+                    "instance_id": "1234456",
+                    "org_slug": "ybmclitest"
                 }
             },
             "info": {
-                "id": "9e3fabbc-849c-4a77-bdb2-9422e712e7dc",
+                "id": "92ceaa26-bac7-4842-9b3c-831a18a4f813",
                 "cluster_ids": [],
                 "metadata": {
-                    "created_on": "2023-08-24T06:41:16.145Z",
-                    "updated_on": "2023-08-24T06:41:16.145Z"
+                    "created_on": "2023-09-12T05:50:25.843Z",
+                    "updated_on": "2023-09-12T05:50:25.843Z"
                 }
             }
         }
@@ -22,7 +44,7 @@
     "_metadata": {
         "continuation_token": null,
         "links": {
-            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/metrics-exporter-configs",
+            "self": "/api/public/v1/accounts/f941bb6b-6b15-4f54-9351-e81c58ad2296/projects/99164795-2a21-42a2-99be-2f3e341acc24/metrics-exporter-configs",
             "next": null
         }
     }
