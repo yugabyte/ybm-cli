@@ -67,7 +67,7 @@ var _ = Describe("Metrics Exporter", func() {
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The metrics exporter config 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being created
-Name      Type      Site      ApiKey
+Name      Type      Site      ApiKey                             InstanceId   OrgSlug
 ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session.Kill()
 		})
@@ -105,7 +105,7 @@ ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Name      Type      Site      ApiKey
+			Expect(session.Out).Should(gbytes.Say(`Name      Type      Site      ApiKey                             InstanceId   OrgSlug
 ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session.Kill()
 		})
