@@ -51,10 +51,10 @@ var _ = Describe("Metrics Exporter", func() {
 		os.Setenv("YBM_APIKEY", "test-token")
 	})
 
-	Context("When creating metrics-exporter", func() {
+	Context("When type is Datadog", func() {
 		It("should create the config", func() {
 			statusCode = 200
-			err := loadJson("./test/fixtures/metrics-exporter.json", &responseMetrics)
+			err := loadJson("./test/fixtures/metrics-exporter-dd.json", &responseMetrics)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -67,7 +67,7 @@ var _ = Describe("Metrics Exporter", func() {
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The metrics exporter config 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being created
-Name      Type      Site      ApiKey                             InstanceId   OrgSlug
+Name      Type      Site      ApiKey
 ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session.Kill()
 		})
@@ -80,12 +80,51 @@ ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"config-name\", \"type\" not set$)"))
 			session.Kill()
 		})
-		It("should return required field when type is datadog", func() {
+		It("should return required field", func() {
 			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "datadog", "--datadog-spec", "site=test")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Err).Should(gbytes.Say("(?m:api-key is a required field for datadog-spec$)"))
+			session.Kill()
+		})
+
+	})
+	Context("When type is Grafana", func() {
+		It("should create the config", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-grafana.json", &responseMetrics)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/metrics-exporter-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseMetrics),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "grafana", "--grafana-spec", "org-slug=ybmclitest,instance-id=1234456,endpoint=test-endpoint,api-key=glXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The metrics exporter config 92ceaa26-bac7-4842-9b3c-831a18a4f813 is being created
+Name      Type      Zone            Access Token Policy                InstanceId   OrgSlug
+grafana   GRAFANA   test-endpoint   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
+			session.Kill()
+		})
+		It("should return required field name and type when not set", func() {
+
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"config-name\", \"type\" not set$)"))
+			session.Kill()
+		})
+		It("should return required field", func() {
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "grafana", "--grafana-spec", "endpoint=test")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:api-key is a required field for grafana-spec$)"))
 			session.Kill()
 		})
 
@@ -105,9 +144,9 @@ ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Name      Type      Site            ApiKey                             InstanceId   OrgSlug
-ff        DATADOG   test            c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d                
-grafana   GRAFANA   test-endpoint   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
+			Expect(session.Out).Should(gbytes.Say(`Name      Type
+ff        DATADOG
+grafana   GRAFANA`))
 			session.Kill()
 		})
 

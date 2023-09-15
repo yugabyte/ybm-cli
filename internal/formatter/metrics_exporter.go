@@ -23,7 +23,9 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-const defaultMetricsExporterListing = "table {{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}\t{{.InstanceId}}\t{{.OrgSlug}}"
+const defaultMetricsExporterListing = "table {{.Name}}\t{{.Type}}"
+const defaultMetricsExporterDataDog = "table {{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
+const defaultMetricsExporterGrafana = "table {{.Name}}\t{{.Type}}\t{{.Zone}}\t{{.AccessTokenPolicy}}\t{{.InstanceId}}\t{{.OrgSlug}}"
 
 type MetricsExporterContext struct {
 	HeaderContext
@@ -31,10 +33,19 @@ type MetricsExporterContext struct {
 	me ybmclient.MetricsExporterConfigurationData
 }
 
-func NewMetricsExporterFormat(source string) Format {
+func NewMetricsExporterFormat(source string, metricsType string) Format {
+	format := defaultMetricsExporterListing
+
+	//Display will differ by exporter type for describe
+	switch metricsType {
+	case string(ybmclient.METRICSEXPORTERCONFIGTYPEENUM_DATADOG):
+		format = defaultMetricsExporterDataDog
+	case string(ybmclient.METRICSEXPORTERCONFIGTYPEENUM_GRAFANA):
+		format = defaultMetricsExporterGrafana
+	}
+
 	switch source {
 	case "table", "":
-		format := defaultMetricsExporterListing
 		return Format(format)
 	default:
 		return Format(source)
@@ -44,13 +55,15 @@ func NewMetricsExporterFormat(source string) Format {
 func NewMetricsExporterContext() *MetricsExporterContext {
 	metricsExporterCtx := MetricsExporterContext{}
 	metricsExporterCtx.Header = SubHeaderContext{
-		"Name":       nameHeader,
-		"ID":         "ID",
-		"Type":       "Type",
-		"Site":       "Site",
-		"ApiKey":     "ApiKey",
-		"InstanceId": "InstanceId",
-		"OrgSlug":    "OrgSlug",
+		"Name":              nameHeader,
+		"ID":                "ID",
+		"Type":              "Type",
+		"Site":              "Site",
+		"ApiKey":            "ApiKey",
+		"InstanceId":        "InstanceId",
+		"OrgSlug":           "OrgSlug",
+		"AccessTokenPolicy": "Access Token Policy",
+		"Zone":              "Zone",
 	}
 	return &metricsExporterCtx
 }
@@ -81,43 +94,36 @@ func (me *MetricsExporterContext) Type() string {
 	return string(me.me.Spec.Type)
 }
 
-func (me *MetricsExporterContext) Site() string {
-	if string(me.me.Spec.GetType()) == "DATADOG" {
-		return me.me.Spec.GetDatadogSpec().Site
-	} else if string(me.me.Spec.GetType()) == "GRAFANA" {
-		return me.me.Spec.GetGrafanaSpec().Endpoint
-	}
-	return ""
+func (me *MetricsExporterContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(me.me)
 }
 
+// DATADOG
 func (me *MetricsExporterContext) ApiKey() string {
-	if string(me.me.Spec.GetType()) == "DATADOG" {
-		return me.me.Spec.GetDatadogSpec().ApiKey
-	} else if string(me.me.Spec.GetType()) == "GRAFANA" {
-		//Key is too long for Grafana we keep only the 32 char
-		apiKey := me.me.Spec.GetGrafanaSpec().ApiKey
-		if len(apiKey) > 32 {
-			return fmt.Sprintf("%s%s%s", apiKey[:12], "...", apiKey[len(apiKey)-17:])
-		}
-		return apiKey
+	return me.me.Spec.GetDatadogSpec().ApiKey
+}
+
+func (me *MetricsExporterContext) Site() string {
+	return me.me.Spec.GetDatadogSpec().Site
+}
+
+// GRAFANA
+func (me *MetricsExporterContext) Zone() string {
+	return me.me.Spec.GetGrafanaSpec().Endpoint
+}
+
+func (me *MetricsExporterContext) AccessTokenPolicy() string {
+	apiKey := me.me.Spec.GetGrafanaSpec().ApiKey
+	if len(apiKey) > 32 {
+		return fmt.Sprintf("%s%s%s", apiKey[:12], "...", apiKey[len(apiKey)-17:])
 	}
-	return ""
+	return apiKey
 }
 
 func (me *MetricsExporterContext) InstanceId() string {
-	if string(me.me.Spec.GetType()) == "GRAFANA" {
-		return me.me.Spec.GetGrafanaSpec().InstanceId
-	}
-	return ""
+	return me.me.Spec.GetGrafanaSpec().InstanceId
 }
 
 func (me *MetricsExporterContext) OrgSlug() string {
-	if string(me.me.Spec.GetType()) == "GRAFANA" {
-		return me.me.Spec.GetGrafanaSpec().OrgSlug
-	}
-	return ""
-}
-
-func (me *MetricsExporterContext) MarshalJSON() ([]byte, error) {
-	return json.Marshal(me.me)
+	return me.me.Spec.GetGrafanaSpec().OrgSlug
 }

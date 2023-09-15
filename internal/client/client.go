@@ -1297,25 +1297,19 @@ func (a *AuthApiClient) UpdateMetricsExporterConfig(configId string) ybmclient.A
 	return a.ApiClient.MetricsExporterConfigApi.UpdateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId)
 }
 
-func (a *AuthApiClient) GetConfigIdByName(configName string) (string, error) {
+func (a *AuthApiClient) GetConfigByName(configName string) (*ybmclient.MetricsExporterConfigurationData, error) {
 	resp, r, err := a.ListMetricsExporterConfigs().Execute()
 
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", r)
-		return "", err
+		return nil, err
 	}
-
-	configId := ""
 
 	for _, metricsExporter := range resp.Data {
 		if metricsExporter.GetSpec().Name == configName {
-			configId = metricsExporter.GetInfo().Id
-			break
+			return &metricsExporter, nil
 		}
 	}
 
-	if configId == "" {
-		return "", fmt.Errorf("could not find config with name %s", configName)
-	}
-	return configId, nil
+	return nil, fmt.Errorf("could not find config with name %s", configName)
 }

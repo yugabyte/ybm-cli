@@ -35,6 +35,7 @@ ybm metrics-exporter [flags]
 * [ybm metrics-exporter assign](ybm_metrics-exporter_assign.md)	 - Associate Metrics Exporter Config with Cluster
 * [ybm metrics-exporter create](ybm_metrics-exporter_create.md)	 - Create Metrics Exporter Config
 * [ybm metrics-exporter delete](ybm_metrics-exporter_delete.md)	 - Delete Metrics Exporter Config
+* [ybm metrics-exporter describe](ybm_metrics-exporter_describe.md)	 - Describe Metrics Exporter Config
 * [ybm metrics-exporter list](ybm_metrics-exporter_list.md)	 - List Metrics Exporter Config
 * [ybm metrics-exporter pause](ybm_metrics-exporter_pause.md)	 - Stop Metrics Exporter
 * [ybm metrics-exporter unassign](ybm_metrics-exporter_unassign.md)	 - Unassign Metrics Exporter Config from Cluster
