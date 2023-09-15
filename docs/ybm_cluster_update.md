@@ -18,7 +18,7 @@ ybm cluster update [flags]
       --cluster-tier string       [OPTIONAL] The tier of the cluster. Sandbox or Dedicated.
       --cluster-type string       [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.
       --database-version string   [OPTIONAL] The database version of the cluster. Production or Innovation or Preview.
-      --fault-tolerance string    [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, ZONE and REGION.
+      --fault-tolerance string    [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION.
   -h, --help                      help for update
       --new-name string           [OPTIONAL] The new name to be given to the cluster.
       --node-config stringToInt   [OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If provided, num-cores is mandatory, while disk-size-gb and disk-iops are optional. (default [])
