@@ -186,7 +186,7 @@ func init() {
 	For GCP:
 	cloud-provider=GCP,gcp-resource-id=<resource-id>,gcp-service-account-path=<service-account-path>.
 	If specified, all parameters for that provider are mandatory.`)
-	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, ZONE and REGION. Default NONE.")
+	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION. Default NONE.")
 	if util.IsFeatureFlagEnabled(util.CLUSTER_RF) {
 		createClusterCmd.Flags().Int32("num-faults-to-tolerate", 0, "[OPTIONAL] The number of domain faults to tolerate for the level specified. The possible values are 0 for NONE, 1 for ZONE and [1-3] for anything else. Defaults to 0 for NONE, 1 otherwise.")
 	}
