@@ -77,15 +77,15 @@ var createMetricsExporterCmd = &cobra.Command{
 
 			}
 			grafanaSpecString, _ := cmd.Flags().GetStringToString("grafana-spec")
-			apiKey := grafanaSpecString["api-key"]
-			endpoint := grafanaSpecString["endpoint"]
+			apiKey := grafanaSpecString["access-policy-token"]
+			zone := grafanaSpecString["zone"]
 			instanceId := grafanaSpecString["instance-id"]
 			orgSlug := grafanaSpecString["org-slug"]
 			if len(apiKey) < 1 {
-				logrus.Fatal("api-key is a required field for grafana-spec")
+				logrus.Fatal("access-policy-token is a required field for grafana-spec")
 			}
-			if len(endpoint) < 1 {
-				logrus.Fatal("endpoint is a required field for grafana-spec")
+			if len(zone) < 1 {
+				logrus.Fatal("Zone is a required field for grafana-spec")
 			}
 			if len(instanceId) < 1 {
 				logrus.Fatal("instance-id is a required field for grafana-spec")
@@ -94,7 +94,7 @@ var createMetricsExporterCmd = &cobra.Command{
 				logrus.Fatal("org-slug is a required field for grafana-spec")
 			}
 
-			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, endpoint, instanceId, orgSlug)
+			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, zone, instanceId, orgSlug)
 			metricsExporterConfigSpec.SetGrafanaSpec(*grafanaSpec)
 		default:
 			//We should never go there normally
@@ -363,15 +363,15 @@ var updateMetricsExporterCmd = &cobra.Command{
 
 			}
 			grafanaSpecString, _ := cmd.Flags().GetStringToString("grafana-spec")
-			apiKey := grafanaSpecString["api-key"]
-			endpoint := grafanaSpecString["endpoint"]
+			apiKey := grafanaSpecString["access-policy-token"]
+			zone := grafanaSpecString["zone"]
 			instanceId := grafanaSpecString["instance-id"]
 			orgSlug := grafanaSpecString["org-slug"]
 			if len(apiKey) < 1 {
-				logrus.Fatal("api-key is a required field for grafana-spec")
+				logrus.Fatal("access-policy-token is a required field for grafana-spec")
 			}
-			if len(endpoint) < 1 {
-				logrus.Fatal("endpoint is a required field for grafana-spec")
+			if len(zone) < 1 {
+				logrus.Fatal("zone is a required field for grafana-spec")
 			}
 			if len(instanceId) < 1 {
 				logrus.Fatal("instance-id is a required field for grafana-spec")
@@ -380,7 +380,7 @@ var updateMetricsExporterCmd = &cobra.Command{
 				logrus.Fatal("org-slug is a required field for grafana-spec")
 			}
 
-			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, endpoint, instanceId, orgSlug)
+			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, zone, instanceId, orgSlug)
 			metricsExporterConfigSpec.SetGrafanaSpec(*grafanaSpec)
 		default:
 			logrus.Fatalf("Only datadog is accepted as third party sink for now")
@@ -425,7 +425,7 @@ func init() {
 	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
 	createMetricsExporterCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
 	Please provide key value pairs as follows: 
-	api-key=<your-grafana-api-key>,endpoint=<your-grafana-enpoint-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
+	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
 
 	MetricsExporterCmd.AddCommand(listMetricsExporterCmd)
 
@@ -462,5 +462,5 @@ func init() {
 	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
 	updateMetricsExporterCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
 	Please provide key value pairs as follows: 
-	api-key=<your-grafana-api-key>,endpoint=<your-grafana-enpoint-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
+	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
 }

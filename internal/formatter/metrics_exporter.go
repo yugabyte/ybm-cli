@@ -109,11 +109,11 @@ func (me *MetricsExporterContext) Site() string {
 
 // GRAFANA
 func (me *MetricsExporterContext) Zone() string {
-	return me.me.Spec.GetGrafanaSpec().Endpoint
+	return me.me.Spec.GetGrafanaSpec().Zone
 }
 
 func (me *MetricsExporterContext) AccessTokenPolicy() string {
-	apiKey := me.me.Spec.GetGrafanaSpec().ApiKey
+	apiKey := me.me.Spec.GetGrafanaSpec().AccessPolicyToken
 	if len(apiKey) > 32 {
 		return fmt.Sprintf("%s%s%s", apiKey[:12], "...", apiKey[len(apiKey)-17:])
 	}

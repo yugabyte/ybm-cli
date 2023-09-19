@@ -101,13 +101,13 @@ ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseMetrics),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "grafana", "--grafana-spec", "org-slug=ybmclitest,instance-id=1234456,endpoint=test-endpoint,api-key=glXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==")
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "grafana", "--grafana-spec", "org-slug=ybmclitest,instance-id=1234456,zone=test-endpoint,access-policy-token=glXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The metrics exporter config 92ceaa26-bac7-4842-9b3c-831a18a4f813 is being created
-Name      Type      Zone            Access Token Policy                InstanceId   OrgSlug
-grafana   GRAFANA   test-endpoint   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
+Name      Type      Zone        Access Token Policy                InstanceId   OrgSlug
+grafana   GRAFANA   test-zone   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
@@ -120,11 +120,11 @@ grafana   GRAFANA   test-endpoint   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456  
 			session.Kill()
 		})
 		It("should return required field", func() {
-			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "grafana", "--grafana-spec", "endpoint=test")
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "grafana", "--grafana-spec", "zone=test")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("(?m:api-key is a required field for grafana-spec$)"))
+			Expect(session.Err).Should(gbytes.Say("(?m:access-policy-token is a required field for grafana-spec$)"))
 			session.Kill()
 		})
 
