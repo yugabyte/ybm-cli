@@ -25,8 +25,8 @@
                 "type": "GRAFANA",
                 "datadog_spec": null,
                 "grafana_spec": {
-                    "api_key": "glXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==",
-                    "endpoint": "test-endpoint",
+                    "access_policy_token": "glXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==",
+                    "zone": "test-zone",
                     "instance_id": "1234456",
                     "org_slug": "ybmclitest"
                 }

@@ -77,15 +77,15 @@ var createMetricsExporterCmd = &cobra.Command{
 
 			}
 			grafanaSpecString, _ := cmd.Flags().GetStringToString("grafana-spec")
-			apiKey := grafanaSpecString["api-key"]
-			endpoint := grafanaSpecString["endpoint"]
+			apiKey := grafanaSpecString["access-policy-token"]
+			zone := grafanaSpecString["zone"]
 			instanceId := grafanaSpecString["instance-id"]
 			orgSlug := grafanaSpecString["org-slug"]
 			if len(apiKey) < 1 {
-				logrus.Fatal("api-key is a required field for grafana-spec")
+				logrus.Fatal("access-policy-token is a required field for grafana-spec")
 			}
-			if len(endpoint) < 1 {
-				logrus.Fatal("endpoint is a required field for grafana-spec")
+			if len(zone) < 1 {
+				logrus.Fatal("Zone is a required field for grafana-spec")
 			}
 			if len(instanceId) < 1 {
 				logrus.Fatal("instance-id is a required field for grafana-spec")
@@ -94,7 +94,7 @@ var createMetricsExporterCmd = &cobra.Command{
 				logrus.Fatal("org-slug is a required field for grafana-spec")
 			}
 
-			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, endpoint, instanceId, orgSlug)
+			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, zone, instanceId, orgSlug)
 			metricsExporterConfigSpec.SetGrafanaSpec(*grafanaSpec)
 		default:
 			//We should never go there normally
@@ -122,7 +122,7 @@ var createMetricsExporterCmd = &cobra.Command{
 
 		metricsExporterCtx := formatter.Context{
 			Output: os.Stdout,
-			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
+			Format: formatter.NewMetricsExporterFormat(viper.GetString("output"), string(resp.GetData().Spec.Type)),
 		}
 
 		respArr := []ybmclient.MetricsExporterConfigurationData{resp.GetData()}
@@ -151,7 +151,7 @@ var listMetricsExporterCmd = &cobra.Command{
 
 		metricsExporterCtx := formatter.Context{
 			Output: os.Stdout,
-			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
+			Format: formatter.NewMetricsExporterFormat(viper.GetString("output"), ""),
 		}
 
 		if len(resp.GetData()) < 1 {
@@ -160,6 +160,30 @@ var listMetricsExporterCmd = &cobra.Command{
 		}
 
 		formatter.MetricsExporterWrite(metricsExporterCtx, resp.GetData())
+	},
+}
+
+var describeMetricsExporterCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe Metrics Exporter Config",
+	Long:  "Describe Metrics Exporter Config",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+		metricsExporterName, _ := cmd.Flags().GetString("config-name")
+		config, err := authApi.GetConfigByName(metricsExporterName)
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		metricsExporterCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewMetricsExporterFormat(viper.GetString("output"), string(config.Spec.GetType())),
+		}
+
+		formatter.MetricsExporterWrite(metricsExporterCtx, []ybmclient.MetricsExporterConfigurationData{*config})
 	},
 }
 
@@ -183,12 +207,12 @@ var deleteMetricsExporterCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 		configName, _ := cmd.Flags().GetString("config-name")
 
-		configId, err := authApi.GetConfigIdByName(configName)
+		config, err := authApi.GetConfigByName(configName)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		r1, err := authApi.DeleteMetricsExporterConfig(configId).Execute()
+		r1, err := authApi.DeleteMetricsExporterConfig(config.GetInfo().Id).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r1)
@@ -248,12 +272,12 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 
 		configName, _ := cmd.Flags().GetString("config-name")
 
-		configId, err := authApi.GetConfigIdByName(configName)
+		config, err := authApi.GetConfigByName(configName)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		metricsExporterClusterConfigSpec := ybmclient.NewMetricsExporterClusterConfigurationSpec(configId)
+		metricsExporterClusterConfigSpec := ybmclient.NewMetricsExporterClusterConfigurationSpec(config.GetInfo().Id)
 
 		_, r, err := authApi.AssociateMetricsExporterWithCluster(clusterId).MetricsExporterClusterConfigurationSpec(*metricsExporterClusterConfigSpec).Execute()
 
@@ -339,15 +363,15 @@ var updateMetricsExporterCmd = &cobra.Command{
 
 			}
 			grafanaSpecString, _ := cmd.Flags().GetStringToString("grafana-spec")
-			apiKey := grafanaSpecString["api-key"]
-			endpoint := grafanaSpecString["endpoint"]
+			apiKey := grafanaSpecString["access-policy-token"]
+			zone := grafanaSpecString["zone"]
 			instanceId := grafanaSpecString["instance-id"]
 			orgSlug := grafanaSpecString["org-slug"]
 			if len(apiKey) < 1 {
-				logrus.Fatal("api-key is a required field for grafana-spec")
+				logrus.Fatal("access-policy-token is a required field for grafana-spec")
 			}
-			if len(endpoint) < 1 {
-				logrus.Fatal("endpoint is a required field for grafana-spec")
+			if len(zone) < 1 {
+				logrus.Fatal("zone is a required field for grafana-spec")
 			}
 			if len(instanceId) < 1 {
 				logrus.Fatal("instance-id is a required field for grafana-spec")
@@ -356,31 +380,31 @@ var updateMetricsExporterCmd = &cobra.Command{
 				logrus.Fatal("org-slug is a required field for grafana-spec")
 			}
 
-			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, endpoint, instanceId, orgSlug)
+			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, zone, instanceId, orgSlug)
 			metricsExporterConfigSpec.SetGrafanaSpec(*grafanaSpec)
 		default:
 			logrus.Fatalf("Only datadog is accepted as third party sink for now")
 		}
 
-		configId, err := authApi.GetConfigIdByName(metricsExporterName)
+		config, err := authApi.GetConfigByName(metricsExporterName)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		resp, r, err := authApi.UpdateMetricsExporterConfig(configId).MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
+		resp, r, err := authApi.UpdateMetricsExporterConfig(config.GetInfo().Id).MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("The metrics exporter config %s is being updated", formatter.Colorize(configId, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The metrics exporter config %s is being updated", formatter.Colorize(config.GetInfo().Id, formatter.GREEN_COLOR))
 
 		fmt.Println(msg)
 
 		metricsExporterCtx := formatter.Context{
 			Output: os.Stdout,
-			Format: formatter.NewMetricsExporterFormat(viper.GetString("output")),
+			Format: formatter.NewMetricsExporterFormat(viper.GetString("output"), string(resp.GetData().Spec.Type)),
 		}
 
 		respArr := []ybmclient.MetricsExporterConfigurationData{resp.GetData()}
@@ -401,9 +425,13 @@ func init() {
 	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
 	createMetricsExporterCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
 	Please provide key value pairs as follows: 
-	api-key=<your-grafana-api-key>,endpoint=<your-grafana-enpoint-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
+	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
 
 	MetricsExporterCmd.AddCommand(listMetricsExporterCmd)
+
+	MetricsExporterCmd.AddCommand(describeMetricsExporterCmd)
+	describeMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
+	describeMetricsExporterCmd.MarkFlagRequired("config-name")
 
 	MetricsExporterCmd.AddCommand(deleteMetricsExporterCmd)
 	deleteMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
@@ -434,5 +462,5 @@ func init() {
 	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
 	updateMetricsExporterCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
 	Please provide key value pairs as follows: 
-	api-key=<your-grafana-api-key>,endpoint=<your-grafana-enpoint-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
+	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
 }

@@ -1,0 +1,23 @@
+{
+    "data": {
+        "spec": {
+            "name": "grafana",
+            "type": "GRAFANA",
+            "datadog_spec": null,
+            "grafana_spec": {
+                "access_policy_token": "glXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==",
+                "zone": "test-zone",
+                "instance_id": "1234456",
+                "org_slug": "ybmclitest"
+            }
+        },
+        "info": {
+            "id": "92ceaa26-bac7-4842-9b3c-831a18a4f813",
+            "cluster_ids": [],
+            "metadata": {
+                "created_on": "2023-09-12T05:50:25.843Z",
+                "updated_on": "2023-09-12T05:50:25.843Z"
+            }
+        }
+    }
+}
