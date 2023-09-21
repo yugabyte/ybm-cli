@@ -26,7 +26,6 @@ import (
 	"github.com/enescakir/emoji"
 	"github.com/inhies/go-bytesize"
 	"github.com/sirupsen/logrus"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -193,11 +192,8 @@ func (c *ClusterContext) Tier() string {
 	return "Dedicated"
 }
 func (c *ClusterContext) FaultTolerance() string {
-	if util.IsFeatureFlagEnabled(util.CLUSTER_RF) {
-		rf := *c.c.GetSpec().ClusterInfo.NumFaultsToTolerate.Get()*2 + 1
-		return fmt.Sprintf("%s, RF %d", string(c.c.GetSpec().ClusterInfo.FaultTolerance), rf)
-	}
-	return string(c.c.GetSpec().ClusterInfo.FaultTolerance)
+	rf := *c.c.GetSpec().ClusterInfo.NumFaultsToTolerate.Get()*2 + 1
+	return fmt.Sprintf("%s, RF %d", string(c.c.GetSpec().ClusterInfo.FaultTolerance), rf)
 }
 
 func (c *ClusterContext) DataDistribution() string {
