@@ -240,14 +240,12 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		faultTolerance, _ := cmd.Flags().GetString("fault-tolerance")
 		clusterInfo.SetFaultTolerance(ybmclient.ClusterFaultTolerance(faultTolerance))
 	}
-	if util.IsFeatureFlagEnabled(util.CLUSTER_RF) {
-		if cmd.Flags().Changed("num-faults-to-tolerate") {
-			numFaultsToTolerate, _ := cmd.Flags().GetInt32("num-faults-to-tolerate")
-			if valid, err := util.ValidateNumFaultsToTolerate(numFaultsToTolerate, clusterInfo.GetFaultTolerance()); !valid {
-				return nil, err
-			}
-			clusterInfo.SetNumFaultsToTolerate(numFaultsToTolerate)
+	if cmd.Flags().Changed("num-faults-to-tolerate") {
+		numFaultsToTolerate, _ := cmd.Flags().GetInt32("num-faults-to-tolerate")
+		if valid, err := util.ValidateNumFaultsToTolerate(numFaultsToTolerate, clusterInfo.GetFaultTolerance()); !valid {
+			return nil, err
 		}
+		clusterInfo.SetNumFaultsToTolerate(numFaultsToTolerate)
 	}
 	if util.IsFeatureFlagEnabled(util.ENTERPRISE_SECURITY) {
 		if cmd.Flags().Changed("enterprise-security") {

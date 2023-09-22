@@ -13,24 +13,25 @@ ybm cluster create [flags]
 ### Options
 
 ```
-      --cluster-name string          [REQUIRED] Name of the cluster.
-      --credentials stringToString   [REQUIRED] Credentials to login to the cluster. Please provide key value pairs username=<user-name>,password=<password>. (default [])
-      --cloud-provider string        [OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP. Default AWS.
-      --cluster-tier string          [OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.
-      --cluster-type string          [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.
-      --database-version string      [OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.
-      --encryption-spec string       [OPTIONAL] The customer managed key spec for the cluster.
-                                     	Please provide key value pairs as follows:
-                                     	For AWS: 
-                                     	cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> .
-                                     	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set. If the environment variable is not set, the user will be prompted to enter the value.
-                                     	For GCP:
-                                     	cloud-provider=GCP,gcp-resource-id=<resource-id>,gcp-service-account-path=<service-account-path>.
-                                     	If specified, all parameters for that provider are mandatory.
-      --fault-tolerance string       [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION. Default NONE.
-      --node-config stringToInt      [OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If specified, num-cores is mandatory, while disk-size-gb and disk-iops are optional. (default [])
-      --region-info stringArray      [OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If specified, region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified by using multiple --region-info arguments. Default if not specified is us-west-2 AWS region.
-  -h, --help                         help for create
+      --cluster-name string            [REQUIRED] Name of the cluster.
+      --credentials stringToString     [REQUIRED] Credentials to login to the cluster. Please provide key value pairs username=<user-name>,password=<password>. (default [])
+      --cloud-provider string          [OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP. Default AWS.
+      --cluster-tier string            [OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.
+      --cluster-type string            [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.
+      --database-version string        [OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.
+      --encryption-spec string         [OPTIONAL] The customer managed key spec for the cluster.
+                                       	Please provide key value pairs as follows:
+                                       	For AWS: 
+                                       	cloud-provider=AWS,aws-secret-key=<secret-key>,aws-access-key=<access-key>,aws-arn=<arn1>,aws-arn=<arn2> .
+                                       	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set. If the environment variable is not set, the user will be prompted to enter the value.
+                                       	For GCP:
+                                       	cloud-provider=GCP,gcp-resource-id=<resource-id>,gcp-service-account-path=<service-account-path>.
+                                       	If specified, all parameters for that provider are mandatory.
+      --fault-tolerance string         [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION. Default NONE.
+      --num-faults-to-tolerate int32   [OPTIONAL] The number of domain faults to tolerate for the level specified. The possible values are 0 for NONE, 1 for ZONE and [1-3] for anything else. Defaults to 0 for NONE, 1 otherwise.
+      --node-config stringToInt        [OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If specified, num-cores is mandatory, while disk-size-gb and disk-iops are optional. (default [])
+      --region-info stringArray        [OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If specified, region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified by using multiple --region-info arguments. Default if not specified is us-west-2 AWS region.
+  -h, --help                           help for create
 ```
 
 ### Options inherited from parent commands
