@@ -14,6 +14,7 @@ ybm metrics-exporter delete [flags]
 
 ```
       --config-name string   [REQUIRED] The name of the metrics exporter configuration
+  -f, --force                Bypass the prompt for non-interactive usage
   -h, --help                 help for delete
 ```
 

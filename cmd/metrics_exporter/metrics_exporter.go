@@ -440,6 +440,7 @@ func init() {
 	MetricsExporterCmd.AddCommand(deleteMetricsExporterCmd)
 	deleteMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
 	deleteMetricsExporterCmd.MarkFlagRequired("config-name")
+	deleteMetricsExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 	MetricsExporterCmd.AddCommand(removeMetricsExporterFromClusterCmd)
 	removeMetricsExporterFromClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster")
