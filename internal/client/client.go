@@ -640,6 +640,14 @@ func (a *AuthApiClient) ListClusterNetworkAllowLists(clusterId string) ybmclient
 	return a.ApiClient.ClusterApi.ListClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) GetBillingUsage(startTimestamp string, endTimestamp string, clusterIds []string) ybmclient.ApiGetBillingUsageRequest {
+	return a.ApiClient.BillingApi.GetBillingUsage(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Granularity(ybmclient.GRANULARITYENUM_DAILY).ClusterIds(clusterIds)
+}
+
+func (a *AuthApiClient) ListClustersByDateRange(startTimestamp string, endTimestamp string) ybmclient.ApiListClustersByDateRangeRequest {
+	return a.ApiClient.BillingApi.ListClustersByDateRange(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Tier(ybmclient.CLUSTERTIER_PAID)
+}
+
 func (a *AuthApiClient) ListClusterCMKs(clusterId string) ybmclient.ApiGetClusterCMKRequest {
 	return a.ApiClient.ClusterApi.GetClusterCMK(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }

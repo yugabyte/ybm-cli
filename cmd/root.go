@@ -35,6 +35,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/role"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
 	"github.com/yugabyte/ybm-cli/cmd/tools"
+	"github.com/yugabyte/ybm-cli/cmd/usage"
 	"github.com/yugabyte/ybm-cli/cmd/user"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
@@ -123,6 +124,7 @@ func init() {
 
 	rootCmd.AddCommand(cluster.ClusterCmd)
 	rootCmd.AddCommand(backup.BackupCmd)
+	rootCmd.AddCommand(usage.UsageCmd)
 	rootCmd.AddCommand(nal.NalCmd)
 	rootCmd.AddCommand(permission.ResourcePermissionsCmd)
 	rootCmd.AddCommand(vpc.VPCCmd)
