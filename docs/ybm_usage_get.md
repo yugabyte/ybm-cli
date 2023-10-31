@@ -13,8 +13,9 @@ ybm usage get [flags]
 ### Options
 
 ```
-      --cluster-name stringArray   [REQUIRED] Cluster names. Multiple names can be specified by using multiple --cluster-name arguments.
+      --cluster-name stringArray   [OPTIONAL] Cluster names. Multiple names can be specified by using multiple --cluster-name arguments.
       --end string                 [REQUIRED] End date in RFC3339 format (e.g., '2023-09-30T23:59:59.999Z') or 'yyyy-MM-dd' format (e.g., '2023-09-30').
+  -f, --force                      [OPTIONAL] Overwrite the output file if it exists
   -h, --help                       help for get
       --output-file string         [OPTIONAL] Output filename.
       --output-format string       [OPTIONAL] Output format. Possible values: csv, json. (default "csv")
