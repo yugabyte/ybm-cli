@@ -337,6 +337,7 @@ var updateMetricsExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
+		oldName := metricsExporterName
 		if cmd.Flags().Changed("new-config-name") {
 			metricsExporterName, _ = cmd.Flags().GetString("new-config-name")
 		}
@@ -389,7 +390,7 @@ var updateMetricsExporterCmd = &cobra.Command{
 			logrus.Fatalf("Only datadog is accepted as third party sink for now")
 		}
 
-		config, err := authApi.GetConfigByName(metricsExporterName)
+		config, err := authApi.GetConfigByName(oldName)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
