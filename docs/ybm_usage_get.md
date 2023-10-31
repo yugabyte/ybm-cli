@@ -18,7 +18,7 @@ ybm usage get [flags]
   -f, --force                      [OPTIONAL] Overwrite the output file if it exists
   -h, --help                       help for get
       --output-file string         [OPTIONAL] Output filename.
-      --output-format string       [OPTIONAL] Output format. Possible values: csv, json. (default "csv")
+      --output-format string       [OPTIONAL] Output format. Possible values: csv, json.
       --start string               [REQUIRED] Start date in RFC3339 format (e.g., '2023-09-01T12:30:45.000Z') or 'yyyy-MM-dd' format (e.g., '2023-09-01').
 ```
 
