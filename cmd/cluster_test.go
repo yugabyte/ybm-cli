@@ -254,7 +254,7 @@ Name            ID                                     Version       State     H
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
 Provider   Tier        Fault Tolerance   Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
-AWS        Dedicated   NONE              1         2 / 8GB / 100GB / -
+AWS        Dedicated   NONE, RF 1        1         2 / 8GB / 100GB / -
 
 
 Regions

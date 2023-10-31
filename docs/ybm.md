@@ -37,6 +37,7 @@ ybm [flags]
 * [ybm region](ybm_region.md)	 - Manage cloud regions
 * [ybm role](ybm_role.md)	 - Manage roles
 * [ybm signup](ybm_signup.md)	 - Open a browser to sign up for YugabyteDB Managed
+* [ybm usage](ybm_usage.md)	 - Billing usage for the account in YugabyteDB Managed
 * [ybm user](ybm_user.md)	 - Manage users
 * [ybm vpc](ybm_vpc.md)	 - Manage VPCs
 

@@ -52,7 +52,7 @@ var listEndpointCmd = &cobra.Command{
 			})
 		}
 
-		accessibility, _ := cmd.Flags().GetString("accessibility")
+		accessibility, _ := cmd.Flags().GetString("accessibility-type")
 		if accessibility != "" {
 			clusterEndpoints = util.Filter(clusterEndpoints, func(endpoint ybmclient.Endpoint) bool {
 				return string(endpoint.GetAccessibilityType()) == accessibility

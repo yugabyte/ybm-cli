@@ -240,14 +240,12 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		faultTolerance, _ := cmd.Flags().GetString("fault-tolerance")
 		clusterInfo.SetFaultTolerance(ybmclient.ClusterFaultTolerance(faultTolerance))
 	}
-	if util.IsFeatureFlagEnabled(util.CLUSTER_RF) {
-		if cmd.Flags().Changed("num-faults-to-tolerate") {
-			numFaultsToTolerate, _ := cmd.Flags().GetInt32("num-faults-to-tolerate")
-			if valid, err := util.ValidateNumFaultsToTolerate(numFaultsToTolerate, clusterInfo.GetFaultTolerance()); !valid {
-				return nil, err
-			}
-			clusterInfo.SetNumFaultsToTolerate(numFaultsToTolerate)
+	if cmd.Flags().Changed("num-faults-to-tolerate") {
+		numFaultsToTolerate, _ := cmd.Flags().GetInt32("num-faults-to-tolerate")
+		if valid, err := util.ValidateNumFaultsToTolerate(numFaultsToTolerate, clusterInfo.GetFaultTolerance()); !valid {
+			return nil, err
 		}
+		clusterInfo.SetNumFaultsToTolerate(numFaultsToTolerate)
 	}
 	if util.IsFeatureFlagEnabled(util.ENTERPRISE_SECURITY) {
 		if cmd.Flags().Changed("enterprise-security") {
@@ -640,6 +638,14 @@ func (a *AuthApiClient) EditClusterNetworkAllowLists(clusterId string, allowList
 
 func (a *AuthApiClient) ListClusterNetworkAllowLists(clusterId string) ybmclient.ApiListClusterNetworkAllowListsRequest {
 	return a.ApiClient.ClusterApi.ListClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) GetBillingUsage(startTimestamp string, endTimestamp string, clusterIds []string) ybmclient.ApiGetBillingUsageRequest {
+	return a.ApiClient.BillingApi.GetBillingUsage(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Granularity(ybmclient.GRANULARITYENUM_DAILY).ClusterIds(clusterIds)
+}
+
+func (a *AuthApiClient) ListClustersByDateRange(startTimestamp string, endTimestamp string) ybmclient.ApiListClustersByDateRangeRequest {
+	return a.ApiClient.BillingApi.ListClustersByDateRange(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Tier(ybmclient.CLUSTERTIER_PAID)
 }
 
 func (a *AuthApiClient) ListClusterCMKs(clusterId string) ybmclient.ApiGetClusterCMKRequest {
