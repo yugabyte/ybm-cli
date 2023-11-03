@@ -49,6 +49,11 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 		cmkAwsArnList := []string{}
 		cmkGcpResourceId := ""
 		cmkGcpServiceAccountPath := ""
+		cmkAzureClientId := ""
+		cmkAzureClientSecret := ""
+		cmkAzureTenantId := ""
+		cmkAzureKeyName := ""
+		cmkAzureKeyVaultUri := ""
 
 		for _, cmkInfo := range strings.Split(cmkString, ",") {
 			kvp := strings.Split(cmkInfo, "=")
@@ -81,6 +86,26 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 			case "gcp-service-account-path":
 				if len(strings.TrimSpace(val)) != 0 {
 					cmkGcpServiceAccountPath = val
+				}
+			case "azu-client-id":
+				if len(strings.TrimSpace(val)) != 0 {
+					cmkAzureClientId = val
+				}
+			case "azu-client-secret":
+				if len(strings.TrimSpace(val)) != 0 {
+					cmkAzureClientSecret = val
+				}
+			case "azu-tenant-id":
+				if len(strings.TrimSpace(val)) != 0 {
+					cmkAzureTenantId = val
+				}
+			case "azu-key-name":
+				if len(strings.TrimSpace(val)) != 0 {
+					cmkAzureKeyName = val
+				}
+			case "azu-key-vault-uri":
+				if len(strings.TrimSpace(val)) != 0 {
+					cmkAzureKeyVaultUri = val
 				}
 			}
 		}
@@ -147,6 +172,44 @@ func GetCmkSpecFromCommand(cmd *cobra.Command) (*ybmclient.CMKSpec, error) {
 			}
 			gcpCmkSpec.SetGcpServiceAccount(gcpServiceAccount)
 			cmkSpec.SetGcpCmkSpec(*gcpCmkSpec)
+		case "AZURE":
+			if cmkAzureClientId == "" {
+				logrus.Fatalln("Incorrect format in cmk spec: AZURE provider specified, but no azu-client-id provided.")
+			}
+
+			// We should first check the environment variables.
+			if cmkAzureClientSecret == "" {
+				envVarName := "YBM_AZU_CLIENT_SECRET"
+				value, exists := os.LookupEnv(envVarName)
+				if exists {
+					cmkAzureClientSecret = value
+				} else {
+					// If not found, prompt the user.
+					fmt.Print("Please provide the AZURE Secret Key for Encryption at Rest: ")
+
+					data, err := term.ReadPassword(int(os.Stdin.Fd()))
+					if err != nil {
+						logrus.Fatalln("Could not read AZURE Secret key: ", err)
+					}
+					cmkAzureClientSecret = string(data)
+
+					// Validate non-empty key
+					if strings.TrimSpace(cmkAzureClientSecret) == "" {
+						logrus.Fatalln("The AZURE Secret Key cannot be empty")
+					}
+				}
+			}
+			if cmkAzureKeyName == "" {
+				logrus.Fatalln("Incorrect format in cmk spec: AZURE provider specified, but no azu-key-name provided.")
+			}
+			if cmkAzureKeyVaultUri == "" {
+				logrus.Fatalln("Incorrect format in cmk spec: AZURE provider specified, but no azu-key-vault-uri provided.")
+			}
+			if cmkAzureTenantId == "" {
+				logrus.Fatalln("Incorrect format in cmk spec: AZURE provider specified, but no azu-tenant-id provided.")
+			}
+			azureCmkSpec := ybmclient.NewAzureCMKSpec(cmkAzureClientId, cmkAzureClientSecret, cmkAzureTenantId, cmkAzureKeyVaultUri, cmkAzureKeyName)
+			cmkSpec.SetAzureCmkSpec(*azureCmkSpec)
 		default:
 			logrus.Fatalln("Incorrect format in CMK spec: invalid cloud-provider")
 		}

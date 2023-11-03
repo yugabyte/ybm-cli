@@ -79,6 +79,8 @@ func (c *CMKContext) CMKStatus() ybmclient.CMKStatusEnum {
 func (c *CMKContext) KeyAlias() string {
 	if c.c.GcpCmkSpec.Get().GetKeyName() != "" {
 		return c.c.GcpCmkSpec.Get().GetKeyName()
+	} else if c.c.AzureCmkSpec.Get().GetKeyName() != "" {
+		return c.c.AzureCmkSpec.Get().GetKeyName()
 	}
 	return c.c.AwsCmkSpec.Get().GetAliasName()
 }
@@ -96,6 +98,8 @@ func (c *CMKContext) ResourceId() string {
 func (c *CMKContext) SecurityPrincipals() string {
 	if c.c.GcpCmkSpec.Get().GetKeyName() != "" {
 		return c.ResourceId()
+	} else if c.c.AzureCmkSpec.Get().GetKeyName() != "" {
+		return c.c.AzureCmkSpec.Get().GetKeyVaultUri()
 	}
 	return strings.Join(c.c.AwsCmkSpec.Get().GetArnList(), ", ")
 }
