@@ -66,7 +66,7 @@ var listCmk = &cobra.Command{
 			Output: os.Stdout,
 			Format: formatter.NewCMKFormat(viper.GetString("output")),
 		}
-		formatter.CMKWrite(cmkCtx, *resp.GetData().Spec.Get())
+		formatter.CMKWrite(cmkCtx, *resp.Data)
 	},
 }
 
