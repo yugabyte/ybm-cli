@@ -64,11 +64,11 @@ func SetPreferredRegion(clusterRegionInfo []ybmclient.ClusterRegionInfo, preferr
 		return fmt.Errorf("the preferred region is not found in the list of regions")
 	}
 
-	for _, info := range clusterRegionInfo {
+	for i, info := range clusterRegionInfo {
 		if info.PlacementInfo.CloudInfo.GetRegion() == preferredRegion {
-			info.SetIsAffinitized(true)
+			clusterRegionInfo[i].SetIsAffinitized(true)
 		} else {
-			info.SetIsAffinitized(false)
+			clusterRegionInfo[i].SetIsAffinitized(false)
 		}
 	}
 
@@ -89,9 +89,9 @@ func SetDefaultRegion(clusterRegionInfo []ybmclient.ClusterRegionInfo, defaultRe
 		return fmt.Errorf("the default region is not found in the list of regions")
 	}
 
-	for _, info := range clusterRegionInfo {
+	for i, info := range clusterRegionInfo {
 		if info.PlacementInfo.CloudInfo.GetRegion() == defaultRegion {
-			info.SetIsDefault(true)
+			clusterRegionInfo[i].SetIsDefault(true)
 		}
 	}
 
