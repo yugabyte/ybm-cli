@@ -92,6 +92,7 @@ func SetDefaultRegion(clusterRegionInfo []ybmclient.ClusterRegionInfo, defaultRe
 	for i, info := range clusterRegionInfo {
 		if info.PlacementInfo.CloudInfo.GetRegion() == defaultRegion {
 			clusterRegionInfo[i].SetIsDefault(true)
+			break
 		}
 	}
 
