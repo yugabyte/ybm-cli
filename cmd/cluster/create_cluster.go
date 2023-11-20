@@ -173,7 +173,7 @@ func init() {
 	createClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP. Default AWS.")
 	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.")
 	createClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.")
-	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Stable or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Stable.")
+	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Production, Innovation or Preview. Default depends on cluster tier, Sandbox is Preview, Dedicated is Production.")
 	if util.IsFeatureFlagEnabled(util.ENTERPRISE_SECURITY) {
 		createClusterCmd.Flags().Bool("enterprise-security", false, "[OPTIONAL] The security level of cluster. Advanced security will have security checks for cluster. Default false.")
 
