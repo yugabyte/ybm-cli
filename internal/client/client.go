@@ -240,6 +240,23 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		faultTolerance, _ := cmd.Flags().GetString("fault-tolerance")
 		clusterInfo.SetFaultTolerance(ybmclient.ClusterFaultTolerance(faultTolerance))
 	}
+	if cmd.Flags().Changed("preferred-region") {
+		preferredRegion, _ := cmd.Flags().GetString("preferred-region")
+		if clusterInfo.GetFaultTolerance() != ybmclient.ClusterFaultTolerance("REGION") {
+			return nil, fmt.Errorf("preferred region is allowed only for regional level fault tolerance")
+		}
+
+		if len(clusterRegionInfo) <= 1 {
+			return nil, fmt.Errorf("preferred region is allowed only if there is more than one region")
+		}
+
+		err = util.SetPreferredRegion(clusterRegionInfo, preferredRegion)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
 	if cmd.Flags().Changed("num-faults-to-tolerate") {
 		numFaultsToTolerate, _ := cmd.Flags().GetInt32("num-faults-to-tolerate")
 		if valid, err := util.ValidateNumFaultsToTolerate(numFaultsToTolerate, clusterInfo.GetFaultTolerance()); !valid {
@@ -299,6 +316,23 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	if cmd.Flags().Changed("cluster-type") {
 		clusterType, _ := cmd.Flags().GetString("cluster-type")
 		clusterInfo.SetClusterType(ybmclient.ClusterType(clusterType))
+	}
+
+	if cmd.Flags().Changed("default-region") {
+		defaultRegion, _ := cmd.Flags().GetString("default-region")
+		if clusterInfo.GetClusterType() != ybmclient.ClusterType("GEO_PARTITIONED") {
+			return nil, fmt.Errorf("default region is allowed only for geo partitioned clusters")
+		}
+
+		if len(clusterRegionInfo) <= 1 {
+			return nil, fmt.Errorf("default region is allowed only if there is more than one region")
+		}
+
+		err = util.SetDefaultRegion(clusterRegionInfo, defaultRegion)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	// Compute track ID for database version

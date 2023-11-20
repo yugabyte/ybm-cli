@@ -51,6 +51,55 @@ func GetClusterTier(tierCli string) (string, error) {
 	return "", fmt.Errorf("the tier must be either 'Sandbox' or 'Dedicated'")
 }
 
+func SetPreferredRegion(clusterRegionInfo []ybmclient.ClusterRegionInfo, preferredRegion string) error {
+
+	regionFound := false
+	for _, info := range clusterRegionInfo {
+		if info.PlacementInfo.CloudInfo.GetRegion() == preferredRegion {
+			regionFound = true
+		}
+	}
+
+	if !regionFound {
+		return fmt.Errorf("the preferred region is not found in the list of regions")
+	}
+
+	for i, info := range clusterRegionInfo {
+		if info.PlacementInfo.CloudInfo.GetRegion() == preferredRegion {
+			clusterRegionInfo[i].SetIsAffinitized(true)
+		} else {
+			clusterRegionInfo[i].SetIsAffinitized(false)
+		}
+	}
+
+	return nil
+
+}
+
+func SetDefaultRegion(clusterRegionInfo []ybmclient.ClusterRegionInfo, defaultRegion string) error {
+
+	regionFound := false
+	for _, info := range clusterRegionInfo {
+		if info.PlacementInfo.CloudInfo.GetRegion() == defaultRegion {
+			regionFound = true
+		}
+	}
+
+	if !regionFound {
+		return fmt.Errorf("the default region is not found in the list of regions")
+	}
+
+	for i, info := range clusterRegionInfo {
+		if info.PlacementInfo.CloudInfo.GetRegion() == defaultRegion {
+			clusterRegionInfo[i].SetIsDefault(true)
+			break
+		}
+	}
+
+	return nil
+
+}
+
 func ValidateNumFaultsToTolerate(numFaultsToTolerate int32, faultTolerance ybmclient.ClusterFaultTolerance) (bool, error) {
 	if numFaultsToTolerate < 0 || numFaultsToTolerate > 3 {
 		return false, fmt.Errorf("number of faults to tolerate must be between 0 and 3")

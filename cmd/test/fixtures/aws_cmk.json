@@ -1,0 +1,27 @@
+{
+  "data": {
+      "spec": {
+          "provider_type": "AWS",
+          "aws_cmk_spec": {
+              "access_key": "AKXXXXXXXXXXXXXXXXGC",
+              "secret_key": "l/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXOo",
+              "arn_list": [
+                  "arn:aws:kms:us-east-1:745846189716:key/41c64d5g-c97d-472c-889e-0d9f80d2c754"
+              ],
+              "alias_name": "0a80e409-e690-42fc-b209-baf969930b2c"
+          },
+          "status": "ACTIVE",
+          "gcp_cmk_spec": null,
+          "azure_cmk_spec": null,
+          "is_enabled": false
+      },
+      "info": {
+        "cmk_id": "41c64d5g-c97d-472c-889e-0d9f80d2c754",
+        "rotated_on": "2023-11-03T07:37:26.351Z",
+        "metadata": {
+            "created_on": "2023-11-03T07:37:26.351Z",
+            "updated_on": "2023-11-03T07:38:30.141Z"
+        }
+    }
+  }
+}

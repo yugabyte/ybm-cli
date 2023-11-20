@@ -32,7 +32,7 @@ type FullCluster struct {
 	//Nodes of the cluster
 	Nodes []ybmclient.NodeData
 	//CMK of the cluster
-	CMK []ybmclient.CMKSpec
+	CMK []ybmclient.CMKData
 	//Helpful to filter by provider
 	Providers []string
 }
@@ -65,7 +65,7 @@ func (f *FullCluster) SetCMK(authApi ybmAuthClient.AuthApiClient) {
 	if _, ok := resp.GetDataOk(); ok {
 		// Make an array here with a single element.
 		// In the future, we will support CMK per region.
-		f.CMK = append(f.CMK, *resp.GetData().Spec.Get())
+		f.CMK = append(f.CMK, *resp.Data)
 	}
 }
 

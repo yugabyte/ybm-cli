@@ -1,0 +1,20 @@
+{
+    "data": {
+        "start_timestamp": "2023-08-13T18:30Z",
+        "end_timestamp": "2023-08-15T18:30Z",
+        "clusters": [
+            {
+                "id": "685fb1e0-8095-488a-8d62-7097d29c40ba",
+                "name": "courageous-jellyfish",
+                "is_deleted": true,
+                "cloud": "AWS"
+            },
+            {
+                "id": "70a6592e-21c3-4d13-b089-152cf62f02cb",
+                "name": "willing-walrus",
+                "is_deleted": false,
+                "cloud": "GCP"
+            }
+        ]
+    }
+}
