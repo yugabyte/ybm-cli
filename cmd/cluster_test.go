@@ -223,7 +223,7 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-we
 				Expect(err).ToNot(HaveOccurred())
 				err = loadJson("./test/fixtures/nodes.json", &responseNodes)
 				Expect(err).ToNot(HaveOccurred())
-				err = loadJson("./test/fixtures/cmk.json", &responseCMK)
+				err = loadJson("./test/fixtures/aws_cmk.json", &responseCMK)
 				Expect(err).ToNot(HaveOccurred())
 				err = loadJson("./test/fixtures/one-cluster.json", &responseCluster)
 				Expect(err).ToNot(HaveOccurred())
@@ -254,7 +254,7 @@ Name            ID                                     Version       State     H
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
 Provider   Tier        Fault Tolerance   Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
-AWS        Dedicated   NONE              1         2 / 8GB / 100GB / -
+AWS        Dedicated   NONE, RF 1        1         2 / 8GB / 100GB / -
 
 
 Regions
@@ -273,8 +273,8 @@ device-ip-gween   device-ip-gween   152.165.26.42/32
 
 
 Encryption at Rest
-Provider   Key Alias                              Security Principals                                                           CMK Status
-AWS        0a80e409-e890-42fc-b209-bafb69931b2c   arn:aws:kms:us-east-1:745846189716:key/db373c8d-1592-4c73-bfa3-420d05922933   ACTIVE
+Provider   Key Alias                              Last Rotated               Security Principals                                                           CMK Status
+AWS        0a80e409-e690-42fc-b209-baf969930b2c   2023-11-03T07:37:26.351Z   arn:aws:kms:us-east-1:745846189716:key/41c64d5g-c97d-472c-889e-0d9f80d2c754   ACTIVE
 
 
 Nodes

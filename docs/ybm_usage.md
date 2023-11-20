@@ -1,21 +1,19 @@
-## ybm metrics-exporter delete
+## ybm usage
 
-Delete Metrics Exporter Config
+Billing usage for the account in YugabyteDB Managed
 
 ### Synopsis
 
-Delete Metrics Exporter Config
+Billing usage for the account in YugabyteDB Managed
 
 ```
-ybm metrics-exporter delete [flags]
+ybm usage [flags]
 ```
 
 ### Options
 
 ```
-      --config-name string   [REQUIRED] The name of the metrics exporter configuration
-  -f, --force                Bypass the prompt for non-interactive usage
-  -h, --help                 help for delete
+  -h, --help   help for usage
 ```
 
 ### Options inherited from parent commands
@@ -33,5 +31,6 @@ ybm metrics-exporter delete [flags]
 
 ### SEE ALSO
 
-* [ybm metrics-exporter](ybm_metrics-exporter.md)	 - Manage Metrics Exporter
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm usage get](ybm_usage_get.md)	 - View billing usage data available for the account in YugabyteDB Managed
 

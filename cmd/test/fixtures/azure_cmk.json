@@ -1,0 +1,28 @@
+{
+    "data": {
+        "spec": {
+            "provider_type": "AZURE",
+            "aws_cmk_spec": null,
+            "status": "ACTIVE",
+            "gcp_cmk_spec": null,
+            "azure_cmk_spec": {
+                "client_id": "8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b",
+                "client_secret": "bfXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXlZ",
+                "tenant_id": "81XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX83",
+                "key_vault_uri": "https://test-azure-gj.vault.azure.net/",
+                "key_name": "AZURE-test-key",
+                "key_algorithm": "RSA",
+                "key_size": 2048
+            },
+            "is_enabled": true
+        },
+        "info": {
+            "cmk_id": "41c64d5f-c97d-472c-889e-0d9f80d2c754",
+            "rotated_on": "2023-11-03T07:37:26.351Z",
+            "metadata": {
+                "created_on": "2023-11-03T07:37:26.351Z",
+                "updated_on": "2023-11-03T07:38:30.141Z"
+            }
+        }
+    }
+}

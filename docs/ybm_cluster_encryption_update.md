@@ -20,6 +20,9 @@ ybm cluster encryption update [flags]
                                  	aws-access-key can be ommitted if the environment variable YBM_AWS_SECRET_KEY is set. If the environment variable is not set, the user will be prompted to enter the value.
                                  	For GCP:
                                  	cloud-provider=GCP,gcp-resource-id=<resource-id>,gcp-service-account-path=<service-account-path>.
+                                 	For AZURE:
+                                 	cloud-provider=AZURE,azu-client-id=<client-id>,azu-client-secret=<client-secret>,azu-tenant-id=<tenant-id>,azu-key-name=<key-name>,azu-key-vault-uri=<key-vault-uri>.
+                                 	
   -h, --help                     help for update
 ```
 

@@ -24,15 +24,16 @@ import (
 )
 
 const (
-	keyAliasHeader   = "Key Alias"
-	cmkStatusHeader  = "CMK Status"
-	defaultCmkFormat = "table {{.Provider}}\t{{.KeyAlias}}\t{{.SecurityPrincipals}}\t{{.CMKStatus}}"
+	keyAliasHeader    = "Key Alias"
+	cmkStatusHeader   = "CMK Status"
+	lastRotatedHeader = "Last Rotated"
+	defaultCmkFormat  = "table {{.Provider}}\t{{.KeyAlias}}\t{{.LastRotated}}\t{{.SecurityPrincipals}}\t{{.CMKStatus}}"
 )
 
 type CMKContext struct {
 	HeaderContext
 	Context
-	c ybmclient.CMKSpec
+	c ybmclient.CMKData
 }
 
 func NewCMKContext() *CMKContext {
@@ -42,6 +43,7 @@ func NewCMKContext() *CMKContext {
 		"KeyAlias":           keyAliasHeader,
 		"SecurityPrincipals": securityPrincipalsHeader,
 		"CMKStatus":          cmkStatusHeader,
+		"LastRotated":        lastRotatedHeader,
 	}
 	return &cmkContext
 }
@@ -56,9 +58,9 @@ func NewCMKFormat(source string) Format {
 	}
 }
 
-func CMKWrite(ctx Context, cmkSpec ybmclient.CMKSpec) error {
+func CMKWrite(ctx Context, cmkData ybmclient.CMKData) error {
 	render := func(format func(subContext SubContext) error) error {
-		err := format(&CMKContext{c: cmkSpec})
+		err := format(&CMKContext{c: cmkData})
 		if err != nil {
 			logrus.Debug(err)
 			return err
@@ -69,35 +71,44 @@ func CMKWrite(ctx Context, cmkSpec ybmclient.CMKSpec) error {
 }
 
 func (c *CMKContext) Provider() ybmclient.CMKProviderEnum {
-	return c.c.ProviderType
+	return c.c.Spec.Get().ProviderType
+}
+
+func (c *CMKContext) LastRotated() string {
+	return *c.c.Info.RotatedOn.Get()
 }
 
 func (c *CMKContext) CMKStatus() ybmclient.CMKStatusEnum {
-	return *c.c.Status.Get()
+	return *c.c.GetSpec().Status.Get()
 }
 
 func (c *CMKContext) KeyAlias() string {
-	if c.c.GcpCmkSpec.Get().GetKeyName() != "" {
-		return c.c.GcpCmkSpec.Get().GetKeyName()
+	if c.c.GetSpec().GcpCmkSpec.Get().GetKeyName() != "" {
+		return c.c.GetSpec().GcpCmkSpec.Get().GetKeyName()
+	} else if c.c.GetSpec().AzureCmkSpec.Get().GetKeyName() != "" {
+		return c.c.GetSpec().AzureCmkSpec.Get().GetClientId()
+	} else {
+		return c.c.GetSpec().AwsCmkSpec.Get().GetAliasName()
 	}
-	return c.c.AwsCmkSpec.Get().GetAliasName()
 }
 
 func (c *CMKContext) ResourceId() string {
 	// Resource id: projects/{PROJECT_ID}/locations/{LOCATION}/keyRings/{KEY_RING_NAME}/cryptoKeys/{KEY_NAME}
-	keyName := c.c.GcpCmkSpec.Get().GetKeyName()
-	location := c.c.GcpCmkSpec.Get().GetLocation()
-	keyRingName := c.c.GcpCmkSpec.Get().GetKeyRingName()
-	projectId := c.c.GcpCmkSpec.Get().GetGcpServiceAccount().ProjectId
+	keyName := c.c.GetSpec().GcpCmkSpec.Get().GetKeyName()
+	location := c.c.GetSpec().GcpCmkSpec.Get().GetLocation()
+	keyRingName := c.c.GetSpec().GcpCmkSpec.Get().GetKeyRingName()
+	projectId := c.c.GetSpec().GcpCmkSpec.Get().GetGcpServiceAccount().ProjectId
 	resourceId := "projects/" + projectId + "/locations/" + location + "/keyRings/" + keyRingName + "/cryptoKeys/" + keyName
 	return resourceId
 }
 
 func (c *CMKContext) SecurityPrincipals() string {
-	if c.c.GcpCmkSpec.Get().GetKeyName() != "" {
+	if c.c.GetSpec().GcpCmkSpec.Get().GetKeyName() != "" {
 		return c.ResourceId()
+	} else if c.c.GetSpec().AzureCmkSpec.Get().GetKeyName() != "" {
+		return c.c.GetSpec().AzureCmkSpec.Get().GetKeyVaultUri()
 	}
-	return strings.Join(c.c.AwsCmkSpec.Get().GetArnList(), ", ")
+	return strings.Join(c.c.GetSpec().AwsCmkSpec.Get().GetArnList(), ", ")
 }
 
 func (c *CMKContext) MarshalJSON() ([]byte, error) {

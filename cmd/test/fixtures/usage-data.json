@@ -1,0 +1,213 @@
+{
+    "data": {
+      "granularity": "DAILY",
+      "start_timestamp": "2023-08-13T18:30:00.000Z",
+      "end_timestamp": "2023-08-15T18:30:00.000Z",
+      "cluster_ids": [
+        "courageous-jellyfish",
+        "willing-walrus"
+      ],
+      "dimensions": [
+        {
+          "name": "VCPUS",
+          "unit": "HOURS",
+          "cumulative_usage": 120.52,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 120.52,
+              "cumulative_usage": 120.52
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0,
+              "cumulative_usage": 120.52
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0,
+              "cumulative_usage": 120.52
+            }
+          ]
+        },
+        {
+          "name": "DISK_STORAGE",
+          "unit": "GB_HOURS",
+          "cumulative_usage": 6026,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 6026,
+              "cumulative_usage": 6026
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0,
+              "cumulative_usage": 6026
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0,
+              "cumulative_usage": 6026
+            }
+          ]
+        },
+        {
+          "name": "DISK_IOPS",
+          "unit": "NONE",
+          "cumulative_usage": 0,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            }
+          ]
+        },
+        {
+          "name": "BACKUP_STORAGE",
+          "unit": "GB_HOURS",
+          "cumulative_usage": 0,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            }
+          ]
+        },
+        {
+          "name": "DATA_TRANSFER_WITHIN_REGION",
+          "unit": "GB",
+          "cumulative_usage": 1.9622329501,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 1.9622329501,
+              "cumulative_usage": 1.9622329501
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0,
+              "cumulative_usage": 1.9622329501
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0,
+              "cumulative_usage": 1.9622329501
+            }
+          ]
+        },
+        {
+          "name": "DATA_TRANSFER_CROSS_REGION_APAC",
+          "unit": "GB",
+          "cumulative_usage": 0,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0,
+              "cumulative_usage": 0
+            }
+          ]
+        },
+        {
+          "name": "DATA_TRANSFER_CROSS_REGION_NON_APAC",
+          "unit": "GB",
+          "cumulative_usage": 0.1733244699,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 0.1733244699,
+              "cumulative_usage": 0.1733244699
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0,
+              "cumulative_usage": 0.1733244699
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0,
+              "cumulative_usage": 0.1733244699
+            }
+          ]
+        },
+        {
+          "name": "DATA_TRANSFER_INTERNET",
+          "unit": "GB",
+          "cumulative_usage": 0.1190233121,
+          "data_points": [
+            {
+              "start_date": "2023-08-13",
+              "end_date": "2023-08-14",
+              "daily_usage": 0.1189816631,
+              "cumulative_usage": 0.1189816631
+            },
+            {
+              "start_date": "2023-08-14",
+              "end_date": "2023-08-15",
+              "daily_usage": 0.0000233949,
+              "cumulative_usage": 0.119005058
+            },
+            {
+              "start_date": "2023-08-15",
+              "end_date": "2023-08-16",
+              "daily_usage": 0.0000182541,
+              "cumulative_usage": 0.1190233121
+            }
+          ]
+        }
+      ]
+    }
+  }

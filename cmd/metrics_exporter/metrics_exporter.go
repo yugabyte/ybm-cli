@@ -337,6 +337,10 @@ var updateMetricsExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
+		oldname := metricsExporterName
+		if cmd.Flags().Changed("new-config-name") {
+			metricsExporterName, _ = cmd.Flags().GetString("new-config-name")
+		}
 		//We initialise this one here, even if we error out later
 		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
 
@@ -386,7 +390,7 @@ var updateMetricsExporterCmd = &cobra.Command{
 			logrus.Fatalf("Only datadog is accepted as third party sink for now")
 		}
 
-		config, err := authApi.GetConfigByName(metricsExporterName)
+		config, err := authApi.GetConfigByName(oldname)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -436,6 +440,7 @@ func init() {
 	MetricsExporterCmd.AddCommand(deleteMetricsExporterCmd)
 	deleteMetricsExporterCmd.Flags().String("config-name", "", "[REQUIRED] The name of the metrics exporter configuration")
 	deleteMetricsExporterCmd.MarkFlagRequired("config-name")
+	deleteMetricsExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 	MetricsExporterCmd.AddCommand(removeMetricsExporterFromClusterCmd)
 	removeMetricsExporterFromClusterCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster")
@@ -463,4 +468,5 @@ func init() {
 	updateMetricsExporterCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
 	Please provide key value pairs as follows: 
 	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
+	updateMetricsExporterCmd.Flags().String("new-config-name", "", "[OPTIONAL] The new name of the metrics exporter configuration")
 }

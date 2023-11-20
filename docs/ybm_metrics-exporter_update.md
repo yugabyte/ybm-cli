@@ -21,6 +21,7 @@ ybm metrics-exporter update [flags]
       --grafana-spec stringToString   Configuration for Grafana. 
                                       	Please provide key value pairs as follows: 
                                       	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug> (default [])
+      --new-config-name string        [OPTIONAL] The new name of the metrics exporter configuration
   -h, --help                          help for update
 ```
 

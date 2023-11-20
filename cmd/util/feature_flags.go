@@ -31,7 +31,6 @@ const (
 	TOOLS               FeatureFlag = "TOOLS"
 	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
-	CLUSTER_RF          FeatureFlag = "CLUSTER_RF"
 )
 
 func (f FeatureFlag) String() string {

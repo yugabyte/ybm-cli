@@ -240,14 +240,29 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		faultTolerance, _ := cmd.Flags().GetString("fault-tolerance")
 		clusterInfo.SetFaultTolerance(ybmclient.ClusterFaultTolerance(faultTolerance))
 	}
-	if util.IsFeatureFlagEnabled(util.CLUSTER_RF) {
-		if cmd.Flags().Changed("num-faults-to-tolerate") {
-			numFaultsToTolerate, _ := cmd.Flags().GetInt32("num-faults-to-tolerate")
-			if valid, err := util.ValidateNumFaultsToTolerate(numFaultsToTolerate, clusterInfo.GetFaultTolerance()); !valid {
-				return nil, err
-			}
-			clusterInfo.SetNumFaultsToTolerate(numFaultsToTolerate)
+	if cmd.Flags().Changed("preferred-region") {
+		preferredRegion, _ := cmd.Flags().GetString("preferred-region")
+		if clusterInfo.GetFaultTolerance() != ybmclient.ClusterFaultTolerance("REGION") {
+			return nil, fmt.Errorf("preferred region is allowed only for regional level fault tolerance")
 		}
+
+		if len(clusterRegionInfo) <= 1 {
+			return nil, fmt.Errorf("preferred region is allowed only if there is more than one region")
+		}
+
+		err = util.SetPreferredRegion(clusterRegionInfo, preferredRegion)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	if cmd.Flags().Changed("num-faults-to-tolerate") {
+		numFaultsToTolerate, _ := cmd.Flags().GetInt32("num-faults-to-tolerate")
+		if valid, err := util.ValidateNumFaultsToTolerate(numFaultsToTolerate, clusterInfo.GetFaultTolerance()); !valid {
+			return nil, err
+		}
+		clusterInfo.SetNumFaultsToTolerate(numFaultsToTolerate)
 	}
 	if util.IsFeatureFlagEnabled(util.ENTERPRISE_SECURITY) {
 		if cmd.Flags().Changed("enterprise-security") {
@@ -301,6 +316,23 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	if cmd.Flags().Changed("cluster-type") {
 		clusterType, _ := cmd.Flags().GetString("cluster-type")
 		clusterInfo.SetClusterType(ybmclient.ClusterType(clusterType))
+	}
+
+	if cmd.Flags().Changed("default-region") {
+		defaultRegion, _ := cmd.Flags().GetString("default-region")
+		if clusterInfo.GetClusterType() != ybmclient.ClusterType("GEO_PARTITIONED") {
+			return nil, fmt.Errorf("default region is allowed only for geo partitioned clusters")
+		}
+
+		if len(clusterRegionInfo) <= 1 {
+			return nil, fmt.Errorf("default region is allowed only if there is more than one region")
+		}
+
+		err = util.SetDefaultRegion(clusterRegionInfo, defaultRegion)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	// Compute track ID for database version
@@ -640,6 +672,14 @@ func (a *AuthApiClient) EditClusterNetworkAllowLists(clusterId string, allowList
 
 func (a *AuthApiClient) ListClusterNetworkAllowLists(clusterId string) ybmclient.ApiListClusterNetworkAllowListsRequest {
 	return a.ApiClient.ClusterApi.ListClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) GetBillingUsage(startTimestamp string, endTimestamp string, clusterIds []string) ybmclient.ApiGetBillingUsageRequest {
+	return a.ApiClient.BillingApi.GetBillingUsage(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Granularity(ybmclient.GRANULARITYENUM_DAILY).ClusterIds(clusterIds)
+}
+
+func (a *AuthApiClient) ListClustersByDateRange(startTimestamp string, endTimestamp string) ybmclient.ApiListClustersByDateRangeRequest {
+	return a.ApiClient.BillingApi.ListClustersByDateRange(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Tier(ybmclient.CLUSTERTIER_PAID)
 }
 
 func (a *AuthApiClient) ListClusterCMKs(clusterId string) ybmclient.ApiGetClusterCMKRequest {
