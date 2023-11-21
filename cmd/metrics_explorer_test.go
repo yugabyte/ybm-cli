@@ -110,15 +110,6 @@ Name      Type      Zone        Access Token Policy                InstanceId   
 grafana   GRAFANA   test-zone   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
 			session.Kill()
 		})
-		It("should return required field name and type when not set", func() {
-
-			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create")
-			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-			Expect(err).NotTo(HaveOccurred())
-			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"config-name\", \"type\" not set$)"))
-			session.Kill()
-		})
 		It("should return required field", func() {
 			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "test", "--type", "grafana", "--grafana-spec", "zone=test")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
@@ -129,6 +120,36 @@ grafana   GRAFANA   test-zone   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      
 		})
 
 	})
+	Context("When type is sumologic", func() {
+		It("should create the config", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-sumologic.json", &responseMetrics)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/metrics-exporter-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseMetrics),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "testsumo", "--type", "sumologic", "--sumologic-spec", "access-id=ybmclitest,access-key=1234456,installation-token=test-endpoint")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`Name         Type        Access Key                         Access ID        InstallationToken
+gwenn-sumo   SUMOLOGIC   FqXXXXXXXXXX...XXXXXXXXXXXXXXX9p   suXXXXXXXXXXJ9   U1XXXXXXXXXX...XXXXXXXXXXXXXXX==`))
+			session.Kill()
+		})
+		It("should return required field", func() {
+			cmd := exec.Command(compiledCLIPath, "metrics-exporter", "create", "--config-name", "testsumo", "--type", "sumologic", "--sumologic-spec", "access-id=test")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:access-key is a required field for sumologic-spec$)"))
+			session.Kill()
+		})
+
+	})
+
 	Context("When listing metrics exporter config", func() {
 		It("should return the list of config", func() {
 			statusCode = 200
@@ -144,9 +165,10 @@ grafana   GRAFANA   test-zone   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Name      Type
-ff        DATADOG
-grafana   GRAFANA`))
+			Expect(session.Out).Should(gbytes.Say(`Name         Type
+ff           DATADOG
+grafana      GRAFANA
+gwenn-sumo   SUMOLOGIC`))
 			session.Kill()
 		})
 

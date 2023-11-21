@@ -26,6 +26,7 @@ import (
 const defaultMetricsExporterListing = "table {{.Name}}\t{{.Type}}"
 const defaultMetricsExporterDataDog = "table {{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
 const defaultMetricsExporterGrafana = "table {{.Name}}\t{{.Type}}\t{{.Zone}}\t{{.AccessTokenPolicy}}\t{{.InstanceId}}\t{{.OrgSlug}}"
+const defaultMetricsExporterSumologic = "table {{.Name}}\t{{.Type}}\t{{.AccessKey}}\t{{.AccessID}}\t{{.InstallationToken}}"
 
 type MetricsExporterContext struct {
 	HeaderContext
@@ -42,6 +43,8 @@ func NewMetricsExporterFormat(source string, metricsType string) Format {
 		format = defaultMetricsExporterDataDog
 	case string(ybmclient.METRICSEXPORTERCONFIGTYPEENUM_GRAFANA):
 		format = defaultMetricsExporterGrafana
+	case string(ybmclient.METRICSEXPORTERCONFIGTYPEENUM_SUMOLOGIC):
+		format = defaultMetricsExporterSumologic
 	}
 
 	switch source {
@@ -64,6 +67,9 @@ func NewMetricsExporterContext() *MetricsExporterContext {
 		"OrgSlug":           "OrgSlug",
 		"AccessTokenPolicy": "Access Token Policy",
 		"Zone":              "Zone",
+		"InstallationToken": "InstallationToken",
+		"AccessID":          "Access ID",
+		"AccessKey":         "Access Key",
 	}
 	return &metricsExporterCtx
 }
@@ -113,11 +119,7 @@ func (me *MetricsExporterContext) Zone() string {
 }
 
 func (me *MetricsExporterContext) AccessTokenPolicy() string {
-	apiKey := me.me.Spec.GetGrafanaSpec().AccessPolicyToken
-	if len(apiKey) > 32 {
-		return fmt.Sprintf("%s%s%s", apiKey[:12], "...", apiKey[len(apiKey)-17:])
-	}
-	return apiKey
+	return ShortenKey(me.me.Spec.GetGrafanaSpec().AccessPolicyToken, 32)
 }
 
 func (me *MetricsExporterContext) InstanceId() string {
@@ -126,4 +128,24 @@ func (me *MetricsExporterContext) InstanceId() string {
 
 func (me *MetricsExporterContext) OrgSlug() string {
 	return me.me.Spec.GetGrafanaSpec().OrgSlug
+}
+
+// Sumologic
+func (me *MetricsExporterContext) AccessID() string {
+	return me.me.Spec.GetSumologicSpec().AccessId
+}
+
+func (me *MetricsExporterContext) AccessKey() string {
+	return ShortenKey(me.me.Spec.GetSumologicSpec().AccessKey, 32)
+}
+
+func (me *MetricsExporterContext) InstallationToken() string {
+	return ShortenKey(me.me.Spec.GetSumologicSpec().InstallationToken, 32)
+}
+
+func ShortenKey(key string, stringLen int) string {
+	if len(key) > stringLen {
+		return fmt.Sprintf("%s%s%s", key[:12], "...", key[len(key)-17:])
+	}
+	return key
 }

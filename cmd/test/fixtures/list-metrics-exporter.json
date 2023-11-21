@@ -39,6 +39,28 @@
                     "updated_on": "2023-09-12T05:50:25.843Z"
                 }
             }
+        },
+        {
+            "spec": {
+                "name": "gwenn-sumo",
+                "type": "SUMOLOGIC",
+                "datadog_spec": null,
+                "grafana_spec": null,
+                "sumologic_spec": {
+                    "installation_token": "U1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==",
+                    "access_id": "suXXXXXXXXXXJ9",
+                    "access_key": "FqXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX9p"
+                },
+                "newrelic_spec": null
+            },
+            "info": {
+                "id": "4021aa44-b22d-4bb6-a7d3-0a1099a4f206",
+                "cluster_ids": [],
+                "metadata": {
+                    "created_on": "2023-11-20T07:33:35.724Z",
+                    "updated_on": "2023-11-20T07:33:35.724Z"
+                }
+            }
         }
     ],
     "_metadata": {

@@ -13,15 +13,18 @@ ybm metrics-exporter create [flags]
 ### Options
 
 ```
-      --config-name string            [REQUIRED] The name of the metrics exporter configuration
-      --type string                   [REQUIRED] The type of third party metrics sink
-      --datadog-spec stringToString   Configuration for Datadog. 
-                                      	Please provide key value pairs as follows: 
-                                      	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters> (default [])
-      --grafana-spec stringToString   Configuration for Grafana. 
-                                      	Please provide key value pairs as follows: 
-                                      	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug> (default [])
-  -h, --help                          help for create
+      --config-name string              [REQUIRED] The name of the metrics exporter configuration
+      --type string                     [REQUIRED] The type of third party metrics sink
+      --datadog-spec stringToString     Configuration for Datadog. 
+                                        	Please provide key value pairs as follows: 
+                                        	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters> (default [])
+      --grafana-spec stringToString     Configuration for Grafana. 
+                                        	Please provide key value pairs as follows: 
+                                        	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug> (default [])
+      --sumologic-spec stringToString   Configuration for sumologic. 
+                                        	Please provide key value pairs as follows: 
+                                        	access-key=<your-sumologic-access-key>,access_id=<your-sumologic-access-id>,installation_token=<your-sumologic-installation-token> (default [])
+  -h, --help                            help for create
 ```
 
 ### Options inherited from parent commands

@@ -52,55 +52,10 @@ var createMetricsExporterCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
-
-		switch *metricsSinkTypeEnum {
-		case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_DATADOG:
-			if !cmd.Flags().Changed("datadog-spec") {
-				logrus.Fatalf("datadog-spec is required for datadog sink")
-
-			}
-			datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
-			apiKey := datadogSpecString["api-key"]
-			site := datadogSpecString["site"]
-			if len(apiKey) < 1 {
-				logrus.Fatal("api-key is a required field for datadog-spec")
-			}
-			if len(site) < 1 {
-				logrus.Fatal("site is a required field for datadog-spec")
-			}
-			datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
-			metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
-		case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_GRAFANA:
-			if !cmd.Flags().Changed("grafana-spec") {
-				logrus.Fatalf("grafana-spec is required for grafana sink")
-
-			}
-			grafanaSpecString, _ := cmd.Flags().GetStringToString("grafana-spec")
-			apiKey := grafanaSpecString["access-policy-token"]
-			zone := grafanaSpecString["zone"]
-			instanceId := grafanaSpecString["instance-id"]
-			orgSlug := grafanaSpecString["org-slug"]
-			if len(apiKey) < 1 {
-				logrus.Fatal("access-policy-token is a required field for grafana-spec")
-			}
-			if len(zone) < 1 {
-				logrus.Fatal("Zone is a required field for grafana-spec")
-			}
-			if len(instanceId) < 1 {
-				logrus.Fatal("instance-id is a required field for grafana-spec")
-			}
-			if len(orgSlug) < 1 {
-				logrus.Fatal("org-slug is a required field for grafana-spec")
-			}
-
-			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, zone, instanceId, orgSlug)
-			metricsExporterConfigSpec.SetGrafanaSpec(*grafanaSpec)
-		default:
-			//We should never go there normally
-			logrus.Fatalf("Only datadog is accepted as third party sink for now")
+		metricsExporterConfigSpec, err := setMetricsExporterConfiguration(cmd, metricsExporterName, *metricsSinkTypeEnum)
+		if err != nil {
+			logrus.Fatalf(err.Error())
 		}
-
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
@@ -342,52 +297,9 @@ var updateMetricsExporterCmd = &cobra.Command{
 			metricsExporterName, _ = cmd.Flags().GetString("new-config-name")
 		}
 		//We initialise this one here, even if we error out later
-		metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, *metricsSinkTypeEnum)
-
-		switch *metricsSinkTypeEnum {
-		case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_DATADOG:
-			if !cmd.Flags().Changed("datadog-spec") {
-				logrus.Fatalf("datadog-spec is required for datadog sink")
-
-			}
-			datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
-			apiKey := datadogSpecString["api-key"]
-			site := datadogSpecString["site"]
-			if len(apiKey) < 1 {
-				logrus.Fatal("api-key is a required field for datadog-spec")
-			}
-			if len(site) < 1 {
-				logrus.Fatal("site is a required field for datadog-spec")
-			}
-			datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
-			metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
-		case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_GRAFANA:
-			if !cmd.Flags().Changed("grafana-spec") {
-				logrus.Fatalf("grafana-spec is required for grafana sink")
-
-			}
-			grafanaSpecString, _ := cmd.Flags().GetStringToString("grafana-spec")
-			apiKey := grafanaSpecString["access-policy-token"]
-			zone := grafanaSpecString["zone"]
-			instanceId := grafanaSpecString["instance-id"]
-			orgSlug := grafanaSpecString["org-slug"]
-			if len(apiKey) < 1 {
-				logrus.Fatal("access-policy-token is a required field for grafana-spec")
-			}
-			if len(zone) < 1 {
-				logrus.Fatal("zone is a required field for grafana-spec")
-			}
-			if len(instanceId) < 1 {
-				logrus.Fatal("instance-id is a required field for grafana-spec")
-			}
-			if len(orgSlug) < 1 {
-				logrus.Fatal("org-slug is a required field for grafana-spec")
-			}
-
-			grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, zone, instanceId, orgSlug)
-			metricsExporterConfigSpec.SetGrafanaSpec(*grafanaSpec)
-		default:
-			logrus.Fatalf("Only datadog is accepted as third party sink for now")
+		metricsExporterConfigSpec, err := setMetricsExporterConfiguration(cmd, metricsExporterName, *metricsSinkTypeEnum)
+		if err != nil {
+			logrus.Fatalf(err.Error())
 		}
 
 		config, err := authApi.GetConfigByName(oldname)
@@ -430,6 +342,9 @@ func init() {
 	createMetricsExporterCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
 	Please provide key value pairs as follows: 
 	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
+	createMetricsExporterCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
+	Please provide key value pairs as follows: 
+	access-key=<your-sumologic-access-key>,access_id=<your-sumologic-access-id>,installation_token=<your-sumologic-installation-token>`)
 
 	MetricsExporterCmd.AddCommand(listMetricsExporterCmd)
 
@@ -468,5 +383,77 @@ func init() {
 	updateMetricsExporterCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
 	Please provide key value pairs as follows: 
 	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
-	updateMetricsExporterCmd.Flags().String("new-config-name", "", "[OPTIONAL] The new name of the metrics exporter configuration")
+	updateMetricsExporterCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
+	Please provide key value pairs as follows: 
+	access-key=<your-sumologic-access-key>,access_id=<your-sumologic-access-id>,installation_token=<your-sumologic-installation-token>`)
+}
+
+func setMetricsExporterConfiguration(cmd *cobra.Command, metricsExporterName string, metricsSinkTypeEnum ybmclient.MetricsExporterConfigTypeEnum) (*ybmclient.MetricsExporterConfigurationSpec, error) {
+	// We initialise this one here, even if we error out later
+	metricsExporterConfigSpec := ybmclient.NewMetricsExporterConfigurationSpec(metricsExporterName, metricsSinkTypeEnum)
+
+	switch metricsSinkTypeEnum {
+	case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_DATADOG:
+		if !cmd.Flags().Changed("datadog-spec") {
+			return nil, fmt.Errorf("datadog-spec is required for datadog sink")
+		}
+		datadogSpecString, _ := cmd.Flags().GetStringToString("datadog-spec")
+		apiKey := datadogSpecString["api-key"]
+		site := datadogSpecString["site"]
+		if len(apiKey) < 1 {
+			return nil, fmt.Errorf("api-key is a required field for datadog-spec")
+		}
+		if len(site) < 1 {
+			return nil, fmt.Errorf("site is a required field for datadog-spec")
+		}
+		datadogSpec := ybmclient.NewDatadogMetricsExporterConfigurationSpec(apiKey, site)
+		metricsExporterConfigSpec.SetDatadogSpec(*datadogSpec)
+	case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_GRAFANA:
+		if !cmd.Flags().Changed("grafana-spec") {
+			return nil, fmt.Errorf("grafana-spec is required for grafana sink")
+		}
+		grafanaSpecString, _ := cmd.Flags().GetStringToString("grafana-spec")
+		apiKey := grafanaSpecString["access-policy-token"]
+		zone := grafanaSpecString["zone"]
+		instanceId := grafanaSpecString["instance-id"]
+		orgSlug := grafanaSpecString["org-slug"]
+		if len(apiKey) < 1 {
+			return nil, fmt.Errorf("access-policy-token is a required field for grafana-spec")
+		}
+		if len(zone) < 1 {
+			return nil, fmt.Errorf("zone is a required field for grafana-spec")
+		}
+		if len(instanceId) < 1 {
+			return nil, fmt.Errorf("instance-id is a required field for grafana-spec")
+		}
+		if len(orgSlug) < 1 {
+			return nil, fmt.Errorf("org-slug is a required field for grafana-spec")
+		}
+
+		grafanaSpec := ybmclient.NewGrafanaMetricsExporterConfigurationSpec(apiKey, zone, instanceId, orgSlug)
+		metricsExporterConfigSpec.SetGrafanaSpec(*grafanaSpec)
+	case ybmclient.METRICSEXPORTERCONFIGTYPEENUM_SUMOLOGIC:
+		if !cmd.Flags().Changed("sumologic-spec") {
+			return nil, fmt.Errorf("sumologic-spec is required for sumologic sink")
+
+		}
+		sumoLogicSpecString, _ := cmd.Flags().GetStringToString("sumologic-spec")
+		accessKey := sumoLogicSpecString["access-key"]
+		accessId := sumoLogicSpecString["access-id"]
+		installationToken := sumoLogicSpecString["installation-token"]
+		if len(accessKey) < 1 {
+			return nil, fmt.Errorf("access-key is a required field for sumologic-spec")
+		}
+		if len(accessId) < 1 {
+			return nil, fmt.Errorf("access-id is a required field for sumologic-spec")
+		}
+		if len(installationToken) < 1 {
+			return nil, fmt.Errorf("installation-token is a required field for sumologic-spec")
+		}
+		sumoLogicSpec := ybmclient.NewSumologicMetricsExporterConfigurationSpec(installationToken, accessId, accessKey)
+		metricsExporterConfigSpec.SetSumologicSpec(*sumoLogicSpec)
+	default:
+		return nil, fmt.Errorf("only datadog, grafana or sumologic are accepted as third party sink for now")
+	}
+	return metricsExporterConfigSpec, nil
 }
