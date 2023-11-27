@@ -23,7 +23,7 @@ ybm metrics-exporter create [flags]
                                         	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug> (default [])
       --sumologic-spec stringToString   Configuration for sumologic. 
                                         	Please provide key value pairs as follows: 
-                                        	access-key=<your-sumologic-access-key>,access_id=<your-sumologic-access-id>,installation_token=<your-sumologic-installation-token> (default [])
+                                        	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token> (default [])
   -h, --help                            help for create
 ```
 

@@ -344,7 +344,7 @@ func init() {
 	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
 	createMetricsExporterCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
 	Please provide key value pairs as follows: 
-	access-key=<your-sumologic-access-key>,access_id=<your-sumologic-access-id>,installation_token=<your-sumologic-installation-token>`)
+	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
 
 	MetricsExporterCmd.AddCommand(listMetricsExporterCmd)
 
@@ -377,6 +377,8 @@ func init() {
 	updateMetricsExporterCmd.MarkFlagRequired("config-name")
 	updateMetricsExporterCmd.Flags().String("type", "", "[REQUIRED] The type of third party metrics sink")
 	updateMetricsExporterCmd.MarkFlagRequired("type")
+	updateMetricsExporterCmd.Flags().String("new-config-name", "", "[OPTIONAL] The new name of the metrics exporter configuration")
+	updateMetricsExporterCmd.MarkFlagRequired("new-config-name")
 	updateMetricsExporterCmd.Flags().StringToString("datadog-spec", nil, `Configuration for Datadog. 
 	Please provide key value pairs as follows: 
 	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
@@ -385,7 +387,7 @@ func init() {
 	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
 	updateMetricsExporterCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
 	Please provide key value pairs as follows: 
-	access-key=<your-sumologic-access-key>,access_id=<your-sumologic-access-id>,installation_token=<your-sumologic-installation-token>`)
+	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
 }
 
 func setMetricsExporterConfiguration(cmd *cobra.Command, metricsExporterName string, metricsSinkTypeEnum ybmclient.MetricsExporterConfigTypeEnum) (*ybmclient.MetricsExporterConfigurationSpec, error) {
