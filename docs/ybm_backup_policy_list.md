@@ -1,19 +1,20 @@
-## ybm backup
+## ybm backup policy list
 
-Manage backup operations of a cluster
+List backup policies
 
 ### Synopsis
 
-Manage backup operations of a cluster
+List backup policies for cluster in YugabyteDB Managed
 
 ```
-ybm backup [flags]
+ybm backup policy list [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for backup
+      --cluster-name string   [REQUIRED] Name of the cluster to fetch backup policiess.
+  -h, --help                  help for list
 ```
 
 ### Options inherited from parent commands
@@ -31,10 +32,5 @@ ybm backup [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm backup create](ybm_backup_create.md)	 - Create backup for a cluster in YugabyteDB Managed
-* [ybm backup delete](ybm_backup_delete.md)	 - Delete backup for a cluster in YugabyteDB Managed
-* [ybm backup list](ybm_backup_list.md)	 - List existing backups available for a cluster in YugabyteDB Managed
 * [ybm backup policy](ybm_backup_policy.md)	 - Manage backup policy of a cluster
-* [ybm backup restore](ybm_backup_restore.md)	 - Restore backups into a cluster in YugabyteDB Managed
 

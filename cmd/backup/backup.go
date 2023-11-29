@@ -22,6 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/backup/policy"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
@@ -238,5 +239,7 @@ func init() {
 	deleteBackupCmd.Flags().String("backup-id", "", "[REQUIRED] The backup ID.")
 	deleteBackupCmd.MarkFlagRequired("backup-id")
 	deleteBackupCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+
+	BackupCmd.AddCommand(policy.PolicyCmd)
 
 }
