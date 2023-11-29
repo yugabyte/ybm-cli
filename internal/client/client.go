@@ -698,6 +698,10 @@ func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
 	return a.ApiClient.BackupApi.ListBackups(a.ctx, a.AccountID, a.ProjectID)
 }
 
+func (a *AuthApiClient) ListBackupPolicies(clusterId string) ybmclient.ApiListBackupSchedulesRequest {
+	return a.ApiClient.BackupApi.ListBackupSchedules(a.ctx, a.AccountID, a.ProjectID).EntityId(clusterId).State("ACTIVE")
+}
+
 func (a *AuthApiClient) RestoreBackup() ybmclient.ApiRestoreBackupRequest {
 	return a.ApiClient.BackupApi.RestoreBackup(a.ctx, a.AccountID, a.ProjectID)
 }
