@@ -105,7 +105,7 @@ func getLocalTime(cronExpression string) string {
 	cronParser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
 	schedule, err := cronParser.Parse(cronExpression)
 	if err != nil {
-		logrus.Println("Error parsing cron expression:\n", err)
+		logrus.Debugln("Error parsing cron expression:\n", err)
 		return ""
 	}
 
@@ -113,8 +113,8 @@ func getLocalTime(cronExpression string) string {
 	utcTime := schedule.Next(time.Now().UTC())
 	localTimeZone, err := time.LoadLocation("Local")
 	if err != nil {
-		logrus.Println("Error loading local time zone:\n", err)
-		return ""
+		logrus.Debugln("Error loading local time zone:\n", err)
+		return utcTime.Format("15:04") + "UTC"
 	}
 	localTime := utcTime.In(localTimeZone)
 	localTimeString := localTime.Format("15:04")
@@ -128,7 +128,7 @@ func getDaysOfTheWeek(cronExpression string) string {
 	specSchedule := schedule.(*cron.SpecSchedule)
 
 	if err != nil {
-		logrus.Println("Error parsing cron expression:\n", err)
+		logrus.Debugln("Error parsing cron expression:\n", err)
 		return ""
 	}
 
