@@ -62,7 +62,7 @@ var listPolicyCmd = &cobra.Command{
 			Format: formatter.NewBackupPolicyFormat(viper.GetString("output")),
 		}
 		if len(resp.GetData()) < 1 {
-			logrus.Println("No backup policies found for the given cluster\n")
+			logrus.Println("No backup policies found for the given cluster")
 			return
 		}
 		formatter.BackupPolicyListWrite(policyCtx, resp.GetData())

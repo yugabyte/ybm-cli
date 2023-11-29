@@ -105,7 +105,7 @@ func getLocalTime(cronExpression string) string {
 	cronParser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
 	schedule, err := cronParser.Parse(cronExpression)
 	if err != nil {
-		fmt.Println("Error parsing cron expression:\n", err)
+		logrus.Println("Error parsing cron expression:\n", err)
 		return ""
 	}
 
@@ -128,7 +128,7 @@ func getDaysOfTheWeek(cronExpression string) string {
 	specSchedule := schedule.(*cron.SpecSchedule)
 
 	if err != nil {
-		fmt.Println("Error parsing cron expression:\n", err)
+		logrus.Println("Error parsing cron expression:\n", err)
 		return ""
 	}
 
