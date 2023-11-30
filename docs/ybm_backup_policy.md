@@ -32,5 +32,8 @@ ybm backup policy [flags]
 ### SEE ALSO
 
 * [ybm backup](ybm_backup.md)	 - Manage backup operations of a cluster
+* [ybm backup policy disable](ybm_backup_policy_disable.md)	 - Disable backup policies
+* [ybm backup policy enable](ybm_backup_policy_enable.md)	 - Enable backup policies
 * [ybm backup policy list](ybm_backup_policy_list.md)	 - List backup policies
+* [ybm backup policy update](ybm_backup_policy_update.md)	 - Update backup policies
 

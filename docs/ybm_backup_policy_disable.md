@@ -1,20 +1,20 @@
-## ybm backup policy list
+## ybm backup policy disable
 
-List backup policies
+Disable backup policies
 
 ### Synopsis
 
-List backup policies for cluster in YugabyteDB Managed
+Disable backup policies for cluster in YugabyteDB Managed
 
 ```
-ybm backup policy list [flags]
+ybm backup policy disable [flags]
 ```
 
 ### Options
 
 ```
-      --cluster-name string   [REQUIRED] Name of the cluster to list backup policies.
-  -h, --help                  help for list
+      --cluster-name string   [REQUIRED] Name of the cluster to disable backup policies.
+  -h, --help                  help for disable
 ```
 
 ### Options inherited from parent commands
