@@ -18,6 +18,10 @@ package policy
 import (
 	"fmt"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -26,6 +30,17 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
+
+// Map weekdays to cron format
+var dayMapping = map[string]string{
+	"su": "0",
+	"mo": "1",
+	"tu": "2",
+	"we": "3",
+	"th": "4",
+	"fr": "5",
+	"sa": "6",
+}
 
 var PolicyCmd = &cobra.Command{
 	Use:   "policy",
@@ -215,10 +230,20 @@ var updatePolicyCmd = &cobra.Command{
 			scheduleSpec.SetTimeIntervalInDays(frequencyInDays)
 		} else {
 			daysOfWeek, _ := cmd.Flags().GetString("full-backup-schedule-days-of-week")
-			//validateDaysOfWeek
+			if !isDaysOfWeekValid(daysOfWeek) {
+				logrus.Println("The days of week specified is incorrect. Please ensure that it is a comma separated list of the first two letters to days of the week.")
+			}
 			backupTime, _ := cmd.Flags().GetString("full-backup-schedule-time")
-			//validateBackupTime
-			cronExpression := generateCronExpression(daysOfWeek, backupTime)
+			if !isTimeFormatValid(backupTime) {
+				logrus.Println("The full backup schedule time is invalid. Please ensure that it in the 24 Hr HH:MM format.")
+				return
+			}
+			backupTimeUTC, err := convertLocalTimeToUTC(backupTime)
+			if err != nil {
+				logrus.Println("Error: ", err)
+				return
+			}
+			cronExpression := generateCronExpression(daysOfWeek, backupTimeUTC)
 			scheduleSpec.SetCronExpression(cronExpression)
 		}
 
@@ -241,9 +266,69 @@ var updatePolicyCmd = &cobra.Command{
 	},
 }
 
+func isTimeFormatValid(timeStr string) bool {
+
+	// check if the time string is in "HH:MM" format
+	timeRegex := regexp.MustCompile(`^([01]?[0-9]|2[0-3]):[0-5][0-9]$`)
+	return timeRegex.MatchString(timeStr)
+}
+
+func isDaysOfWeekValid(daysOfWeek string) bool {
+	daysOfWeek = strings.TrimSpace(daysOfWeek)
+	daysOfWeekList := strings.Split(daysOfWeek, ",")
+	if len(daysOfWeekList) == 0 {
+		return false
+	}
+	for _, day := range daysOfWeekList {
+		day = strings.ToLower(day)
+		_, found := dayMapping[day]
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func convertLocalTimeToUTC(localTimeStr string) (string, error) {
+
+	localTime, err := time.Parse("15:04", localTimeStr)
+	if err != nil {
+		return "", err
+	}
+
+	location, err := time.LoadLocation("Local")
+	if err != nil {
+		return "", err
+	}
+
+	utcTime := localTime.In(location).UTC()
+
+	utcTimeStr := utcTime.Format("15:04")
+
+	return utcTimeStr, nil
+}
+
 func generateCronExpression(daysOfWeek string, backupTime string) string {
-	//TODO: implementation
-	return "* * * * *"
+
+	daysOfWeekList := strings.Split(daysOfWeek, ",")
+
+	backupTimeList := strings.Split(backupTime, ":")
+	hour, _ := strconv.Atoi(backupTimeList[0])
+	minute, _ := strconv.Atoi(backupTimeList[1])
+
+	var cronDays []string
+	for _, day := range daysOfWeekList {
+		day = strings.ToLower(day)
+		cronDay, found := dayMapping[day]
+		if found {
+			cronDays = append(cronDays, cronDay)
+		}
+
+	}
+
+	cronExpr := fmt.Sprintf("%d %d * * %s", minute, hour, strings.Join(cronDays, ","))
+
+	return cronExpr
 }
 
 func init() {
