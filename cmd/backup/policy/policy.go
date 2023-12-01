@@ -228,6 +228,7 @@ var updatePolicyCmd = &cobra.Command{
 		if cmd.Flags().Changed("full-backup-frequency-in-days") {
 			frequencyInDays, _ := cmd.Flags().GetInt32("full-backup-frequency-in-days")
 			scheduleSpec.SetTimeIntervalInDays(frequencyInDays)
+			scheduleSpec.UnsetCronExpression()
 		} else {
 			daysOfWeek, _ := cmd.Flags().GetString("full-backup-schedule-days-of-week")
 			if !isDaysOfWeekValid(daysOfWeek) {
@@ -238,13 +239,10 @@ var updatePolicyCmd = &cobra.Command{
 				logrus.Println("The full backup schedule time is invalid. Please ensure that it in the 24 Hr HH:MM format.")
 				return
 			}
-			backupTimeUTC, err := convertLocalTimeToUTC(backupTime)
-			if err != nil {
-				logrus.Println("Error: ", err)
-				return
-			}
+			backupTimeUTC := convertLocalTimeToUTC(backupTime)
 			cronExpression := generateCronExpression(daysOfWeek, backupTimeUTC)
 			scheduleSpec.SetCronExpression(cronExpression)
+			scheduleSpec.TimeIntervalInDays = nil
 		}
 
 		info := resp.GetData()[0].GetInfo()
@@ -289,23 +287,19 @@ func isDaysOfWeekValid(daysOfWeek string) bool {
 	return true
 }
 
-func convertLocalTimeToUTC(localTimeStr string) (string, error) {
+func convertLocalTimeToUTC(localTimeStr string) string {
 
-	localTime, err := time.Parse("15:04", localTimeStr)
-	if err != nil {
-		return "", err
-	}
+	backupTimeList := strings.Split(localTimeStr, ":")
+	localHour, _ := strconv.Atoi(backupTimeList[0])
+	localMinute, _ := strconv.Atoi(backupTimeList[1])
 
-	location, err := time.LoadLocation("Local")
-	if err != nil {
-		return "", err
-	}
-
-	utcTime := localTime.In(location).UTC()
+	currentTime := time.Now()
+	localTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), localHour, localMinute, 0, 0, time.Local)
+	utcTime := localTime.UTC()
 
 	utcTimeStr := utcTime.Format("15:04")
 
-	return utcTimeStr, nil
+	return utcTimeStr
 }
 
 func generateCronExpression(daysOfWeek string, backupTime string) string {
@@ -351,7 +345,7 @@ func init() {
 	updatePolicyCmd.Flags().Int32("retention-period-in-days", 1, "[REQUIRED] Retention period of the backup in days.")
 	updatePolicyCmd.MarkFlagRequired("retention-period-in-days")
 	updatePolicyCmd.Flags().Int32("full-backup-frequency-in-days", 1, "[OPTIONAL] Frequency of full backup in days.")
-	updatePolicyCmd.Flags().Int32("full-backup-schedule-days-of-week", 1, "[OPTIONAL] Days of the week when the backup has to run. A comma separated list of the first two letters of the days of the week. Eg: 'Mo,Tu,Sa'")
+	updatePolicyCmd.Flags().String("full-backup-schedule-days-of-week", "", "[OPTIONAL] Days of the week when the backup has to run. A comma separated list of the first two letters of the days of the week. Eg: 'Mo,Tu,Sa'")
 	updatePolicyCmd.Flags().String("full-backup-schedule-time", "", "[OPTIONAL] Time of the day at which the backup has to run. Please specify local time in 24 hr HH:MM format. Eg: 15:04")
 	updatePolicyCmd.MarkFlagsRequiredTogether("full-backup-schedule-days-of-week", "full-backup-schedule-time")
 	updatePolicyCmd.MarkFlagsOneRequired("full-backup-frequency-in-days", "full-backup-schedule-days-of-week", "full-backup-schedule-time")
