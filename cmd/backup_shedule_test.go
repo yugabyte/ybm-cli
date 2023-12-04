@@ -20,11 +20,14 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/robfig/cron"
+	"github.com/sirupsen/logrus"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -117,10 +120,10 @@ var _ = Describe("BackupSchedules", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-				fmt.Println(o)
+
 				// no backup schedule must be returned if it is paused
 				expected := `Time Interval(days)   Days of the Week   Backup Start Time
-NA                    Su,We,Fr           21:02` + "\n"
+NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + "\n"
 				Expect(o).Should(Equal(expected))
 
 				session.Kill()
@@ -135,3 +138,23 @@ NA                    Su,We,Fr           21:02` + "\n"
 	})
 
 })
+
+func getLocalTime(cronExpression string) string {
+	cronParser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
+	schedule, err := cronParser.Parse(cronExpression)
+	if err != nil {
+		logrus.Debugln("Error parsing cron expression:\n", err)
+		return ""
+	}
+
+	// Get the next scheduled time in UTC
+	utcTime := schedule.Next(time.Now().UTC())
+	localTimeZone, err := time.LoadLocation("Local")
+	if err != nil {
+		logrus.Debugln("Error loading local time zone:\n", err)
+		return utcTime.Format("15:04") + "UTC"
+	}
+	localTime := utcTime.In(localTimeZone)
+	localTimeString := localTime.Format("15:04")
+	return localTimeString
+}
