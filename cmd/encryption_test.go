@@ -63,14 +63,20 @@ AWS        0a80e409-e690-42fc-b209-baf969930b2c   2023-11-03T07:37:26.351Z   arn
 			{
 				jsonFilePath: "./test/fixtures/azure_cmk.json",
 				provider:     "AZURE",
-				expected: `Provider   Key Alias                              Last Rotated               Security Principals                      CMK Status
-AZURE      8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b   2023-11-03T07:37:26.351Z   https://test-azure-gj.vault.azure.net/   ACTIVE` + "\n",
+				expected: `Provider   Key Alias                              Last Rotated   Security Principals                      CMK Status
+AZURE      8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b   -              https://test-azure-gj.vault.azure.net/   ACTIVE` + "\n",
 			},
 			{
 				jsonFilePath: "./test/fixtures/gcp_cmk.json",
 				provider:     "GCP",
 				expected: `Provider   Key Alias      Last Rotated               Security Principals                                                                              CMK Status
 GCP        GCP-test-key   2023-11-03T07:37:26.351Z   projects/<your-project-id>/locations/global/keyRings/GCP-test-key-ring/cryptoKeys/GCP-test-key   ACTIVE` + "\n",
+			},
+			{
+				jsonFilePath: "./test/fixtures/azure_cmk_not_rotated.json",
+				provider:     "AZURE",
+				expected: `Provider   Key Alias                              Last Rotated   Security Principals                      CMK Status
+AZURE      8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b   -              https://test-azure-gj.vault.azure.net/   ACTIVE` + "\n",
 			},
 		}
 
