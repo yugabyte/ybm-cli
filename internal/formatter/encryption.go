@@ -75,7 +75,10 @@ func (c *CMKContext) Provider() ybmclient.CMKProviderEnum {
 }
 
 func (c *CMKContext) LastRotated() string {
-	return *c.c.Info.RotatedOn.Get()
+	if c.c.Info.GetRotatedOn() != "" {
+		return c.c.Info.GetRotatedOn()
+	}
+	return "-"
 }
 
 func (c *CMKContext) CMKStatus() ybmclient.CMKStatusEnum {
