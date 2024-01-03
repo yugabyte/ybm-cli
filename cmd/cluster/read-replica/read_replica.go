@@ -46,13 +46,17 @@ var ReadReplicaCmd = &cobra.Command{
 func GetDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmclient.ReadReplicaSpec {
 	n := int32(1)
 	numReplicas := ybmclient.NewNullableInt32(&n)
+	primaryC, err := ybmclient.NewCloudEnumFromValue(string(primaryClusterCloud))
+	if err != nil {
+		logrus.Fatalf(err.Error())
+	}
 	spec := ybmclient.ReadReplicaSpec{
 		NodeInfo: ybmclient.ClusterNodeInfo{
 			NumCores: 2,
 		},
 		PlacementInfo: ybmclient.PlacementInfo{
 			CloudInfo: ybmclient.CloudInfo{
-				Code:   primaryClusterCloud,
+				Code:   *ybmclient.NewNullableCloudEnum(primaryC),
 				Region: "us-west2",
 			},
 			VpcId:       *ybmclient.NewNullableString(&vpcId),
@@ -65,7 +69,7 @@ func GetDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmcl
 }
 
 func SetMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.ReadReplicaSpec) error {
-	cloud := string(spec.PlacementInfo.CloudInfo.Code)
+	cloud := string(*spec.PlacementInfo.CloudInfo.Code.Get())
 	tier := "PAID"
 	region := spec.PlacementInfo.CloudInfo.Region
 	numCores := spec.NodeInfo.NumCores
@@ -129,7 +133,11 @@ func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 				if string(primaryClusterCloud) != val {
 					return nil, fmt.Errorf("all the read replicas must be in the same cloud provider as the primary cluster")
 				}
-				spec.PlacementInfo.CloudInfo.Code = ybmclient.CloudEnum(val)
+				appC, err := ybmclient.NewCloudEnumFromValue(val)
+				if err != nil {
+					logrus.Fatalf(err.Error())
+				}
+				spec.PlacementInfo.CloudInfo.Code = *ybmclient.NewNullableCloudEnum(appC)
 			case "region":
 				spec.PlacementInfo.CloudInfo.Region = val
 			case "num-nodes":

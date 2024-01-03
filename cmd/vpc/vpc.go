@@ -133,8 +133,11 @@ var createVpcCmd = &cobra.Command{
 				logrus.Fatal("Regions must be unique")
 			}
 		}
-
-		vpcSpec := *ybmclient.NewSingleTenantVpcSpec(vpcName, ybmclient.CloudEnum(cloud), vpcRegionSpec)
+		cloudN, err := ybmclient.NewCloudEnumFromValue(cloud)
+		if err != nil {
+			logrus.Fatalf(err.Error())
+		}
+		vpcSpec := *ybmclient.NewSingleTenantVpcSpec(vpcName, *ybmclient.NewNullableCloudEnum(cloudN), vpcRegionSpec)
 		if cmd.Flags().Changed("global-cidr") {
 			if valid, err := util.ValidateCIDR(globalCidrRange); !valid {
 				logrus.Fatal(err)

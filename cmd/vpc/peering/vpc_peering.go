@@ -92,7 +92,10 @@ var createVpcPeeringCmd = &cobra.Command{
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
 		ybVpcName, _ := cmd.Flags().GetString("yb-vpc-name")
 		appCloud, _ := cmd.Flags().GetString("cloud-provider")
-
+		appC, err := ybmclient.NewCloudEnumFromValue(appCloud)
+		if err != nil {
+			logrus.Fatalf(err.Error())
+		}
 		var applicationVPCSpec *ybmclient.CustomerVpcSpec
 
 		// Validating and keeping the flow similar to the UI flow
@@ -121,7 +124,8 @@ var createVpcPeeringCmd = &cobra.Command{
 			if valid, err := util.ValidateCIDR(appVpcCidr); !valid {
 				logrus.Fatal(err)
 			}
-			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcID, appAccountID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
+
+			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcID, appAccountID, *ybmclient.NewVpcCloudInfo(*ybmclient.NewNullableCloudEnum(appC)))
 			applicationVPCSpec.CloudInfo.SetRegion(appVpcRegion)
 			applicationVPCSpec.SetCidr(appVpcCidr)
 
@@ -134,8 +138,7 @@ var createVpcPeeringCmd = &cobra.Command{
 			if appVpcName == "" {
 				logrus.Fatalf("Could not create VPC peering: app-vpc-name is required for GCP.")
 			}
-
-			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcName, appProjectID, *ybmclient.NewVpcCloudInfo(ybmclient.CloudEnum(appCloud)))
+			applicationVPCSpec = ybmclient.NewCustomerVpcSpec(appVpcName, appProjectID, *ybmclient.NewVpcCloudInfo(*ybmclient.NewNullableCloudEnum(appC)))
 
 			// app vpc cidr is optional for GCP
 			appVpcCidr, _ := cmd.Flags().GetString("app-vpc-cidr")

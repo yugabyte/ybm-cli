@@ -399,13 +399,19 @@ func (a *AuthApiClient) ExtractProviderFromClusterName(clusterId string) ([]stri
 	if ok := clusterData.Spec.HasClusterRegionInfo(); ok {
 		if len(clusterData.GetSpec().ClusterRegionInfo) > 0 {
 			sort.Slice(clusterData.GetSpec().ClusterRegionInfo, func(i, j int) bool {
-				return string(clusterData.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code) < string(clusterData.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code)
+				if clusterData.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code.IsSet() && clusterData.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code.IsSet() {
+					return string(*clusterData.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code.Get()) < string(*clusterData.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code.Get())
+				}
+				return false
 			})
 			for _, p := range clusterData.GetSpec().ClusterRegionInfo {
 				//Check uniqueness of Cloud (in case multi cloud with strange distribution, AWS, GCP,AWS)
-				if !slices.Contains(providers, string(p.PlacementInfo.CloudInfo.Code)) {
-					providers = append(providers, string(p.PlacementInfo.CloudInfo.Code))
+				if p.PlacementInfo.CloudInfo.Code.IsSet() {
+					if !slices.Contains(providers, string(*p.PlacementInfo.CloudInfo.Code.Get())) {
+						providers = append(providers, string(*p.PlacementInfo.CloudInfo.Code.Get()))
+					}
 				}
+
 			}
 		}
 	}

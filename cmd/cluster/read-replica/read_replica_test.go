@@ -17,6 +17,7 @@ package readreplica_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
@@ -26,6 +27,10 @@ var _ = Describe("Read Replica utils", func() {
 		It("should returh the correct default spec", func() {
 			vpcId := "12345698"
 			n := int32(1)
+			cloud, err := ybmclient.NewCloudEnumFromValue("AWS")
+			if err != nil {
+				logrus.Fatalf(err.Error())
+			}
 			numReplicas := ybmclient.NewNullableInt32(&n)
 			correctSpec := ybmclient.ReadReplicaSpec{
 				NodeInfo: ybmclient.ClusterNodeInfo{
@@ -33,7 +38,7 @@ var _ = Describe("Read Replica utils", func() {
 				},
 				PlacementInfo: ybmclient.PlacementInfo{
 					CloudInfo: ybmclient.CloudInfo{
-						Code:   "AWS",
+						Code:   *ybmclient.NewNullableCloudEnum(cloud),
 						Region: "us-west2",
 					},
 					VpcId:       *ybmclient.NewNullableString(&vpcId),

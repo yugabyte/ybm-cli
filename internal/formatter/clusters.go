@@ -156,7 +156,10 @@ func (c *ClusterContext) MarshalJSON() ([]byte, error) {
 	//Removing Azure Private endpoit from Json output
 	if len(c.c.Info.GetClusterEndpoints()) > 0 {
 		c.c.Info.ClusterEndpoints = slices.DeleteFunc(c.c.Info.ClusterEndpoints, func(ep ybmclient.Endpoint) bool {
-			if ep.AccessibilityType == ybmclient.ACCESSIBILITYTYPE_PRIVATE && c.c.Spec.CloudInfo.Code == ybmclient.CLOUDENUM_AZURE {
+			if !c.c.Spec.CloudInfo.Code.IsSet() {
+				return false
+			}
+			if ep.AccessibilityType == ybmclient.ACCESSIBILITYTYPE_PRIVATE && *c.c.Spec.CloudInfo.Code.Get() == ybmclient.CLOUDENUM_AZURE {
 				return true
 			}
 			return false
@@ -172,12 +175,17 @@ func (c *ClusterContext) Provider() string {
 	if ok := c.c.Spec.HasClusterRegionInfo(); ok {
 		if len(c.c.GetSpec().ClusterRegionInfo) > 0 {
 			sort.Slice(c.c.GetSpec().ClusterRegionInfo, func(i, j int) bool {
-				return string(c.c.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code) < string(c.c.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code)
+				if c.c.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code.IsSet() && c.c.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code.IsSet() {
+					return string(*c.c.GetSpec().ClusterRegionInfo[i].PlacementInfo.CloudInfo.Code.Get()) < string(*c.c.GetSpec().ClusterRegionInfo[j].PlacementInfo.CloudInfo.Code.Get())
+				}
+				return false
 			})
 			for _, p := range c.c.GetSpec().ClusterRegionInfo {
 				//Check uniqueness of Cloud (in case multi cloud with strange distribution, AWS, GCP,AWS)
-				if _, ok := providers[string(p.PlacementInfo.CloudInfo.Code)]; !ok {
-					providers[string(p.PlacementInfo.CloudInfo.Code)] = string(p.PlacementInfo.CloudInfo.Code)
+				if p.PlacementInfo.CloudInfo.Code.IsSet() {
+					if _, ok := providers[string(*p.PlacementInfo.CloudInfo.Code.Get())]; !ok {
+						providers[string(*p.PlacementInfo.CloudInfo.Code.Get())] = string(*p.PlacementInfo.CloudInfo.Code.Get())
+					}
 				}
 			}
 		}
@@ -186,7 +194,7 @@ func (c *ClusterContext) Provider() string {
 }
 
 func (c *ClusterContext) Tier() string {
-	if c.c.GetSpec().ClusterInfo.ClusterTier == ybmclient.CLUSTERTIER_FREE {
+	if *c.c.GetSpec().ClusterInfo.ClusterTier.Get() == ybmclient.CLUSTERTIER_FREE {
 		return "Sandbox"
 	}
 	return "Dedicated"
