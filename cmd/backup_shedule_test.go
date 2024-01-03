@@ -84,8 +84,8 @@ var _ = Describe("BackupSchedules", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-				expected := `Time Interval(days)   Days of the Week   Backup Start Time
-1                     NA                 NA` + "\n"
+				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)
+1                     NA                 NA                  8` + "\n"
 				Expect(o).Should(Equal(expected))
 
 				session.Kill()
@@ -122,9 +122,11 @@ var _ = Describe("BackupSchedules", func() {
 				o := string(session.Out.Contents()[:])
 
 				// no backup schedule must be returned if it is paused
-				expected := `Time Interval(days)   Days of the Week   Backup Start Time
-NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + "\n"
+				fmt.Println(o)
+				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)
+NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8` + "\n"
 				Expect(o).Should(Equal(expected))
+				fmt.Println(expected)
 
 				session.Kill()
 			})
