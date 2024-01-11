@@ -32,6 +32,7 @@ const (
 	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
 	INCREMENTAL_BACKUP  FeatureFlag = "INCREMENTAL_BACKUP"
+	ASYMMETRIC_GEO      FeatureFlag = "ASYMMETRIC_GEO"
 )
 
 func (f FeatureFlag) String() string {

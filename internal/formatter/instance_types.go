@@ -23,12 +23,12 @@ import (
 )
 
 const (
-	defaulInstanceTypeListing = "table {{.Cores}}\t{{.Memory}}\t{{.DiskSize}}\t{{.AZs}}\t{{.IsEnabled}}"
-	coresHeader               = "Number of Cores"
-	memoryHeader              = "Memory (MB)"
-	diskSizeHeader            = "Disk Size (GB)"
-	azsHeader                 = "Number of Availability Zones"
-	isEnabledHeader           = "Is Enabled"
+	defaultInstanceTypeListing = "table {{.Cores}}\t{{.Memory}}\t{{.DiskSize}}\t{{.AZs}}\t{{.IsEnabled}}"
+	coresHeader                = "Number of Cores"
+	memoryHeader               = "Memory (MB)"
+	diskSizeHeader             = "Disk Size (GB)"
+	azsHeader                  = "Number of Availability Zones"
+	isEnabledHeader            = "Is Enabled"
 )
 
 type InstanceTypeContext struct {
@@ -40,7 +40,7 @@ type InstanceTypeContext struct {
 func NewInstanceTypeFormat(source string) Format {
 	switch source {
 	case "table", "":
-		format := defaulInstanceTypeListing
+		format := defaultInstanceTypeListing
 		return Format(format)
 	default: // custom format or json or pretty
 		return Format(source)

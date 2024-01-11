@@ -297,15 +297,33 @@ func (c *clusterInfoRegionsContext) NumNode() string {
 }
 
 func (c *clusterInfoRegionsContext) NumCores() string {
-	return fmt.Sprintf("%d", c.clusterInfo.NodeInfo.NumCores)
+    numCores := c.clusterInfo.NodeInfo.NumCores
+    if c.clusterInfoRegion.NodeInfo.IsSet() {
+        if nc, ok := c.clusterInfoRegion.NodeInfo.Get().GetNumCoresOk(); ok {
+            numCores = *nc
+        }
+    }
+	return fmt.Sprintf("%d", numCores)
 }
 
 func (c *clusterInfoRegionsContext) MemoryGb() string {
-	return convertMbtoGb(c.clusterInfo.NodeInfo.MemoryMb)
+    memoryMb := c.clusterInfo.NodeInfo.MemoryMb
+    if c.clusterInfoRegion.NodeInfo.IsSet() {
+        if mem, ok := c.clusterInfoRegion.NodeInfo.Get().GetMemoryMbOk(); ok {
+            memoryMb = *mem
+        }
+    }
+	return convertMbtoGb(memoryMb)
 }
 
 func (c *clusterInfoRegionsContext) DiskSizeGb() string {
-	return fmt.Sprintf("%dGB", c.clusterInfo.NodeInfo.DiskSizeGb)
+    diskSizeGb := c.clusterInfo.NodeInfo.DiskSizeGb
+    if c.clusterInfoRegion.NodeInfo.IsSet() {
+        if ds, ok := c.clusterInfoRegion.NodeInfo.Get().GetDiskSizeGbOk(); ok {
+            diskSizeGb = *ds
+        }
+    }
+	return fmt.Sprintf("%dGB", diskSizeGb)
 }
 
 func (c *clusterInfoRegionsContext) Region() string {

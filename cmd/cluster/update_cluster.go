@@ -24,6 +24,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -36,6 +37,7 @@ var updateClusterCmd = &cobra.Command{
 	Long:  "Update a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 
+		asymmetricGeoEnabled := util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO)
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -62,9 +64,31 @@ var updateClusterCmd = &cobra.Command{
 		populateFlags(cmd, originalSpec, trackName, authApi)
 
 		regionInfoMapList := []map[string]string{}
-		if cmd.Flags().Changed("region-info") {
+		changedRegionInfo := cmd.Flags().Changed("region-info")
+        changedNodeInfo := cmd.Flags().Changed("node-config")
+
+        defaultNumCores := 0
+        defaultDiskSizeGb := 0
+        defaultDiskIops := 0
+        if changedNodeInfo {
+            nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
+            numCores, ok := nodeConfig["num-cores"]
+            if !asymmetricGeoEnabled && !ok {
+                logrus.Fatalln("Number of cores not specified in node config")
+            }
+            if asymmetricGeoEnabled && ok {
+                defaultNumCores = numCores
+            }
+            if diskSizeGb, ok := nodeConfig["disk-size-gb"]; ok {
+                defaultDiskSizeGb = diskSizeGb
+            }
+            if diskIops, ok := nodeConfig["disk-iops"]; ok {
+                defaultDiskIops = diskIops
+            }
+        }
+
+		if changedRegionInfo {
 			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
-			regionInfoList = strings.Split(regionInfoList[0], "|")
 			for _, regionInfoString := range regionInfoList {
 				regionInfoMap := map[string]string{}
 				for _, regionInfo := range strings.Split(regionInfoString, ",") {
@@ -87,6 +111,18 @@ var updateClusterCmd = &cobra.Command{
 						if len(strings.TrimSpace(val)) != 0 {
 							regionInfoMap["vpc"] = val
 						}
+					case "num-cores":
+						if asymmetricGeoEnabled && len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["num-cores"] = val
+						}
+					case "disk-size-gb":
+						if asymmetricGeoEnabled && len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["disk-size-gb"] = val
+						}
+					case "disk-iops":
+						if asymmetricGeoEnabled && len(strings.TrimSpace(val)) != 0 {
+							regionInfoMap["disk-iops"] = val
+						}
 					}
 				}
 
@@ -96,15 +132,17 @@ var updateClusterCmd = &cobra.Command{
 				if _, ok := regionInfoMap["num-nodes"]; !ok {
 					logrus.Fatalln("Number of nodes not specified in region info")
 				}
+				if _, ok := regionInfoMap["num-cores"]; asymmetricGeoEnabled && !ok && defaultNumCores > 0 {
+                    regionInfoMap["num-cores"] = strconv.Itoa(defaultNumCores)
+                }
+                if _, ok := regionInfoMap["disk-size-gb"]; asymmetricGeoEnabled && !ok && defaultDiskSizeGb > 0 {
+                    regionInfoMap["disk-size-gb"] = strconv.Itoa(defaultDiskSizeGb)
+                }
+                if _, ok := regionInfoMap["disk-iops"]; asymmetricGeoEnabled && !ok && defaultDiskIops > 0 {
+                    regionInfoMap["disk-iops"] = strconv.Itoa(defaultDiskIops)
+                }
 
 				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
-			}
-		}
-
-		if cmd.Flags().Changed("node-config") {
-			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-			if _, ok := nodeConfig["num-cores"]; !ok {
-				logrus.Fatal("Number of cores not specified in node config\n")
 			}
 		}
 
@@ -172,7 +210,12 @@ func init() {
 	updateClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If provided, num-cores is mandatory, while disk-size-gb and disk-iops are optional.")
-	updateClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If provided, region and num-nodes are mandatory, vpc is optional.`)
+	if util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO) {
+		updateClusterCmd.Flags().MarkDeprecated("node-config", "please use --region-info to specify num-cores, disk-size-gb, and disk-iops")
+		updateClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If specified, region and num-nodes are mandatory, while num-cores, disk-size-gb, disk-iops, and vpc are optional.`)
+	} else {
+		updateClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If provided, region and num-nodes are mandatory, vpc is optional.`)
+	}
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION.")
 	updateClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Production or Innovation or Preview.")
@@ -216,27 +259,29 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 		if diskSizeGb, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskSizeGbOk(); ok {
 			nodeConfig += "disk-size-gb=" + strconv.Itoa(int(*diskSizeGb))
 		}
-		if diskIops, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskIopsOk(); ok {
-			if diskIops != nil {
-				nodeConfig += "disk-iops=" + strconv.Itoa(int(*diskIops))
+		if diskIops, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskIopsOk(); ok && diskIops != nil {
+			if nodeConfig != "" {
+				nodeConfig += ","
 			}
+			nodeConfig += "disk-iops=" + strconv.Itoa(int(*diskIops))
 		}
 		if numCores, ok := originalSpec.ClusterInfo.NodeInfo.GetNumCoresOk(); ok {
-			nodeConfig += ",num-cores=" + strconv.Itoa(int(*numCores))
+			if nodeConfig != "" {
+				nodeConfig += ","
+			}
+			nodeConfig += "num-cores=" + strconv.Itoa(int(*numCores))
 		}
 		cmd.Flag("node-config").Value.Set(nodeConfig)
 		cmd.Flag("node-config").Changed = true
 
 	}
-	regionInfoList := ""
-	numRegions := len(originalSpec.ClusterRegionInfo)
+	regionInfoList := []string{}
 	if !cmd.Flags().Changed("region-info") {
-		for index, clusterRegionInfo := range originalSpec.ClusterRegionInfo {
+		for _, clusterRegionInfo := range originalSpec.ClusterRegionInfo {
 			regionInfo := ""
 			if region, ok := clusterRegionInfo.PlacementInfo.CloudInfo.GetRegionOk(); ok && region != nil {
 				regionInfo += "region=" + *region
 			}
-			//logrus.Errorln(clusterRegionInfo.PlacementInfo.GetNumNodes())
 			if numNodes, ok := clusterRegionInfo.PlacementInfo.GetNumNodesOk(); ok && numNodes != nil {
 				regionInfo += ",num-nodes=" + strconv.Itoa(int(*numNodes))
 			}
@@ -249,12 +294,23 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 				}
 				regionInfo += ",vpc=" + vpcName
 			}
-			regionInfoList += regionInfo
-			if index < numRegions-1 {
-				regionInfoList += "|"
+
+			if util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO) {
+				if nodeInfo, ok := clusterRegionInfo.GetNodeInfoOk(); ok {
+					if numCores, ok_ := nodeInfo.GetNumCoresOk(); ok_ {
+						regionInfo += ",num-cores=" + strconv.Itoa(int(*numCores))
+					}
+					if diskSizeGb, ok_ := nodeInfo.GetDiskSizeGbOk(); ok_ {
+						regionInfo += ",disk-size-gb=" + strconv.Itoa(int(*diskSizeGb))
+					}
+					if diskIops, ok_ := nodeInfo.GetDiskIopsOk(); ok_ && diskIops != nil {
+						regionInfo += ",disk-iops=" + strconv.Itoa(int(*diskIops))
+					}
+				}
 			}
+			regionInfoList = append(regionInfoList, regionInfo)
 		}
-		cmd.Flag("region-info").Value.Set(regionInfoList)
+		cmd.Flags().Set("region-info", strings.Join(regionInfoList, " "))
 		cmd.Flag("region-info").Changed = true
 
 	}

@@ -156,8 +156,11 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	var regionInfoProvided bool
 	var err error
 
+	asymmetricGeoEnabled := util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO)
+
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
+	regionNodeInfoMap := map[string]*ybmclient.OptionalClusterNodeInfo{}
 	for _, regionInfo := range regionInfoList {
 		numNodes, err := strconv.ParseInt(regionInfo["num-nodes"], 10, 32)
 		if err != nil {
@@ -191,6 +194,32 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		}
 		info.SetIsDefault(false)
 		clusterRegionInfo = append(clusterRegionInfo, info)
+
+		if asymmetricGeoEnabled {
+			regionNodeInfo := ybmclient.NewOptionalClusterNodeInfo(0, 0, 0)
+			if numCores, ok := regionInfo["num-cores"]; ok {
+				i, err := strconv.Atoi(numCores)
+				if err != nil {
+					logrus.Fatalf("Unable to parse num-cores integer in %s", region)
+				}
+				regionNodeInfo.SetNumCores(int32(i))
+			}
+			if diskSizeGb, ok := regionInfo["disk-size-gb"]; ok {
+				i, err := strconv.Atoi(diskSizeGb)
+				if err != nil {
+					logrus.Fatalf("Unable to parse disk-size-gb integer in %s", region)
+				}
+				regionNodeInfo.SetDiskSizeGb(int32(i))
+			}
+			if diskIops, ok := regionInfo["disk-iops"]; ok {
+				i, err := strconv.Atoi(diskIops)
+				if err != nil {
+					logrus.Fatalf("Unable to parse disk-iops integer in %s", region)
+				}
+				regionNodeInfo.SetDiskIops(int32(i))
+			}
+			regionNodeInfoMap[region] = regionNodeInfo
+		}
 	}
 
 	// This is to populate region in top level cloud info
@@ -271,51 +300,112 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		}
 	}
 	clusterInfo.SetIsProduction(isProduction)
-	clusterInfo.SetNodeInfo(*ybmclient.NewClusterNodeInfoWithDefaults())
-
-	if cmd.Flags().Changed("node-config") {
-		nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-		numCores := nodeConfig["num-cores"]
-
-		clusterInfo.NodeInfo.SetNumCores(int32(numCores))
-
-		if diskSize, ok := nodeConfig["disk-size-gb"]; ok {
-			diskSizeGb = int32(diskSize)
-		}
-
-		if diskIopsInt, ok := nodeConfig["disk-iops"]; ok {
-			diskIops = int32(diskIopsInt)
-		}
-
-	}
-
-	cloud := string(cloudInfo.GetCode())
-	region = cloudInfo.GetRegion()
-	tier := string(clusterInfo.GetClusterTier())
-	numCores := clusterInfo.NodeInfo.GetNumCores()
-
-	memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, numCores)
-	if err != nil {
-		return nil, err
-	}
-	clusterInfo.NodeInfo.SetMemoryMb(memoryMb)
-
-	// Computing the default disk size if it is not provided
-	if diskSizeGb == 0 {
-		diskSizeGb, err = a.GetFromInstanceType("disk", cloud, tier, region, numCores)
-		if err != nil {
-			return nil, err
-		}
-	}
-	clusterInfo.NodeInfo.SetDiskSizeGb(diskSizeGb)
-
-	if diskIops > 0 {
-		clusterInfo.NodeInfo.SetDiskIops(diskIops)
-	}
 
 	if cmd.Flags().Changed("cluster-type") {
 		clusterType, _ := cmd.Flags().GetString("cluster-type")
 		clusterInfo.SetClusterType(ybmclient.ClusterType(clusterType))
+	}
+
+	cloud := string(cloudInfo.GetCode())
+	tier := string(clusterInfo.GetClusterTier())
+
+	if asymmetricGeoEnabled && regionInfoProvided {
+		geoPartitioned := clusterInfo.GetClusterType() == "GEO_PARTITIONED"
+		clusterNodeInfoWithDefaults := *ybmclient.NewClusterNodeInfoWithDefaults()
+		// Create slice of desired regions.
+		regions := make([]string, 0, len(regionNodeInfoMap))
+		for k, _ := range regionNodeInfoMap {
+			regions = append(regions, k)
+		}
+		// Grab available node configurations by region.
+		regionNodeConfigsMap := a.GetSupportedNodeConfigurationsV2(cloud, tier, regions, geoPartitioned)
+		// Create slice of region keys of node configurations response.
+		nodeConfigurationsRegions := make([]string, 0, len(regionNodeConfigsMap))
+		for k, _ := range regionNodeConfigsMap {
+			nodeConfigurationsRegions = append(nodeConfigurationsRegions, k)
+		}
+		// For each desired region, grab appropriate node configuration and set node info.
+		for _, r := range regions {
+			nodeConfigs := []ybmclient.NodeConfigurationResponseItem{}
+			if slices.Contains(nodeConfigurationsRegions, r) {
+				nodeConfigs = regionNodeConfigsMap[r]
+			} else {
+				// Requested region not found in node configurations map.
+				// In this case, the map key is a string of all (comma-separated) regions,
+				// and the value is a list of node configurations that are available in all regions.
+				// So, we just use look through the first map value to find a node configuration to use.
+				nodeConfigs = regionNodeConfigsMap[nodeConfigurationsRegions[0]]
+			}
+			requestedNodeInfo := regionNodeInfoMap[r]
+			requestedNumCores := requestedNodeInfo.GetNumCores()
+			userProvidedNumCores := requestedNumCores != 0
+
+			var nodeConfig *ybmclient.NodeConfigurationResponseItem = nil
+			if !userProvidedNumCores {
+				requestedNumCores = clusterNodeInfoWithDefaults.GetNumCores()
+			}
+			for i, nc := range nodeConfigs {
+				if nc.GetNumCores() == requestedNumCores {
+					nodeConfig = &nodeConfigs[i]
+					break
+				}
+			}
+			if nodeConfig == nil {
+				logrus.Fatalf("No instance type found with %d cores in region %s\n", requestedNumCores, r)
+			}
+			regionNodeInfoMap[r].SetNumCores(nodeConfig.GetNumCores())
+			regionNodeInfoMap[r].SetMemoryMb(nodeConfig.GetMemoryMb())
+			if requestedNodeInfo.GetDiskSizeGb() == 0 {
+				// User did not specify a disk size. Default to included disk size.
+				regionNodeInfoMap[r].SetDiskSizeGb(nodeConfig.GetIncludedDiskSizeGb())
+			}
+		}
+		// Set per-region node info and cluster node info.
+		var currRegionNodeInfo *ybmclient.OptionalClusterNodeInfo = nil
+		for i, regionInfo := range clusterRegionInfo {
+			r := regionInfo.GetPlacementInfo().CloudInfo.Region
+			clusterRegionInfo[i].SetNodeInfo(*regionNodeInfoMap[r])
+			logrus.Infof("region=%s, node-info=%v\n", r, clusterRegionInfo[i].GetNodeInfo())
+			if currRegionNodeInfo != nil && !geoPartitioned && *currRegionNodeInfo != clusterRegionInfo[i].GetNodeInfo() {
+				// Asymmetric node configurations are only allowed for geo-partitioned clusters.
+				logrus.Fatalln("Synchronous cluster regions must have identical node configurations")
+			}
+			currRegionNodeInfo = (&clusterRegionInfo[i]).NodeInfo.Get()
+		}
+		clusterInfo.SetNodeInfo(ToClusterNodeInfo(regionNodeInfoMap[regions[0]]))
+	} else {
+		clusterInfo.SetNodeInfo(*ybmclient.NewClusterNodeInfoWithDefaults())
+		if cmd.Flags().Changed("node-config") {
+			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
+			numCores := nodeConfig["num-cores"]
+			clusterInfo.NodeInfo.SetNumCores(int32(numCores))
+			if diskSize, ok := nodeConfig["disk-size-gb"]; ok {
+				diskSizeGb = int32(diskSize)
+			}
+			if diskIopsInt, ok := nodeConfig["disk-iops"]; ok {
+				diskIops = int32(diskIopsInt)
+			}
+		}
+		region = cloudInfo.GetRegion()
+		numCores := clusterInfo.NodeInfo.GetNumCores()
+		memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, numCores)
+		if err != nil {
+			return nil, err
+		}
+		clusterInfo.NodeInfo.SetMemoryMb(memoryMb)
+
+		// Computing the default disk size if it is not provided
+		if diskSizeGb == 0 {
+			diskSizeGb, err = a.GetFromInstanceType("disk", cloud, tier, region, numCores)
+			if err != nil {
+				return nil, err
+			}
+		}
+		clusterInfo.NodeInfo.SetDiskSizeGb(diskSizeGb)
+
+		if diskIops > 0 {
+			clusterInfo.NodeInfo.SetDiskIops(diskIops)
+		}
 	}
 
 	if cmd.Flags().Changed("default-region") {
@@ -356,6 +446,17 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	}
 
 	return clusterSpec, nil
+}
+
+func ToClusterNodeInfo(opt *ybmclient.OptionalClusterNodeInfo) ybmclient.ClusterNodeInfo {
+    clusterNodeInfo := *ybmclient.NewClusterNodeInfoWithDefaults()
+    clusterNodeInfo.SetNumCores(opt.GetNumCores())
+    clusterNodeInfo.SetMemoryMb(opt.GetMemoryMb())
+    clusterNodeInfo.SetDiskSizeGb(opt.GetDiskSizeGb())
+    if iops, _ := opt.GetDiskIopsOk(); iops != nil {
+        clusterNodeInfo.SetDiskIops(*iops)
+    }
+    return clusterNodeInfo
 }
 
 func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID string) {
@@ -809,6 +910,25 @@ func (a *AuthApiClient) GetSupportedNodeConfigurations(cloud string, tier string
 	return a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions([]string{region})
 }
 
+func (a *AuthApiClient) GetSupportedNodeConfigurationsV2(cloud string, tier string, regions []string, geoPartitioned bool) map[string][]ybmclient.NodeConfigurationResponseItem {
+	// For single-region clusters, set isMultiRegion = false.
+	// For azure clusters, set isMultiRegion = false.
+	// For geo clusters if FF is enabled, set isMultiRegion = false
+	// For all other clusters, set isMultiRegion = true
+	isMultiRegion := true
+	asymmetricGeoEnabled := util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO)
+	if len(regions) == 1 || cloud == "AZURE" || (geoPartitioned && asymmetricGeoEnabled) {
+		isMultiRegion = false
+	}
+	instanceResp, resp, err := a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions(regions).IsMultiRegion(isMultiRegion).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		logrus.Fatalln(err)
+	}
+	return instanceResp.GetData()
+}
+
 func (a *AuthApiClient) GetFromInstanceType(resource string, cloud string, tier string, region string, numCores int32) (int32, error) {
 	instanceResp, resp, err := a.GetSupportedNodeConfigurations(cloud, tier, region).Execute()
 	if err != nil {
@@ -821,9 +941,7 @@ func (a *AuthApiClient) GetFromInstanceType(resource string, cloud string, tier 
 	if !ok || len(nodeConfigList) == 0 {
 		return 0, fmt.Errorf("no instances configured for the given region")
 	}
-
 	return getFromNodeConfig(resource, numCores, nodeConfigList)
-
 }
 
 func (a *AuthApiClient) CreateCdcSink() ybmclient.ApiCreateCdcSinkRequest {
