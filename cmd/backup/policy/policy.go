@@ -80,7 +80,7 @@ var listPolicyCmd = &cobra.Command{
 			Format: formatter.NewBackupPolicyFormat(viper.GetString("output")),
 		}
 		if len(resp.GetData()) < 1 {
-			logrus.Println("No backup policies found for the given cluster")
+			logrus.Fatalln("No backup policies found for the given cluster")
 			return
 		}
 		formatter.BackupPolicyListWrite(policyCtx, resp.GetData())
@@ -123,8 +123,18 @@ var enablePolicyCmd = &cobra.Command{
 		scheduleSpec.SetState(ybmclient.SCHEDULESTATEENUM_ACTIVE)
 		info := resp.GetData()[0].GetInfo()
 		scheduleId := info.GetId()
-		retentionPeriodInDays := int32(info.GetTaskParams()["retention_period_in_days"].(float64))
-		description := info.GetTaskParams()["description"].(string)
+		retentionPeriodInDaysResp, retentionFound := info.GetTaskParams()["retention_period_in_days"]
+		if !retentionFound || retentionPeriodInDaysResp == nil {
+			logrus.Fatalln("Unable to fetch retention period in days for the backup schedule")
+			return
+		}
+		retentionPeriodInDays := int32(retentionPeriodInDaysResp.(float64))
+		descriptionResp, descriptionFound := info.GetTaskParams()["description"]
+		if !descriptionFound || descriptionResp == nil {
+			logrus.Fatalln("Unable to fetch description for the backup schedule")
+			return
+		}
+		description := descriptionResp.(string)
 		backupSpec := ybmclient.NewBackupSpec(clusterId)
 		backupSpec.SetRetentionPeriodInDays(retentionPeriodInDays)
 		backupSpec.SetDescription(description)
@@ -177,8 +187,18 @@ var disablePolicyCmd = &cobra.Command{
 		scheduleSpec.SetState(ybmclient.SCHEDULESTATEENUM_PAUSED)
 		info := resp.GetData()[0].GetInfo()
 		scheduleId := info.GetId()
-		retentionPeriodInDays := int32(info.GetTaskParams()["retention_period_in_days"].(float64))
-		description := info.GetTaskParams()["description"].(string)
+		retentionPeriodInDaysResp, retentionFound := info.GetTaskParams()["retention_period_in_days"]
+		if !retentionFound || retentionPeriodInDaysResp == nil {
+			logrus.Fatalln("Unable to fetch retention period in days for the backup schedule")
+			return
+		}
+		retentionPeriodInDays := int32(retentionPeriodInDaysResp.(float64))
+		descriptionResp, descriptionFound := info.GetTaskParams()["description"]
+		if !descriptionFound || descriptionResp == nil {
+			logrus.Fatalln("Unable to fetch description for the backup schedule")
+			return
+		}
+		description := descriptionResp.(string)
 		backupSpec := ybmclient.NewBackupSpec(clusterId)
 		backupSpec.SetRetentionPeriodInDays(retentionPeriodInDays)
 		backupSpec.SetDescription(description)
@@ -212,6 +232,10 @@ var updatePolicyCmd = &cobra.Command{
 		}
 
 		retentionPeriodInDays, _ := cmd.Flags().GetInt32("retention-period-in-days")
+		if retentionPeriodInDays < 1 {
+			logrus.Println("Retention period should be greater than or equal to 1 day")
+			return
+		}
 
 		listBackupPoliciesRequest := authApi.ListBackupPolicies(clusterId, false /* fetchOnlyActive */)
 		resp, r, err := listBackupPoliciesRequest.Execute()
@@ -227,6 +251,10 @@ var updatePolicyCmd = &cobra.Command{
 		scheduleSpec := resp.GetData()[0].GetSpec()
 		if cmd.Flags().Changed("full-backup-frequency-in-days") {
 			frequencyInDays, _ := cmd.Flags().GetInt32("full-backup-frequency-in-days")
+			if frequencyInDays < 1 {
+				logrus.Println("Time interval for scheduling backup should be greater than or equal to 1 day")
+				return
+			}
 			scheduleSpec.SetTimeIntervalInDays(frequencyInDays)
 			scheduleSpec.UnsetCronExpression()
 		} else {
