@@ -67,7 +67,7 @@ var listPolicyCmd = &cobra.Command{
 			logrus.Fatal(err)
 		}
 
-		listBackupPoliciesRequest := authApi.ListBackupPolicies(clusterID, true /* fetchOnlyActive */)
+		listBackupPoliciesRequest := authApi.ListBackupPolicies(clusterID, false /* fetchOnlyActive */)
 
 		resp, r, err := listBackupPoliciesRequest.Execute()
 		if err != nil {
@@ -81,7 +81,6 @@ var listPolicyCmd = &cobra.Command{
 		}
 		if len(resp.GetData()) < 1 {
 			logrus.Fatalln("No backup policies found for the given cluster")
-			return
 		}
 		formatter.BackupPolicyListWrite(policyCtx, resp.GetData())
 	},
@@ -112,13 +111,11 @@ var enablePolicyCmd = &cobra.Command{
 		}
 
 		if len(resp.GetData()) < 1 {
-			logrus.Println("No backup policies found for the given cluster")
-			return
+			logrus.Fatalln("No backup policies found for the given cluster")
 		}
 		scheduleSpec := resp.GetData()[0].GetSpec()
 		if scheduleSpec.GetState() == ybmclient.SCHEDULESTATEENUM_ACTIVE {
-			fmt.Printf("The backup policy is already enabled for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-			return
+			logrus.Fatalf("The backup policy is already enabled for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 		}
 		scheduleSpec.SetState(ybmclient.SCHEDULESTATEENUM_ACTIVE)
 		info := resp.GetData()[0].GetInfo()
@@ -126,13 +123,11 @@ var enablePolicyCmd = &cobra.Command{
 		retentionPeriodInDaysResp, retentionFound := info.GetTaskParams()["retention_period_in_days"]
 		if !retentionFound || retentionPeriodInDaysResp == nil {
 			logrus.Fatalln("Unable to fetch retention period in days for the backup schedule")
-			return
 		}
 		retentionPeriodInDays := int32(retentionPeriodInDaysResp.(float64))
 		descriptionResp, descriptionFound := info.GetTaskParams()["description"]
 		if !descriptionFound || descriptionResp == nil {
 			logrus.Fatalln("Unable to fetch description for the backup schedule")
-			return
 		}
 		description := descriptionResp.(string)
 		backupSpec := ybmclient.NewBackupSpec(clusterId)
@@ -176,13 +171,11 @@ var disablePolicyCmd = &cobra.Command{
 		}
 
 		if len(resp.GetData()) < 1 {
-			logrus.Println("No backup policies found for the given cluster")
-			return
+			logrus.Fatalln("No backup policies found for the given cluster")
 		}
 		scheduleSpec := resp.GetData()[0].GetSpec()
 		if scheduleSpec.GetState() == ybmclient.SCHEDULESTATEENUM_PAUSED {
-			fmt.Printf("The backup policy is already disabled for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-			return
+			logrus.Fatalf("The backup policy is already disabled for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 		}
 		scheduleSpec.SetState(ybmclient.SCHEDULESTATEENUM_PAUSED)
 		info := resp.GetData()[0].GetInfo()
@@ -190,7 +183,6 @@ var disablePolicyCmd = &cobra.Command{
 		retentionPeriodInDaysResp, retentionFound := info.GetTaskParams()["retention_period_in_days"]
 		if !retentionFound || retentionPeriodInDaysResp == nil {
 			logrus.Fatalln("Unable to fetch retention period in days for the backup schedule")
-			return
 		}
 		retentionPeriodInDays := int32(retentionPeriodInDaysResp.(float64))
 		descriptionResp, descriptionFound := info.GetTaskParams()["description"]
@@ -233,8 +225,7 @@ var updatePolicyCmd = &cobra.Command{
 
 		retentionPeriodInDays, _ := cmd.Flags().GetInt32("retention-period-in-days")
 		if retentionPeriodInDays < 1 {
-			logrus.Println("Retention period should be greater than or equal to 1 day")
-			return
+			logrus.Fatalln("Retention period should be greater than or equal to 1 day")
 		}
 
 		listBackupPoliciesRequest := authApi.ListBackupPolicies(clusterId, false /* fetchOnlyActive */)
@@ -245,27 +236,24 @@ var updatePolicyCmd = &cobra.Command{
 		}
 
 		if len(resp.GetData()) < 1 {
-			logrus.Println("No backup policies found for the given cluster")
-			return
+			logrus.Fatalln("No backup policies found for the given cluster")
 		}
 		scheduleSpec := resp.GetData()[0].GetSpec()
 		if cmd.Flags().Changed("full-backup-frequency-in-days") {
 			frequencyInDays, _ := cmd.Flags().GetInt32("full-backup-frequency-in-days")
 			if frequencyInDays < 1 {
-				logrus.Println("Time interval for scheduling backup should be greater than or equal to 1 day")
-				return
+				logrus.Fatalln("Time interval for scheduling backup should be greater than or equal to 1 day")
 			}
 			scheduleSpec.SetTimeIntervalInDays(frequencyInDays)
 			scheduleSpec.UnsetCronExpression()
 		} else {
 			daysOfWeek, _ := cmd.Flags().GetString("full-backup-schedule-days-of-week")
 			if !isDaysOfWeekValid(daysOfWeek) {
-				logrus.Println("The days of week specified is incorrect. Please ensure that it is a comma separated list of the first two letters to days of the week.")
+				logrus.Fatalln("The days of week specified is incorrect. Please ensure that it is a comma separated list of the first two letters to days of the week.")
 			}
 			backupTime, _ := cmd.Flags().GetString("full-backup-schedule-time")
 			if !isTimeFormatValid(backupTime) {
-				logrus.Println("The full backup schedule time is invalid. Please ensure that it in the 24 Hr HH:MM format.")
-				return
+				logrus.Fatalln("The full backup schedule time is invalid. Please ensure that it in the 24 Hr HH:MM format.")
 			}
 			backupTimeUTC := convertLocalTimeToUTC(backupTime)
 			cronExpression := generateCronExpression(daysOfWeek, backupTimeUTC)

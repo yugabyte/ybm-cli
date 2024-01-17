@@ -34,15 +34,14 @@ import (
 var _ = Describe("BackupSchedules", func() {
 
 	var (
-		server                            *ghttp.Server
-		statusCode                        int
-		args                              []string
-		responseAccount                   openapi.AccountListResponse
-		responseProject                   openapi.AccountListResponse
-		responseListBackupSchedules       openapi.ScheduleListResponse
-		responseListPausedBackupSchedules openapi.ScheduleListResponse
-		responseListCronBackupSchedules   openapi.ScheduleListResponse
-		responseListClusters              openapi.ClusterListResponse
+		server                          *ghttp.Server
+		statusCode                      int
+		args                            []string
+		responseAccount                 openapi.AccountListResponse
+		responseProject                 openapi.AccountListResponse
+		responseListBackupSchedules     openapi.ScheduleListResponse
+		responseListCronBackupSchedules openapi.ScheduleListResponse
+		responseListClusters            openapi.ClusterListResponse
 	)
 
 	BeforeEach(func() {
@@ -72,7 +71,7 @@ var _ = Describe("BackupSchedules", func() {
 			)
 		})
 		Context("with a valid Api token and default output table", func() {
-			It("should return list of backup schedules", func() {
+			It("should return list of backup schedules with a paused schedule", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backup-schedules"),
@@ -84,31 +83,13 @@ var _ = Describe("BackupSchedules", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)
-1                     NA                 NA                  8` + "\n"
+				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)   State
+1                     NA                 NA                  8                        PAUSED` + "\n"
 				Expect(o).Should(Equal(expected))
 
 				session.Kill()
 			})
-			It("should not return list of backup schedules if policy is disabled", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backup-schedules"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPausedBackupSchedules),
-					),
-				)
-				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-				Expect(err).NotTo(HaveOccurred())
-				session.Wait(2)
-				o := string(session.Out.Contents()[:])
-				// no backup schedule must be returned if it is paused
-				expected := ``
-				Expect(o).Should(Equal(expected))
-
-				session.Kill()
-			})
-			It("should not return list of backup schedules if policy is disabled", func() {
+			It("should return backup schedules with cron expression with an active schedule", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backup-schedules"),
@@ -121,10 +102,9 @@ var _ = Describe("BackupSchedules", func() {
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
 
-				// no backup schedule must be returned if it is paused
 				fmt.Println(o)
-				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)
-NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8` + "\n"
+				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)   State
+NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
 				Expect(o).Should(Equal(expected))
 				fmt.Println(expected)
 

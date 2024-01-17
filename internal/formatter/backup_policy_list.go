@@ -27,11 +27,12 @@ import (
 )
 
 const (
-	defaultBackupPolicyListing = "table {{.TimeInterval}}\t{{.DaysOfTheWeek}}\t{{.BackupStartTime}}\t{{.RetentionPeriod}}"
+	defaultBackupPolicyListing = "table {{.TimeInterval}}\t{{.DaysOfTheWeek}}\t{{.BackupStartTime}}\t{{.RetentionPeriod}}\t{{.State}}"
 	timeIntervalHeader         = "Time Interval(days)"
 	daysOfTheWeekHeader        = "Days of the Week"
 	backupStartTimeHeader      = "Backup Start Time"
 	retentionPeriodInDays      = "Retention Period(days)"
+	state                      = "State"
 )
 
 type BackupPolicyContext struct {
@@ -73,6 +74,7 @@ func NewBackupPolicyContext() *BackupPolicyContext {
 		"DaysOfTheWeek":   daysOfTheWeekHeader,
 		"BackupStartTime": backupStartTimeHeader,
 		"RetentionPeriod": retentionPeriodInDays,
+		"State":           state,
 	}
 	return &backupPolicyCtx
 }
@@ -84,6 +86,11 @@ func (c *BackupPolicyContext) TimeInterval() string {
 		return fmt.Sprintf("%d", timeInterval)
 	}
 	return "NA"
+}
+
+func (c *BackupPolicyContext) State() string {
+	state := c.c.Spec.GetState()
+	return fmt.Sprintf("%v", state)
 }
 
 func (c *BackupPolicyContext) RetentionPeriod() string {
