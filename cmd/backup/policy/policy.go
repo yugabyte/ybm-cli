@@ -243,6 +243,8 @@ var updatePolicyCmd = &cobra.Command{
 					logrus.Fatalln("Time interval for scheduling incremental backup cannot be negative or zero")
 				}
 				backupScheduleSpec.SetIncrementalIntervalInMinutes(incrementalBackupFrequencyInMinutes)
+			} else {
+				backupScheduleSpec.UnsetIncrementalIntervalInMinutes()
 			}
 		}
 
