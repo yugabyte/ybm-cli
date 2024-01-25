@@ -27,18 +27,19 @@ import (
 )
 
 const (
-	defaultBackupPolicyListing = "table {{.TimeInterval}}\t{{.DaysOfTheWeek}}\t{{.BackupStartTime}}\t{{.RetentionPeriod}}\t{{.State}}"
-	timeIntervalHeader         = "Time Interval(days)"
-	daysOfTheWeekHeader        = "Days of the Week"
-	backupStartTimeHeader      = "Backup Start Time"
-	retentionPeriodInDays      = "Retention Period(days)"
-	state                      = "State"
+	defaultBackupPolicyListing    = "table {{.TimeInterval}}\t{{.IncrementalTimeInterval}}\t{{.DaysOfTheWeek}}\t{{.BackupStartTime}}\t{{.RetentionPeriod}}\t{{.State}}"
+	timeIntervalHeader            = "Time Interval(days)"
+	incrementalTimeIntervalHeader = "Incremental Time Interval(minutes)"
+	daysOfTheWeekHeader           = "Days of the Week"
+	backupStartTimeHeader         = "Backup Start Time"
+	retentionPeriodInDays         = "Retention Period(days)"
+	state                         = "State"
 )
 
 type BackupPolicyContext struct {
 	HeaderContext
 	Context
-	c ybmclient.BackupScheduleData
+	c ybmclient.BackupScheduleDataV2
 }
 
 func NewBackupPolicyFormat(source string) Format {
@@ -52,7 +53,7 @@ func NewBackupPolicyFormat(source string) Format {
 }
 
 // BackupPolicyListWrite renders the context for a list of backup policies
-func BackupPolicyListWrite(ctx Context, backupPolicies []ybmclient.BackupScheduleData) error {
+func BackupPolicyListWrite(ctx Context, backupPolicies []ybmclient.BackupScheduleDataV2) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, backupPolicy := range backupPolicies {
 			err := format(&BackupPolicyContext{c: backupPolicy})
@@ -70,11 +71,12 @@ func BackupPolicyListWrite(ctx Context, backupPolicies []ybmclient.BackupSchedul
 func NewBackupPolicyContext() *BackupPolicyContext {
 	backupPolicyCtx := BackupPolicyContext{}
 	backupPolicyCtx.Header = SubHeaderContext{
-		"TimeInterval":    timeIntervalHeader,
-		"DaysOfTheWeek":   daysOfTheWeekHeader,
-		"BackupStartTime": backupStartTimeHeader,
-		"RetentionPeriod": retentionPeriodInDays,
-		"State":           state,
+		"TimeInterval":            timeIntervalHeader,
+		"IncrementalTimeInterval": incrementalTimeIntervalHeader,
+		"DaysOfTheWeek":           daysOfTheWeekHeader,
+		"BackupStartTime":         backupStartTimeHeader,
+		"RetentionPeriod":         retentionPeriodInDays,
+		"State":                   state,
 	}
 	return &backupPolicyCtx
 }
@@ -88,13 +90,21 @@ func (c *BackupPolicyContext) TimeInterval() string {
 	return "NA"
 }
 
+func (c *BackupPolicyContext) IncrementalTimeInterval() string {
+	incrementalTimeInterval := c.c.Spec.GetIncrementalIntervalInMinutes()
+	if incrementalTimeInterval != 0 {
+		return fmt.Sprintf("%d", incrementalTimeInterval)
+	}
+	return "NA"
+}
+
 func (c *BackupPolicyContext) State() string {
 	state := c.c.Spec.GetState()
 	return fmt.Sprintf("%v", state)
 }
 
 func (c *BackupPolicyContext) RetentionPeriod() string {
-	retentionPeriodInDays := int32(c.c.Info.GetTaskParams()["retention_period_in_days"].(float64))
+	retentionPeriodInDays := int32(c.c.Spec.GetRetentionPeriodInDays())
 	return fmt.Sprintf("%d", retentionPeriodInDays)
 }
 
