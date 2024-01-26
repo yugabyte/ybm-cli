@@ -2,20 +2,23 @@
     "data": [
       {
         "spec": {
-          "description": "Default backup schedule for fabulous-bobolink",
           "time_interval_in_days": 1,
           "cron_expression": null,
-          "retention_period_in_days": 8,
-          "incremental_interval_in_minutes": 60,
           "state": "PAUSED"
         },
         "info": {
           "id": "c55f06da-b6ea-44c6-a37c-b8a76d6922e4",
-          "schedule_type": "USER_DEFINED",
+          "task_type": "CREATE_BACKUP",
+          "task_params": {
+            "cluster_id": "5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8",
+            "retention_period_in_days": 8,
+            "description": "Default backup schedule for polite-haddock"
+          },
+          "entity_type": "CLUSTER",
+          "entity_id": "5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8",
+          "schedule_type": "SYSTEM_DEFAULT",
           "last_schedule_time": null,
-          "next_schedule_time": "2024-01-25T23:16Z",
-          "last_incremental_schedule_time": null,
-          "next_incremental_schedule_time": null
+          "next_schedule_time": null
         }
       }
     ]

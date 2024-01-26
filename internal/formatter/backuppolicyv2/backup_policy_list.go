@@ -28,7 +28,7 @@ import (
 const (
 	defaultBackupPolicyListing    = "table {{.TimeInterval}}\t{{.IncrementalTimeInterval}}\t{{.DaysOfTheWeek}}\t{{.BackupStartTime}}\t{{.RetentionPeriod}}\t{{.State}}"
 	timeIntervalHeader            = "Time Interval(days)"
-	incrementalTimeIntervalHeader = "Incremental Time Interval(minutes)"
+	incrementalTimeIntervalHeader = "Incr. Interval(mins)"
 	daysOfTheWeekHeader           = "Days of the Week"
 	backupStartTimeHeader         = "Backup Start Time"
 	retentionPeriodInDays         = "Retention Period(days)"
