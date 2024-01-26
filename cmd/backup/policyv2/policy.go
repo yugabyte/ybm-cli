@@ -200,6 +200,7 @@ var updatePolicyCmd = &cobra.Command{
 		scheduleId := info.GetId()
 		backupScheduleSpec := resp.GetData()[0].GetSpec()
 
+		backupScheduleSpec.SetRetentionPeriodInDays(retentionPeriodInDays)
 		if cmd.Flags().Changed("full-backup-frequency-in-days") {
 			frequencyInDays, _ := cmd.Flags().GetInt32("full-backup-frequency-in-days")
 			if frequencyInDays < 1 {

@@ -85,6 +85,7 @@ var _ = Describe("BackupSchedules", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListBackupSchedules),
 					),
 				)
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -103,6 +104,7 @@ var _ = Describe("BackupSchedules", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCronBackupSchedules),
 					),
 				)
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
