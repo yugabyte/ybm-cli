@@ -78,6 +78,7 @@ var _ = Describe("BackupSchedules", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListBackupSchedules),
 					),
 				)
+				os.Setenv("YBM_FF_INCREMENTAL_BACKUP", "true")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -86,7 +87,7 @@ var _ = Describe("BackupSchedules", func() {
 				expected := `Time Interval(days)   Incremental Time Interval(minutes)   Days of the Week   Backup Start Time   Retention Period(days)   State
 1                     60                                   NA                 NA                  8                        PAUSED` + "\n"
 				Expect(o).Should(Equal(expected))
-
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 				session.Kill()
 			})
 			It("should return backup schedules with cron expression with an active schedule", func() {
@@ -96,6 +97,7 @@ var _ = Describe("BackupSchedules", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCronBackupSchedules),
 					),
 				)
+				os.Setenv("YBM_FF_INCREMENTAL_BACKUP", "true")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -106,7 +108,7 @@ var _ = Describe("BackupSchedules", func() {
 				expected := `Time Interval(days)   Incremental Time Interval(minutes)   Days of the Week   Backup Start Time   Retention Period(days)   State
 NA                    NA                                   Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
 				Expect(o).Should(Equal(expected))
-				fmt.Println(expected)
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 
 				session.Kill()
 			})

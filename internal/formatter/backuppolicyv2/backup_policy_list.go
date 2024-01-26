@@ -13,16 +13,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package formatter
+package backuppolicyv2
 
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
 
-	cron "github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
+	"github.com/yugabyte/ybm-cli/internal/formatter/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -37,24 +36,24 @@ const (
 )
 
 type BackupPolicyContext struct {
-	HeaderContext
-	Context
+	formatter.HeaderContext
+	formatter.Context
 	c ybmclient.BackupScheduleDataV2
 }
 
-func NewBackupPolicyFormat(source string) Format {
+func NewBackupPolicyFormat(source string) formatter.Format {
 	switch source {
 	case "table", "":
 		format := defaultBackupPolicyListing
-		return Format(format)
+		return formatter.Format(format)
 	default: // custom format or json or pretty
-		return Format(source)
+		return formatter.Format(source)
 	}
 }
 
 // BackupPolicyListWrite renders the context for a list of backup policies
-func BackupPolicyListWrite(ctx Context, backupPolicies []ybmclient.BackupScheduleDataV2) error {
-	render := func(format func(subContext SubContext) error) error {
+func BackupPolicyListWrite(ctx formatter.Context, backupPolicies []ybmclient.BackupScheduleDataV2) error {
+	render := func(format func(subContext formatter.SubContext) error) error {
 		for _, backupPolicy := range backupPolicies {
 			err := format(&BackupPolicyContext{c: backupPolicy})
 			if err != nil {
@@ -70,7 +69,7 @@ func BackupPolicyListWrite(ctx Context, backupPolicies []ybmclient.BackupSchedul
 // NewBackupPolicyContext creates a new context for rendering backup policy
 func NewBackupPolicyContext() *BackupPolicyContext {
 	backupPolicyCtx := BackupPolicyContext{}
-	backupPolicyCtx.Header = SubHeaderContext{
+	backupPolicyCtx.Header = formatter.SubHeaderContext{
 		"TimeInterval":            timeIntervalHeader,
 		"IncrementalTimeInterval": incrementalTimeIntervalHeader,
 		"DaysOfTheWeek":           daysOfTheWeekHeader,
@@ -110,71 +109,18 @@ func (c *BackupPolicyContext) RetentionPeriod() string {
 
 func (c *BackupPolicyContext) DaysOfTheWeek() string {
 	if cronExpression := c.c.Spec.GetCronExpression(); cronExpression != "" {
-		return getDaysOfTheWeek(cronExpression)
+		return util.GetDaysOfTheWeek(cronExpression)
 	}
 	return "NA"
 }
 
 func (c *BackupPolicyContext) BackupStartTime() string {
 	if cronExpression := c.c.Spec.GetCronExpression(); cronExpression != "" {
-		return getLocalTime(cronExpression)
+		return util.GetLocalTime(cronExpression)
 	}
 	return "NA"
 }
 
 func (c *BackupPolicyContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.c)
-}
-
-func getLocalTime(cronExpression string) string {
-	cronParser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
-	schedule, err := cronParser.Parse(cronExpression)
-	if err != nil {
-		logrus.Debugln("Error parsing cron expression:\n", err)
-		return ""
-	}
-
-	// Get the next scheduled time in UTC
-	utcTime := schedule.Next(time.Now().UTC())
-	localTimeZone, err := time.LoadLocation("Local")
-	if err != nil {
-		logrus.Debugln("Error loading local time zone:\n", err)
-		return utcTime.Format("15:04") + "UTC"
-	}
-	localTime := utcTime.In(localTimeZone)
-	localTimeString := localTime.Format("15:04")
-	return localTimeString
-}
-
-func getDaysOfTheWeek(cronExpression string) string {
-
-	cronParser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
-	schedule, err := cronParser.Parse(cronExpression)
-	specSchedule := schedule.(*cron.SpecSchedule)
-
-	if err != nil {
-		logrus.Debugln("Error parsing cron expression:\n", err)
-		return ""
-	}
-
-	indexToDayMap := map[int]string{
-		0: "Su",
-		1: "Mo",
-		2: "Tu",
-		3: "We",
-		4: "Th",
-		5: "Fr",
-		6: "Sa",
-	}
-	daysOfTheWeek := []string{}
-	for i := 0; i < 7; i++ {
-		dowMatch := 1<<uint(i)&specSchedule.Dow > 0
-		day := indexToDayMap[i]
-		if dowMatch {
-			daysOfTheWeek = append(daysOfTheWeek, day)
-		}
-	}
-
-	return strings.Join(daysOfTheWeek, ",")
-
 }

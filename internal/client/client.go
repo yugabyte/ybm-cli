@@ -698,14 +698,25 @@ func (a *AuthApiClient) ListBackups() ybmclient.ApiListBackupsRequest {
 	return a.ApiClient.BackupApi.ListBackups(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) ListBackupPolicies(clusterId string, fetchOnlyActive bool) ybmclient.ApiListBackupSchedulesV2Request {
+func (a *AuthApiClient) ListBackupPolicies(clusterId string, fetchOnlyActive bool) ybmclient.ApiListBackupSchedulesRequest {
+	if fetchOnlyActive {
+		return a.ApiClient.BackupApi.ListBackupSchedules(a.ctx, a.AccountID, a.ProjectID).EntityId(clusterId).State("ACTIVE")
+	}
+	return a.ApiClient.BackupApi.ListBackupSchedules(a.ctx, a.AccountID, a.ProjectID).EntityId(clusterId)
+}
+
+func (a *AuthApiClient) UpdateBackupPolicy(schedulId string) ybmclient.ApiModifyBackupScheduleRequest {
+	return a.ApiClient.BackupApi.ModifyBackupSchedule(a.ctx, a.AccountID, a.ProjectID, schedulId)
+}
+
+func (a *AuthApiClient) ListBackupPoliciesV2(clusterId string, fetchOnlyActive bool) ybmclient.ApiListBackupSchedulesV2Request {
 	if fetchOnlyActive {
 		return a.ApiClient.BackupApi.ListBackupSchedulesV2(a.ctx, a.AccountID, a.ProjectID, clusterId).State("ACTIVE")
 	}
 	return a.ApiClient.BackupApi.ListBackupSchedulesV2(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) UpdateBackupPolicy(clusterId, scheduleId string) ybmclient.ApiModifyBackupScheduleV2Request {
+func (a *AuthApiClient) UpdateBackupPolicyV2(clusterId, scheduleId string) ybmclient.ApiModifyBackupScheduleV2Request {
 	return a.ApiClient.BackupApi.ModifyBackupScheduleV2(a.ctx, a.AccountID, a.ProjectID, clusterId, scheduleId)
 }
 
