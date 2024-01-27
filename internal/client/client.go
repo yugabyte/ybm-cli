@@ -709,6 +709,17 @@ func (a *AuthApiClient) UpdateBackupPolicy(schedulId string) ybmclient.ApiModify
 	return a.ApiClient.BackupApi.ModifyBackupSchedule(a.ctx, a.AccountID, a.ProjectID, schedulId)
 }
 
+func (a *AuthApiClient) ListBackupPoliciesV2(clusterId string, fetchOnlyActive bool) ybmclient.ApiListBackupSchedulesV2Request {
+	if fetchOnlyActive {
+		return a.ApiClient.BackupApi.ListBackupSchedulesV2(a.ctx, a.AccountID, a.ProjectID, clusterId).State("ACTIVE")
+	}
+	return a.ApiClient.BackupApi.ListBackupSchedulesV2(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) UpdateBackupPolicyV2(clusterId, scheduleId string) ybmclient.ApiModifyBackupScheduleV2Request {
+	return a.ApiClient.BackupApi.ModifyBackupScheduleV2(a.ctx, a.AccountID, a.ProjectID, clusterId, scheduleId)
+}
+
 func (a *AuthApiClient) RestoreBackup() ybmclient.ApiRestoreBackupRequest {
 	return a.ApiClient.BackupApi.RestoreBackup(a.ctx, a.AccountID, a.ProjectID)
 }

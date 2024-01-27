@@ -34,14 +34,16 @@ import (
 var _ = Describe("BackupSchedules", func() {
 
 	var (
-		server                          *ghttp.Server
-		statusCode                      int
-		args                            []string
-		responseAccount                 openapi.AccountListResponse
-		responseProject                 openapi.AccountListResponse
-		responseListBackupSchedules     openapi.ScheduleListResponse
-		responseListCronBackupSchedules openapi.ScheduleListResponse
-		responseListClusters            openapi.ClusterListResponse
+		server                                     *ghttp.Server
+		statusCode                                 int
+		args                                       []string
+		responseAccount                            openapi.AccountListResponse
+		responseProject                            openapi.AccountListResponse
+		responseListIncrementalBackupSchedules     openapi.ScheduleListResponseV2
+		responseListIncrementalCronBackupSchedules openapi.ScheduleListResponseV2
+		responseListBackupSchedules                openapi.ScheduleListResponse
+		responseListCronBackupSchedules            openapi.ScheduleListResponse
+		responseListClusters                       openapi.ClusterListResponse
 	)
 
 	BeforeEach(func() {
@@ -57,11 +59,15 @@ var _ = Describe("BackupSchedules", func() {
 	Describe("List backup schedules", func() {
 		BeforeEach(func() {
 			statusCode = 200
-			err := loadJson("./test/fixtures/list-backup-schedules.json", &responseListBackupSchedules)
+			err := loadJson("./test/fixtures/list-backup-schedules-incremental.json", &responseListIncrementalBackupSchedules)
+			Expect(err).ToNot(HaveOccurred())
+			err = loadJson("./test/fixtures/list-backup-schedules.json", &responseListBackupSchedules)
+			Expect(err).ToNot(HaveOccurred())
+			err = loadJson("./test/fixtures/list-backup-schedules-cron.json", &responseListCronBackupSchedules)
 			Expect(err).ToNot(HaveOccurred())
 			err = loadJson("./test/fixtures/list-clusters.json", &responseListClusters)
 			Expect(err).ToNot(HaveOccurred())
-			err = loadJson("./test/fixtures/list-backup-schedules-cron.json", &responseListCronBackupSchedules)
+			err = loadJson("./test/fixtures/list-backup-schedules-cron-incremental.json", &responseListIncrementalCronBackupSchedules)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -71,6 +77,7 @@ var _ = Describe("BackupSchedules", func() {
 			)
 		})
 		Context("with a valid Api token and default output table", func() {
+
 			It("should return list of backup schedules with a paused schedule", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -78,6 +85,7 @@ var _ = Describe("BackupSchedules", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListBackupSchedules),
 					),
 				)
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -96,6 +104,7 @@ var _ = Describe("BackupSchedules", func() {
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCronBackupSchedules),
 					),
 				)
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -107,6 +116,47 @@ var _ = Describe("BackupSchedules", func() {
 NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
 				Expect(o).Should(Equal(expected))
 				fmt.Println(expected)
+
+				session.Kill()
+			})
+			It("should return list of backup schedules with a paused schedule with incremental backups", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-schedules"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListIncrementalBackupSchedules),
+					),
+				)
+				os.Setenv("YBM_FF_INCREMENTAL_BACKUP", "true")
+				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				o := string(session.Out.Contents()[:])
+				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   State
+1                     60                     NA                 NA                  8                        PAUSED` + "\n"
+				Expect(o).Should(Equal(expected))
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
+				session.Kill()
+			})
+			It("should return backup schedules with cron expression with an active schedule with incremental backups", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-schedules"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListIncrementalCronBackupSchedules),
+					),
+				)
+				os.Setenv("YBM_FF_INCREMENTAL_BACKUP", "true")
+				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				o := string(session.Out.Contents()[:])
+
+				fmt.Println(o)
+				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   State
+NA                    NA                     Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
+				Expect(o).Should(Equal(expected))
+				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 
 				session.Kill()
 			})
