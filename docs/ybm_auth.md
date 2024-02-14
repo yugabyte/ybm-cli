@@ -13,7 +13,7 @@ ybm auth [flags]
 ### Options
 
 ```
-  -h, --help   help for auth
+  -h, --help   help for aut
 ```
 
 ### Options inherited from parent commands
