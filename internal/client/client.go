@@ -365,7 +365,7 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		for i, regionInfo := range clusterRegionInfo {
 			r := regionInfo.GetPlacementInfo().CloudInfo.Region
 			clusterRegionInfo[i].SetNodeInfo(*regionNodeInfoMap[r])
-			logrus.Infof("region=%s, node-info=%v\n", r, clusterRegionInfo[i].GetNodeInfo())
+			logrus.Debugf("region=%s, node-info=%v\n", r, clusterRegionInfo[i].GetNodeInfo())
 			if currRegionNodeInfo != nil && !geoPartitioned && *currRegionNodeInfo != clusterRegionInfo[i].GetNodeInfo() {
 				// Asymmetric node configurations are only allowed for geo-partitioned clusters.
 				logrus.Fatalln("Synchronous cluster regions must have identical node configurations")
@@ -449,14 +449,14 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 }
 
 func ToClusterNodeInfo(opt *ybmclient.OptionalClusterNodeInfo) ybmclient.ClusterNodeInfo {
-    clusterNodeInfo := *ybmclient.NewClusterNodeInfoWithDefaults()
-    clusterNodeInfo.SetNumCores(opt.GetNumCores())
-    clusterNodeInfo.SetMemoryMb(opt.GetMemoryMb())
-    clusterNodeInfo.SetDiskSizeGb(opt.GetDiskSizeGb())
-    if iops, _ := opt.GetDiskIopsOk(); iops != nil {
-        clusterNodeInfo.SetDiskIops(*iops)
-    }
-    return clusterNodeInfo
+	clusterNodeInfo := *ybmclient.NewClusterNodeInfoWithDefaults()
+	clusterNodeInfo.SetNumCores(opt.GetNumCores())
+	clusterNodeInfo.SetMemoryMb(opt.GetMemoryMb())
+	clusterNodeInfo.SetDiskSizeGb(opt.GetDiskSizeGb())
+	if iops, _ := opt.GetDiskIopsOk(); iops != nil {
+		clusterNodeInfo.SetDiskIops(*iops)
+	}
+	return clusterNodeInfo
 }
 
 func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID string) {
