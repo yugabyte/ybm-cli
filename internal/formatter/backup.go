@@ -21,17 +21,20 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/enescakir/emoji"
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
-	defaultBackupListing   = "table {{.Id}}\t{{.CreatedOn}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.Description}}\t{{.BackupState}}\t{{.BackupType}}\t{{.RetainInDays}}"
+	defaultBackupListing   = "table {{.Id}}\t{{.CreatedOn}}\t{{.Incremental}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.BackupState}}\t{{.BackupType}}"
+	incrementalHeader      = "Inc"
 	backupIdCreateOnHeader = "Created On"
 	backupIdExpireOnHeader = "Expire On"
 	backupIdHeader         = "ID"
 	backupTypeHeader       = "Type"
 	retainInDaysHeader     = "Retains(day)"
+	sizeHeader             = "Size"
 )
 
 type BackupContext struct {
@@ -77,8 +80,22 @@ func NewBackupContext() *BackupContext {
 		"Description":  descriptionHeader,
 		"ExpireOn":     backupIdExpireOnHeader,
 		"RetainInDays": retainInDaysHeader,
+		"Incremental":  incrementalHeader,
+		"Size":         sizeHeader,
 	}
 	return &BackupCtx
+}
+
+func (c *BackupContext) Incremental() string {
+	if *c.c.GetSpec().BackupType.Ptr() == ybmclient.BACKUPTYPEENUM_INCREMENTAL {
+		return emoji.Pizza.String()
+	}
+	return emoji.YellowCircle.String()
+}
+
+func (c *BackupContext) Size() string {
+	// Convert the size to string
+	return strconv.FormatInt(*c.c.GetInfo().SizeInBytes.Get(), 10)
 }
 
 func (c *BackupContext) ExpireOn() string {
@@ -106,6 +123,9 @@ func (c *BackupContext) ClusterName() string {
 
 func (c *BackupContext) Description() string {
 	if v, ok := c.c.Spec.GetDescriptionOk(); ok {
+		if v == nil {
+			return ""
+		}
 		return Truncate(*v, 10)
 	}
 	return ""
@@ -116,11 +136,27 @@ func (c *BackupContext) Id() string {
 }
 
 func (c *BackupContext) BackupState() string {
-	return string(*c.c.GetInfo().State)
+	switch *c.c.GetInfo().State {
+	case ybmclient.BACKUPSTATEENUM_SUCCEEDED:
+		return emoji.CheckMarkButton.String()
+	case ybmclient.BACKUPSTATEENUM_FAILED:
+		return emoji.CrossMark.String()
+	case ybmclient.BACKUPSTATEENUM_IN_PROGRESS:
+		return emoji.HourglassNotDone.String()
+	default:
+		return emoji.QuestionMark.String()
+	}
 }
 
 func (c *BackupContext) BackupType() string {
-	return string(*c.c.GetInfo().ActionType)
+	switch *c.c.GetInfo().ActionType {
+	case ybmclient.BACKUPACTIONTYPEENUM_MANUAL:
+		return emoji.Person.String()
+	case ybmclient.BACKUPACTIONTYPEENUM_SCHEDULED:
+		return emoji.Calendar.String()
+	default:
+		return emoji.QuestionMark.String()
+	}
 }
 
 func (c *BackupContext) RetainInDays() string {
