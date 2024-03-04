@@ -110,13 +110,9 @@ var _ = Describe("BackupSchedules", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-
-				fmt.Println(o)
 				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)   State
 NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
 				Expect(o).Should(Equal(expected))
-				fmt.Println(expected)
-
 				session.Kill()
 			})
 			It("should return list of backup schedules with a paused schedule with incremental backups", func() {
@@ -151,8 +147,6 @@ NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `      
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-
-				fmt.Println(o)
 				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   State
 NA                    NA                     Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
 				Expect(o).Should(Equal(expected))
