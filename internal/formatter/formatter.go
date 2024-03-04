@@ -49,6 +49,8 @@ const (
 	softwareVersionHeader = "Version"
 	stateHeader           = "State"
 	providerHeader        = "Provider"
+	clusterIdHeader       = "Cluster ID"
+	dateCreatedAtHeader   = "Date Created"
 
 	GREEN_COLOR = "green"
 	RED_COLOR   = "red"

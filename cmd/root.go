@@ -29,6 +29,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/metrics_exporter"
+	"github.com/yugabyte/ybm-cli/cmd/db_audit_logs_exporter"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/permission"
 	"github.com/yugabyte/ybm-cli/cmd/region"
@@ -135,6 +136,7 @@ func init() {
 	rootCmd.AddCommand(api_key.ApiKeyCmd)
 	rootCmd.AddCommand(user.UserCmd)
 	rootCmd.AddCommand(metrics_exporter.MetricsExporterCmd)
+	rootCmd.AddCommand(db_audit_logs_exporter.DbAuditLogsExporterCmd)
 	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
