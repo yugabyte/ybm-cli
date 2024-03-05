@@ -26,6 +26,7 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/yugabyte/ybm-cli/internal/formatter"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -67,9 +68,9 @@ var _ = Describe("Backup", func() {
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`ID                                     Created On         Inc       Expire On          Clusters        State     Type
-c7742a97-cee0-449d-9c7c-4b934d9cf940   2024-03-04,21:33   🍕        2024-03-12,21:33   mirthful-mole   ✅        🧑
-faaca956-b542-49ee-92a8-9f1e138d1311   2024-03-04,14:28   🟡        2024-03-05,14:28   mirthful-mole   ✅        🧑`))
+			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(`ID                                     Created On         Inc       Expire On          Clusters        State     Type
+c7742a97-cee0-449d-9c7c-4b934d9cf940   %s   🍕        %s   mirthful-mole   ✅        🧑
+faaca956-b542-49ee-92a8-9f1e138d1311   %s   🟡        %s   mirthful-mole   ✅        🧑`, formatter.FormatDate("2024-03-05T03:33:23.532Z"), formatter.FormatDateAndAddDays("2024-03-05T03:33:23.532Z", 8), formatter.FormatDate("2024-03-04T20:28:32.982Z"), formatter.FormatDateAndAddDays("2024-03-04T20:28:32.982Z", 1))))
 			session.Kill()
 		})
 

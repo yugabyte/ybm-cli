@@ -172,3 +172,8 @@ func FormatDate(dateToBeFormatted string) string {
 	t, _ := time.Parse(time.RFC3339Nano, dateToBeFormatted)
 	return t.Local().Format("2006-01-02,15:04")
 }
+
+func FormatDateAndAddDays(dateToBeFormatted string, days int) string {
+	t, _ := time.Parse(time.RFC3339Nano, dateToBeFormatted)
+	return t.Local().AddDate(0, 0, days).Format("2006-01-02,15:04")
+}
