@@ -68,9 +68,9 @@ var _ = Describe("Backup", func() {
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(
-				`ID                                     Created On         Expire On          Clusters                Description     State       Type      Retains\(day\)
-7d08a5c3-8097-48f0-8019-da236e876ab9   %s   %s   proficient-parrotfish   scdasfdadf...   SUCCEEDED   MANUAL    25`, formatter.FormatDate("2023-01-17T08:31:35.818Z"), formatter.FormatDate("2023-02-11T08:31:35.818Z"))))
+			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(`ID                                     Created On         Inc       Expire On          Clusters        State     Type
+c7742a97-cee0-449d-9c7c-4b934d9cf940   %s   🍕        %s   mirthful-mole   ✅        🧑
+faaca956-b542-49ee-92a8-9f1e138d1311   %s   🟡        %s   mirthful-mole   ✅        🧑`, formatter.FormatDate("2024-03-05T03:33:23.532Z"), formatter.FormatDateAndAddDays("2024-03-05T03:33:23.532Z", 8), formatter.FormatDate("2024-03-04T20:28:32.982Z"), formatter.FormatDateAndAddDays("2024-03-04T20:28:32.982Z", 1))))
 			session.Kill()
 		})
 
