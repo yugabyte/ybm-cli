@@ -158,7 +158,7 @@ var disablePolicyCmd = &cobra.Command{
 		}
 
 		if len(resp.GetData()) < 1 {
-			logrus.Fatalln("No backup policies found for the given cluster")
+			logrus.Fatalln("No ACTIVE backup policies found to disable for the given cluster")
 		}
 		scheduleSpec := resp.GetData()[0].GetSpec()
 		if scheduleSpec.GetState() == ybmclient.SCHEDULESTATEENUM_PAUSED {
