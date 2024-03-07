@@ -1,19 +1,19 @@
-## ybm backup
+## ybm db-audit-logs-exporter
 
-Manage backup operations of a cluster
+Manage DB Audit Logs
 
 ### Synopsis
 
-Manage backup operations of a cluster
+Manage DB Audit Logs
 
 ```
-ybm backup [flags]
+ybm db-audit-logs-exporter [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for backup
+  -h, --help   help for db-audit-logs-exporter
 ```
 
 ### Options inherited from parent commands
@@ -32,10 +32,6 @@ ybm backup [flags]
 ### SEE ALSO
 
 * [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm backup create](ybm_backup_create.md)	 - Create backup for a cluster in YugabyteDB Managed
-* [ybm backup delete](ybm_backup_delete.md)	 - Delete backup for a cluster in YugabyteDB Managed
-* [ybm backup describe](ybm_backup_describe.md)	 - Describe backup for a cluster in YugabyteDB Managed
-* [ybm backup list](ybm_backup_list.md)	 - List existing backups available for a cluster in YugabyteDB Managed
-* [ybm backup policy](ybm_backup_policy.md)	 - Manage backup policy of a cluster
-* [ybm backup restore](ybm_backup_restore.md)	 - Restore backups into a cluster in YugabyteDB Managed
+* [ybm db-audit-logs-exporter assign](ybm_db-audit-logs-exporter_assign.md)	 - Assign DB Audit
+* [ybm db-audit-logs-exporter list](ybm_db-audit-logs-exporter_list.md)	 - List DB Audit Logs Export Config
 

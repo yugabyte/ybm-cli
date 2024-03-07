@@ -34,7 +34,7 @@ const (
 	backupIdHeader         = "ID"
 	backupTypeHeader       = "Type"
 	retainInDaysHeader     = "Retains(day)"
-	sizeHeader             = "Size"
+	sizeHeader             = "Size(bytes)"
 )
 
 type BackupContext struct {
@@ -163,6 +163,14 @@ func (c *BackupContext) RetainInDays() string {
 	return fmt.Sprint(*c.c.GetSpec().RetentionPeriodInDays)
 }
 
+func (c *BackupContext) Duration() string {
+	duration, err := CalculateTimeDifference(c.c.Info.Metadata.Get().GetCreatedOn(), c.c.Info.GetCompletedOn())
+	if err != nil {
+		return "NA"
+	}
+	return duration
+}
+
 func (c *BackupContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.c)
 }
@@ -176,4 +184,21 @@ func FormatDate(dateToBeFormatted string) string {
 func FormatDateAndAddDays(dateToBeFormatted string, days int) string {
 	t, _ := time.Parse(time.RFC3339Nano, dateToBeFormatted)
 	return t.Local().AddDate(0, 0, days).Format("2006-01-02,15:04")
+}
+
+func CalculateTimeDifference(timestamp1, timestamp2 string) (string, error) {
+	const timeLayout = "2006-01-02T15:04:05Z"
+	t1, err := time.Parse(timeLayout, timestamp1)
+	if err != nil {
+		return "NA", fmt.Errorf("error parsing timestamp1: %w", err)
+	}
+	t2, err := time.Parse(timeLayout, timestamp2)
+	if err != nil {
+		return "NA", fmt.Errorf("error parsing timestamp2: %w", err)
+	}
+
+	// Calculate difference
+	difference := t2.Sub(t1)
+
+	return strconv.Itoa(int(difference.Minutes())) + " mins", nil
 }
