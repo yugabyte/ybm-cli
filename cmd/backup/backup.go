@@ -220,6 +220,42 @@ var deleteBackupCmd = &cobra.Command{
 	},
 }
 
+var describeBackupCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe backup for a cluster in YugabyteDB Managed",
+	Long:  "Describe backup for a cluster in YugabyteDB Managed",
+	Run: func(cmd *cobra.Command, args []string) {
+		backupID, _ := cmd.Flags().GetString("backup-id")
+
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+		backupResp, r, err := authApi.GetBackup(backupID).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		if viper.GetString("output") == "table" {
+			fullBackupContext := *formatter.NewFullBackupContext()
+			fullBackupContext.Output = os.Stdout
+			fullBackupContext.Format = formatter.NewFullBackupFormat(viper.GetString("output"))
+			fullBackupContext.SetFullBackup(backupResp.GetData())
+			fullBackupContext.Write()
+			return
+		}
+
+		backupCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewFullBackupFormat(viper.GetString("output")),
+		}
+
+		formatter.SingleBackupWrite(backupCtx, backupResp.GetData())
+	},
+}
+
 func init() {
 	BackupCmd.AddCommand(listBackupCmd)
 	listBackupCmd.Flags().String("cluster-name", "", "[OPTIONAL] Name of the cluster to fetch backups.")
@@ -246,4 +282,7 @@ func init() {
 		BackupCmd.AddCommand(policy.PolicyCmd)
 	}
 
+	BackupCmd.AddCommand(describeBackupCmd)
+	describeBackupCmd.Flags().String("backup-id", "", "[REQUIRED] The backup ID.")
+	describeBackupCmd.MarkFlagRequired("backup-id")
 }
