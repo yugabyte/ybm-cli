@@ -1,0 +1,44 @@
+{
+    "data": {
+      "spec": {
+        "cluster_id": "d6954ca7-fc4f-4454-9ce2-8c2e10ed9deb",
+        "retention_period_in_days": 1,
+        "backup_type": "FULL",
+        "description": null
+      },
+      "info": {
+        "id": "5574d58f-68f1-4762-baa1-c2421cdb38b0",
+        "cluster_name": "mirthful-mole",
+        "state": "SUCCEEDED",
+        "action_type": "MANUAL",
+        "keyspace_info": [
+          {
+            "table_type": "YSQL",
+            "keyspaces": [
+              "yugabyte"
+            ]
+          },
+          {
+            "table_type": "YCQL",
+            "keyspaces": [
+              "my_keyspace"
+            ]
+          }
+        ],
+        "size_in_bytes": 1176035,
+        "deleted_on": "2024-03-08T17:58:28.606890Z",
+        "completed_on": "2024-03-07T17:58:28.606907Z",
+        "num_incremental_backups": 0,
+        "last_incremental_backup_completed_on": null,
+        "last_full_backup_completed_on": "2024-03-06T20:56:34.214975Z",
+        "backup_chain_size_in_bytes": 1176035,
+        "backup_current_chain_size_in_bytes": 1176035,
+        "tablespaces": [],
+        "base_backup_id": null,
+        "metadata": {
+          "created_on": "2024-03-07T17:56:14.553Z",
+          "updated_on": "2024-03-07T17:58:29.113Z"
+        }
+      }
+    }
+  }

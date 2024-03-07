@@ -33,12 +33,14 @@ import (
 var _ = Describe("Backup", func() {
 
 	var (
-		server          *ghttp.Server
-		statusCode      int
-		args            []string
-		responseAccount openapi.AccountListResponse
-		responseProject openapi.AccountListResponse
-		responseBackup  openapi.BackupListResponse
+		server             *ghttp.Server
+		statusCode         int
+		args               []string
+		responseAccount    openapi.AccountListResponse
+		responseProject    openapi.AccountListResponse
+		responseBackupList openapi.BackupListResponse
+		responseBackup     openapi.BackupResponse
+
 		//cbr        *cobra.Command
 	)
 
@@ -56,12 +58,12 @@ var _ = Describe("Backup", func() {
 
 		It("should return list of available backup", func() {
 			statusCode = 200
-			err := loadJson("./test/fixtures/backups.json", &responseBackup)
+			err := loadJson("./test/fixtures/backups.json", &responseBackupList)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backups"),
-					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackup),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupList),
 				),
 			)
 			cmd := exec.Command(compiledCLIPath, "backup", "list")
@@ -74,6 +76,39 @@ faaca956-b542-49ee-92a8-9f1e138d1311   %s   🟡        %s   mirthful-mole   ✅
 			session.Kill()
 		})
 
+		It("should describe the given backup", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/backup.json", &responseBackup)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backups/5574d58f-68f1-4762-baa1-c2421cdb38b0"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackup),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "describe", "--backup-id", "5574d58f-68f1-4762-baa1-c2421cdb38b0")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			expected := fmt.Sprintf(`General
+ID                                     Created On         Inc       Clusters        State
+5574d58f-68f1-4762-baa1-c2421cdb38b0   %s   🟡        mirthful-mole   ✅
+
+Type      Size(bytes)   Expire On          Duration
+🧑        1176035       %s   2 mins
+
+
+Databases/Keyspaces
+Database/Keyspace   API Type
+yugabyte            YSQL
+my_keyspace         YCQL
+`, formatter.FormatDate("2024-03-07T17:56:14.553Z"), formatter.FormatDateAndAddDays("2024-03-07T17:56:14.553Z", 1))
+
+			o := string(session.Out.Contents()[:])
+			Expect(o).Should(Equal(expected))
+			session.Kill()
+
+		})
 	})
 
 	AfterEach(func() {
