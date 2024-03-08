@@ -1,28 +1,29 @@
-## ybm db-audit-logs-exporter assign
+## ybm db-audit-logs-exporter update
 
-Assign DB Audit
+Update DB Audit
 
 ### Synopsis
 
-Assign DB Audit Logs to a Cluster
+Update DB Audit Log Configuration for a Cluster
 
 ```
-ybm db-audit-logs-exporter assign [flags]
+ybm db-audit-logs-exporter update [flags]
 ```
 
 ### Options
 
 ```
+      --export-config-id string        [REQUIRED] The ID of the DB audit export config
       --telemetry-provider-id string   [REQUIRED] The ID of the telemetry provider
-      --ysql-config stringToString     [REQUIRED] The ysql config to setup DB auditting
+      --ysql-config stringToString     The ysql config to setup DB auditting
                                        	Please provide key value pairs as follows:
                                        	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
                                        	log_relation=<boolean>,log_statement_once=<boolean> (default [])
-      --statement_classes string       [REQUIRED] The ysql config statement classes
+      --statement_classes string       The ysql config statement classes
                                        	Please provide key value pairs as follows:
                                        	statement_classes=READ,WRITE,MISC
       --cluster-id string              [REQUIRED] The cluster ID to assign DB auditting
-  -h, --help                           help for assign
+  -h, --help                           help for update
 ```
 
 ### Options inherited from parent commands

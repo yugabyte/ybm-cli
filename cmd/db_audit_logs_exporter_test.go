@@ -62,7 +62,7 @@ var _ = Describe("Db Audit", func() {
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--telemetry-provider-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=false,log_level=INFO,log_parameter=true", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--telemetry-provider-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -78,6 +78,15 @@ ID                                     Date Created               Cluster ID    
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Err).Should(gbytes.Say(`\bError: required flag\(s\) "telemetry-provider-id", "ysql-config", "statement_classes", "cluster-id" not set\b`))
+			session.Kill()
+		})
+		It("should return required log setting when not set", func() {
+
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--telemetry-provider-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:log_statement_once required for log settings$)"))
 			session.Kill()
 		})
 	})
@@ -108,6 +117,77 @@ ID                                     Date Created               Cluster ID    
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"cluster-id\" not set$)"))
+			session.Kill()
+		})
+
+	})
+
+	Context("When updating DB Audit config", func() {
+		It("should associate cluster with DB Audit", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/7bb68af6-0875-42e0-8665-dcf634ed9fd1/db-audit-log-exporter-configs/123e4567-e89b-12d3-a456-426614174000"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--telemetry-provider-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The db audit exporter config 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being updated
+ID                                     Date Created               Cluster ID                             Telemetry Provider ID                  State     Ysql Config
+9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   7bb68af6-0875-42e0-8665-dcf634ed9fd1   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":true,\"log_client\":true,\"log_level\":\"LOG\",\"log_parameter\":false,\"log_relation\":false,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
+			session.Kill()
+		})
+		It("should return required field name and type when not set", func() {
+
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"export-config-id\", \"telemetry-provider-id\", \"cluster-id\" not set$)"))
+			session.Kill()
+		})
+		It("should return required log setting when not set", func() {
+
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--telemetry-provider-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_statement_once=false", "--statement_classes", "READ,WRITE")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:log_relation required for log settings$)"))
+			session.Kill()
+		})
+	})
+
+	Context("When removing db audit exporter config", func() {
+		It("should delete the config", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-db-audit.json", &responseDbAuditList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodDelete, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/7bb68af6-0875-42e0-8665-dcf634ed9fd1/db-audit-log-exporter-configs/123e4567-e89b-12d3-a456-426614174000"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAuditList),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "unassign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--force")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`Deleting Db Audit Logs Exporter Config 123e4567-e89b-12d3-a456-426614174000`))
+			session.Kill()
+		})
+		It("should return required field name and type when not set", func() {
+
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "unassign", "--force")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			exec.Command(compiledCLIPath, "y")
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"export-config-id\", \"cluster-id\" not set$)"))
 			session.Kill()
 		})
 
