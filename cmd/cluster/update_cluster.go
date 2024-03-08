@@ -65,27 +65,27 @@ var updateClusterCmd = &cobra.Command{
 
 		regionInfoMapList := []map[string]string{}
 		changedRegionInfo := cmd.Flags().Changed("region-info")
-        changedNodeInfo := cmd.Flags().Changed("node-config")
+		changedNodeInfo := cmd.Flags().Changed("node-config")
 
-        defaultNumCores := 0
-        defaultDiskSizeGb := 0
-        defaultDiskIops := 0
-        if changedNodeInfo {
-            nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-            numCores, ok := nodeConfig["num-cores"]
-            if !asymmetricGeoEnabled && !ok {
-                logrus.Fatalln("Number of cores not specified in node config")
-            }
-            if asymmetricGeoEnabled && ok {
-                defaultNumCores = numCores
-            }
-            if diskSizeGb, ok := nodeConfig["disk-size-gb"]; ok {
-                defaultDiskSizeGb = diskSizeGb
-            }
-            if diskIops, ok := nodeConfig["disk-iops"]; ok {
-                defaultDiskIops = diskIops
-            }
-        }
+		defaultNumCores := 0
+		defaultDiskSizeGb := 0
+		defaultDiskIops := 0
+		if changedNodeInfo {
+			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
+			numCores, ok := nodeConfig["num-cores"]
+			if !asymmetricGeoEnabled && !ok {
+				logrus.Fatalln("Number of cores not specified in node config")
+			}
+			if asymmetricGeoEnabled && ok {
+				defaultNumCores = numCores
+			}
+			if diskSizeGb, ok := nodeConfig["disk-size-gb"]; ok {
+				defaultDiskSizeGb = diskSizeGb
+			}
+			if diskIops, ok := nodeConfig["disk-iops"]; ok {
+				defaultDiskIops = diskIops
+			}
+		}
 
 		if changedRegionInfo {
 			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
@@ -133,20 +133,20 @@ var updateClusterCmd = &cobra.Command{
 					logrus.Fatalln("Number of nodes not specified in region info")
 				}
 				if _, ok := regionInfoMap["num-cores"]; asymmetricGeoEnabled && !ok && defaultNumCores > 0 {
-                    regionInfoMap["num-cores"] = strconv.Itoa(defaultNumCores)
-                }
-                if _, ok := regionInfoMap["disk-size-gb"]; asymmetricGeoEnabled && !ok && defaultDiskSizeGb > 0 {
-                    regionInfoMap["disk-size-gb"] = strconv.Itoa(defaultDiskSizeGb)
-                }
-                if _, ok := regionInfoMap["disk-iops"]; asymmetricGeoEnabled && !ok && defaultDiskIops > 0 {
-                    regionInfoMap["disk-iops"] = strconv.Itoa(defaultDiskIops)
-                }
+					regionInfoMap["num-cores"] = strconv.Itoa(defaultNumCores)
+				}
+				if _, ok := regionInfoMap["disk-size-gb"]; asymmetricGeoEnabled && !ok && defaultDiskSizeGb > 0 {
+					regionInfoMap["disk-size-gb"] = strconv.Itoa(defaultDiskSizeGb)
+				}
+				if _, ok := regionInfoMap["disk-iops"]; asymmetricGeoEnabled && !ok && defaultDiskIops > 0 {
+					regionInfoMap["disk-iops"] = strconv.Itoa(defaultDiskIops)
+				}
 
 				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
 			}
 		}
 
-		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
+		clusterSpec, err := authApi.EditClusterSpec(cmd, regionInfoMapList, clusterID)
 		if err != nil {
 			logrus.Fatalf("Error while creating cluster spec: %v", err)
 		}

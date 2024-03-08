@@ -146,7 +146,7 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 	return projectData[0].Info.Id, nil
 }
 
-func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string) (*ybmclient.ClusterSpec, error) {
+func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string, regionNodeConfigsMap map[string][]ybmclient.NodeConfigurationResponseItem) (*ybmclient.ClusterSpec, error) {
 
 	var diskSizeGb int32
 	var diskIops int32
@@ -317,8 +317,12 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 		for k, _ := range regionNodeInfoMap {
 			regions = append(regions, k)
 		}
-		// Grab available node configurations by region.
-		regionNodeConfigsMap := a.GetSupportedNodeConfigurationsV2(cloud, tier, regions, geoPartitioned)
+
+		if regionNodeConfigsMap == nil {
+			// Grab available node configurations by region.
+			regionNodeConfigsMap = a.GetSupportedNodeConfigurationsV2(cloud, tier, regions, geoPartitioned)
+		}
+
 		// Create slice of region keys of node configurations response.
 		nodeConfigurationsRegions := make([]string, 0, len(regionNodeConfigsMap))
 		for k, _ := range regionNodeConfigsMap {
@@ -446,6 +450,20 @@ func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []m
 	}
 
 	return clusterSpec, nil
+}
+
+func (a *AuthApiClient) CreateClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string) (*ybmclient.ClusterSpec, error) {
+	return a.buildClusterSpec(cmd, regionInfoList, nil)
+}
+
+func (a *AuthApiClient) EditClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string, clusterID string) (*ybmclient.ClusterSpec, error) {
+	regions := make([]string, 0, len(regionInfoList))
+	for _, regionInfo := range regionInfoList {
+		region := regionInfo["region"]
+		regions = append(regions, region)
+	}
+	regionNodeConfigsMap := a.GetSupportedNodeConfigurationsForEdit(clusterID, regions)
+	return a.buildClusterSpec(cmd, regionInfoList, regionNodeConfigsMap)
 }
 
 func ToClusterNodeInfo(opt *ybmclient.OptionalClusterNodeInfo) ybmclient.ClusterNodeInfo {
@@ -925,6 +943,16 @@ func (a *AuthApiClient) GetSupportedNodeConfigurationsV2(cloud string, tier stri
 		isMultiRegion = false
 	}
 	instanceResp, resp, err := a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions(regions).IsMultiRegion(isMultiRegion).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(b)
+		logrus.Fatalln(err)
+	}
+	return instanceResp.GetData()
+}
+
+func (a *AuthApiClient) GetSupportedNodeConfigurationsForEdit(clusterId string, regions []string) map[string][]ybmclient.NodeConfigurationResponseItem {
+	instanceResp, resp, err := a.ApiClient.ClusterApi.GetSupportedNodeConfigurationsForClusterEdit(a.ctx, a.AccountID, a.ProjectID, clusterId).Regions(regions).PerRegion(true).ShowDisabled(false).ClusterType("PRIMARY").Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(b)
@@ -1462,7 +1490,7 @@ func (a *AuthApiClient) ListMetricsExporterConfigs() ybmclient.ApiListMetricsExp
 }
 
 func (a *AuthApiClient) ListDbAuditLogsExportConfigs(clusterId string) ybmclient.ApiListDbAuditExporterConfigRequest {
-	return a.ApiClient.ClusterApi.ListDbAuditExporterConfig(a.ctx,  a.AccountID, a.ProjectID, clusterId)
+	return a.ApiClient.ClusterApi.ListDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
 func (a *AuthApiClient) DeleteMetricsExporterConfig(configId string) ybmclient.ApiDeleteMetricsExporterConfigRequest {
