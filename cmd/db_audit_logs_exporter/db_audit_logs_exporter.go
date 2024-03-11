@@ -28,6 +28,7 @@ import (
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 )
 
 var DbAuditLogsExporterCmd = &cobra.Command{
@@ -84,6 +85,52 @@ var assignDbAuditLogsExporterCmd = &cobra.Command{
 	},
 }
 
+var updateDbAuditLogsExporterCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update DB Audit",
+	Long:  "Update DB Audit Log Configuration for a Cluster",
+	Run: func(cmd *cobra.Command, args []string) {
+
+		clusterId, _ := cmd.Flags().GetString("cluster-id")
+		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
+		telemetryProviderId, _ := cmd.Flags().GetString("telemetry-provider-id")
+		ysqlConfig, _ := cmd.Flags().GetStringToString("ysql-config")
+		statement_classes, _ := cmd.Flags().GetString("statement_classes")
+
+		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, telemetryProviderId)
+
+		if err != nil {
+			logrus.Fatalf(err.Error())
+		}
+		
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+
+		resp, r, err := authApi.UpdateDbAuditLogsExporterConfig(clusterId, exportConfigId).DbAuditExporterConfigSpec(*dbAuditLogsExporterSpec).Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		dbAuditTelemetryProviderId := resp.GetData().Info.Id
+
+		msg := fmt.Sprintf("The db audit exporter config %s is being updated", formatter.Colorize(dbAuditTelemetryProviderId, formatter.GREEN_COLOR))
+
+		fmt.Println(msg)
+
+		dbAuditLogsExporterCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewDbAuditLogsExporterFormat(viper.GetString("output")),
+		}
+
+		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, []openapi.DbAuditExporterConfigurationData{resp.GetData()})
+	},
+}
+
 var listDbAuditLogsExporterCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List DB Audit Logs Export Config",
@@ -118,6 +165,39 @@ var listDbAuditLogsExporterCmd = &cobra.Command{
 	},
 }
 
+var removeDbAuditLogsExporterCmd = &cobra.Command{
+	Use:   "unassign",
+	Short: "Unassign DB Audit Logs Export Config",
+	Long:  "Unassign DB Audit Logs Export Config",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to unassign DB audit %s: %s", "config", exportConfigId), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+
+		clusterId, _ := cmd.Flags().GetString("cluster-id")
+		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
+
+		resp, err := authApi.DeleteDbAuditLogsExportConfig(clusterId, exportConfigId).Execute()
+
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", resp)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		fmt.Printf("Deleting Db Audit Logs Exporter Config %s\n", formatter.Colorize(exportConfigId, formatter.GREEN_COLOR))
+	},
+}
+
 func init() {
 	DbAuditLogsExporterCmd.AddCommand(assignDbAuditLogsExporterCmd)
 	assignDbAuditLogsExporterCmd.Flags().SortFlags = false
@@ -125,7 +205,8 @@ func init() {
 	assignDbAuditLogsExporterCmd.MarkFlagRequired("telemetry-provider-id")
 	assignDbAuditLogsExporterCmd.Flags().StringToString("ysql-config", nil, `[REQUIRED] The ysql config to setup DB auditting
 	Please provide key value pairs as follows:
-	log_catalog=<boolean>,log_level=<LOG_LEVEL>`)
+	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
+	log_relation=<boolean>,log_statement_once=<boolean>`)
 	assignDbAuditLogsExporterCmd.MarkFlagRequired("ysql-config")
 	assignDbAuditLogsExporterCmd.Flags().String("statement_classes", "", `[REQUIRED] The ysql config statement classes
 	Please provide key value pairs as follows:
@@ -138,6 +219,30 @@ func init() {
 	listDbAuditLogsExporterCmd.Flags().SortFlags = false
 	listDbAuditLogsExporterCmd.Flags().String("cluster-id", "", "[REQUIRED] The cluster ID to list DB audit export config")
 	listDbAuditLogsExporterCmd.MarkFlagRequired("cluster-id")
+
+	DbAuditLogsExporterCmd.AddCommand(updateDbAuditLogsExporterCmd)
+	updateDbAuditLogsExporterCmd.Flags().SortFlags = false
+	updateDbAuditLogsExporterCmd.Flags().String("export-config-id", "", "[REQUIRED] The ID of the DB audit export config")
+	updateDbAuditLogsExporterCmd.MarkFlagRequired("export-config-id")
+	updateDbAuditLogsExporterCmd.Flags().String("telemetry-provider-id", "", "[REQUIRED] The ID of the telemetry provider")
+	updateDbAuditLogsExporterCmd.MarkFlagRequired("telemetry-provider-id")
+	updateDbAuditLogsExporterCmd.Flags().StringToString("ysql-config", nil, `The ysql config to setup DB auditting
+	Please provide key value pairs as follows:
+	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
+	log_relation=<boolean>,log_statement_once=<boolean>`)
+	updateDbAuditLogsExporterCmd.Flags().String("statement_classes", "", `The ysql config statement classes
+	Please provide key value pairs as follows:
+	statement_classes=READ,WRITE,MISC`)
+	updateDbAuditLogsExporterCmd.Flags().String("cluster-id", "", "[REQUIRED] The cluster ID to assign DB auditting")
+	updateDbAuditLogsExporterCmd.MarkFlagRequired("cluster-id")
+
+	DbAuditLogsExporterCmd.AddCommand(removeDbAuditLogsExporterCmd)
+	removeDbAuditLogsExporterCmd.Flags().SortFlags = false
+	removeDbAuditLogsExporterCmd.Flags().String("export-config-id", "", "[REQUIRED] The ID of the DB audit export config")
+	removeDbAuditLogsExporterCmd.MarkFlagRequired("export-config-id")
+	removeDbAuditLogsExporterCmd.Flags().String("cluster-id", "", "[REQUIRED] The cluster ID to assign DB auditting")
+	removeDbAuditLogsExporterCmd.MarkFlagRequired("cluster-id")
+	removeDbAuditLogsExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }
 
 func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasses string, telemetryProviderId string) (*ybmclient.DbAuditExporterConfigSpec, error) {
@@ -159,6 +264,9 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			statement_classes_enum = append(statement_classes_enum, *enumVal)
 		}
 	}
+	if len(statement_classes_enum) == 0 {
+		return nil, fmt.Errorf("statement_classes must have one or more of READ, WRITE, ROLE, FUNCTION, DDL, MISC")
+	}
 
 	log_settings := ybmclient.NewDbAuditYsqlLogSettingsWithDefaults()
 
@@ -168,6 +276,8 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogCatalog(catalog)
+	}else{
+		return nil, fmt.Errorf("log_catalog required for log settings")
 	}
 
 	if log_client != "" {
@@ -176,6 +286,8 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogClient(client)
+	}else{
+		return nil, fmt.Errorf("log_client required for log settings")
 	}
 
 	if log_level != "" {
@@ -184,6 +296,8 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogLevel(*level)
+	}else{
+		return nil, fmt.Errorf("log_level required for log settings")
 	}
 
 	if log_parameter != "" {
@@ -192,6 +306,8 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogParameter(parameter)
+	}else{
+		return nil, fmt.Errorf("log_parameter required for log settings")
 	}
 
 	if log_relation != "" {
@@ -200,6 +316,8 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogRelation(relation)
+	}else{
+		return nil, fmt.Errorf("log_relation required for log settings")
 	}
 
 	if log_statement_once != "" {
@@ -208,6 +326,8 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogStatementOnce(statement_once)
+	}else{
+		return nil, fmt.Errorf("log_statement_once required for log settings")
 	}
 
 	ysqlConfig := ybmclient.NewDbAuditYsqlExportConfigWithDefaults()

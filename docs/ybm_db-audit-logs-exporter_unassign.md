@@ -1,19 +1,22 @@
-## ybm db-audit-logs-exporter
+## ybm db-audit-logs-exporter unassign
 
-Manage DB Audit Logs
+Unassign DB Audit Logs Export Config
 
 ### Synopsis
 
-Manage DB Audit Logs
+Unassign DB Audit Logs Export Config
 
 ```
-ybm db-audit-logs-exporter [flags]
+ybm db-audit-logs-exporter unassign [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for db-audit-logs-exporter
+      --export-config-id string   [REQUIRED] The ID of the DB audit export config
+      --cluster-id string         [REQUIRED] The cluster ID to assign DB auditting
+  -f, --force                     Bypass the prompt for non-interactive usage
+  -h, --help                      help for unassign
 ```
 
 ### Options inherited from parent commands
@@ -31,9 +34,5 @@ ybm db-audit-logs-exporter [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm db-audit-logs-exporter assign](ybm_db-audit-logs-exporter_assign.md)	 - Assign DB Audit
-* [ybm db-audit-logs-exporter list](ybm_db-audit-logs-exporter_list.md)	 - List DB Audit Logs Export Config
-* [ybm db-audit-logs-exporter unassign](ybm_db-audit-logs-exporter_unassign.md)	 - Unassign DB Audit Logs Export Config
-* [ybm db-audit-logs-exporter update](ybm_db-audit-logs-exporter_update.md)	 - Update DB Audit
+* [ybm db-audit-logs-exporter](ybm_db-audit-logs-exporter.md)	 - Manage DB Audit Logs
 

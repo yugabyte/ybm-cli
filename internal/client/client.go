@@ -654,6 +654,10 @@ func (a *AuthApiClient) AssignDbAuditLogsExporterConfig(clusterId string) ybmcli
 	return a.ApiClient.ClusterApi.AssociateDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) UpdateDbAuditLogsExporterConfig(clusterId string, telemetryProvider string) ybmclient.ApiUpdateDbAuditExporterConfigRequest {
+	return a.ApiClient.ClusterApi.UpdateDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, telemetryProvider)
+}
+
 func (a *AuthApiClient) CreatePrivateServiceEndpointRegionSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointRegionSpec {
 	pseSpecs := []ybmclient.PrivateServiceEndpointRegionSpec{}
 
@@ -1491,6 +1495,10 @@ func (a *AuthApiClient) ListMetricsExporterConfigs() ybmclient.ApiListMetricsExp
 
 func (a *AuthApiClient) ListDbAuditLogsExportConfigs(clusterId string) ybmclient.ApiListDbAuditExporterConfigRequest {
 	return a.ApiClient.ClusterApi.ListDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) DeleteDbAuditLogsExportConfig(configId string, telemetryProviderId string) ybmclient.ApiRemoveDbAuditLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.RemoveDbAuditLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId, telemetryProviderId)
 }
 
 func (a *AuthApiClient) DeleteMetricsExporterConfig(configId string) ybmclient.ApiDeleteMetricsExporterConfigRequest {
