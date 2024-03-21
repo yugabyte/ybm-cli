@@ -32,6 +32,7 @@ ybm [flags]
 * [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
 * [ybm completion](ybm_completion.md)	 - Generate the autocompletion script for the specified shell
 * [ybm db-audit-logs-exporter](ybm_db-audit-logs-exporter.md)	 - Manage DB Audit Logs
+* [ybm integration](ybm_integration.md)	 - Manage Integration
 * [ybm metrics-exporter](ybm_metrics-exporter.md)	 - Manage Metrics Exporter
 * [ybm network-allow-list](ybm_network-allow-list.md)	 - Manage Network Allow Lists
 * [ybm permission](ybm_permission.md)	 - View available permissions for roles

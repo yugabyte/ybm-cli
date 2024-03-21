@@ -654,8 +654,8 @@ func (a *AuthApiClient) AssignDbAuditLogsExporterConfig(clusterId string) ybmcli
 	return a.ApiClient.ClusterApi.AssociateDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) UpdateDbAuditLogsExporterConfig(clusterId string, telemetryProvider string) ybmclient.ApiUpdateDbAuditExporterConfigRequest {
-	return a.ApiClient.ClusterApi.UpdateDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, telemetryProvider)
+func (a *AuthApiClient) UpdateDbAuditExporterConfig(clusterId string, integrationId string) ybmclient.ApiUpdateDbAuditExporterConfigRequest {
+	return a.ApiClient.ClusterApi.UpdateDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, integrationId)
 }
 
 func (a *AuthApiClient) CreatePrivateServiceEndpointRegionSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointRegionSpec {
@@ -1489,20 +1489,36 @@ func (a *AuthApiClient) CreateMetricsExporterConfig() ybmclient.ApiCreateMetrics
 	return a.ApiClient.MetricsExporterConfigApi.CreateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID)
 }
 
+func (a *AuthApiClient) CreateIntegration() ybmclient.ApiCreateTelemetryProviderRequest {
+	return a.ApiClient.TelemetryProviderApi.CreateTelemetryProvider(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) ValidateIntegration() ybmclient.ApiValidateTelemetryProviderRequest {
+	return a.ApiClient.TelemetryProviderApi.ValidateTelemetryProvider(a.ctx, a.AccountID, a.ProjectID)
+}
+
 func (a *AuthApiClient) ListMetricsExporterConfigs() ybmclient.ApiListMetricsExporterConfigsRequest {
 	return a.ApiClient.MetricsExporterConfigApi.ListMetricsExporterConfigs(a.ctx, a.AccountID, a.ProjectID)
 }
 
-func (a *AuthApiClient) ListDbAuditLogsExportConfigs(clusterId string) ybmclient.ApiListDbAuditExporterConfigRequest {
+func (a *AuthApiClient) ListIntegrations() ybmclient.ApiListTelemetryProvidersRequest {
+	return a.ApiClient.TelemetryProviderApi.ListTelemetryProviders(a.ctx, a.AccountID, a.ProjectID)
+}
+
+func (a *AuthApiClient) ListDbAuditExporterConfig(clusterId string) ybmclient.ApiListDbAuditExporterConfigRequest {
 	return a.ApiClient.ClusterApi.ListDbAuditExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) DeleteDbAuditLogsExportConfig(configId string, telemetryProviderId string) ybmclient.ApiRemoveDbAuditLogExporterConfigRequest {
-	return a.ApiClient.ClusterApi.RemoveDbAuditLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId, telemetryProviderId)
+func (a *AuthApiClient) UnassignDbAuditLogsExportConfig(configId string, integrationId string) ybmclient.ApiRemoveDbAuditLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.RemoveDbAuditLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId, integrationId)
 }
 
 func (a *AuthApiClient) DeleteMetricsExporterConfig(configId string) ybmclient.ApiDeleteMetricsExporterConfigRequest {
 	return a.ApiClient.MetricsExporterConfigApi.DeleteMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId)
+}
+
+func (a *AuthApiClient) DeleteIntegration(configId string) ybmclient.ApiDeleteTelemetryProviderRequest {
+	return a.ApiClient.TelemetryProviderApi.DeleteTelemetryProvider(a.ctx, a.AccountID, a.ProjectID, configId)
 }
 
 func (a *AuthApiClient) RemoveMetricsExporterConfigFromCluster(clusterId string) ybmclient.ApiRemoveMetricsExporterConfigFromClusterRequest {
@@ -1519,6 +1535,10 @@ func (a *AuthApiClient) StopMetricsExporter(clusterId string) ybmclient.ApiStopM
 
 func (a *AuthApiClient) UpdateMetricsExporterConfig(configId string) ybmclient.ApiUpdateMetricsExporterConfigRequest {
 	return a.ApiClient.MetricsExporterConfigApi.UpdateMetricsExporterConfig(a.ctx, a.AccountID, a.ProjectID, configId)
+}
+
+func (a *AuthApiClient) UpdateIntegration(configId string) ybmclient.ApiUpdateTelemetryProviderRequest {
+	return a.ApiClient.TelemetryProviderApi.UpdateTelemetryProvider(a.ctx, a.AccountID, a.ProjectID, configId)
 }
 
 func (a *AuthApiClient) GetConfigByName(configName string) (*ybmclient.MetricsExporterConfigurationData, error) {
