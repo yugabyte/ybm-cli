@@ -23,8 +23,8 @@ import (
 )
 
 const (
-	defaultDbAuditLogsExporterListing = "table {{.ID}}\t{{.CreatedAt}}\t{{.ClusterId}}\t{{.TelemetryProviderId}}\t{{.State}}\t{{.YsqlConfig}}"
-	telemetryProviderIdHeader         = "Telemetry Provider ID"
+	defaultDbAuditLogsExporterListing = "table {{.ID}}\t{{.CreatedAt}}\t{{.ClusterId}}\t{{.IntegrationId}}\t{{.State}}\t{{.YsqlConfig}}"
+	integrationIdHeader               = "Integration ID"
 	ysqlConfigHeader                  = "Ysql Config"
 )
 
@@ -66,7 +66,7 @@ func NewDbAuditLogsExporterContext() *DbAuditLogsExporterContext {
 		"YsqlConfig":          ysqlConfigHeader,
 		"ID":                  "ID",
 		"State":               stateHeader,
-		"TelemetryProviderId": telemetryProviderIdHeader,
+		"IntegrationId":       integrationIdHeader,
 		"ClusterId":           clusterIdHeader,
 		"CreatedAt":           dateCreatedAtHeader,
 	}
@@ -81,7 +81,7 @@ func (a *DbAuditLogsExporterContext) State() string {
 	return string(a.a.Info.State)
 }
 
-func (a *DbAuditLogsExporterContext) TelemetryProviderId() string {
+func (a *DbAuditLogsExporterContext) IntegrationId() string {
 	return a.a.Spec.ExporterId
 }
 

@@ -47,11 +47,11 @@ var assignDbAuditLogsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		clusterId, _ := cmd.Flags().GetString("cluster-id")
-		telemetryProviderId, _ := cmd.Flags().GetString("telemetry-provider-id")
+		integrationId, _ := cmd.Flags().GetString("integration-id")
 		ysqlConfig, _ := cmd.Flags().GetStringToString("ysql-config")
 		statement_classes, _ := cmd.Flags().GetString("statement_classes")
 
-		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, telemetryProviderId)
+		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, integrationId)
 
 		if err != nil {
 			logrus.Fatalf(err.Error())
@@ -70,9 +70,9 @@ var assignDbAuditLogsExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		dbAuditTelemetryProviderId := resp.GetData().Info.Id
+		dbAuditIntegrationId := resp.GetData().Info.Id
 
-		msg := fmt.Sprintf("The db audit exporter config %s is being created", formatter.Colorize(dbAuditTelemetryProviderId, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The db audit exporter config %s is being created", formatter.Colorize(dbAuditIntegrationId, formatter.GREEN_COLOR))
 
 		fmt.Println(msg)
 
@@ -93,11 +93,11 @@ var updateDbAuditLogsExporterCmd = &cobra.Command{
 
 		clusterId, _ := cmd.Flags().GetString("cluster-id")
 		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
-		telemetryProviderId, _ := cmd.Flags().GetString("telemetry-provider-id")
+		integrationId, _ := cmd.Flags().GetString("integration-id")
 		ysqlConfig, _ := cmd.Flags().GetStringToString("ysql-config")
 		statement_classes, _ := cmd.Flags().GetString("statement_classes")
 
-		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, telemetryProviderId)
+		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, integrationId)
 
 		if err != nil {
 			logrus.Fatalf(err.Error())
@@ -109,16 +109,16 @@ var updateDbAuditLogsExporterCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		resp, r, err := authApi.UpdateDbAuditLogsExporterConfig(clusterId, exportConfigId).DbAuditExporterConfigSpec(*dbAuditLogsExporterSpec).Execute()
+		resp, r, err := authApi.UpdateDbAuditExporterConfig(clusterId, exportConfigId).DbAuditExporterConfigSpec(*dbAuditLogsExporterSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		dbAuditTelemetryProviderId := resp.GetData().Info.Id
+		dbAuditIntegrationId := resp.GetData().Info.Id
 
-		msg := fmt.Sprintf("The db audit exporter config %s is being updated", formatter.Colorize(dbAuditTelemetryProviderId, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The db audit exporter config %s is being updated", formatter.Colorize(dbAuditIntegrationId, formatter.GREEN_COLOR))
 
 		fmt.Println(msg)
 
@@ -144,7 +144,7 @@ var listDbAuditLogsExporterCmd = &cobra.Command{
 
 		clusterId, _ := cmd.Flags().GetString("cluster-id")
 
-		resp, r, err := authApi.ListDbAuditLogsExportConfigs(clusterId).Execute()
+		resp, r, err := authApi.ListDbAuditExporterConfig(clusterId).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
@@ -187,7 +187,7 @@ var removeDbAuditLogsExporterCmd = &cobra.Command{
 		clusterId, _ := cmd.Flags().GetString("cluster-id")
 		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
 
-		resp, err := authApi.DeleteDbAuditLogsExportConfig(clusterId, exportConfigId).Execute()
+		resp, err := authApi.UnassignDbAuditLogsExportConfig(clusterId, exportConfigId).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
@@ -201,8 +201,8 @@ var removeDbAuditLogsExporterCmd = &cobra.Command{
 func init() {
 	DbAuditLogsExporterCmd.AddCommand(assignDbAuditLogsExporterCmd)
 	assignDbAuditLogsExporterCmd.Flags().SortFlags = false
-	assignDbAuditLogsExporterCmd.Flags().String("telemetry-provider-id", "", "[REQUIRED] The ID of the telemetry provider")
-	assignDbAuditLogsExporterCmd.MarkFlagRequired("telemetry-provider-id")
+	assignDbAuditLogsExporterCmd.Flags().String("integration-id", "", "[REQUIRED] The ID of the Integration")
+	assignDbAuditLogsExporterCmd.MarkFlagRequired("integration-id")
 	assignDbAuditLogsExporterCmd.Flags().StringToString("ysql-config", nil, `[REQUIRED] The ysql config to setup DB auditting
 	Please provide key value pairs as follows:
 	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
@@ -224,8 +224,8 @@ func init() {
 	updateDbAuditLogsExporterCmd.Flags().SortFlags = false
 	updateDbAuditLogsExporterCmd.Flags().String("export-config-id", "", "[REQUIRED] The ID of the DB audit export config")
 	updateDbAuditLogsExporterCmd.MarkFlagRequired("export-config-id")
-	updateDbAuditLogsExporterCmd.Flags().String("telemetry-provider-id", "", "[REQUIRED] The ID of the telemetry provider")
-	updateDbAuditLogsExporterCmd.MarkFlagRequired("telemetry-provider-id")
+	updateDbAuditLogsExporterCmd.Flags().String("integration-id", "", "[REQUIRED] The ID of the Integration")
+	updateDbAuditLogsExporterCmd.MarkFlagRequired("integration-id")
 	updateDbAuditLogsExporterCmd.Flags().StringToString("ysql-config", nil, `The ysql config to setup DB auditting
 	Please provide key value pairs as follows:
 	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
@@ -245,7 +245,7 @@ func init() {
 	removeDbAuditLogsExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }
 
-func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasses string, telemetryProviderId string) (*ybmclient.DbAuditExporterConfigSpec, error) {
+func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasses string, integrationId string) (*ybmclient.DbAuditExporterConfigSpec, error) {
 	log_catalog := ysqlConfigMap["log_catalog"]
 	log_client := ysqlConfigMap["log_client"]
 	log_level := ysqlConfigMap["log_level"]
@@ -337,5 +337,5 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 
 	ysqlConfig.SetLogSettings(*log_settings)
 
-	return ybmclient.NewDbAuditExporterConfigSpec(*ysqlConfig, telemetryProviderId), nil
+	return ybmclient.NewDbAuditExporterConfigSpec(*ysqlConfig, integrationId), nil
 }

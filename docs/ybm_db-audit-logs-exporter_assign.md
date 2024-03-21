@@ -13,16 +13,16 @@ ybm db-audit-logs-exporter assign [flags]
 ### Options
 
 ```
-      --telemetry-provider-id string   [REQUIRED] The ID of the telemetry provider
-      --ysql-config stringToString     [REQUIRED] The ysql config to setup DB auditting
-                                       	Please provide key value pairs as follows:
-                                       	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
-                                       	log_relation=<boolean>,log_statement_once=<boolean> (default [])
-      --statement_classes string       [REQUIRED] The ysql config statement classes
-                                       	Please provide key value pairs as follows:
-                                       	statement_classes=READ,WRITE,MISC
-      --cluster-id string              [REQUIRED] The cluster ID to assign DB auditting
-  -h, --help                           help for assign
+      --integration-id string        [REQUIRED] The ID of the Integration
+      --ysql-config stringToString   [REQUIRED] The ysql config to setup DB auditting
+                                     	Please provide key value pairs as follows:
+                                     	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
+                                     	log_relation=<boolean>,log_statement_once=<boolean> (default [])
+      --statement_classes string     [REQUIRED] The ysql config statement classes
+                                     	Please provide key value pairs as follows:
+                                     	statement_classes=READ,WRITE,MISC
+      --cluster-id string            [REQUIRED] The cluster ID to assign DB auditting
+  -h, --help                         help for assign
 ```
 
 ### Options inherited from parent commands
