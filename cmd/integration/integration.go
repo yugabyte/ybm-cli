@@ -210,47 +210,6 @@ var updateIntegrationCmd = &cobra.Command{
 	},
 }
 
-var validateIntegrationCmd = &cobra.Command{
-	Use:   "validate",
-	Short: "Validate Integration",
-	Long:  "Validate Integration",
-	Run: func(cmd *cobra.Command, args []string) {
-
-		IntegrationName, _ := cmd.Flags().GetString("config-name")
-		sinkType, _ := cmd.Flags().GetString("type")
-
-		//We initialise here, even if we error out later
-		sinkTypeEnum, err := ybmclient.NewTelemetryProviderTypeEnumFromValue(strings.ToUpper(sinkType))
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-		IntegrationSpec, err := setIntegrationConfiguration(cmd, IntegrationName, *sinkTypeEnum)
-		if err != nil {
-			logrus.Fatalf(err.Error())
-		}
-		authApi, err := ybmAuthClient.NewAuthApiClient()
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-		authApi.GetInfo("", "")
-
-		resp, r, err := authApi.ValidateIntegration().TelemetryProviderSpec(*IntegrationSpec).Execute()
-
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		isValid := resp.GetData().IsValid
-
-		if isValid {
-			fmt.Println("Integration is valid")
-		}else{
-			fmt.Println("Integration is invalid. Please check configuration parameters")
-		}
-	},
-}
-
 func init() {
 	IntegrationCmd.AddCommand(createIntegrationCmd)
 	createIntegrationCmd.Flags().SortFlags = false
@@ -293,21 +252,6 @@ func init() {
 	Please provide key value pairs as follows: 
 	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
 
-	IntegrationCmd.AddCommand(validateIntegrationCmd)
-	validateIntegrationCmd.Flags().SortFlags = false
-	validateIntegrationCmd.Flags().String("config-name", "", "[REQUIRED] The name of the Integration")
-	validateIntegrationCmd.MarkFlagRequired("config-name")
-	validateIntegrationCmd.Flags().String("type", "", "[REQUIRED] The type of third party Integration sink")
-	validateIntegrationCmd.MarkFlagRequired("type")
-	validateIntegrationCmd.Flags().StringToString("datadog-spec", nil, `Configuration for Datadog. 
-	Please provide key value pairs as follows: 
-	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
-	validateIntegrationCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
-	Please provide key value pairs as follows: 
-	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
-	validateIntegrationCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
-	Please provide key value pairs as follows: 
-	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
 }
 
 func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sinkTypeEnum ybmclient.TelemetryProviderTypeEnum) (*ybmclient.TelemetryProviderSpec, error) {
