@@ -21,8 +21,7 @@ ybm cluster update [flags]
       --fault-tolerance string    [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION.
   -h, --help                      help for update
       --new-name string           [OPTIONAL] The new name to be given to the cluster.
-      --node-config stringToInt   [OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If provided, num-cores is mandatory, while disk-size-gb and disk-iops are optional. (default [])
-      --region-info stringArray   [OPTIONAL] Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If provided, region and num-nodes are mandatory, vpc is optional.
+      --region-info stringArray   Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. Region, num-nodes, num-cores, disk-size-gb are mandatory while disk-iops (AWS only) and vpc are optional.
 ```
 
 ### Options inherited from parent commands

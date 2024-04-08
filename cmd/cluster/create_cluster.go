@@ -42,7 +42,6 @@ var createClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
-		asymmetricGeoEnabled := util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO)
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		credentials, _ := cmd.Flags().GetStringToString("credentials")
@@ -59,10 +58,8 @@ var createClusterCmd = &cobra.Command{
 		if changedNodeInfo {
 			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
 			numCores, ok := nodeConfig["num-cores"]
-			if !asymmetricGeoEnabled && !ok {
-				logrus.Fatalln("Number of cores not specified in node config")
-			}
-			if asymmetricGeoEnabled && ok {
+
+			if ok {
 				defaultNumCores = numCores
 			}
 			if diskSizeGb, ok := nodeConfig["disk-size-gb"]; ok {
@@ -98,15 +95,15 @@ var createClusterCmd = &cobra.Command{
 							regionInfoMap["vpc"] = val
 						}
 					case "num-cores":
-						if asymmetricGeoEnabled && len(strings.TrimSpace(val)) != 0 {
+						if len(strings.TrimSpace(val)) != 0 {
 							regionInfoMap["num-cores"] = val
 						}
 					case "disk-size-gb":
-						if asymmetricGeoEnabled && len(strings.TrimSpace(val)) != 0 {
+						if len(strings.TrimSpace(val)) != 0 {
 							regionInfoMap["disk-size-gb"] = val
 						}
 					case "disk-iops":
-						if asymmetricGeoEnabled && len(strings.TrimSpace(val)) != 0 {
+						if len(strings.TrimSpace(val)) != 0 {
 							regionInfoMap["disk-iops"] = val
 						}
 					}
@@ -118,13 +115,13 @@ var createClusterCmd = &cobra.Command{
 				if _, ok := regionInfoMap["num-nodes"]; !ok {
 					logrus.Fatalln("Number of nodes not specified in region info")
 				}
-				if _, ok := regionInfoMap["num-cores"]; asymmetricGeoEnabled && !ok && defaultNumCores > 0 {
+				if _, ok := regionInfoMap["num-cores"]; !ok && defaultNumCores > 0 {
 					regionInfoMap["num-cores"] = strconv.Itoa(defaultNumCores)
 				}
-				if _, ok := regionInfoMap["disk-size-gb"]; asymmetricGeoEnabled && !ok && defaultDiskSizeGb > 0 {
+				if _, ok := regionInfoMap["disk-size-gb"]; !ok && defaultDiskSizeGb > 0 {
 					regionInfoMap["disk-size-gb"] = strconv.Itoa(defaultDiskSizeGb)
 				}
-				if _, ok := regionInfoMap["disk-iops"]; asymmetricGeoEnabled && !ok && defaultDiskIops > 0 {
+				if _, ok := regionInfoMap["disk-iops"]; !ok && defaultDiskIops > 0 {
 					regionInfoMap["disk-iops"] = strconv.Itoa(defaultDiskIops)
 				}
 
@@ -229,13 +226,8 @@ func init() {
 	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION. Default NONE.")
 	createClusterCmd.Flags().Int32("num-faults-to-tolerate", 0, "[OPTIONAL] The number of domain faults to tolerate for the level specified. The possible values are 0 for NONE, 1 for ZONE and [1-3] for anything else. Defaults to 0 for NONE, 1 otherwise.")
 	createClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If specified, num-cores is mandatory, while disk-size-gb and disk-iops are optional.")
-	if util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO) {
-		createClusterCmd.Flags().MarkDeprecated("node-config", "please use --region-info to specify num-cores, disk-size-gb, and disk-iops")
-		createClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If specified, region and num-nodes are mandatory, while num-cores, disk-size-gb, disk-iops, and vpc are optional. Information about multiple regions can be specified by using multiple --region-info arguments. Default if not specified is us-west-2 AWS region.`)
-	} else {
-		createClusterCmd.Flags().StringArray("region-info", []string{}, `[OPTIONAL] Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name> as the value. If specified, region and num-nodes are mandatory, vpc is optional. Information about multiple regions can be specified by using multiple --region-info arguments. Default if not specified is us-west-2 AWS region.`)
-	}
+	createClusterCmd.Flags().MarkDeprecated("node-config", "please use --region-info to specify num-cores, disk-size-gb, and disk-iops")
+	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. Region, num-nodes, num-cores, disk-size-gb are mandatory while disk-iops (AWS only) and vpc are optional. Information about multiple regions can be specified by using multiple --region-info arguments.`)
 	createClusterCmd.Flags().String("preferred-region", "", "[OPTIONAL] The preferred region in a multi region cluster. A preferred region is where all the reads and writes are handled.")
 	createClusterCmd.Flags().String("default-region", "", "[OPTIONAL] The default region in a geo partitioned cluster. A default region is where all the tables not created within a tablespace reside.")
-
 }
