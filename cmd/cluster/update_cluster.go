@@ -205,11 +205,11 @@ func init() {
 	updateClusterCmd.Flags().String("new-name", "", "[OPTIONAL] The new name to be given to the cluster.")
 	updateClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
-	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If provided, num-cores is mandatory, while disk-size-gb and disk-iops are optional.")
-	updateClusterCmd.Flags().MarkDeprecated("node-config", "please use --region-info to specify num-cores, disk-size-gb, and disk-iops")
-	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. Region, num-nodes, num-cores, disk-size-gb are mandatory while disk-iops (AWS only) and vpc are optional.`)
+	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Number of vCPUs and disk size per node for the cluster, provided as key-value pairs. Arguments are num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). num-cores is required.")
+	updateClusterCmd.Flags().MarkDeprecated("node-config", "Deprecated. Use --region-info to specify num-cores, disk-size-gb, and disk-iops.")
+	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
-	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION.")
+	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
 	updateClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Production or Innovation or Preview.")
 
 }

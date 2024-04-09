@@ -29,11 +29,11 @@ ybm cluster create [flags]
                                        	For AZURE:
                                        	cloud-provider=AZURE,azu-client-id=<client-id>,azu-client-secret=<client-secret>,azu-tenant-id=<tenant-id>,azu-key-name=<key-name>,azu-key-vault-uri=<key-vault-uri>.
                                        	If specified, all parameters for that provider are mandatory.
-      --fault-tolerance string         [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION. Default NONE.
+      --fault-tolerance string         [OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.
       --num-faults-to-tolerate int32   [OPTIONAL] The number of domain faults to tolerate for the level specified. The possible values are 0 for NONE, 1 for ZONE and [1-3] for anything else. Defaults to 0 for NONE, 1 otherwise.
-      --region-info stringArray        Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. Region, num-nodes, num-cores, disk-size-gb are mandatory while disk-iops (AWS only) and vpc are optional. Information about multiple regions can be specified by using multiple --region-info arguments.
-      --preferred-region string        [OPTIONAL] The preferred region in a multi region cluster. A preferred region is where all the reads and writes are handled.
-      --default-region string          [OPTIONAL] The default region in a geo partitioned cluster. A default region is where all the tables not created within a tablespace reside.
+      --region-info stringArray        Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.
+      --preferred-region string        [OPTIONAL] The preferred region in a multi region cluster. The preferred region handles all read and write requests from clients.
+      --default-region string          [OPTIONAL] The primary region in a partition-by-region cluster. The primary region is where all the tables not created in a tablespace reside.
   -h, --help                           help for create
 ```
 

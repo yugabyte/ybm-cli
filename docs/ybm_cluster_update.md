@@ -18,10 +18,10 @@ ybm cluster update [flags]
       --cluster-tier string       [OPTIONAL] The tier of the cluster. Sandbox or Dedicated.
       --cluster-type string       [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.
       --database-version string   [OPTIONAL] The database version of the cluster. Production or Innovation or Preview.
-      --fault-tolerance string    [OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION.
+      --fault-tolerance string    [OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.
   -h, --help                      help for update
       --new-name string           [OPTIONAL] The new name to be given to the cluster.
-      --region-info stringArray   Region information for the cluster. Please provide key value pairs, region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. Region, num-nodes, num-cores, disk-size-gb are mandatory while disk-iops (AWS only) and vpc are optional.
+      --region-info stringArray   Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.
 ```
 
 ### Options inherited from parent commands

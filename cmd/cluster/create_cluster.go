@@ -223,11 +223,11 @@ func init() {
 	For AZURE:
 	cloud-provider=AZURE,azu-client-id=<client-id>,azu-client-secret=<client-secret>,azu-tenant-id=<tenant-id>,azu-key-name=<key-name>,azu-key-vault-uri=<key-vault-uri>.
 	If specified, all parameters for that provider are mandatory.`)
-	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] The fault tolerance domain of the cluster. The possible values are NONE, NODE, ZONE and REGION. Default NONE.")
+	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
 	createClusterCmd.Flags().Int32("num-faults-to-tolerate", 0, "[OPTIONAL] The number of domain faults to tolerate for the level specified. The possible values are 0 for NONE, 1 for ZONE and [1-3] for anything else. Defaults to 0 for NONE, 1 otherwise.")
-	createClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Configuration of the cluster nodes. Please provide key value pairs num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. If specified, num-cores is mandatory, while disk-size-gb and disk-iops are optional.")
-	createClusterCmd.Flags().MarkDeprecated("node-config", "please use --region-info to specify num-cores, disk-size-gb, and disk-iops")
-	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster. Please provide key value pairs region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> as the value. Region, num-nodes, num-cores, disk-size-gb are mandatory while disk-iops (AWS only) and vpc are optional. Information about multiple regions can be specified by using multiple --region-info arguments.`)
-	createClusterCmd.Flags().String("preferred-region", "", "[OPTIONAL] The preferred region in a multi region cluster. A preferred region is where all the reads and writes are handled.")
-	createClusterCmd.Flags().String("default-region", "", "[OPTIONAL] The default region in a geo partitioned cluster. A default region is where all the tables not created within a tablespace reside.")
+	createClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Number of vCPUs and disk size per node for the cluster, provided as key-value pairs. Arguments are num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). num-cores is required.")
+	createClusterCmd.Flags().MarkDeprecated("node-config", "Deprecated. Use --region-info to specify num-cores, disk-size-gb, and disk-iops")
+	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
+	createClusterCmd.Flags().String("preferred-region", "", "[OPTIONAL] The preferred region in a multi region cluster. The preferred region handles all read and write requests from clients.")
+	createClusterCmd.Flags().String("default-region", "", "[OPTIONAL] The primary region in a partition-by-region cluster. The primary region is where all the tables not created in a tablespace reside.")
 }
