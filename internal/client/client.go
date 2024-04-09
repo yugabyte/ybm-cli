@@ -156,8 +156,6 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 	var regionInfoProvided bool
 	var err error
 
-	asymmetricGeoEnabled := util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO)
-
 	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
 	totalNodes := 0
 	regionNodeInfoMap := map[string]*ybmclient.OptionalClusterNodeInfo{}
@@ -195,31 +193,29 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		info.SetIsDefault(false)
 		clusterRegionInfo = append(clusterRegionInfo, info)
 
-		if asymmetricGeoEnabled {
-			regionNodeInfo := ybmclient.NewOptionalClusterNodeInfo(0, 0, 0)
-			if numCores, ok := regionInfo["num-cores"]; ok {
-				i, err := strconv.Atoi(numCores)
-				if err != nil {
-					logrus.Fatalf("Unable to parse num-cores integer in %s", region)
-				}
-				regionNodeInfo.SetNumCores(int32(i))
+		regionNodeInfo := ybmclient.NewOptionalClusterNodeInfo(0, 0, 0)
+		if numCores, ok := regionInfo["num-cores"]; ok {
+			i, err := strconv.Atoi(numCores)
+			if err != nil {
+				logrus.Fatalf("Unable to parse num-cores integer in %s", region)
 			}
-			if diskSizeGb, ok := regionInfo["disk-size-gb"]; ok {
-				i, err := strconv.Atoi(diskSizeGb)
-				if err != nil {
-					logrus.Fatalf("Unable to parse disk-size-gb integer in %s", region)
-				}
-				regionNodeInfo.SetDiskSizeGb(int32(i))
-			}
-			if diskIops, ok := regionInfo["disk-iops"]; ok {
-				i, err := strconv.Atoi(diskIops)
-				if err != nil {
-					logrus.Fatalf("Unable to parse disk-iops integer in %s", region)
-				}
-				regionNodeInfo.SetDiskIops(int32(i))
-			}
-			regionNodeInfoMap[region] = regionNodeInfo
+			regionNodeInfo.SetNumCores(int32(i))
 		}
+		if diskSizeGb, ok := regionInfo["disk-size-gb"]; ok {
+			i, err := strconv.Atoi(diskSizeGb)
+			if err != nil {
+				logrus.Fatalf("Unable to parse disk-size-gb integer in %s", region)
+			}
+			regionNodeInfo.SetDiskSizeGb(int32(i))
+		}
+		if diskIops, ok := regionInfo["disk-iops"]; ok {
+			i, err := strconv.Atoi(diskIops)
+			if err != nil {
+				logrus.Fatalf("Unable to parse disk-iops integer in %s", region)
+			}
+			regionNodeInfo.SetDiskIops(int32(i))
+		}
+		regionNodeInfoMap[region] = regionNodeInfo
 	}
 
 	// This is to populate region in top level cloud info
@@ -309,7 +305,7 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 	cloud := string(cloudInfo.GetCode())
 	tier := string(clusterInfo.GetClusterTier())
 
-	if asymmetricGeoEnabled && regionInfoProvided {
+	if regionInfoProvided {
 		geoPartitioned := clusterInfo.GetClusterType() == "GEO_PARTITIONED"
 		clusterNodeInfoWithDefaults := *ybmclient.NewClusterNodeInfoWithDefaults()
 		// Create slice of desired regions.
@@ -942,8 +938,7 @@ func (a *AuthApiClient) GetSupportedNodeConfigurationsV2(cloud string, tier stri
 	// For geo clusters if FF is enabled, set isMultiRegion = false
 	// For all other clusters, set isMultiRegion = true
 	isMultiRegion := true
-	asymmetricGeoEnabled := util.IsFeatureFlagEnabled(util.ASYMMETRIC_GEO)
-	if len(regions) == 1 || cloud == "AZURE" || (geoPartitioned && asymmetricGeoEnabled) {
+	if len(regions) == 1 || cloud == "AZURE" || (geoPartitioned) {
 		isMultiRegion = false
 	}
 	instanceResp, resp, err := a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions(regions).IsMultiRegion(isMultiRegion).Execute()
