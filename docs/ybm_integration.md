@@ -35,5 +35,4 @@ ybm integration [flags]
 * [ybm integration create](ybm_integration_create.md)	 - Create Integration
 * [ybm integration delete](ybm_integration_delete.md)	 - Delete Integration
 * [ybm integration list](ybm_integration_list.md)	 - List Integration
-* [ybm integration update](ybm_integration_update.md)	 - Update Integration
 
