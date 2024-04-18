@@ -154,62 +154,6 @@ var deleteIntegrationCmd = &cobra.Command{
 	},
 }
 
-var updateIntegrationCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Update Integration",
-	Long:  "Update Integration",
-	Run: func(cmd *cobra.Command, args []string) {
-		authApi, err := ybmAuthClient.NewAuthApiClient()
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-		authApi.GetInfo("", "")
-
-		IntegrationName, _ := cmd.Flags().GetString("config-name")
-		sinkType, _ := cmd.Flags().GetString("type")
-
-		sinkTypeEnum, err := ybmclient.NewTelemetryProviderTypeEnumFromValue(strings.ToUpper(sinkType))
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		oldname := IntegrationName
-		if cmd.Flags().Changed("new-config-name") {
-			IntegrationName, _ = cmd.Flags().GetString("new-config-name")
-		}
-		//We initialise this one here, even if we error out later
-		IntegrationSpec, err := setIntegrationConfiguration(cmd, IntegrationName, *sinkTypeEnum)
-		if err != nil {
-			logrus.Fatalf(err.Error())
-		}
-
-		config, err := authApi.GetConfigByName(oldname)
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		resp, r, err := authApi.UpdateIntegration(config.GetInfo().Id).TelemetryProviderSpec(*IntegrationSpec).Execute()
-
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		msg := fmt.Sprintf("The Integration %s is being updated", formatter.Colorize(config.GetInfo().Id, formatter.GREEN_COLOR))
-
-		fmt.Println(msg)
-
-		IntegrationCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewIntegrationFormat(viper.GetString("output"), string(resp.GetData().Spec.Type)),
-		}
-
-		respArr := []ybmclient.TelemetryProviderData{resp.GetData()}
-
-		formatter.IntegrationWrite(IntegrationCtx, respArr)
-	},
-}
-
 func init() {
 	IntegrationCmd.AddCommand(createIntegrationCmd)
 	createIntegrationCmd.Flags().SortFlags = false
@@ -233,25 +177,6 @@ func init() {
 	deleteIntegrationCmd.Flags().String("config-name", "", "[REQUIRED] The name of the Integration")
 	deleteIntegrationCmd.MarkFlagRequired("config-name")
 	deleteIntegrationCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
-
-	IntegrationCmd.AddCommand(updateIntegrationCmd)
-	updateIntegrationCmd.Flags().SortFlags = false
-	updateIntegrationCmd.Flags().String("config-name", "", "[REQUIRED] The name of the Integration")
-	updateIntegrationCmd.MarkFlagRequired("config-name")
-	updateIntegrationCmd.Flags().String("type", "", "[REQUIRED] The type of third party Integration sink")
-	updateIntegrationCmd.MarkFlagRequired("type")
-	updateIntegrationCmd.Flags().String("new-config-name", "", "[OPTIONAL] The new name of the Integration")
-	updateIntegrationCmd.MarkFlagRequired("new-config-name")
-	updateIntegrationCmd.Flags().StringToString("datadog-spec", nil, `Configuration for Datadog. 
-	Please provide key value pairs as follows: 
-	api-key=<your-datadog-api-key>,site=<your-datadog-site-parameters>`)
-	updateIntegrationCmd.Flags().StringToString("grafana-spec", nil, `Configuration for Grafana. 
-	Please provide key value pairs as follows: 
-	access-policy-token=<your-grafana-token>,zone=<your-grafana-zone-parameter>,instance-id=<your-grafana-instance-id>,org-slug=<your-grafana-org-slug>`)
-	updateIntegrationCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
-	Please provide key value pairs as follows: 
-	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
-
 }
 
 func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sinkTypeEnum ybmclient.TelemetryProviderTypeEnum) (*ybmclient.TelemetryProviderSpec, error) {

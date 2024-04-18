@@ -62,7 +62,7 @@ var _ = Describe("Db Audit", func() {
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -82,7 +82,7 @@ ID                                     Date Created               Cluster ID    
 		})
 		It("should return required log setting when not set", func() {
 
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -133,7 +133,7 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -153,7 +153,7 @@ ID                                     Date Created               Cluster ID    
 		})
 		It("should return required log setting when not set", func() {
 
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=INFO,log_parameter=false,log_statement_once=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)

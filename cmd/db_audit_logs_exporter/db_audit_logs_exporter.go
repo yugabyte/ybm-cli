@@ -187,11 +187,10 @@ var removeDbAuditLogsExporterCmd = &cobra.Command{
 		clusterId, _ := cmd.Flags().GetString("cluster-id")
 		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
 
-		resp, err := authApi.UnassignDbAuditLogsExportConfig(clusterId, exportConfigId).Execute()
+		resp, _, err := authApi.UnassignDbAuditLogsExportConfig(clusterId, exportConfigId).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("Deleting Db Audit Logs Exporter Config %s\n", formatter.Colorize(exportConfigId, formatter.GREEN_COLOR))
