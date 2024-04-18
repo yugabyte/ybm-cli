@@ -245,7 +245,6 @@ var updatePolicyCmd = &cobra.Command{
 			backupTimeUTC := util.ConvertLocalTimeToUTC(backupTime)
 			cronExpression := util.GenerateCronExpression(daysOfWeek, backupTimeUTC)
 			scheduleSpec.SetCronExpression(cronExpression)
-			scheduleSpec.TimeIntervalInDays = nil
 		}
 
 		info := resp.GetData()[0].GetInfo()
