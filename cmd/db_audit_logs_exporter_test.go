@@ -32,13 +32,14 @@ import (
 var _ = Describe("Db Audit", func() {
 
 	var (
-		server              *ghttp.Server
-		statusCode          int
-		args                []string
-		responseAccount     openapi.AccountListResponse
-		responseProject     openapi.AccountListResponse
-		responseDbAudit     openapi.DbAuditExporterConfigResponse
-		responseDbAuditList openapi.DbAuditExporterConfigListResponse
+		server              	*ghttp.Server
+		statusCode          	int
+		args                	[]string
+		responseAccount     	openapi.AccountListResponse
+		responseProject     	openapi.AccountListResponse
+		responseDbAudit     	openapi.DbAuditExporterConfigResponse
+		responseDbAuditList 	openapi.DbAuditExporterConfigListResponse
+		responseIntegrationList openapi.TelemetryProviderListResponse
 	)
 
 	BeforeEach(func() {
@@ -54,7 +55,15 @@ var _ = Describe("Db Audit", func() {
 	Context("When associating DB Audit config", func() {
 		It("should associate cluster with DB Audit", func() {
 			statusCode = 200
-			err := loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
+			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
+			err = loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -62,7 +71,7 @@ var _ = Describe("Db Audit", func() {
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -72,17 +81,49 @@ ID                                     Date Created               Cluster ID    
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
-
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
+			err = loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/7bb68af6-0875-42e0-8665-dcf634ed9fd1/db-audit-log-exporter-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say(`\bError: required flag\(s\) "integration-id", "ysql-config", "statement_classes", "cluster-id" not set\b`))
+			Expect(session.Err).Should(gbytes.Say(`\bError: required flag\(s\) "integration-name", "ysql-config", "statement_classes", "cluster-id" not set\b`))
 			session.Kill()
 		})
 		It("should return required log setting when not set", func() {
-
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
+			err = loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/7bb68af6-0875-42e0-8665-dcf634ed9fd1/db-audit-log-exporter-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -111,7 +152,15 @@ ID                                     Date Created               Cluster ID    
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
-
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "list")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -120,46 +169,6 @@ ID                                     Date Created               Cluster ID    
 			session.Kill()
 		})
 
-	})
-
-	Context("When updating DB Audit config", func() {
-		It("should associate cluster with DB Audit", func() {
-			statusCode = 200
-			err := loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
-			Expect(err).ToNot(HaveOccurred())
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/7bb68af6-0875-42e0-8665-dcf634ed9fd1/db-audit-log-exporter-configs/123e4567-e89b-12d3-a456-426614174000"),
-					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
-				),
-			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
-			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-			Expect(err).NotTo(HaveOccurred())
-			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`The db audit exporter config 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being updated
-ID                                     Date Created               Cluster ID                             Integration ID                         State     Ysql Config
-9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   7bb68af6-0875-42e0-8665-dcf634ed9fd1   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":true,\"log_client\":true,\"log_level\":\"LOG\",\"log_parameter\":false,\"log_relation\":false,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
-			session.Kill()
-		})
-		It("should return required field name and type when not set", func() {
-
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update")
-			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-			Expect(err).NotTo(HaveOccurred())
-			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"export-config-id\", \"integration-id\", \"cluster-id\" not set$)"))
-			session.Kill()
-		})
-		It("should return required log setting when not set", func() {
-
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-id", "7bb68af6-0875-42e0-8665-dcf634ed9fd1", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--integration-id", "7c07c103-e3b2-48b6-ac30-764e9b5275e1", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false", "--statement_classes", "READ,WRITE")
-			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-			Expect(err).NotTo(HaveOccurred())
-			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("(?m:log_relation required for log settings$)"))
-			session.Kill()
-		})
 	})
 
 	Context("When removing db audit exporter config", func() {

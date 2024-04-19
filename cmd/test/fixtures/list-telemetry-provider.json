@@ -1,0 +1,30 @@
+{
+    "data": [
+        {
+            "spec": {
+                "name": "datadog-tp",
+                "type": "DATADOG",
+                "datadog_spec": {
+                    "api_key": "c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d",
+                    "site": "test"
+                },
+                "grafana_spec": null
+            },
+            "info": {
+                "id": "129f7c97-81ae-47c7-8f9e-40ab4390093f",
+                "cluster_ids": [],
+                "metadata": {
+                    "created_on": "2023-09-12T02:25:55.804Z",
+                    "updated_on": "2023-09-12T02:25:55.804Z"
+                }
+            }
+        }
+    ],
+    "_metadata": {
+        "continuation_token": null,
+        "links": {
+            "self": "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers",
+            "next": null
+        }
+    }
+}
