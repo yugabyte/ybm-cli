@@ -31,7 +31,6 @@ const (
 	TOOLS               FeatureFlag = "TOOLS"
 	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
-	INCREMENTAL_BACKUP  FeatureFlag = "INCREMENTAL_BACKUP"
 )
 
 func (f FeatureFlag) String() string {

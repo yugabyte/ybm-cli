@@ -78,43 +78,6 @@ var _ = Describe("BackupSchedules", func() {
 		})
 		Context("with a valid Api token and default output table", func() {
 
-			It("should return list of backup schedules with a paused schedule", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backup-schedules"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListBackupSchedules),
-					),
-				)
-				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
-				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-				Expect(err).NotTo(HaveOccurred())
-				session.Wait(2)
-				o := string(session.Out.Contents()[:])
-				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)   State
-1                     NA                 NA                  8                        PAUSED` + "\n"
-				Expect(o).Should(Equal(expected))
-
-				session.Kill()
-			})
-			It("should return backup schedules with cron expression with an active schedule", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/backup-schedules"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCronBackupSchedules),
-					),
-				)
-				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
-				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-				Expect(err).NotTo(HaveOccurred())
-				session.Wait(2)
-				o := string(session.Out.Contents()[:])
-				expected := `Time Interval(days)   Days of the Week   Backup Start Time   Retention Period(days)   State
-NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
-				Expect(o).Should(Equal(expected))
-				session.Kill()
-			})
 			It("should return list of backup schedules with a paused schedule with incremental backups", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -122,7 +85,6 @@ NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `      
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListIncrementalBackupSchedules),
 					),
 				)
-				os.Setenv("YBM_FF_INCREMENTAL_BACKUP", "true")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -131,7 +93,6 @@ NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `      
 				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   State
 1                     60                     NA                 NA                  8                        PAUSED` + "\n"
 				Expect(o).Should(Equal(expected))
-				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 				session.Kill()
 			})
 			It("should return backup schedules with cron expression with an active schedule with incremental backups", func() {
@@ -141,7 +102,6 @@ NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `      
 						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListIncrementalCronBackupSchedules),
 					),
 				)
-				os.Setenv("YBM_FF_INCREMENTAL_BACKUP", "true")
 				cmd := exec.Command(compiledCLIPath, "backup", "policy", "list", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -150,7 +110,6 @@ NA                    Su,We,Fr           ` + getLocalTime("2 3 * * *") + `      
 				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   State
 NA                    NA                     Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
 				Expect(o).Should(Equal(expected))
-				os.Unsetenv("YBM_FF_INCREMENTAL_BACKUP")
 
 				session.Kill()
 			})
