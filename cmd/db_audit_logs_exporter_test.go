@@ -49,6 +49,7 @@ var _ = Describe("Db Audit", func() {
 		Expect(err).ToNot(HaveOccurred())
 		os.Setenv("YBM_HOST", fmt.Sprintf("http://%s", server.Addr()))
 		os.Setenv("YBM_APIKEY", "test-token")
+		os.Setenv("YBM_FF_DB_AUDIT_LOGS", "true")
 	})
 
 	Context("When associating DB Audit config", func() {
