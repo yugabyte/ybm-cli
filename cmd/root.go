@@ -138,7 +138,7 @@ func init() {
 	rootCmd.AddCommand(user.UserCmd)
 	rootCmd.AddCommand(metrics_exporter.MetricsExporterCmd)
 	rootCmd.AddCommand(integration.IntegrationCmd)
-	rootCmd.AddCommand(db_audit_logs_exporter.DbAuditLogsExporterCmd)
+	util.AddCommandIfFeatureFlag(rootCmd, db_audit_logs_exporter.DbAuditLogsExporterCmd, util.DB_AUDIT_LOGS)
 	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)
 
