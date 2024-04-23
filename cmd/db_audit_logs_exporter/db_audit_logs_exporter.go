@@ -46,22 +46,28 @@ var assignDbAuditLogsExporterCmd = &cobra.Command{
 	Long:  "Assign DB Audit Logs to a Cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+
 		clusterId, _ := cmd.Flags().GetString("cluster-id")
-		integrationId, _ := cmd.Flags().GetString("integration-id")
+		integrationName, _ := cmd.Flags().GetString("integration-name")
 		ysqlConfig, _ := cmd.Flags().GetStringToString("ysql-config")
 		statement_classes, _ := cmd.Flags().GetString("statement_classes")
+
+		integrationId, err := getIntegrationIdFromName(integrationName, authApi)
+
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
 
 		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, integrationId)
 
 		if err != nil {
 			logrus.Fatalf(err.Error())
 		}
-
-		authApi, err := ybmAuthClient.NewAuthApiClient()
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-		authApi.GetInfo("", "")
 
 		resp, r, err := authApi.AssignDbAuditLogsExporterConfig(clusterId).DbAuditExporterConfigSpec(*dbAuditLogsExporterSpec).Execute()
 
@@ -90,24 +96,29 @@ var updateDbAuditLogsExporterCmd = &cobra.Command{
 	Short: "Update DB Audit",
 	Long:  "Update DB Audit Log Configuration for a Cluster",
 	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
 
 		clusterId, _ := cmd.Flags().GetString("cluster-id")
 		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
-		integrationId, _ := cmd.Flags().GetString("integration-id")
+		integrationName, _ := cmd.Flags().GetString("integration-name")
 		ysqlConfig, _ := cmd.Flags().GetStringToString("ysql-config")
 		statement_classes, _ := cmd.Flags().GetString("statement_classes")
+
+		integrationId, err := getIntegrationIdFromName(integrationName, authApi)
+
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
 
 		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, integrationId)
 
 		if err != nil {
 			logrus.Fatalf(err.Error())
 		}
-		
-		authApi, err := ybmAuthClient.NewAuthApiClient()
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-		authApi.GetInfo("", "")
 
 		resp, r, err := authApi.UpdateDbAuditExporterConfig(clusterId, exportConfigId).DbAuditExporterConfigSpec(*dbAuditLogsExporterSpec).Execute()
 
@@ -200,8 +211,8 @@ var removeDbAuditLogsExporterCmd = &cobra.Command{
 func init() {
 	DbAuditLogsExporterCmd.AddCommand(assignDbAuditLogsExporterCmd)
 	assignDbAuditLogsExporterCmd.Flags().SortFlags = false
-	assignDbAuditLogsExporterCmd.Flags().String("integration-id", "", "[REQUIRED] The ID of the Integration")
-	assignDbAuditLogsExporterCmd.MarkFlagRequired("integration-id")
+	assignDbAuditLogsExporterCmd.Flags().String("integration-name", "", "[REQUIRED] Name of the Integration")
+	assignDbAuditLogsExporterCmd.MarkFlagRequired("integration-name")
 	assignDbAuditLogsExporterCmd.Flags().StringToString("ysql-config", nil, `[REQUIRED] The ysql config to setup DB auditting
 	Please provide key value pairs as follows:
 	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
@@ -223,8 +234,8 @@ func init() {
 	updateDbAuditLogsExporterCmd.Flags().SortFlags = false
 	updateDbAuditLogsExporterCmd.Flags().String("export-config-id", "", "[REQUIRED] The ID of the DB audit export config")
 	updateDbAuditLogsExporterCmd.MarkFlagRequired("export-config-id")
-	updateDbAuditLogsExporterCmd.Flags().String("integration-id", "", "[REQUIRED] The ID of the Integration")
-	updateDbAuditLogsExporterCmd.MarkFlagRequired("integration-id")
+	updateDbAuditLogsExporterCmd.Flags().String("integration-name", "", "[REQUIRED] Name of the Integration")
+	updateDbAuditLogsExporterCmd.MarkFlagRequired("integration-name")
 	updateDbAuditLogsExporterCmd.Flags().StringToString("ysql-config", nil, `The ysql config to setup DB auditting
 	Please provide key value pairs as follows:
 	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
@@ -242,6 +253,21 @@ func init() {
 	removeDbAuditLogsExporterCmd.Flags().String("cluster-id", "", "[REQUIRED] The cluster ID to assign DB auditting")
 	removeDbAuditLogsExporterCmd.MarkFlagRequired("cluster-id")
 	removeDbAuditLogsExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+}
+
+func getIntegrationIdFromName(integrationName string, authApi *ybmAuthClient.AuthApiClient) (string, error){
+	integration, _, err := authApi.ListIntegrations().Name(integrationName).Execute()
+	if err != nil {
+		return "" , err
+	}
+
+	integrationData := integration.GetData()
+
+	if len(integrationData) == 0 {
+		return "", fmt.Errorf("No integrations found with given name")
+	}
+
+	return integrationData[0].GetInfo().Id, nil
 }
 
 func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasses string, integrationId string) (*ybmclient.DbAuditExporterConfigSpec, error) {
