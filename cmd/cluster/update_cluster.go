@@ -206,7 +206,7 @@ func init() {
 	updateClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
 	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Number of vCPUs and disk size per node for the cluster, provided as key-value pairs. Arguments are num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). num-cores is required.")
-	updateClusterCmd.Flags().MarkDeprecated("node-config", "Deprecated. Use --region-info to specify num-cores, disk-size-gb, and disk-iops.")
+	updateClusterCmd.Flags().MarkDeprecated("node-config", "use --region-info to specify num-cores, disk-size-gb, and disk-iops.")
 	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
