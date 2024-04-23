@@ -220,6 +220,7 @@ var updatePolicyCmd = &cobra.Command{
 			backupTimeUTC := util.ConvertLocalTimeToUTC(backupTime)
 			cronExpression := util.GenerateCronExpression(daysOfWeek, backupTimeUTC)
 			backupScheduleSpec.SetCronExpression(cronExpression)
+			backupScheduleSpec.UnsetTimeIntervalInDays()
 		}
 
 		if cmd.Flags().Changed("incremental-backup-frequency-in-minutes") {
