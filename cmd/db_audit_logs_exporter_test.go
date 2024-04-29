@@ -185,19 +185,19 @@ ID                                     Date Created               Cluster ID    
 	Context("When removing db audit exporter config", func() {
 		It("should delete the config", func() {
 			statusCode = 200
-			err := loadJson("./test/fixtures/list-db-audit.json", &responseDbAuditList)
+			err := loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(http.MethodDelete, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-audit-log-exporter-configs/123e4567-e89b-12d3-a456-426614174000"),
-					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAuditList),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
 			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "unassign", "--cluster-name", "stunning-sole", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--force")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Deleting Db Audit Logs Exporter Config 123e4567-e89b-12d3-a456-426614174000`))
+			Expect(session.Out).Should(gbytes.Say(`Request submitted to remove Db Audit Logging 123e4567-e89b-12d3-a456-426614174000`))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {

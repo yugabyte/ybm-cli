@@ -80,19 +80,38 @@ var assignDbAuditLogsExporterCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
+		respData := resp.GetData()
 
-		dbAuditIntegrationId := resp.GetData().Info.Id
+		dbAuditLogConfigId := respData.Info.Id
 
-		msg := fmt.Sprintf("The db audit exporter config %s is being created", formatter.Colorize(dbAuditIntegrationId, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The db audit exporter config %s is being created", formatter.Colorize(dbAuditLogConfigId, formatter.GREEN_COLOR))
 
-		fmt.Println(msg)
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_ENABLE_DATABASE_AUDIT_LOGGING, []string{"FAILED", "SUCCEEDED"}, msg)
+			if err != nil {
+				logrus.Fatalf("error when getting task status: %s", err)
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
+			}
+			fmt.Printf("DB audit logging %v has been started on the cluster %v\n", formatter.Colorize(dbAuditLogConfigId, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+			respC, r, err := authApi.ListDbAuditExporterConfig(clusterId).Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", r)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			}
+			respData = respC.GetData()[0]
+		} else {
+			fmt.Println(msg)
+		}
 
 		dbAuditLogsExporterCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewDbAuditLogsExporterFormat(viper.GetString("output")),
 		}
 
-		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, []openapi.DbAuditExporterConfigurationData{resp.GetData()})
+		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, []openapi.DbAuditExporterConfigurationData{respData})
 	},
 }
 
@@ -137,18 +156,38 @@ var updateDbAuditLogsExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		dbAuditIntegrationId := resp.GetData().Info.Id
+		respData := resp.GetData()
 
-		msg := fmt.Sprintf("The db audit exporter config %s is being updated", formatter.Colorize(dbAuditIntegrationId, formatter.GREEN_COLOR))
+		dbAuditLogConfigId := respData.Info.Id
 
-		fmt.Println(msg)
+		msg := fmt.Sprintf("The db audit exporter config %s is being updated", formatter.Colorize(dbAuditLogConfigId, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_EDIT_DATABASE_AUDIT_LOGGING, []string{"FAILED", "SUCCEEDED"}, msg)
+			if err != nil {
+				logrus.Fatalf("error when getting task status: %s", err)
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
+			}
+			fmt.Printf("DB audit logging configuration %v has been updated on the cluster %v\n", formatter.Colorize(dbAuditLogConfigId, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+
+			respC, r, err := authApi.ListDbAuditExporterConfig(clusterId).Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", r)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			}
+			respData = respC.GetData()[0]
+		} else {
+			fmt.Println(msg)
+		}
 
 		dbAuditLogsExporterCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewDbAuditLogsExporterFormat(viper.GetString("output")),
 		}
 
-		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, []openapi.DbAuditExporterConfigurationData{resp.GetData()})
+		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, []openapi.DbAuditExporterConfigurationData{respData})
 	},
 }
 
@@ -222,9 +261,24 @@ var removeDbAuditLogsExporterCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Deleting Db Audit Logs Exporter Config %s\n", formatter.Colorize(exportConfigId, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Request submitted to remove Db Audit Logging %s\n", formatter.Colorize(exportConfigId, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DISABLE_DATABASE_AUDIT_LOGGING, []string{"FAILED", "SUCCEEDED"}, msg)
+			if err != nil {
+				logrus.Fatalf("error when getting task status: %s", err)
+			}
+			if returnStatus != "SUCCEEDED" {
+				logrus.Fatalf("Operation failed with error: %s", returnStatus)
+			}
+			fmt.Printf("DB audit logging %v has been removed from the cluster %v\n", formatter.Colorize(exportConfigId, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			return
+		} else {
+			fmt.Println(msg)
+		}
 	},
 }
 
