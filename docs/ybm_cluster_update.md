@@ -17,7 +17,7 @@ ybm cluster update [flags]
       --cluster-name string       [REQUIRED] Name of the cluster.
       --cluster-tier string       [OPTIONAL] The tier of the cluster. Sandbox or Dedicated.
       --cluster-type string       [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.
-      --database-version string   [OPTIONAL] The database version of the cluster. Production or Innovation or Preview.
+      --database-version string   [OPTIONAL] The database version of the cluster. Production or Innovation or Preview or Early Access.
       --fault-tolerance string    [OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.
   -h, --help                      help for update
       --new-name string           [OPTIONAL] The new name to be given to the cluster.
@@ -30,6 +30,7 @@ ybm cluster update [flags]
   -a, --apiKey string      YBM Api Key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
+      --host string        YBM Api hostname
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
   -o, --output string      Select the desired output format (table, json, pretty). Default to table
