@@ -17,7 +17,7 @@ ybm cluster update [flags]
       --cluster-name string       [REQUIRED] Name of the cluster.
       --cluster-tier string       [OPTIONAL] The tier of the cluster. Sandbox or Dedicated.
       --cluster-type string       [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.
-      --database-version string   [OPTIONAL] The database version of the cluster. Production or Innovation or Preview or Early Access.
+      --database-version string   [OPTIONAL] The database version of the cluster. Production or Innovation or Preview or 'Early Access'.
       --fault-tolerance string    [OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.
   -h, --help                      help for update
       --new-name string           [OPTIONAL] The new name to be given to the cluster.
