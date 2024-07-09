@@ -29,7 +29,7 @@ import (
 var InstanceCmd = &cobra.Command{
 	Use:   "instance",
 	Short: "Manage instance types",
-	Long:  "Manage instance types for your YBM clusters",
+	Long:  "Manage instance types for your YugabyteDB Aeon clusters",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

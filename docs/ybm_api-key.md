@@ -4,7 +4,7 @@ Manage API Keys
 
 ### Synopsis
 
-Manage API Keys in your YBM account
+Manage API Keys in your YugabyteDB Aeon account
 
 ```
 ybm api-key [flags]
@@ -19,10 +19,9 @@ ybm api-key [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon Api Key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
-      --host string        YBM Api hostname
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
   -o, --output string      Select the desired output format (table, json, pretty). Default to table

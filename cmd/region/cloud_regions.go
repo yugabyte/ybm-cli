@@ -28,7 +28,7 @@ import (
 var CloudRegionsCmd = &cobra.Command{
 	Use:   "region",
 	Short: "Manage cloud regions",
-	Long:  "Manage cloud regions for your YBM clusters",
+	Long:  "Manage cloud regions for your YugabyteDB Aeon clusters",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

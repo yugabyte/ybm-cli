@@ -38,7 +38,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// AuthApiClient is a auth YBM Client
+// AuthApiClient is a auth YugabyteDB Aeon Client
 
 var cliVersion = "v0.1.0"
 
