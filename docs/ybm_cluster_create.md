@@ -18,7 +18,7 @@ ybm cluster create [flags]
       --cloud-provider string          [OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP. Default AWS.
       --cluster-tier string            [OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.
       --cluster-type string            [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.
-      --database-version string        [OPTIONAL] The database version of the cluster. Production, Innovation, Preview or 'Early Access'. Default depends on cluster tier, Sandbox is Preview, Dedicated is Production.
+      --database-version string        [OPTIONAL] The database version of the cluster. Production, Innovation, Preview, or 'Early Access'. Default depends on cluster tier, Sandbox is Preview, Dedicated is Production.
       --encryption-spec string         [OPTIONAL] The customer managed key spec for the cluster.
                                        	Please provide key value pairs as follows:
                                        	For AWS: 
@@ -43,7 +43,6 @@ ybm cluster create [flags]
   -a, --apiKey string      YBM Api Key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
-      --host string        YBM Api hostname
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
   -o, --output string      Select the desired output format (table, json, pretty). Default to table
