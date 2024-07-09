@@ -4,7 +4,7 @@ Manage cloud regions
 
 ### Synopsis
 
-Manage cloud regions for your YBM clusters
+Manage cloud regions for your YugabyteDB Aeon clusters
 
 ```
 ybm region [flags]
@@ -19,7 +19,7 @@ ybm region [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,7 +31,7 @@ ybm region [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm region instance](ybm_region_instance.md)	 - Manage instance types
 * [ybm region list](ybm_region_list.md)	 - List Cloud Provider Regions
 

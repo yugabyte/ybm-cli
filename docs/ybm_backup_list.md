@@ -1,10 +1,10 @@
 ## ybm backup list
 
-List existing backups available for a cluster in YugabyteDB Managed
+List existing backups available for a cluster in YugabyteDB Aeon
 
 ### Synopsis
 
-List existing backups available for a cluster in YugabyteDB Managed
+List existing backups available for a cluster in YugabyteDB Aeon
 
 ```
 ybm backup list [flags]
@@ -20,7 +20,7 @@ ybm backup list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

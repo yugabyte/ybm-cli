@@ -43,8 +43,8 @@ var NalCmd = &cobra.Command{
 
 var listNetworkAllowListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List network allow lists in YugabyteDB Managed",
-	Long:  "List network allow lists in YugabyteDB Managed",
+	Short: "List network allow lists in YugabyteDB Aeon",
+	Long:  "List network allow lists in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -84,8 +84,8 @@ var listNetworkAllowListCmd = &cobra.Command{
 
 var createNetworkAllowListCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create network allow lists in YugabyteDB Managed",
-	Long:  "Create network allow lists in YugabyteDB Managed",
+	Short: "Create network allow lists in YugabyteDB Aeon",
+	Long:  "Create network allow lists in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -118,8 +118,8 @@ var createNetworkAllowListCmd = &cobra.Command{
 
 var deleteNetworkAllowListCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete network allow list from YugabyteDB Managed",
-	Long:  "Delete network allow list from YugabyteDB Managed",
+	Short: "Delete network allow list from YugabyteDB Aeon",
+	Long:  "Delete network allow list from YugabyteDB Aeon",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete %s: %s", "network-allow-list", nalName), viper.GetBool("force"))

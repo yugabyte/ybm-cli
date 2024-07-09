@@ -4,7 +4,7 @@ Modify role of a user
 
 ### Synopsis
 
-Modify role of a user in your YugabyteDB Managed account
+Modify role of a user in your YugabyteDB Aeon account
 
 ```
 ybm user update [flags]
@@ -22,7 +22,7 @@ ybm user update [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

@@ -22,8 +22,8 @@ import (
 
 var SignUpCmd = &cobra.Command{
 	Use:   "signup",
-	Short: "Open a browser to sign up for YugabyteDB Managed",
-	Long:  "Open a browser to sign up for YugabyteDB Managed",
+	Short: "Open a browser to sign up for YugabyteDB Aeon",
+	Long:  "Open a browser to sign up for YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		browser.OpenURL("https://cloud.yugabyte.com/signup")
 	},

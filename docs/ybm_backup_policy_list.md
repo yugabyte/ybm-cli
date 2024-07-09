@@ -4,7 +4,7 @@ List backup policies
 
 ### Synopsis
 
-List backup policies for cluster in YugabyteDB Managed
+List backup policies for cluster in YugabyteDB Aeon
 
 ```
 ybm backup policy list [flags]
@@ -20,7 +20,7 @@ ybm backup policy list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

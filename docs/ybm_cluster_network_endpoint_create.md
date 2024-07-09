@@ -22,7 +22,7 @@ ybm cluster network endpoint create [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string         YBM Api Key
+  -a, --apiKey string         YugabyteDB Aeon account API key
   -c, --cluster-name string   [REQUIRED] The name of the cluster.
       --config string         config file (default is $HOME/.ybm-cli.yaml)
       --debug                 Use debug mode, same as --logLevel debug

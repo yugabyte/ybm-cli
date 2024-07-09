@@ -1,10 +1,10 @@
 ## ybm backup create
 
-Create backup for a cluster in YugabyteDB Managed
+Create backup for a cluster in YugabyteDB Aeon
 
 ### Synopsis
 
-Create backup for a cluster in YugabyteDB Managed
+Create backup for a cluster in YugabyteDB Aeon
 
 ```
 ybm backup create [flags]
@@ -22,7 +22,7 @@ ybm backup create [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

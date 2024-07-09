@@ -38,7 +38,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// AuthApiClient is a auth YBM Client
+// AuthApiClient is a auth YugabyteDB Aeon Client
 
 var cliVersion = "v0.1.0"
 
@@ -68,7 +68,7 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 	apiKey := viper.GetString("apiKey")
 	// If the api key is empty, then tell the user to run the auth command.
 	if len(apiKey) == 0 {
-		logrus.Fatalln("No valid API key detected. Please run `ybm auth` to authenticate with YugabyteDB Managed.")
+		logrus.Fatalln("No valid API key detected. Please run `ybm auth` to authenticate with YugabyteDB Aeon.")
 	}
 
 	return NewAuthApiClientCustomUrlKey(url, apiKey)

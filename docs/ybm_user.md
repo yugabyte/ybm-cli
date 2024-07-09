@@ -4,7 +4,7 @@ Manage users
 
 ### Synopsis
 
-Manage users in your YugabyteDB Managed account
+Manage users in your YugabyteDB Aeon account
 
 ```
 ybm user [flags]
@@ -19,7 +19,7 @@ ybm user [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,7 +31,7 @@ ybm user [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm user delete](ybm_user_delete.md)	 - Delete a user
 * [ybm user invite](ybm_user_invite.md)	 - Invite a user
 * [ybm user list](ybm_user_list.md)	 - List users

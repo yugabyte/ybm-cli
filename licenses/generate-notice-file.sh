@@ -8,7 +8,7 @@ PARENT_DIRECTORY="${DIR%/*}"
 go install github.com/google/go-licenses@latest
 
 cat > NOTICE <<EOF
-Yugabyte Managed Command Line Interface (CLI)
+YugabyteDB Aeon Command Line Interface (CLI)
 Copyright © 2022-present Yugabyte, Inc. All Rights Reserved.
 
 This product is licensed to you under the Apache License, Version

@@ -4,7 +4,7 @@ Manage instance types
 
 ### Synopsis
 
-Manage instance types for your YBM clusters
+Manage instance types for your YugabyteDB Aeon clusters
 
 ```
 ybm region instance [flags]
@@ -19,7 +19,7 @@ ybm region instance [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

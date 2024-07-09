@@ -19,7 +19,7 @@ ybm role [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,7 +31,7 @@ ybm role [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm role create](ybm_role_create.md)	 - Create a custom role
 * [ybm role delete](ybm_role_delete.md)	 - Delete a custom role
 * [ybm role describe](ybm_role_describe.md)	 - Describe a role

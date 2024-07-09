@@ -31,7 +31,7 @@ import (
 var ApiKeyCmd = &cobra.Command{
 	Use:   "api-key",
 	Short: "Manage API Keys",
-	Long:  "Manage API Keys in your YBM account",
+	Long:  "Manage API Keys in your YugabyteDB Aeon account",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -40,7 +40,7 @@ var ApiKeyCmd = &cobra.Command{
 var listApiKeysCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List API Keys",
-	Long:  `List API Keys in your YBM account`,
+	Long:  `List API Keys in your YugabyteDB Aeon account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

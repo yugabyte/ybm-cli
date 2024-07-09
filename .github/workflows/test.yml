@@ -1,4 +1,4 @@
-name: YB Managed CLI Build
+name: YugabyteDB Aeon CLI Build
 
 on:
   push:

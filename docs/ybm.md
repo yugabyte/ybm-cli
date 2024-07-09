@@ -1,10 +1,10 @@
 ## ybm
 
-ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 
 ### Synopsis
 
-ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 
 ```
 ybm [flags]
@@ -13,7 +13,7 @@ ybm [flags]
 ### Options
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -h, --help               help for ybm
@@ -37,8 +37,8 @@ ybm [flags]
 * [ybm permission](ybm_permission.md)	 - View available permissions for roles
 * [ybm region](ybm_region.md)	 - Manage cloud regions
 * [ybm role](ybm_role.md)	 - Manage roles
-* [ybm signup](ybm_signup.md)	 - Open a browser to sign up for YugabyteDB Managed
-* [ybm usage](ybm_usage.md)	 - Billing usage for the account in YugabyteDB Managed
+* [ybm signup](ybm_signup.md)	 - Open a browser to sign up for YugabyteDB Aeon
+* [ybm usage](ybm_usage.md)	 - Billing usage for the account in YugabyteDB Aeon
 * [ybm user](ybm_user.md)	 - Manage users
 * [ybm vpc](ybm_vpc.md)	 - Manage VPCs
 

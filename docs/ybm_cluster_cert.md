@@ -4,7 +4,7 @@ Get the root CA certificate
 
 ### Synopsis
 
-Get the root CA certificate for your YBM clusters
+Get the root CA certificate for your YugabyteDB Aeon clusters
 
 ```
 ybm cluster cert [flags]
@@ -19,7 +19,7 @@ ybm cluster cert [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

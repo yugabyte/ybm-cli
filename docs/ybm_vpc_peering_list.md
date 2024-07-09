@@ -4,7 +4,7 @@ List VPC peerings
 
 ### Synopsis
 
-List VPC peerings in YugabyteDB Managed
+List VPC peerings in YugabyteDB Aeon
 
 ```
 ybm vpc peering list [flags]
@@ -20,7 +20,7 @@ ybm vpc peering list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

@@ -4,7 +4,7 @@ Delete a custom role
 
 ### Synopsis
 
-Delete a custom role in YugabyteDB Managed
+Delete a custom role in YugabyteDB Aeon
 
 ```
 ybm role delete [flags]
@@ -21,7 +21,7 @@ ybm role delete [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

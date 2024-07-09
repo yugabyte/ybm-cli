@@ -4,7 +4,7 @@ Describe a role
 
 ### Synopsis
 
-Describe a role in YugabyteDB Managed
+Describe a role in YugabyteDB Aeon
 
 ```
 ybm role describe [flags]
@@ -20,7 +20,7 @@ ybm role describe [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

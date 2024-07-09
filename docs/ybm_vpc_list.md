@@ -1,10 +1,10 @@
 ## ybm vpc list
 
-List VPCs in YugabyteDB Managed
+List VPCs in YugabyteDB Aeon
 
 ### Synopsis
 
-List VPCs in YugabyteDB Managed
+List VPCs in YugabyteDB Aeon
 
 ```
 ybm vpc list [flags]
@@ -20,7 +20,7 @@ ybm vpc list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

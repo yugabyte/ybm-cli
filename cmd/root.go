@@ -28,14 +28,14 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/backup"
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
-	"github.com/yugabyte/ybm-cli/cmd/metrics_exporter"
 	"github.com/yugabyte/ybm-cli/cmd/db_audit_logs_exporter"
+	"github.com/yugabyte/ybm-cli/cmd/integration"
+	"github.com/yugabyte/ybm-cli/cmd/metrics_exporter"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/permission"
 	"github.com/yugabyte/ybm-cli/cmd/region"
 	"github.com/yugabyte/ybm-cli/cmd/role"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
-	"github.com/yugabyte/ybm-cli/cmd/integration"
 	"github.com/yugabyte/ybm-cli/cmd/tools"
 	"github.com/yugabyte/ybm-cli/cmd/usage"
 	"github.com/yugabyte/ybm-cli/cmd/user"
@@ -53,8 +53,8 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ybm",
-	Short: "ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!",
-	Long:  `ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!`,
+	Short: "ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!",
+	Long:  `ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		myFigure := figure.NewFigure("ybm", "", true)
@@ -101,7 +101,7 @@ func init() {
 	// will be global for your application.
 	setDefaults()
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ybm-cli.yaml)")
-	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YBM Api Key")
+	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YugabyteDB Aeon account API key")
 	rootCmd.PersistentFlags().StringP("output", "o", "", "Select the desired output format (table, json, pretty). Default to table")
 	rootCmd.PersistentFlags().StringP("logLevel", "l", "", "Select the desired log level format(info). Default to info")
 	rootCmd.PersistentFlags().Bool("debug", false, "Use debug mode, same as --logLevel debug")
@@ -120,7 +120,7 @@ func init() {
 
 	// Make host configurable only if the CONFIGURE_URL feature flag is set to true
 	if util.IsFeatureFlagEnabled(util.CONFIGURE_URL) {
-		rootCmd.PersistentFlags().StringP("host", "", "", "YBM Api hostname")
+		rootCmd.PersistentFlags().StringP("host", "", "", "YugabyteDB Aeon Api hostname")
 		viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	}
 

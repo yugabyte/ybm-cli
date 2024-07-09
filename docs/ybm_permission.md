@@ -4,7 +4,7 @@ View available permissions for roles
 
 ### Synopsis
 
-View available permissions for your YBM roles
+View available permissions for your YugabyteDB Aeon roles
 
 ```
 ybm permission [flags]
@@ -19,7 +19,7 @@ ybm permission [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,6 +31,6 @@ ybm permission [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm permission list](ybm_permission_list.md)	 - List Available Permissions for Custom Roles
 

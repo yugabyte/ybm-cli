@@ -17,7 +17,7 @@ See each sub-command's help for details on how to use the generated script.
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -29,7 +29,7 @@ See each sub-command's help for details on how to use the generated script.
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm completion bash](ybm_completion_bash.md)	 - Generate the autocompletion script for bash
 * [ybm completion fish](ybm_completion_fish.md)	 - Generate the autocompletion script for fish
 * [ybm completion powershell](ybm_completion_powershell.md)	 - Generate the autocompletion script for powershell

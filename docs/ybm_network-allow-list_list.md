@@ -1,10 +1,10 @@
 ## ybm network-allow-list list
 
-List network allow lists in YugabyteDB Managed
+List network allow lists in YugabyteDB Aeon
 
 ### Synopsis
 
-List network allow lists in YugabyteDB Managed
+List network allow lists in YugabyteDB Aeon
 
 ```
 ybm network-allow-list list [flags]
@@ -20,7 +20,7 @@ ybm network-allow-list list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

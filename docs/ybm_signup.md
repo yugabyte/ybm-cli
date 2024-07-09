@@ -1,10 +1,10 @@
 ## ybm signup
 
-Open a browser to sign up for YugabyteDB Managed
+Open a browser to sign up for YugabyteDB Aeon
 
 ### Synopsis
 
-Open a browser to sign up for YugabyteDB Managed
+Open a browser to sign up for YugabyteDB Aeon
 
 ```
 ybm signup [flags]
@@ -19,7 +19,7 @@ ybm signup [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,5 +31,5 @@ ybm signup [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 

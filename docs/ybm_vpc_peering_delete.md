@@ -4,7 +4,7 @@ Delete VPC peering
 
 ### Synopsis
 
-Delete VPC peering in YugabyteDB Managed
+Delete VPC peering in YugabyteDB Aeon
 
 ```
 ybm vpc peering delete [flags]
@@ -21,7 +21,7 @@ ybm vpc peering delete [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

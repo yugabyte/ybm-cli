@@ -27,7 +27,7 @@ import (
 var CertCmd = &cobra.Command{
 	Use:   "cert",
 	Short: "Get the root CA certificate",
-	Long:  "Get the root CA certificate for your YBM clusters",
+	Long:  "Get the root CA certificate for your YugabyteDB Aeon clusters",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

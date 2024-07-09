@@ -1,10 +1,10 @@
 ## ybm usage
 
-Billing usage for the account in YugabyteDB Managed
+Billing usage for the account in YugabyteDB Aeon
 
 ### Synopsis
 
-Billing usage for the account in YugabyteDB Managed
+Billing usage for the account in YugabyteDB Aeon
 
 ```
 ybm usage [flags]
@@ -19,7 +19,7 @@ ybm usage [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,6 +31,6 @@ ybm usage [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm usage get](ybm_usage_get.md)	 - View billing usage data available for the account in YugabyteDB Managed
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
+* [ybm usage get](ybm_usage_get.md)	 - View billing usage data available for the account in YugabyteDB Aeon
 

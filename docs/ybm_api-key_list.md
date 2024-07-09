@@ -4,7 +4,7 @@ List API Keys
 
 ### Synopsis
 
-List API Keys in your YBM account
+List API Keys in your YugabyteDB Aeon account
 
 ```
 ybm api-key list [flags]
@@ -21,7 +21,7 @@ ybm api-key list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

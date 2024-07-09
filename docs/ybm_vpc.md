@@ -19,7 +19,7 @@ ybm vpc [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,9 +31,9 @@ ybm vpc [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm vpc create](ybm_vpc_create.md)	 - Create a VPC in YugabyteDB Managed
-* [ybm vpc delete](ybm_vpc_delete.md)	 - Delete a VPC in YugabyteDB Managed
-* [ybm vpc list](ybm_vpc_list.md)	 - List VPCs in YugabyteDB Managed
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
+* [ybm vpc create](ybm_vpc_create.md)	 - Create a VPC in YugabyteDB Aeon
+* [ybm vpc delete](ybm_vpc_delete.md)	 - Delete a VPC in YugabyteDB Aeon
+* [ybm vpc list](ybm_vpc_list.md)	 - List VPCs in YugabyteDB Aeon
 * [ybm vpc peering](ybm_vpc_peering.md)	 - Manage VPC Peerings
 

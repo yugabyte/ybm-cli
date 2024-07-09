@@ -19,7 +19,7 @@ ybm network-allow-list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,8 +31,8 @@ ybm network-allow-list [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm network-allow-list create](ybm_network-allow-list_create.md)	 - Create network allow lists in YugabyteDB Managed
-* [ybm network-allow-list delete](ybm_network-allow-list_delete.md)	 - Delete network allow list from YugabyteDB Managed
-* [ybm network-allow-list list](ybm_network-allow-list_list.md)	 - List network allow lists in YugabyteDB Managed
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
+* [ybm network-allow-list create](ybm_network-allow-list_create.md)	 - Create network allow lists in YugabyteDB Aeon
+* [ybm network-allow-list delete](ybm_network-allow-list_delete.md)	 - Delete network allow list from YugabyteDB Aeon
+* [ybm network-allow-list list](ybm_network-allow-list_list.md)	 - List network allow lists in YugabyteDB Aeon
 

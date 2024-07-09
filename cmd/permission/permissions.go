@@ -28,7 +28,7 @@ import (
 var ResourcePermissionsCmd = &cobra.Command{
 	Use:   "permission",
 	Short: "View available permissions for roles",
-	Long:  "View available permissions for your YBM roles",
+	Long:  "View available permissions for your YugabyteDB Aeon roles",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

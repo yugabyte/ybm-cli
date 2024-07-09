@@ -1,6 +1,6 @@
 FROM scratch
 
-# Copy YBM CLI binary.
+# Copy YugabyteDB Aeon CLI binary.
 COPY ybm /ybm
 
 # Set entry point.

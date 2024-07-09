@@ -19,7 +19,7 @@ ybm cluster [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YBM Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
@@ -31,7 +31,7 @@ ybm cluster [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm cluster cert](ybm_cluster_cert.md)	 - Get the root CA certificate
 * [ybm cluster create](ybm_cluster_create.md)	 - Create a cluster
 * [ybm cluster delete](ybm_cluster_delete.md)	 - Delete a cluster
