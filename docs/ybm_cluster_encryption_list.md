@@ -19,7 +19,7 @@ ybm cluster encryption list [flags]
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string         YugabyteDB Aeon Api Key
+  -a, --apiKey string         YugabyteDB Aeon account API key
   -c, --cluster-name string   [REQUIRED] The name of the cluster.
       --config string         config file (default is $HOME/.ybm-cli.yaml)
       --debug                 Use debug mode, same as --logLevel debug

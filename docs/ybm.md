@@ -13,7 +13,7 @@ ybm [flags]
 ### Options
 
 ```
-  -a, --apiKey string      YugabyteDB Aeon Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -h, --help               help for ybm

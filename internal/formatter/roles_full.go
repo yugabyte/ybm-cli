@@ -253,7 +253,7 @@ func (r *FullRoleContext) Write() error {
 		frc.RoleUsersContext = append(frc.RoleUsersContext, &roleUsersContext{r: user})
 	}
 
-	//Adding Api Keys information
+	//Adding account API keys information
 	for _, apiKey := range r.fullRole.RoleApiKeys {
 		frc.RoleApiKeysContext = append(frc.RoleApiKeysContext, &roleApiKeysContext{r: apiKey})
 	}
@@ -311,7 +311,7 @@ func (r *FullRoleContext) Write() error {
 		r.postFormat(tmpl, NewRoleUsersContext())
 	}
 
-	// Role Api Keys
+	// Role account API keys
 	if len(frc.RoleApiKeysContext) > 0 {
 		tmpl, err = r.startSubsection(defaultRoleApiKeysListing)
 		if err != nil {

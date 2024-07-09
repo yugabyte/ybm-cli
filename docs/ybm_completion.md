@@ -17,7 +17,7 @@ See each sub-command's help for details on how to use the generated script.
 ### Options inherited from parent commands
 
 ```
-  -a, --apiKey string      YugabyteDB Aeon Api Key
+  -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info

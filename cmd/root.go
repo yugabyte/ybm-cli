@@ -101,7 +101,7 @@ func init() {
 	// will be global for your application.
 	setDefaults()
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ybm-cli.yaml)")
-	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YugabyteDB Aeon Api Key")
+	rootCmd.PersistentFlags().StringP("apiKey", "a", "", "YugabyteDB Aeon account API key")
 	rootCmd.PersistentFlags().StringP("output", "o", "", "Select the desired output format (table, json, pretty). Default to table")
 	rootCmd.PersistentFlags().StringP("logLevel", "l", "", "Select the desired log level format(info). Default to info")
 	rootCmd.PersistentFlags().Bool("debug", false, "Use debug mode, same as --logLevel debug")
