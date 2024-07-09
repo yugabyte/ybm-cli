@@ -4,7 +4,7 @@ Delete a custom role
 
 ### Synopsis
 
-Delete a custom role in YugabyteDB Managed
+Delete a custom role in YugabyteDB Aeon
 
 ```
 ybm role delete [flags]

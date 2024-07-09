@@ -4,7 +4,7 @@ List clusters
 
 ### Synopsis
 
-List clusters in YugabyteDB Managed
+List clusters in YugabyteDB Aeon
 
 ```
 ybm cluster list [flags]

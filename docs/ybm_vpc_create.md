@@ -1,10 +1,10 @@
 ## ybm vpc create
 
-Create a VPC in YugabyteDB Managed
+Create a VPC in YugabyteDB Aeon
 
 ### Synopsis
 
-Create a VPC in YugabyteDB Managed
+Create a VPC in YugabyteDB Aeon
 
 ```
 ybm vpc create [flags]

@@ -31,7 +31,7 @@ ybm api-key [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm api-key create](ybm_api-key_create.md)	 - Create an API Key
 * [ybm api-key list](ybm_api-key_list.md)	 - List API Keys
 * [ybm api-key revoke](ybm_api-key_revoke.md)	 - Revoke an API Key

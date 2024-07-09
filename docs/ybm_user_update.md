@@ -4,7 +4,7 @@ Modify role of a user
 
 ### Synopsis
 
-Modify role of a user in your YugabyteDB Managed account
+Modify role of a user in your YugabyteDB Aeon account
 
 ```
 ybm user update [flags]

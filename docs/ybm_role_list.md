@@ -4,7 +4,7 @@ List roles
 
 ### Synopsis
 
-List roles in YugabyteDB Managed
+List roles in YugabyteDB Aeon
 
 ```
 ybm role list [flags]

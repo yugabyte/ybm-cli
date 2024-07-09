@@ -34,8 +34,8 @@ import (
 
 var UsageCmd = &cobra.Command{
 	Use:   "usage",
-	Short: "Billing usage for the account in YugabyteDB Managed",
-	Long:  "Billing usage for the account in YugabyteDB Managed",
+	Short: "Billing usage for the account in YugabyteDB Aeon",
+	Long:  "Billing usage for the account in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -43,8 +43,8 @@ var UsageCmd = &cobra.Command{
 
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "View billing usage data available for the account in YugabyteDB Managed",
-	Long:  "View billing usage data available for the account in YugabyteDB Managed",
+	Short: "View billing usage data available for the account in YugabyteDB Aeon",
+	Long:  "View billing usage data available for the account in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

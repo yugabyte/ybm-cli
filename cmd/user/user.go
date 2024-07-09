@@ -31,7 +31,7 @@ import (
 var UserCmd = &cobra.Command{
 	Use:   "user",
 	Short: "Manage users",
-	Long:  "Manage users in your YugabyteDB Managed account",
+	Long:  "Manage users in your YugabyteDB Aeon account",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -40,7 +40,7 @@ var UserCmd = &cobra.Command{
 var listUsersCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List users",
-	Long:  `List users in your YugabyteDB Managed account`,
+	Long:  `List users in your YugabyteDB Aeon account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -80,7 +80,7 @@ var listUsersCmd = &cobra.Command{
 var inviteUserCmd = &cobra.Command{
 	Use:   "invite",
 	Short: "Invite a user",
-	Long:  "Invite a user to your YugabyteDB Managed account",
+	Long:  "Invite a user to your YugabyteDB Aeon account",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -132,7 +132,7 @@ var inviteUserCmd = &cobra.Command{
 var updateUserCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Modify role of a user",
-	Long:  "Modify role of a user in your YugabyteDB Managed account",
+	Long:  "Modify role of a user in your YugabyteDB Aeon account",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		email, _ := cmd.Flags().GetString("email")
@@ -191,7 +191,7 @@ var updateUserCmd = &cobra.Command{
 var deleteUserCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a user",
-	Long:  "Delete a user from your YugabyteDB Managed account",
+	Long:  "Delete a user from your YugabyteDB Aeon account",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		email, _ := cmd.Flags().GetString("email")

@@ -4,7 +4,7 @@ Disable backup policies
 
 ### Synopsis
 
-Disable backup policies for cluster in YugabyteDB Managed
+Disable backup policies for cluster in YugabyteDB Aeon
 
 ```
 ybm backup policy disable [flags]

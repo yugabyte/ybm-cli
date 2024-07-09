@@ -187,7 +187,7 @@ func printReadReplicaOutput(resp ybmclient.ReadReplicaListResponse) {
 var listReadReplicaCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List read replicas",
-	Long:  "List read replicas in YugabyteDB Managed",
+	Long:  "List read replicas in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -212,7 +212,7 @@ var listReadReplicaCmd = &cobra.Command{
 var createReadReplicaCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create read replica",
-	Long:  "Create read replica in YugabyteDB Managed",
+	Long:  "Create read replica in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -276,7 +276,7 @@ var createReadReplicaCmd = &cobra.Command{
 var updateReadReplicaCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Edit read replica",
-	Long:  "Edit read replica in YugabyteDB Managed",
+	Long:  "Edit read replica in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -339,7 +339,7 @@ var updateReadReplicaCmd = &cobra.Command{
 var deleteReadReplicaCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete read replica",
-	Long:  "Delete read replica from YugabyteDB Managed",
+	Long:  "Delete read replica from YugabyteDB Aeon",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		clusterName, _ := cmd.Flags().GetString("cluster-name")

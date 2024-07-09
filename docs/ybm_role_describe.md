@@ -4,7 +4,7 @@ Describe a role
 
 ### Synopsis
 
-Describe a role in YugabyteDB Managed
+Describe a role in YugabyteDB Aeon
 
 ```
 ybm role describe [flags]

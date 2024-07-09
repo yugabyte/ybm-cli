@@ -4,7 +4,7 @@ Update backup policies
 
 ### Synopsis
 
-Update backup policies for cluster in YugabyteDB Managed
+Update backup policies for cluster in YugabyteDB Aeon
 
 ```
 ybm backup policy update [flags]

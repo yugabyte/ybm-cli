@@ -4,7 +4,7 @@ List users
 
 ### Synopsis
 
-List users in your YugabyteDB Managed account
+List users in your YugabyteDB Aeon account
 
 ```
 ybm user list [flags]

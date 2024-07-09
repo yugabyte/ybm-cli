@@ -1,10 +1,10 @@
 ## ybm network-allow-list create
 
-Create network allow lists in YugabyteDB Managed
+Create network allow lists in YugabyteDB Aeon
 
 ### Synopsis
 
-Create network allow lists in YugabyteDB Managed
+Create network allow lists in YugabyteDB Aeon
 
 ```
 ybm network-allow-list create [flags]

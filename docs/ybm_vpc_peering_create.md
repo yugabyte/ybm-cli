@@ -4,7 +4,7 @@ Create VPC peering
 
 ### Synopsis
 
-Create VPC peering in YugabyteDB Managed
+Create VPC peering in YugabyteDB Aeon
 
 ```
 ybm vpc peering create [flags]
@@ -14,7 +14,7 @@ ybm vpc peering create [flags]
 
 ```
       --name string                 [REQUIRED] Name for the VPC peering.
-      --yb-vpc-name string          [REQUIRED] Name of the YugabyteDB Managed VPC.
+      --yb-vpc-name string          [REQUIRED] Name of the YugabyteDB Aeon VPC.
       --cloud-provider string       [REQUIRED] Cloud of the VPC with which to peer. AWS or GCP.
       --app-vpc-name string         [OPTIONAL] Name of the application VPC. Required for GCP. Not applicable for AWS.
       --app-vpc-project-id string   [OPTIONAL] Project ID of the application VPC. Required for GCP. Not applicable for AWS.

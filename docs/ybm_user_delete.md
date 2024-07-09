@@ -4,7 +4,7 @@ Delete a user
 
 ### Synopsis
 
-Delete a user from your YugabyteDB Managed account
+Delete a user from your YugabyteDB Aeon account
 
 ```
 ybm user delete [flags]

@@ -50,7 +50,7 @@ func findVpcPeering(vpcPeerings []ybmclient.VpcPeeringData, name string) (ybmcli
 var listVpcPeeringCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List VPC peerings",
-	Long:  "List VPC peerings in YugabyteDB Managed",
+	Long:  "List VPC peerings in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -87,7 +87,7 @@ var listVpcPeeringCmd = &cobra.Command{
 var createVpcPeeringCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create VPC peering",
-	Long:  "Create VPC peering in YugabyteDB Managed",
+	Long:  "Create VPC peering in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
 		ybVpcName, _ := cmd.Flags().GetString("yb-vpc-name")
@@ -216,7 +216,7 @@ var createVpcPeeringCmd = &cobra.Command{
 var deleteVpcPeeringCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete VPC peering",
-	Long:  "Delete VPC peering in YugabyteDB Managed",
+	Long:  "Delete VPC peering in YugabyteDB Aeon",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		vpcPeeringName, _ := cmd.Flags().GetString("name")
@@ -278,7 +278,7 @@ func init() {
 	createVpcPeeringCmd.Flags().SortFlags = false
 	createVpcPeeringCmd.Flags().String("name", "", "[REQUIRED] Name for the VPC peering.")
 	createVpcPeeringCmd.MarkFlagRequired("name")
-	createVpcPeeringCmd.Flags().String("yb-vpc-name", "", "[REQUIRED] Name of the YugabyteDB Managed VPC.")
+	createVpcPeeringCmd.Flags().String("yb-vpc-name", "", "[REQUIRED] Name of the YugabyteDB Aeon VPC.")
 	createVpcPeeringCmd.MarkFlagRequired("yb-vpc-name")
 	createVpcPeeringCmd.Flags().String("cloud-provider", "", "[REQUIRED] Cloud of the VPC with which to peer. AWS or GCP.")
 	createVpcPeeringCmd.MarkFlagRequired("cloud-provider")

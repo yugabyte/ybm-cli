@@ -1,10 +1,10 @@
 ## ybm backup delete
 
-Delete backup for a cluster in YugabyteDB Managed
+Delete backup for a cluster in YugabyteDB Aeon
 
 ### Synopsis
 
-Delete backup for a cluster in YugabyteDB Managed
+Delete backup for a cluster in YugabyteDB Aeon
 
 ```
 ybm backup delete [flags]

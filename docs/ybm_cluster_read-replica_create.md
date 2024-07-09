@@ -4,7 +4,7 @@ Create read replica
 
 ### Synopsis
 
-Create read replica in YugabyteDB Managed
+Create read replica in YugabyteDB Aeon
 
 ```
 ybm cluster read-replica create [flags]

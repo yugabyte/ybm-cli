@@ -1,10 +1,10 @@
 ## ybm vpc list
 
-List VPCs in YugabyteDB Managed
+List VPCs in YugabyteDB Aeon
 
 ### Synopsis
 
-List VPCs in YugabyteDB Managed
+List VPCs in YugabyteDB Aeon
 
 ```
 ybm vpc list [flags]

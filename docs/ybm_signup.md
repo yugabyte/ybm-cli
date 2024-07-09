@@ -1,10 +1,10 @@
 ## ybm signup
 
-Open a browser to sign up for YugabyteDB Managed
+Open a browser to sign up for YugabyteDB Aeon
 
 ### Synopsis
 
-Open a browser to sign up for YugabyteDB Managed
+Open a browser to sign up for YugabyteDB Aeon
 
 ```
 ybm signup [flags]
@@ -31,5 +31,5 @@ ybm signup [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 

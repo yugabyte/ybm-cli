@@ -1,10 +1,10 @@
 ## ybm vpc delete
 
-Delete a VPC in YugabyteDB Managed
+Delete a VPC in YugabyteDB Aeon
 
 ### Synopsis
 
-Delete a VPC in YugabyteDB Managed
+Delete a VPC in YugabyteDB Aeon
 
 ```
 ybm vpc delete [flags]

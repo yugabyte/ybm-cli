@@ -31,6 +31,6 @@ ybm permission [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm permission list](ybm_permission_list.md)	 - List Available Permissions for Custom Roles
 

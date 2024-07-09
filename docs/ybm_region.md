@@ -31,7 +31,7 @@ ybm region [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm region instance](ybm_region_instance.md)	 - Manage instance types
 * [ybm region list](ybm_region_list.md)	 - List Cloud Provider Regions
 

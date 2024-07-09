@@ -1,10 +1,10 @@
 ## ybm network-allow-list list
 
-List network allow lists in YugabyteDB Managed
+List network allow lists in YugabyteDB Aeon
 
 ### Synopsis
 
-List network allow lists in YugabyteDB Managed
+List network allow lists in YugabyteDB Aeon
 
 ```
 ybm network-allow-list list [flags]

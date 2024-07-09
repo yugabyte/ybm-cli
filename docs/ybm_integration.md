@@ -31,7 +31,7 @@ ybm integration [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm integration create](ybm_integration_create.md)	 - Create Integration
 * [ybm integration delete](ybm_integration_delete.md)	 - Delete Integration
 * [ybm integration list](ybm_integration_list.md)	 - List Integration

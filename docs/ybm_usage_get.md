@@ -1,10 +1,10 @@
 ## ybm usage get
 
-View billing usage data available for the account in YugabyteDB Managed
+View billing usage data available for the account in YugabyteDB Aeon
 
 ### Synopsis
 
-View billing usage data available for the account in YugabyteDB Managed
+View billing usage data available for the account in YugabyteDB Aeon
 
 ```
 ybm usage get [flags]
@@ -37,5 +37,5 @@ ybm usage get [flags]
 
 ### SEE ALSO
 
-* [ybm usage](ybm_usage.md)	 - Billing usage for the account in YugabyteDB Managed
+* [ybm usage](ybm_usage.md)	 - Billing usage for the account in YugabyteDB Aeon
 

@@ -1,5 +1,5 @@
 # ybm-cli
-A CLI implementation for YB Managed.
+A CLI implementation for YugabyteDB Aeon.
 
 # Install with brew
 

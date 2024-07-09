@@ -4,7 +4,7 @@ Update a custom role
 
 ### Synopsis
 
-Update a custom role in YugabyteDB Managed
+Update a custom role in YugabyteDB Aeon
 
 ```
 ybm role update [flags]

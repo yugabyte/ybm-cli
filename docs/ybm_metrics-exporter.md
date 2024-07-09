@@ -31,7 +31,7 @@ ybm metrics-exporter [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm metrics-exporter assign](ybm_metrics-exporter_assign.md)	 - Associate Metrics Exporter Config with Cluster
 * [ybm metrics-exporter create](ybm_metrics-exporter_create.md)	 - Create Metrics Exporter Config
 * [ybm metrics-exporter delete](ybm_metrics-exporter_delete.md)	 - Delete Metrics Exporter Config

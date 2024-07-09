@@ -47,8 +47,8 @@ var CDCStreamCmd = &cobra.Command{
 
 var listCdcStreamCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List CDC Streams in YugabyteDB Managed",
-	Long:  "List CDC Streams in YugabyteDB Managed",
+	Short: "List CDC Streams in YugabyteDB Aeon",
+	Long:  "List CDC Streams in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -82,8 +82,8 @@ var listCdcStreamCmd = &cobra.Command{
 
 var createCdcStreamCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create CDC Stream in YugabyteDB Managed",
-	Long:  `Create CDC Stream in YugabyteDB Managed`,
+	Short: "Create CDC Stream in YugabyteDB Aeon",
+	Long:  `Create CDC Stream in YugabyteDB Aeon`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -144,8 +144,8 @@ var createCdcStreamCmd = &cobra.Command{
 
 var editCdcStreamCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update CDC Stream in YugabyteDB Managed",
-	Long:  "Update CDC Stream in YugabyteDB Managed",
+	Short: "Update CDC Stream in YugabyteDB Aeon",
+	Long:  "Update CDC Stream in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -209,8 +209,8 @@ var editCdcStreamCmd = &cobra.Command{
 
 var deleteCdcStreamCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete CDC Stream in YugabyteDB Managed",
-	Long:  `Delete CDC Stream in YugabyteDB Managed`,
+	Short: "Delete CDC Stream in YugabyteDB Aeon",
+	Long:  `Delete CDC Stream in YugabyteDB Aeon`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

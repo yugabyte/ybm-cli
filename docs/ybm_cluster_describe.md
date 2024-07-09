@@ -4,7 +4,7 @@ Describe a cluster
 
 ### Synopsis
 
-Describe a cluster in YugabyteDB Managed
+Describe a cluster in YugabyteDB Aeon
 
 ```
 ybm cluster describe [flags]

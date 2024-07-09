@@ -1,10 +1,10 @@
 ## ybm backup describe
 
-Describe backup for a cluster in YugabyteDB Managed
+Describe backup for a cluster in YugabyteDB Aeon
 
 ### Synopsis
 
-Describe backup for a cluster in YugabyteDB Managed
+Describe backup for a cluster in YugabyteDB Aeon
 
 ```
 ybm backup describe [flags]

@@ -4,7 +4,7 @@ Enable backup policies
 
 ### Synopsis
 
-Enable backup policies for cluster in YugabyteDB Managed
+Enable backup policies for cluster in YugabyteDB Aeon
 
 ```
 ybm backup policy enable [flags]

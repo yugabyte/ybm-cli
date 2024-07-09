@@ -29,7 +29,7 @@ import (
 var describeClusterCmd = &cobra.Command{
 	Use:   "describe",
 	Short: "Describe a cluster",
-	Long:  "Describe a cluster in YugabyteDB Managed",
+	Long:  "Describe a cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

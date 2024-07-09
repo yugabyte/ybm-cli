@@ -28,14 +28,14 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/backup"
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
-	"github.com/yugabyte/ybm-cli/cmd/metrics_exporter"
 	"github.com/yugabyte/ybm-cli/cmd/db_audit_logs_exporter"
+	"github.com/yugabyte/ybm-cli/cmd/integration"
+	"github.com/yugabyte/ybm-cli/cmd/metrics_exporter"
 	"github.com/yugabyte/ybm-cli/cmd/nal"
 	"github.com/yugabyte/ybm-cli/cmd/permission"
 	"github.com/yugabyte/ybm-cli/cmd/region"
 	"github.com/yugabyte/ybm-cli/cmd/role"
 	"github.com/yugabyte/ybm-cli/cmd/signup"
-	"github.com/yugabyte/ybm-cli/cmd/integration"
 	"github.com/yugabyte/ybm-cli/cmd/tools"
 	"github.com/yugabyte/ybm-cli/cmd/usage"
 	"github.com/yugabyte/ybm-cli/cmd/user"
@@ -53,8 +53,8 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ybm",
-	Short: "ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!",
-	Long:  `ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!`,
+	Short: "ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!",
+	Long:  `ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		myFigure := figure.NewFigure("ybm", "", true)

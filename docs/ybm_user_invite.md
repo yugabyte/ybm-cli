@@ -4,7 +4,7 @@ Invite a user
 
 ### Synopsis
 
-Invite a user to your YugabyteDB Managed account
+Invite a user to your YugabyteDB Aeon account
 
 ```
 ybm user invite [flags]

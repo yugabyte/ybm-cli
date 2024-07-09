@@ -31,11 +31,11 @@ ybm backup [flags]
 
 ### SEE ALSO
 
-* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Managed (DBaaS) from command line!
-* [ybm backup create](ybm_backup_create.md)	 - Create backup for a cluster in YugabyteDB Managed
-* [ybm backup delete](ybm_backup_delete.md)	 - Delete backup for a cluster in YugabyteDB Managed
-* [ybm backup describe](ybm_backup_describe.md)	 - Describe backup for a cluster in YugabyteDB Managed
-* [ybm backup list](ybm_backup_list.md)	 - List existing backups available for a cluster in YugabyteDB Managed
+* [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
+* [ybm backup create](ybm_backup_create.md)	 - Create backup for a cluster in YugabyteDB Aeon
+* [ybm backup delete](ybm_backup_delete.md)	 - Delete backup for a cluster in YugabyteDB Aeon
+* [ybm backup describe](ybm_backup_describe.md)	 - Describe backup for a cluster in YugabyteDB Aeon
+* [ybm backup list](ybm_backup_list.md)	 - List existing backups available for a cluster in YugabyteDB Aeon
 * [ybm backup policy](ybm_backup_policy.md)	 - Manage backup policy of a cluster
-* [ybm backup restore](ybm_backup_restore.md)	 - Restore backups into a cluster in YugabyteDB Managed
+* [ybm backup restore](ybm_backup_restore.md)	 - Restore backups into a cluster in YugabyteDB Aeon
 

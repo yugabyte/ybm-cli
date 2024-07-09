@@ -4,7 +4,7 @@ List VPC peerings
 
 ### Synopsis
 
-List VPC peerings in YugabyteDB Managed
+List VPC peerings in YugabyteDB Aeon
 
 ```
 ybm vpc peering list [flags]

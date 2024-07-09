@@ -1,10 +1,10 @@
 ## ybm backup restore
 
-Restore backups into a cluster in YugabyteDB Managed
+Restore backups into a cluster in YugabyteDB Aeon
 
 ### Synopsis
 
-Restore backups into a cluster in  YugabyteDB Managed
+Restore backups into a cluster in  YugabyteDB Aeon
 
 ```
 ybm backup restore [flags]

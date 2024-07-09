@@ -4,7 +4,7 @@ List read replicas
 
 ### Synopsis
 
-List read replicas in YugabyteDB Managed
+List read replicas in YugabyteDB Aeon
 
 ```
 ybm cluster read-replica list [flags]

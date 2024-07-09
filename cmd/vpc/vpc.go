@@ -41,8 +41,8 @@ var VPCCmd = &cobra.Command{
 // vpcCmd represents the vpc command
 var listVpcCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List VPCs in YugabyteDB Managed",
-	Long:  "List VPCs in YugabyteDB Managed",
+	Short: "List VPCs in YugabyteDB Aeon",
+	Long:  "List VPCs in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -74,8 +74,8 @@ var createRegions []string
 var createCidrs []string
 var createVpcCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a VPC in YugabyteDB Managed",
-	Long:  "Create a VPC in YugabyteDB Managed",
+	Short: "Create a VPC in YugabyteDB Aeon",
+	Long:  "Create a VPC in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcName, _ := cmd.Flags().GetString("name")
 		cloud, _ := cmd.Flags().GetString("cloud-provider")
@@ -189,8 +189,8 @@ var createVpcCmd = &cobra.Command{
 
 var deleteVpcCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete a VPC in YugabyteDB Managed",
-	Long:  "Delete a VPC in YugabyteDB Managed",
+	Short: "Delete a VPC in YugabyteDB Aeon",
+	Long:  "Delete a VPC in YugabyteDB Aeon",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		vpcName, _ := cmd.Flags().GetString("name")

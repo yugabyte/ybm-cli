@@ -4,7 +4,7 @@ Edit read replica
 
 ### Synopsis
 
-Edit read replica in YugabyteDB Managed
+Edit read replica in YugabyteDB Aeon
 
 ```
 ybm cluster read-replica update [flags]

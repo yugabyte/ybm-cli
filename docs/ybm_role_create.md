@@ -4,7 +4,7 @@ Create a custom role
 
 ### Synopsis
 
-Create a custom role in YugabyteDB Managed
+Create a custom role in YugabyteDB Aeon
 
 ```
 ybm role create [flags]

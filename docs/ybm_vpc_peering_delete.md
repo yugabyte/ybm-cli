@@ -4,7 +4,7 @@ Delete VPC peering
 
 ### Synopsis
 
-Delete VPC peering in YugabyteDB Managed
+Delete VPC peering in YugabyteDB Aeon
 
 ```
 ybm vpc peering delete [flags]

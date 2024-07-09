@@ -4,7 +4,7 @@ Delete read replica
 
 ### Synopsis
 
-Delete read replica from YugabyteDB Managed
+Delete read replica from YugabyteDB Aeon
 
 ```
 ybm cluster read-replica delete [flags]

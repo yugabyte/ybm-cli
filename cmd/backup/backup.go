@@ -40,8 +40,8 @@ var BackupCmd = &cobra.Command{
 
 var listBackupCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List existing backups available for a cluster in YugabyteDB Managed",
-	Long:  "List existing backups available for a cluster in YugabyteDB Managed",
+	Short: "List existing backups available for a cluster in YugabyteDB Aeon",
+	Long:  "List existing backups available for a cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -75,8 +75,8 @@ var listBackupCmd = &cobra.Command{
 
 var restoreBackupCmd = &cobra.Command{
 	Use:   "restore",
-	Short: "Restore backups into a cluster in YugabyteDB Managed",
-	Long:  "Restore backups into a cluster in  YugabyteDB Managed",
+	Short: "Restore backups into a cluster in YugabyteDB Aeon",
+	Long:  "Restore backups into a cluster in  YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -120,8 +120,8 @@ var restoreBackupCmd = &cobra.Command{
 
 var createBackupCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create backup for a cluster in YugabyteDB Managed",
-	Long:  "Create backup for a cluster in YugabyteDB Managed",
+	Short: "Create backup for a cluster in YugabyteDB Aeon",
+	Long:  "Create backup for a cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -190,8 +190,8 @@ var createBackupCmd = &cobra.Command{
 
 var deleteBackupCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete backup for a cluster in YugabyteDB Managed",
-	Long:  "Delete backup for a cluster in YugabyteDB Managed",
+	Short: "Delete backup for a cluster in YugabyteDB Aeon",
+	Long:  "Delete backup for a cluster in YugabyteDB Aeon",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		backupID, _ := cmd.Flags().GetString("backup-id")
@@ -221,8 +221,8 @@ var deleteBackupCmd = &cobra.Command{
 
 var describeBackupCmd = &cobra.Command{
 	Use:   "describe",
-	Short: "Describe backup for a cluster in YugabyteDB Managed",
-	Long:  "Describe backup for a cluster in YugabyteDB Managed",
+	Short: "Describe backup for a cluster in YugabyteDB Aeon",
+	Long:  "Describe backup for a cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		backupID, _ := cmd.Flags().GetString("backup-id")
 

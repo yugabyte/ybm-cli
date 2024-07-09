@@ -4,7 +4,7 @@ List backup policies
 
 ### Synopsis
 
-List backup policies for cluster in YugabyteDB Managed
+List backup policies for cluster in YugabyteDB Aeon
 
 ```
 ybm backup policy list [flags]

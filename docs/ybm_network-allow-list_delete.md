@@ -1,10 +1,10 @@
 ## ybm network-allow-list delete
 
-Delete network allow list from YugabyteDB Managed
+Delete network allow list from YugabyteDB Aeon
 
 ### Synopsis
 
-Delete network allow list from YugabyteDB Managed
+Delete network allow list from YugabyteDB Aeon
 
 ```
 ybm network-allow-list delete [flags]

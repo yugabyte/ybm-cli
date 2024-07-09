@@ -1,10 +1,10 @@
 ## ybm backup create
 
-Create backup for a cluster in YugabyteDB Managed
+Create backup for a cluster in YugabyteDB Aeon
 
 ### Synopsis
 
-Create backup for a cluster in YugabyteDB Managed
+Create backup for a cluster in YugabyteDB Aeon
 
 ```
 ybm backup create [flags]

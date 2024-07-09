@@ -41,7 +41,7 @@ var PolicyCmd = &cobra.Command{
 var listPolicyCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List backup policies",
-	Long:  "List backup policies for cluster in YugabyteDB Managed",
+	Long:  "List backup policies for cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -76,7 +76,7 @@ var listPolicyCmd = &cobra.Command{
 var enablePolicyCmd = &cobra.Command{
 	Use:   "enable",
 	Short: "Enable backup policies",
-	Long:  "Enable backup policies for cluster in YugabyteDB Managed",
+	Long:  "Enable backup policies for cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -122,7 +122,7 @@ var enablePolicyCmd = &cobra.Command{
 var disablePolicyCmd = &cobra.Command{
 	Use:   "disable",
 	Short: "Disable backup policies",
-	Long:  "Disable backup policies for cluster in YugabyteDB Managed",
+	Long:  "Disable backup policies for cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -167,7 +167,7 @@ var disablePolicyCmd = &cobra.Command{
 var updatePolicyCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update backup policies",
-	Long:  "Update backup policies for cluster in YugabyteDB Managed",
+	Long:  "Update backup policies for cluster in YugabyteDB Aeon",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

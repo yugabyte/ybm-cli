@@ -1,10 +1,10 @@
 ## ybm backup list
 
-List existing backups available for a cluster in YugabyteDB Managed
+List existing backups available for a cluster in YugabyteDB Aeon
 
 ### Synopsis
 
-List existing backups available for a cluster in YugabyteDB Managed
+List existing backups available for a cluster in YugabyteDB Aeon
 
 ```
 ybm backup list [flags]
