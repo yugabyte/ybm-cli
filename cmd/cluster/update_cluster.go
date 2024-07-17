@@ -157,7 +157,7 @@ var updateClusterCmd = &cobra.Command{
 		}
 		clusterData := []ybmclient.ClusterData{resp.GetData()}
 
-		msg := fmt.Sprintf("The cluster %s is being updated and will be updated soon if there are changes", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The cluster %s is being updated and will begin updating if there are changes", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") && !isNameChange {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_EDIT_CLUSTER, []string{"FAILED", "SUCCEEDED"}, msg)
