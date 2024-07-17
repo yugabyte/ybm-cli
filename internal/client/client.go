@@ -1347,6 +1347,8 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmc
 							output = output + "\n" + ". Task " + strconv.Itoa(index+1) + ": " + action.GetName() + " " + strconv.Itoa(int(action.GetPercentComplete())) + "% completed"
 						}
 					}
+				} else {
+					currentStatus = "SUCCEEDED"
 				}
 			}
 			if slices.Contains(completionStatus, currentStatus) {
@@ -1410,6 +1412,8 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType yb
 							output = output + "\n" + ". Task " + strconv.Itoa(index+1) + ": " + action.GetName() + " " + strconv.Itoa(int(action.GetPercentComplete())) + "% completed"
 						}
 					}
+				} else {
+					currentStatus = "SUCCEEDED"
 				}
 			}
 			s.Suffix = output
