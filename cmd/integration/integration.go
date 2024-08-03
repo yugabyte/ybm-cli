@@ -20,6 +20,7 @@ import (
 	"os"
 	"strings"
 
+	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -27,7 +28,6 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
-	"encoding/json"
 	"io"
 )
 
@@ -174,7 +174,6 @@ func init() {
 	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
 	createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
 	Please provide absolute file path`)
-	
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
 

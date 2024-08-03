@@ -32,13 +32,13 @@ import (
 var _ = Describe("Db Audit", func() {
 
 	var (
-		server              	*ghttp.Server
-		statusCode          	int
-		args                	[]string
-		responseAccount     	openapi.AccountListResponse
-		responseProject     	openapi.AccountListResponse
-		responseDbAudit     	openapi.DbAuditExporterConfigResponse
-		responseDbAuditList 	openapi.DbAuditExporterConfigListResponse
+		server                  *ghttp.Server
+		statusCode              int
+		args                    []string
+		responseAccount         openapi.AccountListResponse
+		responseProject         openapi.AccountListResponse
+		responseDbAudit         openapi.DbAuditExporterConfigResponse
+		responseDbAuditList     openapi.DbAuditExporterConfigListResponse
 		responseIntegrationList openapi.TelemetryProviderListResponse
 		responseListClusters    openapi.ClusterListResponse
 	)

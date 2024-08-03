@@ -1,0 +1,24 @@
+{
+    "data": [
+        {
+            "name": "test_ycql_db",
+            "id": "9671367e-72c9-4593-be50-418cae59bf45",
+            "table_type": "YQL_TABLE_TYPE"
+        },
+        {
+            "name": "postgres",
+            "id": "000033c1-0000-3000-8000-000000000000",
+            "table_type": "PGSQL_TABLE_TYPE"
+        },
+        {
+            "name": "yugabyte",
+            "id": "000033c3-0000-3000-8000-000000000000",
+            "table_type": "PGSQL_TABLE_TYPE"
+        },
+        {
+            "name": "test_ysql_db",
+            "id": "00004002-0000-3000-8000-000000000000",
+            "table_type": "PGSQL_TABLE_TYPE"
+        }
+    ]
+}

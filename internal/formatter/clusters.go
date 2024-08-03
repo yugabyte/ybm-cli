@@ -138,13 +138,13 @@ func (c *ClusterContext) HealthState() string {
 
 func (c *ClusterContext) NodesSpec() string {
 	iops := "-"
-	if c.c.GetSpec().ClusterInfo.NodeInfo.DiskIops.Get() != nil {
-		iops = strconv.Itoa(int(*c.c.GetSpec().ClusterInfo.NodeInfo.DiskIops.Get()))
+	if c.c.GetSpec().ClusterInfo.NodeInfo.Get().DiskIops.Get() != nil {
+		iops = strconv.Itoa(int(*c.c.GetSpec().ClusterInfo.NodeInfo.Get().DiskIops.Get()))
 	}
 	return fmt.Sprintf("%d / %s / %dGB / %s",
-		c.c.GetSpec().ClusterInfo.NodeInfo.NumCores,
-		convertMbtoGb(c.c.GetSpec().ClusterInfo.NodeInfo.MemoryMb),
-		c.c.GetSpec().ClusterInfo.NodeInfo.DiskSizeGb,
+		c.c.GetSpec().ClusterInfo.NodeInfo.Get().NumCores,
+		convertMbtoGb(c.c.GetSpec().ClusterInfo.NodeInfo.Get().MemoryMb),
+		c.c.GetSpec().ClusterInfo.NodeInfo.Get().DiskSizeGb,
 		iops)
 }
 

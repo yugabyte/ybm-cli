@@ -24,11 +24,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 )
 
 var DbAuditLogsExporterCmd = &cobra.Command{
@@ -329,10 +329,10 @@ func init() {
 	removeDbAuditLogsExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }
 
-func getIntegrationIdFromName(integrationName string, authApi *ybmAuthClient.AuthApiClient) (string, error){
+func getIntegrationIdFromName(integrationName string, authApi *ybmAuthClient.AuthApiClient) (string, error) {
 	integration, _, err := authApi.ListIntegrations().Name(integrationName).Execute()
 	if err != nil {
-		return "" , err
+		return "", err
 	}
 
 	integrationData := integration.GetData()
@@ -375,7 +375,7 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogCatalog(catalog)
-	}else{
+	} else {
 		return nil, fmt.Errorf("log_catalog required for log settings")
 	}
 
@@ -385,7 +385,7 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogClient(client)
-	}else{
+	} else {
 		return nil, fmt.Errorf("log_client required for log settings")
 	}
 
@@ -395,7 +395,7 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogLevel(*level)
-	}else{
+	} else {
 		return nil, fmt.Errorf("log_level required for log settings")
 	}
 
@@ -405,7 +405,7 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogParameter(parameter)
-	}else{
+	} else {
 		return nil, fmt.Errorf("log_parameter required for log settings")
 	}
 
@@ -415,7 +415,7 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogRelation(relation)
-	}else{
+	} else {
 		return nil, fmt.Errorf("log_relation required for log settings")
 	}
 
@@ -425,7 +425,7 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 			return nil, err
 		}
 		log_settings.SetLogStatementOnce(statement_once)
-	}else{
+	} else {
 		return nil, fmt.Errorf("log_statement_once required for log settings")
 	}
 

@@ -32,13 +32,13 @@ import (
 var _ = Describe("Integration", func() {
 
 	var (
-		server              			*ghttp.Server
-		statusCode          			int
-		args                			[]string
-		responseAccount     			openapi.AccountListResponse
-		responseProject     			openapi.AccountListResponse
-		responseIntegration   			openapi.TelemetryProviderResponse
-		responseIntegrationList 		openapi.TelemetryProviderListResponse
+		server                  *ghttp.Server
+		statusCode              int
+		args                    []string
+		responseAccount         openapi.AccountListResponse
+		responseProject         openapi.AccountListResponse
+		responseIntegration     openapi.TelemetryProviderResponse
+		responseIntegrationList openapi.TelemetryProviderListResponse
 	)
 
 	BeforeEach(func() {

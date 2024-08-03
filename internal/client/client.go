@@ -378,7 +378,7 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		if cmd.Flags().Changed("node-config") {
 			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
 			numCores := nodeConfig["num-cores"]
-			clusterInfo.NodeInfo.SetNumCores(int32(numCores))
+			clusterInfo.NodeInfo.Get().SetNumCores(int32(numCores))
 			if diskSize, ok := nodeConfig["disk-size-gb"]; ok {
 				diskSizeGb = int32(diskSize)
 			}
@@ -387,12 +387,12 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 			}
 		}
 		region = cloudInfo.GetRegion()
-		numCores := clusterInfo.NodeInfo.GetNumCores()
+		numCores := clusterInfo.NodeInfo.Get().GetNumCores()
 		memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, numCores)
 		if err != nil {
 			return nil, err
 		}
-		clusterInfo.NodeInfo.SetMemoryMb(memoryMb)
+		clusterInfo.NodeInfo.Get().SetMemoryMb(memoryMb)
 
 		// Computing the default disk size if it is not provided
 		if diskSizeGb == 0 {
@@ -401,10 +401,10 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 				return nil, err
 			}
 		}
-		clusterInfo.NodeInfo.SetDiskSizeGb(diskSizeGb)
+		clusterInfo.NodeInfo.Get().SetDiskSizeGb(diskSizeGb)
 
 		if diskIops > 0 {
-			clusterInfo.NodeInfo.SetDiskIops(diskIops)
+			clusterInfo.NodeInfo.Get().SetDiskIops(diskIops)
 		}
 	}
 
@@ -1555,4 +1555,30 @@ func (a *AuthApiClient) GetConfigByName(configName string) (*ybmclient.MetricsEx
 	}
 
 	return nil, fmt.Errorf("could not find config with name %s", configName)
+}
+
+func (a *AuthApiClient) GetClusterNamespaces(clusterID string) ybmclient.ApiGetClusterNamespacesRequest {
+	return a.ApiClient.ClusterApi.GetClusterNamespaces(a.ctx, a.AccountID, a.ProjectID, clusterID)
+}
+
+func (a *AuthApiClient) ListClusterPitrConfigs(clusterId string) ybmclient.ApiListClusterPitrConfigsRequest {
+	return a.ApiClient.ClusterApi.ListClusterPitrConfigs(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) CreatePitrConfigSpec(databaseName string, databaseType string, retentionPeriodInDays int32) (*ybmclient.DatabasePitrConfigSpec, error) {
+	pitrConfigSpec := ybmclient.NewDatabasePitrConfigSpec(ybmclient.YbApiEnum(databaseType), databaseName, retentionPeriodInDays)
+	return pitrConfigSpec, nil
+}
+
+func (a *AuthApiClient) CreatePitrConfig(clusterId string) ybmclient.ApiCreateDatabasePitrConfigRequest {
+	return a.ApiClient.ClusterApi.CreateDatabasePitrConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) CreateRestoreViaPitrConfigSpec(restoreAtMilis int64) (*ybmclient.DatabaseRestoreViaPitrSpec, error) {
+	restoreViaPitrConfigSpec := ybmclient.NewDatabaseRestoreViaPitrSpec(restoreAtMilis)
+	return restoreViaPitrConfigSpec, nil
+}
+
+func (a *AuthApiClient) RestoreViaPitrConfig(clusterId string, pitrConfigId string) ybmclient.ApiRestoreDatabaseViaPitrRequest {
+	return a.ApiClient.ClusterApi.RestoreDatabaseViaPitr(a.ctx, a.AccountID, a.ProjectID, clusterId, pitrConfigId)
 }

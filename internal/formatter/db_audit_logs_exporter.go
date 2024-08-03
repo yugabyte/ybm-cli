@@ -63,12 +63,12 @@ func DbAuditLogsExporterWrite(ctx Context, dbAuditLogsExporterConfigs []ybmclien
 func NewDbAuditLogsExporterContext() *DbAuditLogsExporterContext {
 	dbAuditLogsExporterCtx := DbAuditLogsExporterContext{}
 	dbAuditLogsExporterCtx.Header = SubHeaderContext{
-		"YsqlConfig":          ysqlConfigHeader,
-		"ID":                  "ID",
-		"State":               stateHeader,
-		"IntegrationId":       integrationIdHeader,
-		"ClusterId":           clusterIdHeader,
-		"CreatedAt":           dateCreatedAtHeader,
+		"YsqlConfig":    ysqlConfigHeader,
+		"ID":            "ID",
+		"State":         stateHeader,
+		"IntegrationId": integrationIdHeader,
+		"ClusterId":     clusterIdHeader,
+		"CreatedAt":     dateCreatedAtHeader,
 	}
 	return &dbAuditLogsExporterCtx
 }

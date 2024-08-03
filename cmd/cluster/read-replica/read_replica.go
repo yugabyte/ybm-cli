@@ -47,9 +47,6 @@ func GetDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmcl
 	n := int32(1)
 	numReplicas := ybmclient.NewNullableInt32(&n)
 	spec := ybmclient.ReadReplicaSpec{
-		NodeInfo: ybmclient.ClusterNodeInfo{
-			NumCores: 2,
-		},
 		PlacementInfo: ybmclient.PlacementInfo{
 			CloudInfo: ybmclient.CloudInfo{
 				Code:   primaryClusterCloud,
@@ -61,6 +58,11 @@ func GetDefaultSpec(primaryClusterCloud ybmclient.CloudEnum, vpcId string) ybmcl
 		},
 	}
 
+	nodeInfo := ybmclient.ClusterNodeInfo{
+		NumCores: 2,
+	}
+	spec.SetNodeInfo(nodeInfo)
+
 	return spec
 }
 
@@ -68,18 +70,18 @@ func SetMemoryAndDisk(authApi *ybmAuthClient.AuthApiClient, spec *ybmclient.Read
 	cloud := string(spec.PlacementInfo.CloudInfo.Code)
 	tier := "PAID"
 	region := spec.PlacementInfo.CloudInfo.Region
-	numCores := spec.NodeInfo.NumCores
+	numCores := spec.NodeInfo.Get().NumCores
 	memoryMb, err := authApi.GetFromInstanceType("memory", cloud, tier, region, numCores)
 	if err != nil {
 		return err
 	}
-	spec.NodeInfo.MemoryMb = memoryMb
-	if spec.NodeInfo.DiskSizeGb == 0 {
+	spec.NodeInfo.Get().MemoryMb = memoryMb
+	if spec.NodeInfo.Get().DiskSizeGb == 0 {
 		diskSizeGb, err := authApi.GetFromInstanceType("disk", cloud, tier, region, numCores)
 		if err != nil {
 			return err
 		}
-		spec.NodeInfo.DiskSizeGb = diskSizeGb
+		spec.NodeInfo.Get().DiskSizeGb = diskSizeGb
 	}
 	return nil
 }
@@ -112,17 +114,17 @@ func ParseReplicaOpts(authApi *ybmAuthClient.AuthApiClient, replicaOpts []string
 				//Avoid potential integer overflow see gosec
 				if n > 0 && n <= math.MaxInt32 {
 					/* #nosec G109 */
-					spec.NodeInfo.NumCores = int32(n)
+					spec.NodeInfo.Get().NumCores = int32(n)
 				}
 			case "disk-size-gb":
 				if n > 0 && n <= math.MaxInt32 {
 					/* #nosec G109 */
-					spec.NodeInfo.DiskSizeGb = int32(n)
+					spec.NodeInfo.Get().DiskSizeGb = int32(n)
 				}
 			case "disk-iops":
 				if n > 0 && n <= math.MaxInt32 {
 					iops := int32(n)
-					spec.NodeInfo.DiskIops.Set(&iops)
+					spec.NodeInfo.Get().DiskIops.Set(&iops)
 				}
 			// Keeping code as temp. backward compatibility
 			case "code", "cloud-provider":

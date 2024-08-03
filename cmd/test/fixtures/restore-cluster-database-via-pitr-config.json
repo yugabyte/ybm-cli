@@ -1,0 +1,17 @@
+{
+  "data": {
+    "spec": {
+      "restore_at_millis": 1234556
+    },
+    "info": {
+      "cluster_id": "5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8",
+      "metadata": {
+        "updated_on": "2024-08-07T17:26:08.435Z",
+        "created_on": "2024-08-07T17:26:08.435Z"
+      },
+      "pitr_config_id": "07de8b5e-ce57-4ab5-8e29-97e57b20e76f",
+      "id": "9e74ca8f-331b-4dec-89b0-4e59b81e905c",
+      "state": "QUEUED"
+    }
+  }
+}

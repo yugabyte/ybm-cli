@@ -28,9 +28,6 @@ var _ = Describe("Read Replica utils", func() {
 			n := int32(1)
 			numReplicas := ybmclient.NewNullableInt32(&n)
 			correctSpec := ybmclient.ReadReplicaSpec{
-				NodeInfo: ybmclient.ClusterNodeInfo{
-					NumCores: 2,
-				},
 				PlacementInfo: ybmclient.PlacementInfo{
 					CloudInfo: ybmclient.CloudInfo{
 						Code:   "AWS",
@@ -41,6 +38,10 @@ var _ = Describe("Read Replica utils", func() {
 					NumReplicas: *numReplicas,
 				},
 			}
+			nodeInfo := ybmclient.ClusterNodeInfo{
+				NumCores: 2,
+			}
+			correctSpec.SetNodeInfo(nodeInfo)
 			spec := readreplica.GetDefaultSpec(ybmclient.CLOUDENUM_AWS, vpcId)
 			Expect(spec).To(BeEquivalentTo(correctSpec))
 		})
