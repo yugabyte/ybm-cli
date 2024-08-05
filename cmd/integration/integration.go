@@ -27,6 +27,8 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"encoding/json"
+	"io"
 )
 
 var IntegrationCmd = &cobra.Command{
@@ -170,6 +172,9 @@ func init() {
 	createIntegrationCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
 	Please provide key value pairs as follows: 
 	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
+	createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
+	Please provide absolute file path`)
+	
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
 
@@ -243,8 +248,74 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		}
 		sumoLogicSpec := ybmclient.NewSumologicTelemetryProviderSpec(installationToken, accessId, accessKey)
 		IntegrationSpec.SetSumologicSpec(*sumoLogicSpec)
+	case ybmclient.TELEMETRYPROVIDERTYPEENUM_GOOGLECLOUD:
+		if !cmd.Flags().Changed("googlecloud-cred-filepath") {
+			return nil, fmt.Errorf("googlecloud-cred-filepath is required for googlecloud sink")
+		}
+		filepath, _ := cmd.Flags().GetString("googlecloud-cred-filepath")
+		jsonFile, err := os.Open(filepath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open file: %s", err)
+		}
+		defer jsonFile.Close()
+
+		// Read the file into a byte array
+		byteValue, err := io.ReadAll(jsonFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file: %s", err)
+		}
+
+		// Unmarshal the byte array into a map
+		var googlecloudMap map[string]string
+		if err := json.Unmarshal(byteValue, &googlecloudMap); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal JSON: %s", err)
+		}
+
+		credType, valid := googlecloudMap["type"]
+		if !valid {
+			return nil, fmt.Errorf("type is a required field for googlecloud credentials")
+		}
+		projectId, valid := googlecloudMap["project_id"]
+		if !valid {
+			return nil, fmt.Errorf("project_id is a required field for googlecloud credentials")
+		}
+		privateKey, valid := googlecloudMap["private_key"]
+		if !valid {
+			return nil, fmt.Errorf("private_key is a required field for googlecloud credentials")
+		}
+		privateKeyId, valid := googlecloudMap["private_key_id"]
+		if !valid {
+			return nil, fmt.Errorf("private_key_id is a required field for googlecloud credentials")
+		}
+		clientEmail, valid := googlecloudMap["client_email"]
+		if !valid {
+			return nil, fmt.Errorf("client_email is a required field for googlecloud credentials")
+		}
+		clientId, valid := googlecloudMap["client_id"]
+		if !valid {
+			return nil, fmt.Errorf("client_id is a required field for googlecloud credentials")
+		}
+		authUri, valid := googlecloudMap["auth_uri"]
+		if !valid {
+			return nil, fmt.Errorf("auth_uri is a required field for googlecloud credentials")
+		}
+		tokenUri, valid := googlecloudMap["token_uri"]
+		if !valid {
+			return nil, fmt.Errorf("token_uri is a required field for googlecloud credentials")
+		}
+		authProviderX509CertUrl, valid := googlecloudMap["auth_provider_x509_cert_url"]
+		if !valid {
+			return nil, fmt.Errorf("auth_provider_x509_cert_url is a required field for googlecloud credentials")
+		}
+		clientX509CertUrl, valid := googlecloudMap["client_x509_cert_url"]
+		if !valid {
+			return nil, fmt.Errorf("client_x509_cert_url is a required field for googlecloud credentials")
+		}
+
+		googlecloudSpec := ybmclient.NewGCPServiceAccount(credType, projectId, privateKey, privateKeyId, clientEmail, clientId, authUri, tokenUri, authProviderX509CertUrl, clientX509CertUrl)
+		IntegrationSpec.SetGooglecloudSpec(*googlecloudSpec)
 	default:
-		return nil, fmt.Errorf("only datadog, grafana or sumologic are accepted as third party sink for now")
+		return nil, fmt.Errorf("only datadog, grafana, googlecloud or sumologic are accepted as third party sink for now")
 	}
 	return IntegrationSpec, nil
 }

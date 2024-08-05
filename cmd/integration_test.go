@@ -149,6 +149,43 @@ ID                                     Name      Type      Zone        Access To
 		})
 
 	})
+	Context("When type is googlecloud", func() {
+		It("should create the config", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-googlecloud.json", &responseIntegration)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegration),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "testgcp", "--type", "googlecloud", "--googlecloud-cred-filepath", "./test/fixtures/googlecloud-test-creds.json")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The Integration 7913c052-fcd0-4b37-8a90-b0e47320190b is being created
+ID                                     Name      Type
+7913c052-fcd0-4b37-8a90-b0e47320190b   ddd       GOOGLECLOUD`))
+			session.Kill()
+		})
+		It("should return filepath error", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "testgcp", "--type", "googlecloud", "--googlecloud-cred-filepath", "./test/fixtures/invalid-filepath.json")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("failed to open file"))
+			session.Kill()
+		})
+		It("should return required field", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "testgcp", "--type", "googlecloud", "--googlecloud-cred-filepath", "./test/fixtures/invalid-googlecloud-test-creds.json")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("type is a required field for googlecloud credentials"))
+			session.Kill()
+		})
+	})
 
 	Context("When listing telememtry providers", func() {
 		It("should return the list of config", func() {
