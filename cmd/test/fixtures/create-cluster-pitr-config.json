@@ -1,0 +1,19 @@
+{
+    "data": {
+      "spec": {
+        "database_type": "YSQL",
+        "database_name": "test_ysql_db",
+        "retention_period": 5
+      },
+      "info": {
+        "id": "3fb11555-b561-4e8f-b0ed-e77b8374cbc3",
+        "cluster_id": "95c522b3-dfd8-4654-ab10-99f59179ad7c",
+        "metadata": {
+          "created_on": "2024-08-07T16:26:08.435Z",
+          "updated_on": "2024-08-07T16:26:08.435Z"
+        },
+        "backup_interval": 86400,
+        "state": "QUEUED"
+      }
+    }
+  }

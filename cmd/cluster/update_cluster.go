@@ -248,16 +248,16 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 	}
 	if !cmd.Flags().Changed("node-config") {
 		nodeConfig := ""
-		if diskSizeGb, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskSizeGbOk(); ok {
+		if diskSizeGb, ok := originalSpec.ClusterInfo.NodeInfo.Get().GetDiskSizeGbOk(); ok {
 			nodeConfig += "disk-size-gb=" + strconv.Itoa(int(*diskSizeGb))
 		}
-		if diskIops, ok := originalSpec.ClusterInfo.NodeInfo.GetDiskIopsOk(); ok && diskIops != nil {
+		if diskIops, ok := originalSpec.ClusterInfo.NodeInfo.Get().GetDiskIopsOk(); ok && diskIops != nil {
 			if nodeConfig != "" {
 				nodeConfig += ","
 			}
 			nodeConfig += "disk-iops=" + strconv.Itoa(int(*diskIops))
 		}
-		if numCores, ok := originalSpec.ClusterInfo.NodeInfo.GetNumCoresOk(); ok {
+		if numCores, ok := originalSpec.ClusterInfo.NodeInfo.Get().GetNumCoresOk(); ok {
 			if nodeConfig != "" {
 				nodeConfig += ","
 			}

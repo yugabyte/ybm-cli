@@ -98,13 +98,13 @@ func (c *ReadReplicaContext) Endpoint() string {
 
 func (c *ReadReplicaContext) NodesSpec() string {
 	iops := "-"
-	if c.rrSpec.NodeInfo.DiskIops.Get() != nil {
-		iops = strconv.Itoa(int(*c.rrSpec.NodeInfo.DiskIops.Get()))
+	if c.rrSpec.NodeInfo.Get().DiskIops.Get() != nil {
+		iops = strconv.Itoa(int(*c.rrSpec.NodeInfo.Get().DiskIops.Get()))
 	}
 	return fmt.Sprintf("%d / %s / %dGB / %s",
-		c.rrSpec.NodeInfo.NumCores,
-		convertMbtoGb(c.rrSpec.NodeInfo.MemoryMb),
-		c.rrSpec.NodeInfo.DiskSizeGb,
+		c.rrSpec.NodeInfo.Get().NumCores,
+		convertMbtoGb(c.rrSpec.NodeInfo.Get().MemoryMb),
+		c.rrSpec.NodeInfo.Get().DiskSizeGb,
 		iops)
 }
 

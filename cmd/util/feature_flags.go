@@ -32,6 +32,7 @@ const (
 	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
 	DB_AUDIT_LOGS       FeatureFlag = "DB_AUDIT_LOGS"
+	PITR_CONFIG         FeatureFlag = "PITR_CONFIG"
 )
 
 func (f FeatureFlag) String() string {
