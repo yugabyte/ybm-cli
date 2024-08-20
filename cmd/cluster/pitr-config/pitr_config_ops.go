@@ -25,6 +25,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 var ClusterName string
@@ -64,6 +65,60 @@ var listPitrConfigCmd = &cobra.Command{
 	},
 }
 
+var describePitrConfigCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe PITR Configs of a namespace in a cluster",
+	Long:  "Describe PITR Configs of a namespace in a cluster in YugabyteDB Aeon",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		if len(namespaceName) == 0 {
+			logrus.Fatalf("Namespace name must be provided.\n")
+		}
+
+		var pitrConfigId string
+		listConfigsResp, listConfigsResponse, listConfigsError := authApi.ListClusterPitrConfigs(clusterID).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", listConfigsResponse)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(listConfigsError))
+		}
+
+		for _, pitrConfig := range listConfigsResp.GetData() {
+			if pitrConfig.Spec.DatabaseName == namespaceName {
+				pitrConfigId = *pitrConfig.Info.Id
+				break
+			}
+		}
+
+		if len(pitrConfigId) == 0 {
+			logrus.Fatalf("No PITR Configs found for namespace %s in cluster %s \n", namespaceName, ClusterName)
+		}
+
+		resp, r, err := authApi.GetPitrConfig(clusterID, pitrConfigId).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		pitrConfigCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewPitrConfigFormat(viper.GetString("output")),
+		}
+
+		formatter.SinglePitrConfigWrite(pitrConfigCtx, resp.GetData())
+
+	},
+}
+
 var createPitrConfigCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create PITR Config for a cluster",
@@ -80,12 +135,14 @@ var createPitrConfigCmd = &cobra.Command{
 		}
 
 		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		if len(namespaceName) == 0 {
+			logrus.Fatalf("Namespace name must be provided.\n")
+		}
 		namespaceType, _ := cmd.Flags().GetString("namespace-type")
-		retentionPeriod, _ := cmd.Flags().GetInt32("retention-period-in-days")
-
 		if !(namespaceType == "YCQL" || namespaceType == "YSQL") {
 			logrus.Fatalln("Only YCQL or YSQL namespace types are allowed.")
 		}
+		retentionPeriod, _ := cmd.Flags().GetInt32("retention-period-in-days")
 
 		pitrConfigSpec, err := authApi.CreatePitrConfigSpec(namespaceName, namespaceType, retentionPeriod)
 		if err != nil {
@@ -97,15 +154,29 @@ var createPitrConfigCmd = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
+		pitrConfigId := resp.Data.Info.Id
 
-		fmt.Printf("\nSuccessfully created PITR configuration.\n\n")
+		msg := fmt.Sprintf("The PITR Configuration for namespace %s in cluster %s is being created\n\n", formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
-		pitrConfigCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewPitrConfigFormat(viper.GetString("output")),
+		if viper.GetBool("wait") {
+			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_ENABLE_DB_PITR)
+			fmt.Printf("Successfully created PITR configuration.\n\n")
+
+			getConfigResp, r, err := authApi.GetPitrConfig(clusterID, *pitrConfigId).Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", r)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			}
+			pitrConfigData := getConfigResp.GetData()
+			pitrConfigCtx := formatter.Context{
+				Output: os.Stdout,
+				Format: formatter.NewPitrConfigFormat(viper.GetString("output")),
+			}
+
+			formatter.SinglePitrConfigWrite(pitrConfigCtx, pitrConfigData)
+		} else {
+			fmt.Println(msg)
 		}
-
-		formatter.SinglePitrConfigWrite(pitrConfigCtx, resp.GetData())
 	},
 }
 
@@ -117,7 +188,7 @@ var restorePitrConfigCmd = &cobra.Command{
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		namespaceName, _ := cmd.Flags().GetString("namespace-name")
 		restoreAtMilis, _ := cmd.Flags().GetInt64("restore-at-millis")
-		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to restore the namespace: %s at %d", namespaceName, restoreAtMilis), viper.GetBool("force"))
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to restore the namespace: %s in cluster %s to the snapshot at %d", namespaceName, ClusterName, restoreAtMilis), viper.GetBool("force"))
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -134,6 +205,9 @@ var restorePitrConfigCmd = &cobra.Command{
 		}
 
 		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		if len(namespaceName) == 0 {
+			logrus.Fatalf("Namespace name must be provided.\n")
+		}
 		restoreAtMilis, _ := cmd.Flags().GetInt64("restore-at-millis")
 
 		var pitrConfigId string
@@ -151,7 +225,7 @@ var restorePitrConfigCmd = &cobra.Command{
 		}
 
 		if len(pitrConfigId) == 0 {
-			logrus.Fatalf("No PITR Configs found for namespace %s\n", namespaceName)
+			logrus.Fatalf("No PITR Configs found for namespace %s in cluster %s.\n", namespaceName, ClusterName)
 		}
 
 		restoreViaPitrConfigSpec, err := authApi.CreateRestoreViaPitrConfigSpec(restoreAtMilis)
@@ -165,12 +239,100 @@ var restorePitrConfigCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("\nSuccessfully restored namespace %s at %d ms.\n\n", namespaceName, restoreAtMilis)
+		msg := fmt.Sprintf("The namespace %s in cluster %s is being restored via PITR Configuration.\n\n", formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_DISABLE_DB_PITR)
+			fmt.Printf("\nSuccessfully restored namespace %s in cluster %s to the snapshot at %d ms.\n\n", namespaceName, ClusterName, restoreAtMilis)
+		} else {
+			fmt.Println(msg)
+		}
 	},
+}
+
+var deletePitrConfigCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete PITR Config for a cluster",
+	Long:  "Delete PITR Config for a cluster in YugabyteDB Aeon",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		if len(namespaceName) == 0 {
+			logrus.Fatalf("Namespace name must be provided.\n")
+		}
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to delete PITR Configuration for the namespace: %s in cluster: %s", namespaceName, ClusterName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		if len(namespaceName) == 0 {
+			logrus.Fatalf("Namespace name must be provided.\n")
+		}
+
+		var pitrConfigId string
+		listConfigsResp, listConfigsResponse, listConfigsError := authApi.ListClusterPitrConfigs(clusterID).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", listConfigsResponse)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(listConfigsError))
+		}
+
+		for _, pitrConfig := range listConfigsResp.GetData() {
+			if pitrConfig.Spec.DatabaseName == namespaceName {
+				pitrConfigId = *pitrConfig.Info.Id
+				break
+			}
+		}
+
+		if len(pitrConfigId) == 0 {
+			logrus.Fatalf("No PITR Configs found for namespace %s in cluster %s.\n", namespaceName, ClusterName)
+		}
+
+		r, err := authApi.DeletePitrConfig(clusterID, pitrConfigId).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		msg := fmt.Sprintf("The PITR Configuration for namespace %s in cluster %s is being removed.\n\n", formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_DISABLE_DB_PITR)
+			fmt.Printf("\nSuccessfully removed PITR Configuration for namespace %s in cluster %s.\n\n", namespaceName, ClusterName)
+		} else {
+			fmt.Println(msg)
+		}
+	},
+}
+
+func handleTaskCompletion(authApi *ybmAuthClient.AuthApiClient, clusterID string, msg string, taskType ybmclient.TaskTypeEnum) {
+	returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, taskType, []string{"FAILED", "SUCCEEDED"}, msg)
+	if err != nil {
+		logrus.Fatalf("error when getting task status: %s", err)
+	}
+	if returnStatus != "SUCCEEDED" {
+		logrus.Fatalf("Operation failed with error: %s", returnStatus)
+	}
 }
 
 func init() {
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, listPitrConfigCmd, util.PITR_CONFIG)
+
+	util.AddCommandIfFeatureFlag(PitrConfigCmd, describePitrConfigCmd, util.PITR_CONFIG)
+	describePitrConfigCmd.Flags().SortFlags = false
+	describePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be restored via PITR Config.")
+	describePitrConfigCmd.MarkFlagRequired("namespace-name")
 
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, createPitrConfigCmd, util.PITR_CONFIG)
 	createPitrConfigCmd.Flags().SortFlags = false
@@ -188,5 +350,11 @@ func init() {
 	restorePitrConfigCmd.Flags().Int64("restore-at-millis", 1, "[REQUIRED] The time in milliseconds to which the namespace is to be restored")
 	restorePitrConfigCmd.MarkFlagRequired("restore-at-millis")
 	restorePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+
+	util.AddCommandIfFeatureFlag(PitrConfigCmd, deletePitrConfigCmd, util.PITR_CONFIG)
+	deletePitrConfigCmd.Flags().SortFlags = false
+	deletePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be restored via PITR Config.")
+	deletePitrConfigCmd.MarkFlagRequired("namespace-name")
+	deletePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 }

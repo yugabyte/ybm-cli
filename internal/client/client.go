@@ -1313,7 +1313,7 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmc
 	previousStatus := "UNKNOWN"
 	output := fmt.Sprintf(" %s: %s", message, currentStatus)
 	timeout := time.After(viper.GetDuration("timeout"))
-	checkEveryInSec := time.Tick(2 * time.Second)
+	checkEveryInSec := time.Tick(10 * time.Second)
 	fmt.Println(output)
 	for {
 		select {
@@ -1377,7 +1377,7 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType yb
 	s.FinalMSG = ""
 	defer s.Stop()
 	timeout := time.After(viper.GetDuration("timeout"))
-	checkEveryInSec := time.Tick(2 * time.Second)
+	checkEveryInSec := time.Tick(10 * time.Second)
 
 	for {
 		select {
@@ -1581,4 +1581,12 @@ func (a *AuthApiClient) CreateRestoreViaPitrConfigSpec(restoreAtMilis int64) (*y
 
 func (a *AuthApiClient) RestoreViaPitrConfig(clusterId string, pitrConfigId string) ybmclient.ApiRestoreDatabaseViaPitrRequest {
 	return a.ApiClient.ClusterApi.RestoreDatabaseViaPitr(a.ctx, a.AccountID, a.ProjectID, clusterId, pitrConfigId)
+}
+
+func (a *AuthApiClient) GetPitrConfig(clusterId string, pitrConfigId string) ybmclient.ApiGetDatabasePitrConfigRequest {
+	return a.ApiClient.ClusterApi.GetDatabasePitrConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, pitrConfigId)
+}
+
+func (a *AuthApiClient) DeletePitrConfig(clusterId string, pitrConfigId string) ybmclient.ApiRemoveDatabasePitrConfigRequest {
+	return a.ApiClient.ClusterApi.RemoveDatabasePitrConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, pitrConfigId)
 }

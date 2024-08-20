@@ -18,15 +18,17 @@ package formatter
 import (
 	"encoding/json"
 	"sort"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
-	defaultPitrConfigListing      = "table {{.Namespace}}\t{{.TableType}}\t{{.RetentionPeriodInDays}}\t{{.BackupIntervalInSeconds}}\t{{.State}}\t{{.CreatedAt}}"
-	retentionPeriodInDaysHeader   = "Retention Period in Days"
-	backupIntervalInSecondsHeader = "Backup Interval in Seconds"
+	defaultPitrConfigListing         = "table {{.Namespace}}\t{{.TableType}}\t{{.RetentionPeriodInDays}}\t{{.BackupIntervalInSeconds}}\t{{.State}}\t{{.EarliestRecoveryTimeMillis}}"
+	retentionPeriodInDaysHeader      = "Retention Period in Days"
+	backupIntervalInSecondsHeader    = "Backup Interval in Seconds"
+	earliestRecoveryTimeMillisHeader = "Earliest Recovery Time in Millis"
 )
 
 type PitrConfigContext struct {
@@ -79,12 +81,12 @@ func PitrConfigWrite(ctx Context, pitrConfig []ybmclient.DatabasePitrConfigData)
 func NewPitrConfigContext() *PitrConfigContext {
 	pitrConfigCtx := PitrConfigContext{}
 	pitrConfigCtx.Header = SubHeaderContext{
-		"Namespace":               namespaceHeader,
-		"TableType":               tableTypeHeader,
-		"RetentionPeriodInDays":   retentionPeriodInDaysHeader,
-		"BackupIntervalInSeconds": backupIntervalInSecondsHeader,
-		"State":                   stateHeader,
-		"CreatedAt":               createdAtHeader,
+		"Namespace":                  namespaceHeader,
+		"TableType":                  tableTypeHeader,
+		"RetentionPeriodInDays":      retentionPeriodInDaysHeader,
+		"BackupIntervalInSeconds":    backupIntervalInSecondsHeader,
+		"State":                      stateHeader,
+		"EarliestRecoveryTimeMillis": earliestRecoveryTimeMillisHeader,
 	}
 	return &pitrConfigCtx
 }
@@ -109,8 +111,8 @@ func (d *PitrConfigContext) State() string {
 	return string(d.d.Info.GetState())
 }
 
-func (d *PitrConfigContext) CreatedAt() string {
-	return d.d.Info.Metadata.Get().GetCreatedOn()
+func (d *PitrConfigContext) EarliestRecoveryTimeMillis() string {
+	return strconv.Itoa(int(d.d.Info.GetEarliestRecoveryTimeMillis()))
 }
 
 func (d *PitrConfigContext) MarshalJSON() ([]byte, error) {
