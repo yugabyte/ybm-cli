@@ -14,7 +14,8 @@
           "updated_on": "2024-08-03T11:34:06.456Z"
         },
         "backup_interval": 86400,
-        "state": "QUEUED"
+        "state": "QUEUED",
+        "earliest_recovery_time_millis": 654321
       }
     },
     {
@@ -31,7 +32,8 @@
           "updated_on": "2024-08-03T11:38:10.838Z"
         },
         "backup_interval": 86400,
-        "state": "ACTIVE"
+        "state": "ACTIVE",
+        "earliest_recovery_time_millis": 123456
       }
     }
   ]

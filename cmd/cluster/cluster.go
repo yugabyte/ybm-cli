@@ -22,7 +22,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cluster/namespace"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
-	"github.com/yugabyte/ybm-cli/cmd/cluster/pitr-config"
+	pitrconfig "github.com/yugabyte/ybm-cli/cmd/cluster/pitr-config"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 )
 
@@ -60,6 +60,6 @@ func init() {
 	namespace.NamespaceCmd.MarkPersistentFlagRequired("cluster-name")
 
 	ClusterCmd.AddCommand(pitrconfig.PitrConfigCmd)
-	pitrconfig.PitrConfigCmd.PersistentFlags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	pitrconfig.PitrConfigCmd.PersistentFlags().StringVarP(&pitrconfig.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	pitrconfig.PitrConfigCmd.MarkPersistentFlagRequired("cluster-name")
 }
