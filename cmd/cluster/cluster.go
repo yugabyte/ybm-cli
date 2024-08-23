@@ -25,6 +25,7 @@ import (
 	pitrconfig "github.com/yugabyte/ybm-cli/cmd/cluster/pitr-config"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 	"github.com/yugabyte/ybm-cli/cmd/util"
+	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
 )
 
 // getCmd represents the list command
@@ -63,4 +64,8 @@ func init() {
 	util.AddCommandIfFeatureFlag(ClusterCmd, pitrconfig.PitrConfigCmd, util.PITR_CONFIG)
 	pitrconfig.PitrConfigCmd.PersistentFlags().StringVarP(&pitrconfig.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	pitrconfig.PitrConfigCmd.MarkPersistentFlagRequired("cluster-name")
+
+	ClusterCmd.AddCommand(connectionpooling.ConnectionPoolingCmd)
+	connectionpooling.ConnectionPoolingCmd.PersistentFlags().StringVarP(&connectionpooling.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	connectionpooling.ConnectionPoolingCmd.MarkPersistentFlagRequired("cluster-name")
 }

@@ -1590,3 +1590,7 @@ func (a *AuthApiClient) GetPitrConfig(clusterId string, pitrConfigId string) ybm
 func (a *AuthApiClient) DeletePitrConfig(clusterId string, pitrConfigId string) ybmclient.ApiRemoveDatabasePitrConfigRequest {
 	return a.ApiClient.ClusterApi.RemoveDatabasePitrConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, pitrConfigId)
 }
+
+func (a *AuthApiClient) PerformConnectionPoolingOperation(clusterId string) ybmclient.ApiPerformConnectionPoolingOperationRequest {
+	return a.ApiClient.ClusterApi.PerformConnectionPoolingOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
