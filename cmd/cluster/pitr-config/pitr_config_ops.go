@@ -242,7 +242,7 @@ var restorePitrConfigCmd = &cobra.Command{
 		msg := fmt.Sprintf("The namespace %s in cluster %s is being restored via PITR Configuration.\n\n", formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_DISABLE_DB_PITR)
+			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_RESTORE_DB_PITR)
 			fmt.Printf("\nSuccessfully restored namespace %s in cluster %s to the snapshot at %d ms.\n\n", namespaceName, ClusterName, restoreAtMilis)
 		} else {
 			fmt.Println(msg)
