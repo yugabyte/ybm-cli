@@ -27,6 +27,8 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
+var ClusterName string
+
 var ConnectionPoolingCmd = &cobra.Command{
 	Use:   "connection-pooling",
 	Short: "Manage Connection Pooling",
@@ -55,7 +57,7 @@ var enableConnectionPoolingCmd = &cobra.Command{
 
 		connectionPoolingOpSpec := ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_ENABLE)
 
-		resp, err := authApi.PerformConnectionPoolingOperation.ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
+		resp, err := authApi.PerformConnectionPoolingOperation(clusterId).ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
@@ -97,7 +99,7 @@ var disableConnectionPoolingCmd = &cobra.Command{
 
 		connectionPoolingOpSpec := ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_DISABLE)
 
-		resp, err := authApi.PerformConnectionPoolingOperation.ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
+		resp, err := authApi.PerformConnectionPoolingOperation(clusterId).ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
@@ -121,11 +123,11 @@ var disableConnectionPoolingCmd = &cobra.Command{
 }
 
 func init() {
-	ConnectionPoolingCmd.AddCommand(enableConnectionPoolingCmd)
+	util.AddCommandIfFeatureFlag(ConnectionPoolingCmd, enableConnectionPoolingCmd, util.CONNECTION_POOLING)
 	enableConnectionPoolingCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
 	enableConnectionPoolingCmd.MarkFlagRequired("cluster-name")
 
-	ConnectionPoolingCmd.AddCommand(disableConnectionPoolingCmd)
+	util.AddCommandIfFeatureFlag(ConnectionPoolingCmd, disableConnectionPoolingCmd, util.CONNECTION_POOLING)
 	disableConnectionPoolingCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
 	disableConnectionPoolingCmd.MarkFlagRequired("cluster-name")
 }

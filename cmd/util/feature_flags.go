@@ -33,6 +33,7 @@ const (
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
 	DB_AUDIT_LOGS       FeatureFlag = "DB_AUDIT_LOGS"
 	PITR_CONFIG         FeatureFlag = "PITR_CONFIG"
+	CONNECTION_POOLING  FeatureFlag = "CONNECTION_POOLING"
 )
 
 func (f FeatureFlag) String() string {
