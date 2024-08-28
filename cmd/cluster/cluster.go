@@ -18,6 +18,7 @@ package cluster
 import (
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/namespace"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
@@ -65,7 +66,7 @@ func init() {
 	pitrconfig.PitrConfigCmd.PersistentFlags().StringVarP(&pitrconfig.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	pitrconfig.PitrConfigCmd.MarkPersistentFlagRequired("cluster-name")
 
-	ClusterCmd.AddCommand(connectionpooling.ConnectionPoolingCmd)
+	util.AddCommandIfFeatureFlag(ClusterCmd, connectionpooling.ConnectionPoolingCmd, util.CONNECTION_POOLING)
 	connectionpooling.ConnectionPoolingCmd.PersistentFlags().StringVarP(&connectionpooling.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	connectionpooling.ConnectionPoolingCmd.MarkPersistentFlagRequired("cluster-name")
 }
