@@ -70,11 +70,14 @@ func performConnectionPoolingOperation(operationName string, cmd *cobra.Command,
 		}
 
 		var connectionPoolingOpSpec *ybmclient.ConnectionPoolingOpSpec
+		var connectionPoolingTaskEnum ybmclient.TaskTypeEnum
 
 		if operationName == "enable" {
 			connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_ENABLE)
+			connectionPoolingTaskEnum = ybmclient.TASKTYPEENUM_ENABLE_CONNECTION_POOLING
 		} else {
 			connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_DISABLE)
+			connectionPoolingTaskEnum = ybmclient.TASKTYPEENUM_DISABLE_CONNECTION_POOLING
 		}
 
 		resp, err := authApi.PerformConnectionPoolingOperation(clusterId).ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
@@ -86,7 +89,7 @@ func performConnectionPoolingOperation(operationName string, cmd *cobra.Command,
 
 		msg := fmt.Sprintf("Connection Pooling for cluster %s is being %sd", formatter.Colorize(clusterName, formatter.GREEN_COLOR), operationName)
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DISABLE_CONNECTION_POOLING, []string{"FAILED", "SUCCEEDED"}, msg)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, connectionPoolingTaskEnum, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
