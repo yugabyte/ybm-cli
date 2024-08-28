@@ -18,7 +18,6 @@ package cluster
 import (
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/namespace"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
