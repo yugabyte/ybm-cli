@@ -43,40 +43,7 @@ var enableConnectionPoolingCmd = &cobra.Command{
 	Short: "Enable Connection Pooling",
 	Long:  "Enable Connection Pooling",
 	Run: func(cmd *cobra.Command, args []string) {
-		authApi, err := ybmAuthClient.NewAuthApiClient()
-		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-		authApi.GetInfo("", "")
-
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterId, err := authApi.GetClusterIdByName(clusterName)
-		if err != nil {
-			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		connectionPoolingOpSpec := ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_ENABLE)
-
-		resp, err := authApi.PerformConnectionPoolingOperation(clusterId).ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
-
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		msg := fmt.Sprintf("Connection Pooling for cluster %s is being enabled", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_ENABLE_CONNECTION_POOLING, []string{"FAILED", "SUCCEEDED"}, msg)
-			if err != nil {
-				logrus.Fatalf("error when getting task status: %s", err)
-			}
-			if returnStatus != "SUCCEEDED" {
-				logrus.Fatalf("Operation failed with error: %s", returnStatus)
-			}
-			fmt.Printf("Connection Pooling has been enabled on cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-		} else {
-			fmt.Println(msg)
-		}
+		performConnectionPoolingOperation("enable", cmd, args)
 	},
 }
 
@@ -85,7 +52,12 @@ var disableConnectionPoolingCmd = &cobra.Command{
 	Short: "Disable Connection Pooling",
 	Long:  "Disable Connection Pooling",
 	Run: func(cmd *cobra.Command, args []string) {
-		authApi, err := ybmAuthClient.NewAuthApiClient()
+		performConnectionPoolingOperation("disable", cmd, args)
+	},
+}
+
+func performConnectionPoolingOperation(operationName string, cmd *cobra.Command, args []string) {
+	authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -97,7 +69,13 @@ var disableConnectionPoolingCmd = &cobra.Command{
 			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		connectionPoolingOpSpec := ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_DISABLE)
+		var connectionPoolingOpSpec *ybmclient.ConnectionPoolingOpSpec
+
+		if operationName == "enable" {
+			connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_ENABLE)
+		} else {
+			connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_DISABLE)
+		}
 
 		resp, err := authApi.PerformConnectionPoolingOperation(clusterId).ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
 
@@ -106,7 +84,7 @@ var disableConnectionPoolingCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("Connection Pooling for cluster %s is being disabled", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Connection Pooling for cluster %s is being %sd", formatter.Colorize(clusterName, formatter.GREEN_COLOR), operationName)
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DISABLE_CONNECTION_POOLING, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
@@ -115,11 +93,10 @@ var disableConnectionPoolingCmd = &cobra.Command{
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("Connection Pooling has been disabled on cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			fmt.Printf("Connection Pooling has been %sd on cluster %s\n", operationName, formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 		} else {
 			fmt.Println(msg)
 		}
-	},
 }
 
 func init() {

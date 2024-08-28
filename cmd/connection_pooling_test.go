@@ -58,7 +58,7 @@ var _ = Describe("Connection Pooling", func() {
 	})
 
 	Context("When enabling connection pooling", func() {
-		It("should return ", func() {
+		It("should enable connection pooling", func() {
 			statusCode = 200
 
 			server.AppendHandlers(
@@ -85,6 +85,27 @@ var _ = Describe("Connection Pooling", func() {
 				),
 			)
 
+			cmd := exec.Command(compiledCLIPath, "cluster", "connection-pooling", "enable")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"cluster-name\" not set$)"))
+			session.Kill()
+		})
+
+	})
+
+	Context("When disabling connection pooling", func() {
+		It("should disable connection pooling", func() {
+			statusCode = 200
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/connection-pooling"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, "Successfully submitted cluster connection pooling operation request"),
+				),
+			)
+
 			cmd := exec.Command(compiledCLIPath, "cluster", "connection-pooling", "disable", "--cluster-name", "stunning-sole")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			exec.Command(compiledCLIPath, "y")
@@ -93,6 +114,22 @@ var _ = Describe("Connection Pooling", func() {
 			Expect(session.Out).Should(gbytes.Say("Connection Pooling for cluster stunning-sole is being disabled"))
 			session.Kill()
 		})
+		It("should return required field name and type when not set", func() {
+			statusCode = 200
 
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/connection-pooling"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, "Successfully submitted cluster connection pooling operation request"),
+				),
+			)
+
+			cmd := exec.Command(compiledCLIPath, "cluster", "connection-pooling", "disable")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"cluster-name\" not set$)"))
+			session.Kill()
+		})
 	})
 })
