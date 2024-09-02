@@ -15,7 +15,8 @@
         },
         "backup_interval": 86400,
         "state": "QUEUED",
-        "earliest_recovery_time_millis": 654321
+        "earliest_recovery_time_millis": 654321,
+        "latest_recovery_time_millis": 987654321
       }
     },
     {
@@ -33,7 +34,8 @@
         },
         "backup_interval": 86400,
         "state": "ACTIVE",
-        "earliest_recovery_time_millis": 123456
+        "earliest_recovery_time_millis": 123456,
+        "latest_recovery_time_millis": 123456789
       }
     }
   ]
