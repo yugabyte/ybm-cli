@@ -25,10 +25,11 @@ import (
 )
 
 const (
-	defaultPitrConfigListing         = "table {{.Namespace}}\t{{.TableType}}\t{{.RetentionPeriodInDays}}\t{{.BackupIntervalInSeconds}}\t{{.State}}\t{{.EarliestRecoveryTimeMillis}}"
+	defaultPitrConfigListing         = "table {{.Namespace}}\t{{.TableType}}\t{{.RetentionPeriodInDays}}\t{{.BackupIntervalInSeconds}}\t{{.State}}\t{{.EarliestRecoveryTimeMillis}}\t{{.LatestRecoveryTimeMillis}}"
 	retentionPeriodInDaysHeader      = "Retention Period in Days"
 	backupIntervalInSecondsHeader    = "Backup Interval in Seconds"
 	earliestRecoveryTimeMillisHeader = "Earliest Recovery Time in Millis"
+	latestRecoveryTimeMillisHeader   = "Latest Recovery Time in Millis"
 )
 
 type PitrConfigContext struct {
@@ -87,6 +88,7 @@ func NewPitrConfigContext() *PitrConfigContext {
 		"BackupIntervalInSeconds":    backupIntervalInSecondsHeader,
 		"State":                      stateHeader,
 		"EarliestRecoveryTimeMillis": earliestRecoveryTimeMillisHeader,
+		"LatestRecoveryTimeMillis":   latestRecoveryTimeMillisHeader,
 	}
 	return &pitrConfigCtx
 }
@@ -113,6 +115,10 @@ func (d *PitrConfigContext) State() string {
 
 func (d *PitrConfigContext) EarliestRecoveryTimeMillis() string {
 	return strconv.Itoa(int(d.d.Info.GetEarliestRecoveryTimeMillis()))
+}
+
+func (d *PitrConfigContext) LatestRecoveryTimeMillis() string {
+	return strconv.Itoa(int(d.d.Info.GetLatestRecoveryTimeMillis()))
 }
 
 func (d *PitrConfigContext) MarshalJSON() ([]byte, error) {

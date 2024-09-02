@@ -23,7 +23,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-    "github.com/onsi/gomega/gbytes"
+	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/ghttp"
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -32,11 +32,11 @@ import (
 var _ = Describe("Connection Pooling", func() {
 
 	var (
-		server                  *ghttp.Server
-		statusCode              int
-		responseAccount         openapi.AccountListResponse
-		responseProject         openapi.AccountListResponse
-		responseListClusters    openapi.ClusterListResponse
+		server               *ghttp.Server
+		statusCode           int
+		responseAccount      openapi.AccountListResponse
+		responseProject      openapi.AccountListResponse
+		responseListClusters openapi.ClusterListResponse
 	)
 
 	BeforeEach(func() {

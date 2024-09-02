@@ -21,7 +21,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
-	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20240821184408-0227fa6030a5
+	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20240830204440-2604500644ab
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/mod v0.19.0
 	golang.org/x/term v0.22.0
