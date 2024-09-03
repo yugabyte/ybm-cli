@@ -25,9 +25,8 @@ import (
 )
 
 const (
-	defaultPitrConfigListing         = "table {{.Namespace}}\t{{.TableType}}\t{{.RetentionPeriodInDays}}\t{{.BackupIntervalInSeconds}}\t{{.State}}\t{{.EarliestRecoveryTimeMillis}}\t{{.LatestRecoveryTimeMillis}}"
+	defaultPitrConfigListing         = "table {{.Namespace}}\t{{.TableType}}\t{{.RetentionPeriodInDays}}\t{{.State}}\t{{.EarliestRecoveryTimeMillis}}\t{{.LatestRecoveryTimeMillis}}"
 	retentionPeriodInDaysHeader      = "Retention Period in Days"
-	backupIntervalInSecondsHeader    = "Backup Interval in Seconds"
 	earliestRecoveryTimeMillisHeader = "Earliest Recovery Time in Millis"
 	latestRecoveryTimeMillisHeader   = "Latest Recovery Time in Millis"
 )
@@ -85,7 +84,6 @@ func NewPitrConfigContext() *PitrConfigContext {
 		"Namespace":                  namespaceHeader,
 		"TableType":                  tableTypeHeader,
 		"RetentionPeriodInDays":      retentionPeriodInDaysHeader,
-		"BackupIntervalInSeconds":    backupIntervalInSecondsHeader,
 		"State":                      stateHeader,
 		"EarliestRecoveryTimeMillis": earliestRecoveryTimeMillisHeader,
 		"LatestRecoveryTimeMillis":   latestRecoveryTimeMillisHeader,
@@ -103,10 +101,6 @@ func (d *PitrConfigContext) TableType() string {
 
 func (d *PitrConfigContext) RetentionPeriodInDays() int32 {
 	return d.d.Spec.RetentionPeriod
-}
-
-func (d *PitrConfigContext) BackupIntervalInSeconds() int32 {
-	return d.d.Info.GetBackupInterval()
 }
 
 func (d *PitrConfigContext) State() string {

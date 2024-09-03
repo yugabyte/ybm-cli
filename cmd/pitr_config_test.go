@@ -64,9 +64,9 @@ var _ = Describe("PITR Configs Test", func() {
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Namespace      Table Type   Retention Period in Days   Backup Interval in Seconds   State     Earliest Recovery Time in Millis   Latest Recovery Time in Millis
-test_ycql_db   YCQL         6                          86400                        ACTIVE    123456                             123456789
-test_ysql_db   YSQL         5                          86400                        QUEUED    654321                             987654321`))
+			Expect(session.Out).Should(gbytes.Say(`Namespace      Table Type   Retention Period in Days   State     Earliest Recovery Time in Millis   Latest Recovery Time in Millis
+test_ycql_db   YCQL         6                          ACTIVE    123456                             123456789
+test_ysql_db   YSQL         5                          QUEUED    654321                             987654321`))
 			session.Kill()
 		})
 
@@ -209,8 +209,8 @@ test_ysql_db   YSQL         5                          86400                    
 			ysqlSession, ysqlErr := gexec.Start(ysqlCmd, GinkgoWriter, GinkgoWriter)
 			Expect(ysqlErr).NotTo(HaveOccurred())
 			ysqlSession.Wait(2)
-			Expect(ysqlSession.Out).Should(gbytes.Say(`Namespace      Table Type   Retention Period in Days   Backup Interval in Seconds   State     Earliest Recovery Time in Millis   Latest Recovery Time in Millis
-test_ysql_db   YSQL         5                          86400                        QUEUED    654321                             987654321`))
+			Expect(ysqlSession.Out).Should(gbytes.Say(`Namespace      Table Type   Retention Period in Days   State     Earliest Recovery Time in Millis   Latest Recovery Time in Millis
+test_ysql_db   YSQL         5                          QUEUED    654321                             987654321`))
 			ysqlSession.Kill()
 		})
 
@@ -236,8 +236,8 @@ test_ysql_db   YSQL         5                          86400                    
 			ycqlSession, ycqlErr := gexec.Start(ycqlCmd, GinkgoWriter, GinkgoWriter)
 			Expect(ycqlErr).NotTo(HaveOccurred())
 			ycqlSession.Wait(2)
-			Expect(ycqlSession.Out).Should(gbytes.Say(`Namespace      Table Type   Retention Period in Days   Backup Interval in Seconds   State     Earliest Recovery Time in Millis   Latest Recovery Time in Millis
-test_ycql_db   YCQL         6                          86400                        ACTIVE    123456                             123456789`))
+			Expect(ycqlSession.Out).Should(gbytes.Say(`Namespace      Table Type   Retention Period in Days   State     Earliest Recovery Time in Millis   Latest Recovery Time in Millis
+test_ycql_db   YCQL         6                          ACTIVE    123456                             123456789`))
 			ycqlSession.Kill()
 		})
 
