@@ -211,8 +211,8 @@ var _ = Describe("Cluster", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-				expected := `Name            Tier        Version       State     Health    Provider   Regions     Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
-stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-west-2   1         2 / 8GB / 100GB / -` + "\n"
+				expected := `Name            Tier        Version       State     Health    Provider   Regions     Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)   Connection Pooling Enabled
+stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-west-2   1         2 / 8GB / 100GB / -               false` + "\n"
 				Expect(o).Should(Equal(expected))
 				session.Kill()
 			})
@@ -253,8 +253,8 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-we
 Name            ID                                     Version       State     Health
 stunning-sole   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   2.16.0.1-b7   ACTIVE    💚
 
-Provider   Tier        Fault Tolerance   Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)
-AWS        Dedicated   NONE, RF 1        1         2 / 8GB / 100GB / -
+Provider   Tier        Fault Tolerance   Nodes     Node Res.(Vcpu/Mem/DiskGB/IOPS)   Connection Pooling Enabled
+AWS        Dedicated   NONE, RF 1        1         2 / 8GB / 100GB / -               false
 
 
 Regions
