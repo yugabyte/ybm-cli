@@ -33,7 +33,7 @@ import (
 
 const (
 	defaultFullClusterGeneral       = "table {{.Name}}\t{{.ID}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}"
-	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
 	defaultVPCListingCluster        = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
 	defaultDefaultFullClusterRegion = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
 	defaultFullClusterNalListing    = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
