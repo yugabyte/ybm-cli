@@ -16,6 +16,7 @@
 package formatter
 
 import (
+	"encoding/json"
 	"fmt"
 	"runtime"
 	"sort"
@@ -122,9 +123,9 @@ func (n *NodeContext) MemoryUsed() string {
 // 	return e.e.GetHost()
 // }
 
-// func (n *NodeContext) MarshalJSON() ([]byte, error) {
-// 	return json.Marshal(e.e)
-// }
+func (n *NodeContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(n.n)
+}
 
 func NodeTypeToEmoji(nodeType bool) string {
 
