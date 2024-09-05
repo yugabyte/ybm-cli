@@ -104,10 +104,6 @@ func performConnectionPoolingOperation(operationName string, cmd *cobra.Command,
 
 func init() {
 	util.AddCommandIfFeatureFlag(ConnectionPoolingCmd, enableConnectionPoolingCmd, util.CONNECTION_POOLING)
-	enableConnectionPoolingCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
-	enableConnectionPoolingCmd.MarkFlagRequired("cluster-name")
 
 	util.AddCommandIfFeatureFlag(ConnectionPoolingCmd, disableConnectionPoolingCmd, util.CONNECTION_POOLING)
-	disableConnectionPoolingCmd.Flags().String("cluster-name", "", "[REQUIRED] The name of the cluster to get details.")
-	disableConnectionPoolingCmd.MarkFlagRequired("cluster-name")
 }
