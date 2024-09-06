@@ -1557,6 +1557,23 @@ func (a *AuthApiClient) GetConfigByName(configName string) (*ybmclient.MetricsEx
 	return nil, fmt.Errorf("could not find config with name %s", configName)
 }
 
+func (a *AuthApiClient) GetIntegrationByName(configName string) (*ybmclient.TelemetryProviderData, error) {
+	resp, r, err := a.ListIntegrations().Execute()
+
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		return nil, err
+	}
+
+	for _, tp := range resp.Data {
+		if tp.GetSpec().Name == configName {
+			return &tp, nil
+		}
+	}
+
+	return nil, fmt.Errorf("could not find config with name %s", configName)
+}
+
 func (a *AuthApiClient) GetClusterNamespaces(clusterID string) ybmclient.ApiGetClusterNamespacesRequest {
 	return a.ApiClient.ClusterApi.GetClusterNamespaces(a.ctx, a.AccountID, a.ProjectID, clusterID)
 }
