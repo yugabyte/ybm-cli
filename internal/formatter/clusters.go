@@ -32,11 +32,12 @@ import (
 )
 
 const (
-	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
 	numNodesHeader        = "Nodes"
 	nodeInfoHeader        = "Node Res.(Vcpu/Mem/DiskGB/IOPS)"
 	healthStateHeader     = "Health"
 	tierHeader            = "Tier"
+	connectionPoolingHeader = "Connection Pooling Enabled"
 )
 
 type ClusterContext struct {
@@ -86,6 +87,7 @@ func NewClusterContext() *ClusterContext {
 		"FaultTolerance":   faultToleranceHeader,
 		"DataDistribution": dataDistributionHeader,
 		"Tier":             tierHeader,
+		"ConnectionPoolingStatus": connectionPoolingHeader,
 	}
 	return &clusterCtx
 }
@@ -127,6 +129,13 @@ func (c *ClusterContext) SoftwareVersion() string {
 		return *v
 	}
 	return ""
+}
+
+func (c *ClusterContext) ConnectionPoolingStatus() bool {
+	if v, ok := c.c.Info.GetIsConnectionPoolingEnabledOk(); ok {
+		return *v
+	}
+	return false
 }
 
 func (c *ClusterContext) HealthState() string {
