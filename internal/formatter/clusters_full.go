@@ -27,13 +27,15 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/cluster"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	"golang.org/x/exp/slices"
 )
 
 const (
 	defaultFullClusterGeneral       = "table {{.Name}}\t{{.ID}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}"
-	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
+	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultFullClusterGeneral2v2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
 	defaultVPCListingCluster        = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
 	defaultDefaultFullClusterRegion = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
 	defaultFullClusterNalListing    = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
@@ -157,7 +159,14 @@ func (c *FullClusterContext) Write() error {
 	}
 	c.postFormat(tmpl, NewClusterContext())
 
-	tmpl, err = c.startSubsection(defaultFullClusterGeneral2)
+
+
+	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
+		tmpl, err = c.startSubsection(defaultFullClusterGeneral2v2)
+	} else {
+		tmpl, err = c.startSubsection(defaultFullClusterGeneral2)
+	}
+
 	if err != nil {
 		return err
 	}
