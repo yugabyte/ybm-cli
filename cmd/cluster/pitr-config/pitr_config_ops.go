@@ -314,7 +314,7 @@ func init() {
 	createPitrConfigCmd.MarkFlagRequired("namespace-name")
 	createPitrConfigCmd.Flags().String("namespace-type", "", "[REQUIRED] The type of the namespace. Available options are YCQL and YSQL")
 	createPitrConfigCmd.MarkFlagRequired("namespace-type")
-	createPitrConfigCmd.Flags().Int32("retention-period-in-days", 1, "[REQUIRED] The time duration in days to retain a snapshot for.")
+	createPitrConfigCmd.Flags().Int32("retention-period-in-days", 2, "[REQUIRED] The time duration in days to retain a snapshot for.")
 	createPitrConfigCmd.MarkFlagRequired("retention-period-in-days")
 
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, restorePitrConfigCmd, util.PITR_CONFIG)
