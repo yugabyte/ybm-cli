@@ -21,6 +21,8 @@ import (
 	"strings"
 
 	"encoding/json"
+	"io"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -28,7 +30,6 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
-	"io"
 )
 
 var IntegrationCmd = &cobra.Command{
@@ -140,7 +141,7 @@ var deleteIntegrationCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 		configName, _ := cmd.Flags().GetString("config-name")
 
-		config, err := authApi.GetConfigByName(configName)
+		config, err := authApi.GetIntegrationByName(configName)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -172,8 +173,11 @@ func init() {
 	createIntegrationCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
 	Please provide key value pairs as follows: 
 	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
-	createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
+
+	if util.IsFeatureFlagEnabled(util.GOOGLECLOUD_INTEGRATION) {
+		createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
 	Please provide absolute file path`)
+	}
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
 
@@ -248,6 +252,10 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		sumoLogicSpec := ybmclient.NewSumologicTelemetryProviderSpec(installationToken, accessId, accessKey)
 		IntegrationSpec.SetSumologicSpec(*sumoLogicSpec)
 	case ybmclient.TELEMETRYPROVIDERTYPEENUM_GOOGLECLOUD:
+		if !util.IsFeatureFlagEnabled(util.GOOGLECLOUD_INTEGRATION) {
+			return nil, fmt.Errorf("Integration of type GOOGLECLOUD is currently not supported")
+		}
+
 		if !cmd.Flags().Changed("googlecloud-cred-filepath") {
 			return nil, fmt.Errorf("googlecloud-cred-filepath is required for googlecloud sink")
 		}

@@ -49,6 +49,7 @@ var _ = Describe("Integration", func() {
 		Expect(err).ToNot(HaveOccurred())
 		os.Setenv("YBM_HOST", fmt.Sprintf("http://%s", server.Addr()))
 		os.Setenv("YBM_APIKEY", "test-token")
+		os.Setenv("YBM_FF_GOOGLECLOUD_INTEGRATION", "true")
 	})
 
 	Context("When type is Datadog", func() {
@@ -149,7 +150,7 @@ ID                                     Name      Type      Zone        Access To
 		})
 
 	})
-	Context("When type is googlecloud", func() {
+	Context("When type is googlecloud ff is true", func() {
 		It("should create the config", func() {
 			statusCode = 200
 			err := loadJson("./test/fixtures/metrics-exporter-googlecloud.json", &responseIntegration)
@@ -186,7 +187,26 @@ ID                                     Name      Type
 			session.Kill()
 		})
 	})
-
+	Context("When type is googlecloud and ff is false", func() {
+		It("should return unknown flag error", func() {
+			os.Setenv("YBM_FF_GOOGLECLOUD_INTEGRATION", "false")
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "testgcp", "--type", "googlecloud", "--googlecloud-cred-filepath", "./test/fixtures/googlecloud-test-creds.json")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("unknown flag: --googlecloud-cred-filepath"))
+			session.Kill()
+		})
+		It("should return 'unsupported integration' error", func() {
+			os.Setenv("YBM_FF_GOOGLECLOUD_INTEGRATION", "false")
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "testgcp", "--type", "googlecloud", "--datadog-spec", "site=test,api-key=c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("Integration of type GOOGLECLOUD is currently not supported"))
+			session.Kill()
+		})
+	})
 	Context("When listing telememtry providers", func() {
 		It("should return the list of config", func() {
 			statusCode = 200
