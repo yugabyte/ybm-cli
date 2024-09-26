@@ -26,13 +26,15 @@ import (
 	"github.com/enescakir/emoji"
 	"github.com/inhies/go-bytesize"
 	"github.com/sirupsen/logrus"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
 const (
-	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
+	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultClusterListingV2 = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
 	numNodesHeader        = "Nodes"
 	nodeInfoHeader        = "Node Res.(Vcpu/Mem/DiskGB/IOPS)"
 	healthStateHeader     = "Health"
@@ -50,6 +52,9 @@ func NewClusterFormat(source string) Format {
 	switch source {
 	case "table", "":
 		format := defaultClusterListing
+		if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING){
+			format = defaultClusterListingV2
+		}
 		return Format(format)
 	default: // custom format or json or pretty
 		return Format(source)
@@ -68,11 +73,37 @@ func ClusterWrite(ctx Context, clusters []ybmclient.ClusterData) error {
 		}
 		return nil
 	}
-	return ctx.Write(NewClusterContext(), render)
+
+	clusterContext := NewClusterContext()
+	
+	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING){
+		clusterContext = NewClusterContextV2()
+	}
+
+	return ctx.Write(clusterContext, render)
 }
 
 // NewClusterContext creates a new context for rendering cluster
 func NewClusterContext() *ClusterContext {
+	clusterCtx := ClusterContext{}
+	clusterCtx.Header = SubHeaderContext{
+		"Name":             nameHeader,
+		"ID":               "ID",
+		"Regions":          regionsHeader,
+		"Nodes":            numNodesHeader,
+		"NodesSpec":        nodeInfoHeader,
+		"SoftwareVersion":  softwareVersionHeader,
+		"State":            stateHeader,
+		"HealthState":      healthStateHeader,
+		"Provider":         providerHeader,
+		"FaultTolerance":   faultToleranceHeader,
+		"DataDistribution": dataDistributionHeader,
+		"Tier":             tierHeader,
+	}
+	return &clusterCtx
+}
+
+func NewClusterContextV2() *ClusterContext {
 	clusterCtx := ClusterContext{}
 	clusterCtx.Header = SubHeaderContext{
 		"Name":             nameHeader,
