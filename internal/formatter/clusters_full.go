@@ -157,7 +157,14 @@ func (c *FullClusterContext) Write() error {
 	if err := c.contextFormat(tmpl, fcc.Cluster); err != nil {
 		return err
 	}
-	c.postFormat(tmpl, NewClusterContext())
+
+	clusterContext := NewClusterContext()
+
+
+	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING){
+		clusterContext = NewClusterContextV2()
+	}
+	c.postFormat(tmpl, clusterContext)
 
 
 
@@ -174,7 +181,14 @@ func (c *FullClusterContext) Write() error {
 	if err := c.contextFormat(tmpl, fcc.Cluster); err != nil {
 		return err
 	}
-	c.postFormat(tmpl, NewClusterContext())
+	
+	clusterContext = NewClusterContext()
+
+
+	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING){
+		clusterContext = NewClusterContextV2()
+	}
+	c.postFormat(tmpl, clusterContext)
 
 	//Regions Subsection
 	tmpl, err = c.startSubsection(defaultDefaultFullClusterRegion)
