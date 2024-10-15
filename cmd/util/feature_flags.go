@@ -35,6 +35,7 @@ const (
 	PITR_CONFIG             FeatureFlag = "PITR_CONFIG"
 	CONNECTION_POOLING      FeatureFlag = "CONNECTION_POOLING"
 	GOOGLECLOUD_INTEGRATION FeatureFlag = "GOOGLECLOUD_INTEGRATION"
+	DR                      FeatureFlag = "DR"
 )
 
 func (f FeatureFlag) String() string {

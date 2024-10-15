@@ -1611,3 +1611,11 @@ func (a *AuthApiClient) DeletePitrConfig(clusterId string, pitrConfigId string) 
 func (a *AuthApiClient) PerformConnectionPoolingOperation(clusterId string) ybmclient.ApiPerformConnectionPoolingOperationRequest {
 	return a.ApiClient.ClusterApi.PerformConnectionPoolingOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
+
+func (a *AuthApiClient) CreateXClusterDr(clusterId string) ybmclient.ApiCreateXClusterDrRequest {
+	return a.ApiClient.XclusterDrApi.CreateXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) GetXClusterDr(clusterId string, drId string) ybmclient.ApiGetXClusterDrRequest {
+	return a.ApiClient.XclusterDrApi.GetXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
