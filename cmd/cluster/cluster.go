@@ -18,14 +18,15 @@ package cluster
 import (
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
+	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
+	log_exporter "github.com/yugabyte/ybm-cli/cmd/cluster/log-exporter"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/namespace"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
 	pitrconfig "github.com/yugabyte/ybm-cli/cmd/cluster/pitr-config"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 	"github.com/yugabyte/ybm-cli/cmd/util"
-	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
 )
 
 // getCmd represents the list command
@@ -40,6 +41,10 @@ var ClusterCmd = &cobra.Command{
 
 func init() {
 	ClusterCmd.AddCommand(cert.CertCmd)
+
+	ClusterCmd.AddCommand(log_exporter.DbQueryLoggingCmd)
+	log_exporter.DbQueryLoggingCmd.PersistentFlags().StringVarP(&log_exporter.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	log_exporter.DbQueryLoggingCmd.MarkPersistentFlagRequired("cluster-name")
 
 	ClusterCmd.AddCommand(network.NetworkCmd)
 	network.NetworkCmd.PersistentFlags().StringVarP(&network.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")

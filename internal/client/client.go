@@ -1611,3 +1611,19 @@ func (a *AuthApiClient) DeletePitrConfig(clusterId string, pitrConfigId string) 
 func (a *AuthApiClient) PerformConnectionPoolingOperation(clusterId string) ybmclient.ApiPerformConnectionPoolingOperationRequest {
 	return a.ApiClient.ClusterApi.PerformConnectionPoolingOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
+
+func (a *AuthApiClient) GetDbLoggingConfig(clusterId string) ybmclient.ApiListPgLogExporterConfigsRequest {
+	return a.ApiClient.ClusterApi.ListPgLogExporterConfigs(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) EnableDbQueryLogging(clusterId string) ybmclient.ApiAssociatePgLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.AssociatePgLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) EditDbQueryLoggingConfig(clusterId string, exporterConfigId string) ybmclient.ApiUpdatePgLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.UpdatePgLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, exporterConfigId)
+}
+
+func (a *AuthApiClient) RemoveDbQueryLoggingConfig(clusterId string, exporterConfigId string) ybmclient.ApiRemovePgLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.RemovePgLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, exporterConfigId)
+}
