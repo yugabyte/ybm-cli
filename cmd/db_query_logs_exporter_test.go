@@ -64,7 +64,7 @@ var _ = Describe("DB Query Logging", func() {
 	Describe("When enabling query log exporter", func() {
 		Context("with exporter-id not set", func() {
 			It("should throw error, exporter-id not set", func() {
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "enable", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 
 				Expect(err).NotTo(HaveOccurred())
@@ -86,7 +86,7 @@ var _ = Describe("DB Query Logging", func() {
 					),
 				)
 
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "enable",
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable",
 					"--cluster-name", "stunning-sole",
 					"--exporter-id", "9e740000-331b-4dec-89b0-4e59b81e9019",
 				)
@@ -114,7 +114,7 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log
 					),
 				)
 
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "enable",
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable",
 					"--cluster-name", "stunning-sole",
 					"--exporter-id", "9e740000-331b-4dec-89b0-4e59b81e9019",
 					"--debug-print-plan", "true",
@@ -156,7 +156,7 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_
 					),
 				)
 
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "disable",
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "disable",
 					"--cluster-name", "stunning-sole",
 				)
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
@@ -164,7 +164,7 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				Expect(session.Out).Should(gbytes.Say(`Disabling DB query log config for the cluster, this may take a few minutes...
-You can check the status via \$ ybm cluster db-query-logging describe --cluster-name stunning-sole`))
+You can check the status via \$ ybm cluster db-query-log-exporter describe --cluster-name stunning-sole`))
 				Expect(server.ReceivedRequests()).Should(HaveLen(5))
 				session.Kill()
 			})
@@ -182,7 +182,7 @@ You can check the status via \$ ybm cluster db-query-logging describe --cluster-
 				),
 			)
 
-			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "describe",
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "describe",
 				"--cluster-name", "stunning-sole",
 			)
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
@@ -222,7 +222,7 @@ ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_
 				),
 			)
 
-			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "update-config",
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "update-config",
 				"--cluster-name", "stunning-sole",
 				"--exporter-id", "9e740000-331b-4dec-89b0-4e59b81e9019",
 				// Change few query log configs

@@ -31,7 +31,7 @@ import (
 var ClusterName string
 
 var DbQueryLoggingCmd = &cobra.Command{
-	Use:   "db-query-logging",
+	Use:   "db-query-log-exporter",
 	Short: "Configure DB Query Log exporter for your Cluster.",
 	Long:  "Configure DB Query Log exporter for your Cluster.",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -171,7 +171,7 @@ var disableLogExporterCmd = &cobra.Command{
 		}
 
 		fmt.Printf(`Disabling DB query log config for the cluster, this may take a few minutes...
-You can check the status via $ ybm cluster db-query-logging describe --cluster-name %s%s`, clusterName, "\n")
+You can check the status via $ ybm cluster db-query-log-exporter describe --cluster-name %s%s`, clusterName, "\n")
 	},
 }
 
