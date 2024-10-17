@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -35,6 +36,7 @@ type DrContext struct {
 	HeaderContext
 	Context
 	c ybmclient.XClusterDrData
+	a ybmAuthClient.AuthApiClient
 }
 
 func NewDrFormat(source string) Format {
@@ -48,10 +50,10 @@ func NewDrFormat(source string) Format {
 }
 
 // DrWrite renders the context for a list of DRs
-func DrWrite(ctx Context, Drs []ybmclient.XClusterDrData) error {
+func DrWrite(ctx Context, Drs []ybmclient.XClusterDrData, authApi ybmAuthClient.AuthApiClient) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, Dr := range Drs {
-			err := format(&DrContext{c: Dr})
+			err := format(&DrContext{c: Dr, a: authApi})
 			if err != nil {
 				logrus.Debugf("Error in rendering DR context: %v", err)
 				return err
@@ -93,14 +95,20 @@ func (c *DrContext) Id() string {
 
 func (c *DrContext) TargetCluster() string {
 	if v, ok := c.c.Info.GetTargetClusterIdOk(); ok {
-		return *v
+		clusterResp, _, err := c.a.GetCluster(*v).Execute()
+		if err == nil {
+			return clusterResp.Data.Spec.GetName()
+		}
 	}
 	return ""
 }
 
 func (c *DrContext) SourceCluster() string {
 	if v, ok := c.c.Info.GetSourceClusterIdOk(); ok {
-		return *v
+		clusterResp, _, err := c.a.GetCluster(*v).Execute()
+		if err == nil {
+			return clusterResp.Data.Spec.GetName()
+		}
 	}
 	return ""
 }
@@ -114,7 +122,22 @@ func (c *DrContext) CreatedOn() string {
 
 func (c *DrContext) Databases() string {
 	if v, ok := c.c.Spec.GetDatabaseIdsOk(); ok {
-		return strings.Join(*v, ",")
+		namespacesResp, _, err := c.a.GetClusterNamespaces(c.c.Info.GetSourceClusterId()).Execute()
+		if err == nil {
+			dbIdToNameMap := map[string]string{}
+			for _, namespace := range namespacesResp.Data {
+				dbIdToNameMap[namespace.GetId()] = namespace.GetName()
+			}
+			databaseNames := []string{}
+			for _, databaseId := range *v {
+				if databaseName, exists := dbIdToNameMap[databaseId]; exists {
+					databaseNames = append(databaseNames, databaseName)
+				} else {
+					return ""
+				}
+			}
+			return strings.Join(databaseNames, ",")
+		}
 	}
 	return ""
 }

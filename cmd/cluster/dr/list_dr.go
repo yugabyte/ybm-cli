@@ -55,7 +55,7 @@ var listDrCmd = &cobra.Command{
 			fmt.Println("No DRs found")
 			return
 		}
-		formatter.DrWrite(drsCtx, resp.GetData())
+		formatter.DrWrite(drsCtx, resp.GetData(), *authApi)
 	},
 }
 

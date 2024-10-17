@@ -57,7 +57,7 @@ var describeDrCmd = &cobra.Command{
 			Format: formatter.NewDrFormat(viper.GetString("output")),
 		}
 
-		formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drResp.GetData()})
+		formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drResp.GetData()}, *authApi)
 	},
 }
 
