@@ -63,7 +63,7 @@ var deleteDrCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("The DR %s is being deleted", formatter.Colorize(drId, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The DR %s is being deleted", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterID, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DELETE_DR, []string{"FAILED", "SUCCEEDED"}, msg)
