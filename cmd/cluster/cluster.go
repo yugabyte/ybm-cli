@@ -18,6 +18,8 @@ package cluster
 import (
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
+	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
+	dr "github.com/yugabyte/ybm-cli/cmd/cluster/dr"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/namespace"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/network"
@@ -25,7 +27,6 @@ import (
 	pitrconfig "github.com/yugabyte/ybm-cli/cmd/cluster/pitr-config"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
 	"github.com/yugabyte/ybm-cli/cmd/util"
-	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
 )
 
 // getCmd represents the list command
@@ -68,4 +69,8 @@ func init() {
 	util.AddCommandIfFeatureFlag(ClusterCmd, connectionpooling.ConnectionPoolingCmd, util.CONNECTION_POOLING)
 	connectionpooling.ConnectionPoolingCmd.PersistentFlags().StringVarP(&connectionpooling.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	connectionpooling.ConnectionPoolingCmd.MarkPersistentFlagRequired("cluster-name")
+
+	util.AddCommandIfFeatureFlag(ClusterCmd, dr.DrCmd, util.DR)
+	dr.DrCmd.PersistentFlags().StringVarP(&dr.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	dr.DrCmd.MarkPersistentFlagRequired("cluster-name")
 }

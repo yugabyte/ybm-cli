@@ -503,6 +503,24 @@ func (a *AuthApiClient) GetClusterByName(clusterName string) (ybmclient.ClusterD
 	return ybmclient.ClusterData{}, fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
+func (a *AuthApiClient) GetDrByName(clusterId string, drName string) (ybmclient.XClusterDrData, error) {
+	drResp, resp, err := a.ListXClusterDr(clusterId).Execute()
+	if err != nil {
+		b, _ := httputil.DumpResponse(resp, true)
+		logrus.Debug(string(b))
+		return ybmclient.XClusterDrData{}, err
+	}
+	drData := drResp.GetData()
+
+	for _, drDatum := range drData {
+		if drDatum.Spec.GetName() == drName {
+			return drDatum, nil
+		}
+	}
+
+	return ybmclient.XClusterDrData{}, fmt.Errorf("could not get dr data for dr name: %s", drName)
+}
+
 func (a *AuthApiClient) ExtractProviderFromClusterName(clusterId string) ([]string, error) {
 	clusterResp, _, err := a.GetCluster(clusterId).Execute()
 	clusterData := clusterResp.GetData()
@@ -567,6 +585,15 @@ func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
 	}
 
 	return "", fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
+}
+
+func (a *AuthApiClient) GetDrIdByName(clusterId string, drName string) (string, error) {
+	drData, err := a.GetDrByName(clusterId, drName)
+	if err == nil {
+		return drData.Info.GetId(), nil
+	}
+
+	return "", fmt.Errorf("could not get dr data for dr name: %s", drName)
 }
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {
@@ -1610,4 +1637,20 @@ func (a *AuthApiClient) DeletePitrConfig(clusterId string, pitrConfigId string) 
 
 func (a *AuthApiClient) PerformConnectionPoolingOperation(clusterId string) ybmclient.ApiPerformConnectionPoolingOperationRequest {
 	return a.ApiClient.ClusterApi.PerformConnectionPoolingOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) CreateXClusterDr(clusterId string) ybmclient.ApiCreateXClusterDrRequest {
+	return a.ApiClient.XclusterDrApi.CreateXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) GetXClusterDr(clusterId string, drId string) ybmclient.ApiGetXClusterDrRequest {
+	return a.ApiClient.XclusterDrApi.GetXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
+
+func (a *AuthApiClient) ListXClusterDr(clusterId string) ybmclient.ApiListXClusterDrRequest {
+	return a.ApiClient.XclusterDrApi.ListXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) DeleteXClusterDr(clusterId string, drId string) ybmclient.ApiDeleteXClusterDrRequest {
+	return a.ApiClient.XclusterDrApi.DeleteXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
 }
