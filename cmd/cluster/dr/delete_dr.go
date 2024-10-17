@@ -73,7 +73,7 @@ var deleteDrCmd = &cobra.Command{
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("The DR %s has been deleted\n", formatter.Colorize(drId, formatter.GREEN_COLOR))
+			fmt.Printf("The DR %s has been deleted\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 			return
 		}
 		fmt.Println(msg)
