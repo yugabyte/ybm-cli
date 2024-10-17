@@ -49,7 +49,24 @@ var createDrCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		createDrRequest := ybmclient.NewCreateXClusterDrRequest(*ybmclient.NewXClusterDrSpec(drName, targetClusterId, databases))
+		namespacesResp, r, err := authApi.GetClusterNamespaces(sourceClusterId).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		dbNameToIdMap := map[string]string{}
+		for _, namespace := range namespacesResp.Data {
+			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
+		}
+		databaseIds := []string{}
+		for _, database := range databases {
+			if databaseId, exists := dbNameToIdMap[database]; exists {
+				databaseIds = append(databaseIds, databaseId)
+			} else {
+				logrus.Fatalf("The database %s doesn't exist", database)
+			}
+		}
+		createDrRequest := ybmclient.NewCreateXClusterDrRequest(*ybmclient.NewXClusterDrSpec(drName, targetClusterId, databaseIds))
 		drResp, response, err := authApi.CreateXClusterDr(sourceClusterId).CreateXClusterDrRequest(*createDrRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)

@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	defaultDrListing    = "table {{.Name}}\t{{.SourceCluster}}\t{{.TargetCluster}}\t{{.Databases}}\t{{.State}}\t{{.CreatedOn}}"
+	defaultDrListing    = "table {{.Id}}\t{{.Name}}\t{{.SourceCluster}}\t{{.TargetCluster}}\t{{.Databases}}\t{{.State}}\t{{.CreatedOn}}"
 	sourceClusterHeader = "Source Cluster"
 	targetClusterHeader = "Target Cluster"
 	databasesHeader     = "Databases"
@@ -66,6 +66,7 @@ func DrWrite(ctx Context, Drs []ybmclient.XClusterDrData) error {
 func NewDrContext() *DrContext {
 	DrCtx := DrContext{}
 	DrCtx.Header = SubHeaderContext{
+		"Id":            idHeader,
 		"Name":          nameHeader,
 		"SourceCluster": sourceClusterHeader,
 		"TargetCluster": targetClusterHeader,
@@ -78,6 +79,13 @@ func NewDrContext() *DrContext {
 
 func (c *DrContext) Name() string {
 	if v, ok := c.c.Spec.GetNameOk(); ok {
+		return *v
+	}
+	return ""
+}
+
+func (c *DrContext) Id() string {
+	if v, ok := c.c.Info.GetIdOk(); ok {
 		return *v
 	}
 	return ""

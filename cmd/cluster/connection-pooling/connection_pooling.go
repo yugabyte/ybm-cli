@@ -58,48 +58,48 @@ var disableConnectionPoolingCmd = &cobra.Command{
 
 func performConnectionPoolingOperation(operationName string, cmd *cobra.Command, args []string) {
 	authApi, err := ybmAuthClient.NewAuthApiClient()
+	if err != nil {
+		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+	}
+	authApi.GetInfo("", "")
+
+	clusterName, _ := cmd.Flags().GetString("cluster-name")
+	clusterId, err := authApi.GetClusterIdByName(clusterName)
+	if err != nil {
+		logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
+	}
+
+	var connectionPoolingOpSpec *ybmclient.ConnectionPoolingOpSpec
+	var connectionPoolingTaskEnum ybmclient.TaskTypeEnum
+
+	if operationName == "enable" {
+		connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_ENABLE)
+		connectionPoolingTaskEnum = ybmclient.TASKTYPEENUM_ENABLE_CONNECTION_POOLING
+	} else {
+		connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_DISABLE)
+		connectionPoolingTaskEnum = ybmclient.TASKTYPEENUM_DISABLE_CONNECTION_POOLING
+	}
+
+	resp, err := authApi.PerformConnectionPoolingOperation(clusterId).ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
+
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", resp)
+		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+	}
+
+	msg := fmt.Sprintf("Connection Pooling for cluster %s is being %sd", formatter.Colorize(clusterName, formatter.GREEN_COLOR), operationName)
+	if viper.GetBool("wait") {
+		returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, connectionPoolingTaskEnum, []string{"FAILED", "SUCCEEDED"}, msg)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("error when getting task status: %s", err)
 		}
-		authApi.GetInfo("", "")
-
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		clusterId, err := authApi.GetClusterIdByName(clusterName)
-		if err != nil {
-			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
+		if returnStatus != "SUCCEEDED" {
+			logrus.Fatalf("Operation failed with error: %s", returnStatus)
 		}
-
-		var connectionPoolingOpSpec *ybmclient.ConnectionPoolingOpSpec
-		var connectionPoolingTaskEnum ybmclient.TaskTypeEnum
-
-		if operationName == "enable" {
-			connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_ENABLE)
-			connectionPoolingTaskEnum = ybmclient.TASKTYPEENUM_ENABLE_CONNECTION_POOLING
-		} else {
-			connectionPoolingOpSpec = ybmclient.NewConnectionPoolingOpSpec(ybmclient.CONNECTIONPOOLINGOPENUM_DISABLE)
-			connectionPoolingTaskEnum = ybmclient.TASKTYPEENUM_DISABLE_CONNECTION_POOLING
-		}
-
-		resp, err := authApi.PerformConnectionPoolingOperation(clusterId).ConnectionPoolingOpSpec(*connectionPoolingOpSpec).Execute()
-
-		if err != nil {
-			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		msg := fmt.Sprintf("Connection Pooling for cluster %s is being %sd", formatter.Colorize(clusterName, formatter.GREEN_COLOR), operationName)
-		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, connectionPoolingTaskEnum, []string{"FAILED", "SUCCEEDED"}, msg)
-			if err != nil {
-				logrus.Fatalf("error when getting task status: %s", err)
-			}
-			if returnStatus != "SUCCEEDED" {
-				logrus.Fatalf("Operation failed with error: %s", returnStatus)
-			}
-			fmt.Printf("Connection Pooling has been %sd on cluster %s\n", operationName, formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-		} else {
-			fmt.Println(msg)
-		}
+		fmt.Printf("Connection Pooling has been %sd on cluster %s\n", operationName, formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+	} else {
+		fmt.Println(msg)
+	}
 }
 
 func init() {
