@@ -22,7 +22,7 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-const defaultDbQueryLoggingConfigListing = "table {{.State}}\t{{.ExporterID}}\t{{.LogConfig}}"
+const defaultDbQueryLoggingConfigListing = "table {{.State}}\t{{.IntegrationID}}\t{{.LogConfig}}"
 
 type DbQueryLoggingContext struct {
 	HeaderContext
@@ -37,9 +37,9 @@ func NewDbQueryLoggingFormat() Format {
 func NewDbQueryLoggingContext() *DbQueryLoggingContext {
 	DbQueryLoggingContext := DbQueryLoggingContext{}
 	DbQueryLoggingContext.Header = SubHeaderContext{
-		"State":      "State",
-		"ExporterID": "Exporter ID",
-		"LogConfig":  "Log Config",
+		"State":         "State",
+		"IntegrationID": "Integration ID",
+		"LogConfig":     "Log Config",
 	}
 	return &DbQueryLoggingContext
 }
@@ -62,7 +62,7 @@ func (context *DbQueryLoggingContext) State() string {
 	return string(context.data.Info.State)
 }
 
-func (context *DbQueryLoggingContext) ExporterID() string {
+func (context *DbQueryLoggingContext) IntegrationID() string {
 	return string(context.data.Spec.ExporterId)
 }
 

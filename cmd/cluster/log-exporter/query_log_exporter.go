@@ -51,24 +51,22 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		if clusterName == "" {
-			logrus.Fatalf("cluster-name must not be empty")
-		}
-
-		exporterId, _ := cmd.Flags().GetString("exporter-id")
-		if exporterId == "" {
-			logrus.Fatalf("exporter-id must not be empty")
-		}
+		integrationName, _ := cmd.Flags().GetString("integration-name")
 
 		clusterId, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
+		integrationId, err := authApi.GetIntegrationIdFromName(integrationName)
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
 		exportConfig := BuildNewPgExportConfig(cmd)
 
 		resp, r, err := authApi.EnableDbQueryLogging(clusterId).PgLogExporterConfigSpec(
-			ybmclient.PgLogExporterConfigSpec{ExportConfig: exportConfig, ExporterId: exporterId}).Execute()
+			ybmclient.PgLogExporterConfigSpec{ExportConfig: exportConfig, ExporterId: integrationId}).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v\n", r)
@@ -170,13 +168,13 @@ var disableLogExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf(`Disabling DB query log config for the cluster, this may take a few minutes...
-You can check the status via $ ybm cluster db-query-log-exporter describe --cluster-name %s%s`, clusterName, "\n")
+		fmt.Printf(`Request submitted to disable DB query logging for the cluster, this may take a few minutes...
+You can check the status via $ ybm cluster db-query-logging describe --cluster-name %s%s`, formatter.Colorize(clusterName, formatter.GREEN_COLOR), "\n")
 	},
 }
 
 var updateLogExporterConfigCmd = &cobra.Command{
-	Use:   "update-config",
+	Use:   "update",
 	Short: "Update DB query log exporter config",
 	Long:  "Update DB query log exporter config. Only the config values that are passed in args will be updated, the remaining one's will remain same as existing config.",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -189,11 +187,6 @@ var updateLogExporterConfigCmd = &cobra.Command{
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		if clusterName == "" {
 			logrus.Fatalf("cluster-name must not be empty")
-		}
-
-		var exporterId string = ""
-		if cmd.Flags().Changed("exporter-id") { // use exporter id only if provided by user explicitly
-			exporterId, _ = cmd.Flags().GetString("exporter-id")
 		}
 
 		clusterId, err := authApi.GetClusterIdByName(clusterName)
@@ -216,9 +209,16 @@ var updateLogExporterConfigCmd = &cobra.Command{
 		logExporterData := resp.GetData()[0]
 		exporterConfigId := logExporterData.Info.Id
 
-		// Use existing exporterId if it is not provided by user
-		if exporterId == "" {
-			exporterId = logExporterData.Spec.ExporterId
+		var integrationId string = ""
+		// use integration name if provided by user, else use existing one
+		if cmd.Flags().Changed("integration-name") {
+			integrationName, _ := cmd.Flags().GetString("integration-name")
+			integrationId, err = authApi.GetIntegrationIdFromName(integrationName)
+			if err != nil {
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			}
+		} else {
+			integrationId = logExporterData.Spec.ExporterId
 		}
 
 		existingExportConfig := logExporterData.Spec.ExportConfig
@@ -226,7 +226,7 @@ var updateLogExporterConfigCmd = &cobra.Command{
 
 		var pgLogExporterConfigResponse ybmclient.PgLogExporterConfigResponse
 		pgLogExporterConfigResponse, r, err = authApi.EditDbQueryLoggingConfig(clusterId, exporterConfigId).PgLogExporterConfigSpec(
-			ybmclient.PgLogExporterConfigSpec{ExportConfig: newExportConfig, ExporterId: exporterId}).Execute()
+			ybmclient.PgLogExporterConfigSpec{ExportConfig: newExportConfig, ExporterId: integrationId}).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response for update DB Query logging config: %v\n", r)
@@ -250,8 +250,8 @@ func init() {
 
 	DbQueryLoggingCmd.AddCommand(enableDbQueryLoggingCmd)
 	enableDbQueryLoggingCmd.Flags().SortFlags = false
-	enableDbQueryLoggingCmd.Flags().String("exporter-id", "", "[REQUIRED] Exporter ID to which logs should be exported(can be fetched by $ ybm integration list).")
-	enableDbQueryLoggingCmd.MarkFlagRequired("exporter-id")
+	enableDbQueryLoggingCmd.Flags().String("integration-name", "", "[REQUIRED] Name of the Integration")
+	enableDbQueryLoggingCmd.MarkFlagRequired("integration-name")
 	enableDbQueryLoggingCmd.Flags().String("debug-print-plan", "false", "[OPTIONAL] Enables various debugging output to be emitted.")
 	enableDbQueryLoggingCmd.Flags().Int32("log-min-duration-statement", -1, "[OPTIONAL] Duration(in ms) of each completed statement to be logged if the statement ran for at least the specified amount of time. Default -1 (log all statements).")
 	enableDbQueryLoggingCmd.Flags().String("log-connections", "false", "[OPTIONAL] Log connection attempts.")
@@ -263,7 +263,7 @@ func init() {
 	enableDbQueryLoggingCmd.Flags().String("log-line-prefix", "%m :%r :%u @ %d :[%p] :", "[OPTIONAL] A printf-style format string for log line prefixes.")
 
 	DbQueryLoggingCmd.AddCommand(updateLogExporterConfigCmd)
-	updateLogExporterConfigCmd.Flags().String("exporter-id", "", "[OPTIONAL] Exporter ID to which logs should be exported(can be fetched by $ ybm integration list).")
+	updateLogExporterConfigCmd.Flags().String("integration-name", "", "[OPTIONAL] Name of the Integration")
 	updateLogExporterConfigCmd.Flags().String("debug-print-plan", "", "[OPTIONAL] Enables various debugging output to be emitted.")
 	updateLogExporterConfigCmd.Flags().Int32("log-min-duration-statement", -1, "[OPTIONAL] Duration(in ms) of each completed statement to be logged if the statement ran for at least the specified amount of time.")
 	updateLogExporterConfigCmd.Flags().String("log-connections", "", "[OPTIONAL] Log connection attempts.")

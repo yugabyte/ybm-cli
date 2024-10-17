@@ -1627,3 +1627,18 @@ func (a *AuthApiClient) EditDbQueryLoggingConfig(clusterId string, exporterConfi
 func (a *AuthApiClient) RemoveDbQueryLoggingConfig(clusterId string, exporterConfigId string) ybmclient.ApiRemovePgLogExporterConfigRequest {
 	return a.ApiClient.ClusterApi.RemovePgLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, exporterConfigId)
 }
+
+func (authApi *AuthApiClient) GetIntegrationIdFromName(integrationName string) (string, error) {
+	integration, _, err := authApi.ListIntegrations().Name(integrationName).Execute()
+	if err != nil {
+		return "", err
+	}
+
+	integrationData := integration.GetData()
+
+	if len(integrationData) == 0 {
+		return "", fmt.Errorf("no integrations found with name: %s%s", integrationName, "\n")
+	}
+
+	return integrationData[0].GetInfo().Id, nil
+}

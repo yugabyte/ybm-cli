@@ -40,6 +40,7 @@ var _ = Describe("DB Query Logging", func() {
 		pgLogExporterResponse           openapi.PgLogExporterConfigResponse
 		pgLogExporterConfigListResponse openapi.PgLogExporterConfigListResponse
 		responseListClusters            openapi.ClusterListResponse
+		responseIntegrationList         openapi.TelemetryProviderListResponse
 	)
 
 	BeforeEach(func() {
@@ -62,14 +63,14 @@ var _ = Describe("DB Query Logging", func() {
 	})
 
 	Describe("When enabling query log exporter", func() {
-		Context("with exporter-id not set", func() {
-			It("should throw error, exporter-id not set", func() {
+		Context("with integration-name not set", func() {
+			It("should throw error, integration-name not set", func() {
 				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				Expect(session.Err).Should(gbytes.Say(`\bError: required flag\(s\) "exporter-id" not set\b`))
+				Expect(session.Err).Should(gbytes.Say(`\bError: required flag\(s\) "integration-name" not set\b`))
 				session.Kill()
 			})
 		})
@@ -78,6 +79,17 @@ var _ = Describe("DB Query Logging", func() {
 				err := loadJson("./test/fixtures/db-query-log-exporter.json", &pgLogExporterResponse)
 				Expect(err).ToNot(HaveOccurred())
 
+				err = loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+					),
+				)
+
 				statusCode = 202
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -88,16 +100,16 @@ var _ = Describe("DB Query Logging", func() {
 
 				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable",
 					"--cluster-name", "stunning-sole",
-					"--exporter-id", "9e740000-331b-4dec-89b0-4e59b81e9019",
+					"--integration-name", "datadog-tp",
 				)
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				// Specials characters like $ % [ ] etc must be escaped using backslash to do exact matching
-				Expect(session.Out).Should(gbytes.Say(`State      Exporter ID                            Log Config
+				Expect(session.Out).Should(gbytes.Say(`State      Integration ID                         Log Config
 ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_connections":false,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"DEFAULT","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] :","log_min_duration_statement":-1,"log_min_error_statement":"ERROR","log_statement":"NONE"}`))
-				Expect(server.ReceivedRequests()).Should(HaveLen(4))
+				Expect(server.ReceivedRequests()).Should(HaveLen(5))
 				session.Kill()
 			})
 		})
@@ -106,6 +118,17 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log
 				err := loadJson("./test/fixtures/db-query-log-exporter-custom.json", &pgLogExporterResponse)
 				Expect(err).ToNot(HaveOccurred())
 
+				err = loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+					),
+				)
+
 				statusCode = 202
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -116,7 +139,7 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log
 
 				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable",
 					"--cluster-name", "stunning-sole",
-					"--exporter-id", "9e740000-331b-4dec-89b0-4e59b81e9019",
+					"--integration-name", "datadog-tp",
 					"--debug-print-plan", "true",
 					"--log-connections", "true",
 					"--log-disconnections", "false",
@@ -131,9 +154,9 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log
 
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say(`State      Exporter ID                            Log Config
+				Expect(session.Out).Should(gbytes.Say(`State      Integration ID                         Log Config
 ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_connections":true,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"TERSE","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] : \%a :","log_min_duration_statement":50,"log_min_error_statement":"ERROR","log_statement":"MOD"}`))
-				Expect(server.ReceivedRequests()).Should(HaveLen(4))
+				Expect(server.ReceivedRequests()).Should(HaveLen(5))
 				session.Kill()
 			})
 		})
@@ -163,8 +186,8 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_
 
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say(`Disabling DB query log config for the cluster, this may take a few minutes...
-You can check the status via \$ ybm cluster db-query-log-exporter describe --cluster-name stunning-sole`))
+				Expect(session.Out).Should(gbytes.Say(`Request submitted to disable DB query logging for the cluster, this may take a few minutes...
+You can check the status via \$ ybm cluster db-query-logging describe --cluster-name stunning-sole`))
 				Expect(server.ReceivedRequests()).Should(HaveLen(5))
 				session.Kill()
 			})
@@ -189,7 +212,7 @@ You can check the status via \$ ybm cluster db-query-log-exporter describe --clu
 
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`State     Exporter ID                            Log Config
+			Expect(session.Out).Should(gbytes.Say(`State     Integration ID                         Log Config
 ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_connections":true,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"DEFAULT","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] : \%a :","log_min_duration_statement":30,"log_min_error_statement":"ERROR","log_statement":"MOD"}`))
 			Expect(server.ReceivedRequests()).Should(HaveLen(4))
 			session.Kill()
@@ -222,9 +245,8 @@ ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_
 				),
 			)
 
-			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "update-config",
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "update",
 				"--cluster-name", "stunning-sole",
-				"--exporter-id", "9e740000-331b-4dec-89b0-4e59b81e9019",
 				// Change few query log configs
 				"--debug-print-plan", "true",
 				"--log-connections", "false",
@@ -235,7 +257,7 @@ ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_
 
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`State     Exporter ID                            Log Config
+			Expect(session.Out).Should(gbytes.Say(`State     Integration ID                         Log Config
 ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_connections":false,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"DEFAULT","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] : \%a :","log_min_duration_statement":60,"log_min_error_statement":"ERROR","log_statement":"ALL"}`))
 			Expect(server.ReceivedRequests()).Should(HaveLen(5))
 			session.Kill()
