@@ -65,7 +65,7 @@ var _ = Describe("DB Query Logging", func() {
 	Describe("When enabling query log exporter", func() {
 		Context("with integration-name not set", func() {
 			It("should throw error, integration-name not set", func() {
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable", "--cluster-name", "stunning-sole")
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "enable", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 
 				Expect(err).NotTo(HaveOccurred())
@@ -98,7 +98,7 @@ var _ = Describe("DB Query Logging", func() {
 					),
 				)
 
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable",
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "enable",
 					"--cluster-name", "stunning-sole",
 					"--integration-name", "datadog-tp",
 				)
@@ -137,7 +137,7 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log
 					),
 				)
 
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "enable",
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "enable",
 					"--cluster-name", "stunning-sole",
 					"--integration-name", "datadog-tp",
 					"--debug-print-plan", "true",
@@ -179,8 +179,8 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_
 					),
 				)
 
-				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "disable",
-					"--cluster-name", "stunning-sole",
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "disable",
+					"--cluster-name", "stunning-sole", "-f",
 				)
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 
@@ -205,7 +205,7 @@ You can check the status via \$ ybm cluster db-query-logging describe --cluster-
 				),
 			)
 
-			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "describe",
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "describe",
 				"--cluster-name", "stunning-sole",
 			)
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
@@ -245,7 +245,7 @@ ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_
 				),
 			)
 
-			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-log-exporter", "update",
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "update",
 				"--cluster-name", "stunning-sole",
 				// Change few query log configs
 				"--debug-print-plan", "true",

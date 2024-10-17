@@ -23,6 +23,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -31,7 +33,7 @@ import (
 var ClusterName string
 
 var DbQueryLoggingCmd = &cobra.Command{
-	Use:   "db-query-log-exporter",
+	Use:   "db-query-logging",
 	Short: "Configure DB Query Log exporter for your Cluster.",
 	Long:  "Configure DB Query Log exporter for your Cluster.",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -129,6 +131,14 @@ var disableLogExporterCmd = &cobra.Command{
 	Use:   "disable",
 	Short: "Disable DB query log exporter",
 	Long:  "Disable DB query log exporter, if enabled",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to disable DB query logging for cluster: %s", clusterName), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -275,7 +285,9 @@ func init() {
 	updateLogExporterConfigCmd.Flags().String("log-line-prefix", "", "[OPTIONAL] A printf-style format string for log line prefixes.")
 
 	DbQueryLoggingCmd.AddCommand(describeLogExporterCmd)
+
 	DbQueryLoggingCmd.AddCommand(disableLogExporterCmd)
+	disableLogExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }
 
 func BuildNewPgExportConfig(cmd *cobra.Command) ybmclient.PgLogExportConfig {
