@@ -33,12 +33,12 @@ import (
 )
 
 const (
-	defaultClusterListing = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
+	defaultClusterListing   = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
 	defaultClusterListingV2 = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
-	numNodesHeader        = "Nodes"
-	nodeInfoHeader        = "Node Res.(Vcpu/Mem/DiskGB/IOPS)"
-	healthStateHeader     = "Health"
-	tierHeader            = "Tier"
+	numNodesHeader          = "Nodes"
+	nodeInfoHeader          = "Node Res.(Vcpu/Mem/DiskGB/IOPS)"
+	healthStateHeader       = "Health"
+	tierHeader              = "Tier"
 	connectionPoolingHeader = "Connection Pooling Enabled"
 )
 
@@ -52,7 +52,7 @@ func NewClusterFormat(source string) Format {
 	switch source {
 	case "table", "":
 		format := defaultClusterListing
-		if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING){
+		if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
 			format = defaultClusterListingV2
 		}
 		return Format(format)
@@ -75,8 +75,8 @@ func ClusterWrite(ctx Context, clusters []ybmclient.ClusterData) error {
 	}
 
 	clusterContext := NewClusterContext()
-	
-	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING){
+
+	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
 		clusterContext = NewClusterContextV2()
 	}
 
@@ -106,18 +106,18 @@ func NewClusterContext() *ClusterContext {
 func NewClusterContextV2() *ClusterContext {
 	clusterCtx := ClusterContext{}
 	clusterCtx.Header = SubHeaderContext{
-		"Name":             nameHeader,
-		"ID":               "ID",
-		"Regions":          regionsHeader,
-		"Nodes":            numNodesHeader,
-		"NodesSpec":        nodeInfoHeader,
-		"SoftwareVersion":  softwareVersionHeader,
-		"State":            stateHeader,
-		"HealthState":      healthStateHeader,
-		"Provider":         providerHeader,
-		"FaultTolerance":   faultToleranceHeader,
-		"DataDistribution": dataDistributionHeader,
-		"Tier":             tierHeader,
+		"Name":                    nameHeader,
+		"ID":                      "ID",
+		"Regions":                 regionsHeader,
+		"Nodes":                   numNodesHeader,
+		"NodesSpec":               nodeInfoHeader,
+		"SoftwareVersion":         softwareVersionHeader,
+		"State":                   stateHeader,
+		"HealthState":             healthStateHeader,
+		"Provider":                providerHeader,
+		"FaultTolerance":          faultToleranceHeader,
+		"DataDistribution":        dataDistributionHeader,
+		"Tier":                    tierHeader,
 		"ConnectionPoolingStatus": connectionPoolingHeader,
 	}
 	return &clusterCtx

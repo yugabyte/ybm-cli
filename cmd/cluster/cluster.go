@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
 	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
+	dr "github.com/yugabyte/ybm-cli/cmd/cluster/dr"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
 	log_exporter "github.com/yugabyte/ybm-cli/cmd/cluster/log-exporter"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/namespace"
@@ -73,4 +74,8 @@ func init() {
 	util.AddCommandIfFeatureFlag(ClusterCmd, connectionpooling.ConnectionPoolingCmd, util.CONNECTION_POOLING)
 	connectionpooling.ConnectionPoolingCmd.PersistentFlags().StringVarP(&connectionpooling.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	connectionpooling.ConnectionPoolingCmd.MarkPersistentFlagRequired("cluster-name")
+
+	util.AddCommandIfFeatureFlag(ClusterCmd, dr.DrCmd, util.DR)
+	dr.DrCmd.PersistentFlags().StringVarP(&dr.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	dr.DrCmd.MarkPersistentFlagRequired("cluster-name")
 }
