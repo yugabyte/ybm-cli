@@ -185,19 +185,30 @@ ID                                     Date Created               Cluster ID    
 	Context("When removing db audit exporter config", func() {
 		It("should delete the config", func() {
 			statusCode = 200
-			err := loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
+
+			err := loadJson("./test/fixtures/list-db-audit.json", &responseDbAuditList)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(http.MethodDelete, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-audit-log-exporter-configs/123e4567-e89b-12d3-a456-426614174000"),
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-audit-log-exporter-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAuditList),
+				),
+			)
+
+			err = loadJson("./test/fixtures/db-audit-data.json", &responseDbAudit)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodDelete, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-audit-log-exporter-configs/9e3fabbc-849c-4a77-bdb2-9422e712e7dc"),
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "unassign", "--cluster-name", "stunning-sole", "--export-config-id", "123e4567-e89b-12d3-a456-426614174000", "--force")
+
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "unassign", "--cluster-name", "stunning-sole", "--force")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Request submitted to remove Db Audit Logging 123e4567-e89b-12d3-a456-426614174000`))
+			Expect(session.Out).Should(gbytes.Say(`Request submitted to remove Db Audit Logging 9e3fabbc-849c-4a77-bdb2-9422e712e7dc`))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
@@ -207,10 +218,93 @@ ID                                     Date Created               Cluster ID    
 			exec.Command(compiledCLIPath, "y")
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"export-config-id\", \"cluster-name\" not set$)"))
+			Expect(session.Err).Should(gbytes.Say("(?m:Error: required flag\\(s\\) \"cluster-name\" not set$)"))
 			session.Kill()
 		})
 
+	})
+
+	Context("When updating DB Audit config for a cluster", func() {
+		It("should update cluster DB Audit config", func() {
+			statusCode = 200
+
+			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
+
+			err = loadJson("./test/fixtures/list-db-audit.json", &responseDbAuditList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-audit-log-exporter-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAuditList),
+				),
+			)
+
+			err = loadJson("./test/fixtures/db-audit-data2.json", &responseDbAudit)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-audit-log-exporter-configs/9e3fabbc-849c-4a77-bdb2-9422e712e7dc"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=false,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=true", "--statement_classes", "READ,WRITE")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The db audit exporter config 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being updated
+ID                                     Date Created               Cluster ID                             Integration ID                         State     Ysql Config
+9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":false,\"log_client\":true,\"log_level\":\"NOTICE\",\"log_parameter\":false,\"log_relation\":true,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
+			session.Kill()
+		})
+		It("should return required field name and type when not set", func() {
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say(`\bError: required flag\(s\) "integration-name", "cluster-name" not set\b`))
+			session.Kill()
+		})
+		It("should return required log setting when not set", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:log_statement_once required for log settings$)"))
+			session.Kill()
+		})
+		It("should return required statement class when not set", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:statement_classes must have one or more of READ, WRITE, ROLE, FUNCTION, DDL, MISC$)"))
+			session.Kill()
+		})
 	})
 
 	AfterEach(func() {
