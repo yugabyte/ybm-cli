@@ -127,7 +127,6 @@ var updateDbAuditLogsExporterCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
 		integrationName, _ := cmd.Flags().GetString("integration-name")
 		ysqlConfig, _ := cmd.Flags().GetStringToString("ysql-config")
 		statement_classes, _ := cmd.Flags().GetString("statement_classes")
@@ -144,10 +143,11 @@ var updateDbAuditLogsExporterCmd = &cobra.Command{
 		}
 
 		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, integrationId)
-
 		if err != nil {
 			logrus.Fatalf(err.Error())
 		}
+
+		exportConfigId := getDbAuditExportConfigIdForCluster(authApi, clusterId)
 
 		resp, r, err := authApi.UpdateDbAuditExporterConfig(clusterId, exportConfigId).DbAuditExporterConfigSpec(*dbAuditLogsExporterSpec).Execute()
 
@@ -236,8 +236,8 @@ var removeDbAuditLogsExporterCmd = &cobra.Command{
 	Long:  "Unassign DB Audit Logs Export Config",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
-		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
-		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to unassign DB audit %s: %s", "config", exportConfigId), viper.GetBool("force"))
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to unassign DB audit config from cluster: %s", clusterName), viper.GetBool("force"))
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -250,12 +250,13 @@ var removeDbAuditLogsExporterCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
-		exportConfigId, _ := cmd.Flags().GetString("export-config-id")
 
 		clusterId, err := authApi.GetClusterIdByName(clusterName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
+
+		exportConfigId := getDbAuditExportConfigIdForCluster(authApi, clusterId)
 
 		resp, _, err := authApi.UnassignDbAuditLogsExportConfig(clusterId, exportConfigId).Execute()
 
@@ -306,8 +307,6 @@ func init() {
 
 	DbAuditLogsExporterCmd.AddCommand(updateDbAuditLogsExporterCmd)
 	updateDbAuditLogsExporterCmd.Flags().SortFlags = false
-	updateDbAuditLogsExporterCmd.Flags().String("export-config-id", "", "[REQUIRED] The ID of the DB audit export config")
-	updateDbAuditLogsExporterCmd.MarkFlagRequired("export-config-id")
 	updateDbAuditLogsExporterCmd.Flags().String("integration-name", "", "[REQUIRED] Name of the Integration")
 	updateDbAuditLogsExporterCmd.MarkFlagRequired("integration-name")
 	updateDbAuditLogsExporterCmd.Flags().StringToString("ysql-config", nil, `The ysql config to setup DB auditting
@@ -322,8 +321,6 @@ func init() {
 
 	DbAuditLogsExporterCmd.AddCommand(removeDbAuditLogsExporterCmd)
 	removeDbAuditLogsExporterCmd.Flags().SortFlags = false
-	removeDbAuditLogsExporterCmd.Flags().String("export-config-id", "", "[REQUIRED] The ID of the DB audit export config")
-	removeDbAuditLogsExporterCmd.MarkFlagRequired("export-config-id")
 	removeDbAuditLogsExporterCmd.Flags().String("cluster-name", "", "[REQUIRED] The cluster name to assign DB auditting")
 	removeDbAuditLogsExporterCmd.MarkFlagRequired("cluster-name")
 	removeDbAuditLogsExporterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
@@ -437,4 +434,18 @@ func setDbAuditLogsExporterSpec(ysqlConfigMap map[string]string, statementClasse
 	ysqlConfig.SetLogSettings(*log_settings)
 
 	return ybmclient.NewDbAuditExporterConfigSpec(*ysqlConfig, integrationId), nil
+}
+
+func getDbAuditExportConfigIdForCluster(authApi *ybmAuthClient.AuthApiClient, clusterId string) string {
+	listResp, r, err := authApi.ListDbAuditExporterConfig(clusterId).Execute()
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+	}
+
+	if len(listResp.GetData()) < 1 {
+		logrus.Fatalf("No DB Audit Log Configuration exists for cluster")
+	}
+
+	return listResp.GetData()[0].Info.Id
 }
