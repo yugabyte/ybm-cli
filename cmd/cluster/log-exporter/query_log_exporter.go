@@ -17,7 +17,6 @@ package query_log_exporter
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -75,15 +74,7 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		DbQueryLoggingContext := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDbQueryLoggingFormat(),
-		}
-
-		err = formatter.DbQueryLoggingWrite(DbQueryLoggingContext, []ybmclient.PgLogExporterConfigData{resp.GetData()})
-		if err != nil {
-			fmt.Println(err.Error())
-		}
+		formatter.DbQueryLoggingWriteFull(resp.GetData(), integrationName)
 	},
 }
 
@@ -115,15 +106,15 @@ var describeLogExporterCmd = &cobra.Command{
 			return
 		}
 
-		DbQueryLoggingContext := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDbQueryLoggingFormat(),
+		pgLogExporterConfigData := resp.GetData()[0]
+		integrationName, integrationId := "", pgLogExporterConfigData.Spec.ExporterId
+
+		integrationName, err = authApi.GetIntegrationNameFromId(integrationId)
+		if err != nil {
+			logrus.Debugf("could not fetch associated name for integration id: %s", integrationId)
 		}
 
-		err = formatter.DbQueryLoggingWrite(DbQueryLoggingContext, resp.GetData())
-		if err != nil {
-			fmt.Println(err.Error())
-		}
+		formatter.DbQueryLoggingWriteFull(resp.GetData()[0], integrationName)
 	},
 }
 
@@ -220,15 +211,21 @@ var updateLogExporterConfigCmd = &cobra.Command{
 		exporterConfigId := logExporterData.Info.Id
 
 		var integrationId string = ""
+		var integrationName string = ""
 		// use integration name if provided by user, else use existing one
 		if cmd.Flags().Changed("integration-name") {
-			integrationName, _ := cmd.Flags().GetString("integration-name")
+			integrationName, _ = cmd.Flags().GetString("integration-name")
 			integrationId, err = authApi.GetIntegrationIdFromName(integrationName)
 			if err != nil {
 				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
 		} else {
 			integrationId = logExporterData.Spec.ExporterId
+			integrationName, err = authApi.GetIntegrationNameFromId(integrationId)
+			fmt.Println("making get call")
+			if err != nil {
+				logrus.Debugf("could not fetch associated name for integration id: %s", integrationId)
+			}
 		}
 
 		existingExportConfig := logExporterData.Spec.ExportConfig
@@ -243,16 +240,8 @@ var updateLogExporterConfigCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		DbQueryLoggingContext := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDbQueryLoggingFormat(),
-		}
-
-		err = formatter.DbQueryLoggingWrite(DbQueryLoggingContext,
-			[]ybmclient.PgLogExporterConfigData{pgLogExporterConfigResponse.GetData()})
-		if err != nil {
-			fmt.Println(err.Error())
-		}
+		fmt.Println("Request submitted to edit DB query log config for the cluster, this may take a few minutes...")
+		formatter.DbQueryLoggingWriteFull(pgLogExporterConfigResponse.GetData(), integrationName)
 	},
 }
 

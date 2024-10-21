@@ -107,8 +107,19 @@ var _ = Describe("DB Query Logging", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				// Specials characters like $ % [ ] etc must be escaped using backslash to do exact matching
-				Expect(session.Out).Should(gbytes.Say(`State      Integration ID                         Log Config
-ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_connections":false,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"DEFAULT","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] :","log_min_duration_statement":-1,"log_min_error_statement":"ERROR","log_statement":"NONE"}`))
+				Expect(session.Out).Should(gbytes.Say(`State      Integration Name
+ENABLING   datadog-tp
+
+Log Config Key               Log Config Value
+debug-print-plan             false
+log-min-duration-statement   -1
+log-connections              false
+log-disconnections           false
+log-duration                 false
+log-error-verbosity          DEFAULT
+log-statement                NONE
+log-min-error-statement      ERROR
+log-line-prefix              \%m :\%r :\%u @ \%d :\[\%p\] :`))
 				Expect(server.ReceivedRequests()).Should(HaveLen(5))
 				session.Kill()
 			})
@@ -154,8 +165,19 @@ ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log
 
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say(`State      Integration ID                         Log Config
-ENABLING   9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_connections":true,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"TERSE","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] : \%a :","log_min_duration_statement":50,"log_min_error_statement":"ERROR","log_statement":"MOD"}`))
+				Expect(session.Out).Should(gbytes.Say(`State      Integration Name
+ENABLING   datadog-tp
+
+Log Config Key               Log Config Value
+debug-print-plan             true
+log-min-duration-statement   50
+log-connections              true
+log-disconnections           false
+log-duration                 false
+log-error-verbosity          TERSE
+log-statement                MOD
+log-min-error-statement      ERROR
+log-line-prefix              \%m :\%r :\%u @ \%d :\[\%p\] : \%a :`))
 				Expect(server.ReceivedRequests()).Should(HaveLen(5))
 				session.Kill()
 			})
@@ -205,6 +227,17 @@ You can check the status via \$ ybm cluster db-query-logging describe --cluster-
 				),
 			)
 
+			err = loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+
+			statusCode = 200
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
+
 			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "describe",
 				"--cluster-name", "stunning-sole",
 			)
@@ -212,56 +245,192 @@ You can check the status via \$ ybm cluster db-query-logging describe --cluster-
 
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`State     Integration ID                         Log Config
-ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":false,"log_connections":true,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"DEFAULT","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] : \%a :","log_min_duration_statement":30,"log_min_error_statement":"ERROR","log_statement":"MOD"}`))
-			Expect(server.ReceivedRequests()).Should(HaveLen(4))
+			Expect(session.Out).Should(gbytes.Say(`State     Integration Name
+ACTIVE    datadog-tp
+
+Log Config Key               Log Config Value
+debug-print-plan             false
+log-min-duration-statement   30
+log-connections              true
+log-disconnections           false
+log-duration                 false
+log-error-verbosity          DEFAULT
+log-statement                MOD
+log-min-error-statement      ERROR
+log-line-prefix              \%m :\%r :\%u @ \%d :\[\%p\] : \%a :`))
+			Expect(server.ReceivedRequests()).Should(HaveLen(5))
 			session.Kill()
 		})
 	})
 
 	Describe("When updating query log exporter config", func() {
-		It("should update log config with provided args", func() {
-			// Load existing log export config
-			err := loadJson("./test/fixtures/db-query-log-exporter-describe-resp.json", &pgLogExporterConfigListResponse)
-			Expect(err).ToNot(HaveOccurred())
+		Context("without integration name", func() {
+			It("should update log config with provided args", func() {
+				// Load existing log export config
+				err := loadJson("./test/fixtures/db-query-log-exporter-describe-resp.json", &pgLogExporterConfigListResponse)
+				Expect(err).ToNot(HaveOccurred())
 
-			statusCode = 200
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/cluster/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-query-log-exporter-configs"),
-					ghttp.RespondWithJSONEncodedPtr(&statusCode, pgLogExporterConfigListResponse),
-				),
-			)
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/cluster/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-query-log-exporter-configs"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, pgLogExporterConfigListResponse),
+					),
+				)
 
-			// Load updated log export config response
-			err = loadJson("./test/fixtures/db-query-log-exporter-update-config-resp.json", &pgLogExporterResponse)
-			Expect(err).ToNot(HaveOccurred())
+				err = loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+				Expect(err).ToNot(HaveOccurred())
 
-			statusCode = 202
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/cluster/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-query-log-exporter-configs/388c41b9-81f7-4ed9-8239-ab22f4aaca91"),
-					ghttp.RespondWithJSONEncodedPtr(&statusCode, pgLogExporterResponse),
-				),
-			)
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+					),
+				)
 
-			cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "update",
-				"--cluster-name", "stunning-sole",
-				// Change few query log configs
-				"--debug-print-plan", "true",
-				"--log-connections", "false",
-				"--log-min-duration-statement", "60",
-				"--log-statement", "ALL",
-			)
-			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				// Load updated log export config response
+				err = loadJson("./test/fixtures/db-query-log-exporter-update-config-resp.json", &pgLogExporterResponse)
+				Expect(err).ToNot(HaveOccurred())
 
-			Expect(err).NotTo(HaveOccurred())
-			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`State     Integration ID                         Log Config
-ACTIVE    9e740000-331b-4dec-89b0-4e59b81e9019   {"debug_print_plan":true,"log_connections":false,"log_disconnections":false,"log_duration":false,"log_error_verbosity":"DEFAULT","log_line_prefix":"\%m :\%r :\%u @ \%d :\[\%p\] : \%a :","log_min_duration_statement":60,"log_min_error_statement":"ERROR","log_statement":"ALL"}`))
-			Expect(server.ReceivedRequests()).Should(HaveLen(5))
-			session.Kill()
+				statusCode = 202
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/cluster/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-query-log-exporter-configs/388c41b9-81f7-4ed9-8239-ab22f4aaca91"),
+						ghttp.VerifyJSON(`{
+							"export_config": {
+							"debug_print_plan": true,
+							"log_connections": false,
+							"log_disconnections": false,
+							"log_duration": false,
+							"log_error_verbosity": "DEFAULT",
+							"log_line_prefix": "%m :%r :%u @ %d :[%p] : %a :",
+							"log_min_duration_statement": 60,
+							"log_min_error_statement": "ERROR",
+							"log_statement": "ALL"
+							},
+							"exporter_id": "129f7c97-81ae-47c7-8f9e-40ab4390093f"
+						}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, pgLogExporterResponse),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "update",
+					"--cluster-name", "stunning-sole",
+					// Change few query log configs
+					"--debug-print-plan", "true",
+					"--log-connections", "false",
+					"--log-min-duration-statement", "60",
+					"--log-statement", "ALL",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`Request submitted to edit DB query log config for the cluster, this may take a few minutes...
+State     Integration Name
+ACTIVE    datadog-tp
+
+Log Config Key               Log Config Value
+debug-print-plan             true
+log-min-duration-statement   60
+log-connections              false
+log-disconnections           false
+log-duration                 false
+log-error-verbosity          DEFAULT
+log-statement                ALL
+log-min-error-statement      ERROR
+log-line-prefix              \%m :\%r :\%u @ \%d :\[\%p\] : \%a :`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
 		})
+		Context("with new integration name", func() {
+			It("should update log config with given integration name", func() {
+				// Load existing log export config
+				err := loadJson("./test/fixtures/db-query-log-exporter-describe-resp.json", &pgLogExporterConfigListResponse)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/cluster/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-query-log-exporter-configs"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, pgLogExporterConfigListResponse),
+					),
+				)
+
+				err = loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+				Expect(err).ToNot(HaveOccurred())
+				// Update integration ID to a new value
+				responseIntegrationList.Data[0].Info.Id = "517c2d8c-d320-4e4c-97d8-e030f0047b0a"
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+					),
+				)
+
+				// Load updated log export config response
+				err = loadJson("./test/fixtures/db-query-log-exporter-update-config-resp.json", &pgLogExporterResponse)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 202
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/cluster/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/db-query-log-exporter-configs/388c41b9-81f7-4ed9-8239-ab22f4aaca91"),
+						// notice: exporter id must be for same as new integration ID
+						ghttp.VerifyJSON(`{
+							"export_config": {
+							"debug_print_plan": true,
+							"log_connections": false,
+							"log_disconnections": false,
+							"log_duration": false,
+							"log_error_verbosity": "DEFAULT",
+							"log_line_prefix": "%m :%r :%u @ %d :[%p] : %a :",
+							"log_min_duration_statement": 60,
+							"log_min_error_statement": "ERROR",
+							"log_statement": "ALL"
+							},
+							"exporter_id": "517c2d8c-d320-4e4c-97d8-e030f0047b0a"
+						}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, pgLogExporterResponse),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "db-query-logging", "update",
+					"--cluster-name", "stunning-sole",
+					// pass new integration name
+					"--integration-name", "datadog-tp-new",
+					"--debug-print-plan", "true",
+					"--log-connections", "false",
+					"--log-min-duration-statement", "60",
+					"--log-statement", "ALL",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`Request submitted to edit DB query log config for the cluster, this may take a few minutes...
+State     Integration Name
+ACTIVE    datadog-tp-new
+
+Log Config Key               Log Config Value
+debug-print-plan             true
+log-min-duration-statement   60
+log-connections              false
+log-disconnections           false
+log-duration                 false
+log-error-verbosity          DEFAULT
+log-statement                ALL
+log-min-error-statement      ERROR
+log-line-prefix              \%m :\%r :\%u @ \%d :\[\%p\] : \%a :`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+		})
+
 	})
 
 	AfterEach(func() {
