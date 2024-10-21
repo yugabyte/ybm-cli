@@ -72,9 +72,7 @@ var createIntegrationCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		IntegrationId := resp.GetData().Info.Id
-
-		msg := fmt.Sprintf("The Integration %s is being created", formatter.Colorize(IntegrationId, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The Integration %s has been created", formatter.Colorize(IntegrationName, formatter.GREEN_COLOR))
 
 		fmt.Println(msg)
 
@@ -153,7 +151,7 @@ var deleteIntegrationCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		fmt.Printf("Deleting Integration %s\n", formatter.Colorize(configName, formatter.GREEN_COLOR))
+		fmt.Printf("The Integration %s has been deleted\n", formatter.Colorize(configName, formatter.GREEN_COLOR))
 	},
 }
 

@@ -67,7 +67,7 @@ var _ = Describe("Integration", func() {
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`The Integration 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being created
+			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
 ID                                     Name      Type      Site      ApiKey
 9e3fabbc-849c-4a77-bdb2-9422e712e7dc   ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session.Kill()
@@ -106,7 +106,7 @@ ID                                     Name      Type      Site      ApiKey
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`The Integration 92ceaa26-bac7-4842-9b3c-831a18a4f813 is being created
+			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
 ID                                     Name      Type      Zone        Access Token Policy                InstanceId   OrgSlug
 92ceaa26-bac7-4842-9b3c-831a18a4f813   grafana   GRAFANA   test-zone   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
 			session.Kill()
@@ -165,7 +165,7 @@ ID                                     Name      Type      Zone        Access To
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`The Integration 7913c052-fcd0-4b37-8a90-b0e47320190b is being created
+			Expect(session.Out).Should(gbytes.Say(`The Integration testgcp has been created
 ID                                     Name      Type
 7913c052-fcd0-4b37-8a90-b0e47320190b   ddd       GOOGLECLOUD`))
 			session.Kill()
