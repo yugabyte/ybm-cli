@@ -16,10 +16,12 @@
 package formatter
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -41,11 +43,25 @@ type LogConfigContext struct {
 }
 
 func NewDbQueryLoggingFormat() Format {
-	return Format(defaultDbQueryLoggingConfigListing)
+	source := viper.GetString("output")
+	switch source {
+	case "table", "":
+		format := defaultDbQueryLoggingConfigListing
+		return Format(format)
+	default: // custom format or json or pretty
+		return Format(source)
+	}
 }
 
 func NewLogConfigFormat() Format {
-	return Format(loggingConfigListing)
+	source := viper.GetString("output")
+	switch source {
+	case "table", "":
+		format := loggingConfigListing
+		return Format(format)
+	default: // custom format or json or pretty
+		return Format(source)
+	}
 }
 
 func NewDbQueryLoggingContext() *DbQueryLoggingContext {
@@ -111,17 +127,21 @@ func DbQueryLoggingWriteFull(PgLogExporterConfigData ybmclient.PgLogExporterConf
 	if err != nil {
 		logrus.Fatal(err.Error())
 	}
-
 	ctx.Output.Write([]byte("\n"))
-	ctx = Context{
-		Output: os.Stdout,
-		Format: NewLogConfigFormat(),
+
+	// Only render Log config for table output format
+	if viper.GetString("output") == "table" {
+		ctx = Context{
+			Output: os.Stdout,
+			Format: NewLogConfigFormat(),
+		}
+
+		err = dbLogConfigWrite(ctx, PgLogExporterConfigData.Spec.ExportConfig)
+		if err != nil {
+			logrus.Fatal(err.Error())
+		}
 	}
 
-	err = dbLogConfigWrite(ctx, PgLogExporterConfigData.Spec.ExportConfig)
-	if err != nil {
-		logrus.Fatal(err.Error())
-	}
 }
 
 func (context *DbQueryLoggingContext) State() string {
@@ -130,6 +150,10 @@ func (context *DbQueryLoggingContext) State() string {
 
 func (context *DbQueryLoggingContext) IntegrationName() string {
 	return context.integrationName
+}
+
+func (context *DbQueryLoggingContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(context.data)
 }
 
 func (context *LogConfigContext) LogConfigKey() string {

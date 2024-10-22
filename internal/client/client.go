@@ -1674,7 +1674,7 @@ func (authApi *AuthApiClient) GetIntegrationNameFromId(integrationId string) (st
 	// TODO: Change this to use Get api(once available) instead of List API.
 	integrationList, _, err := authApi.ListIntegrations().Execute()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get integration by id %s: %w", integrationId, err)
 	}
 
 	for _, data := range integrationList.GetData() {
