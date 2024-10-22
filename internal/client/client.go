@@ -1658,7 +1658,7 @@ func (a *AuthApiClient) RemoveDbQueryLoggingConfig(clusterId string, exporterCon
 func (authApi *AuthApiClient) GetIntegrationIdFromName(integrationName string) (string, error) {
 	integration, _, err := authApi.ListIntegrations().Name(integrationName).Execute()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get integration by name %s: %w", integrationName, err)
 	}
 
 	integrationData := integration.GetData()

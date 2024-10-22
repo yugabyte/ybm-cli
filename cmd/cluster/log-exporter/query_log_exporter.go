@@ -34,8 +34,8 @@ var ClusterName string
 
 var DbQueryLoggingCmd = &cobra.Command{
 	Use:   "db-query-logging",
-	Short: "Configure DB Query Log exporter for your Cluster.",
-	Long:  "Configure DB Query Log exporter for your Cluster.",
+	Short: "Configure Database Query Logging for your Cluster.",
+	Long:  "Configure Database Query Logging for your Cluster.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -43,8 +43,8 @@ var DbQueryLoggingCmd = &cobra.Command{
 
 var enableDbQueryLoggingCmd = &cobra.Command{
 	Use:   "enable",
-	Short: "Enable DB query log exporter",
-	Long:  "Enable DB query log exporter",
+	Short: "Enable Database Query Logging",
+	Long:  "Enable Database Query Logging",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -89,8 +89,8 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 
 var describeLogExporterCmd = &cobra.Command{
 	Use:   "describe",
-	Short: "Describe DB query log exporter config",
-	Long:  "Describe DB query log exporter config",
+	Short: "Describe Database Query Logging config",
+	Long:  "Describe Database Query Logging config",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -129,8 +129,8 @@ var describeLogExporterCmd = &cobra.Command{
 
 var disableLogExporterCmd = &cobra.Command{
 	Use:   "disable",
-	Short: "Disable DB query log exporter",
-	Long:  "Disable DB query log exporter, if enabled",
+	Short: "Disable Database Query Logging",
+	Long:  "Disable Database Query Logging, if enabled",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -185,8 +185,8 @@ You can check the status via $ ybm cluster db-query-logging describe --cluster-n
 
 var updateLogExporterConfigCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update DB query log exporter config",
-	Long:  "Update DB query log exporter config. Only the config values that are passed in args will be updated, the remaining one's will remain same as existing config.",
+	Short: "Update Database Query Logging config",
+	Long:  "Update Database Query Logging config. Only the config values that are passed in args will be updated, the remaining one's will remain same as existing config.",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
