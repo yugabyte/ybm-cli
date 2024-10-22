@@ -1,0 +1,29 @@
+{
+    "data": [
+        {
+            "spec": {
+                "export_config": {
+                    "debug_print_plan": false,
+                    "log_connections": true,
+                    "log_disconnections": false,
+                    "log_duration": false,
+                    "log_error_verbosity": "DEFAULT",
+                    "log_line_prefix": "%m :%r :%u @ %d :[%p] : %a :",
+                    "log_min_duration_statement": 30,
+                    "log_min_error_statement": "ERROR",
+                    "log_statement": "MOD"
+                },
+                "exporter_id": "9e740000-331b-4dec-89b0-4e59b81e9019"
+            },
+            "info": {
+                "id": "388c41b9-81f7-4ed9-8239-ab22f4aaca91",
+                "cluster_id": "5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8",
+                "state": "ACTIVE",
+                "metadata": {
+                    "created_on": "2024-10-07T10:28:55.148Z",
+                    "updated_on": "2024-10-15T04:33:41.263Z"
+                }
+            }
+        }
+    ]
+}

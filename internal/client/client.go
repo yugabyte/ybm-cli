@@ -1639,6 +1639,37 @@ func (a *AuthApiClient) PerformConnectionPoolingOperation(clusterId string) ybmc
 	return a.ApiClient.ClusterApi.PerformConnectionPoolingOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) GetDbLoggingConfig(clusterId string) ybmclient.ApiListPgLogExporterConfigsRequest {
+	return a.ApiClient.ClusterApi.ListPgLogExporterConfigs(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) EnableDbQueryLogging(clusterId string) ybmclient.ApiAssociatePgLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.AssociatePgLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
+func (a *AuthApiClient) EditDbQueryLoggingConfig(clusterId string, exporterConfigId string) ybmclient.ApiUpdatePgLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.UpdatePgLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, exporterConfigId)
+}
+
+func (a *AuthApiClient) RemoveDbQueryLoggingConfig(clusterId string, exporterConfigId string) ybmclient.ApiRemovePgLogExporterConfigRequest {
+	return a.ApiClient.ClusterApi.RemovePgLogExporterConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, exporterConfigId)
+}
+
+func (authApi *AuthApiClient) GetIntegrationIdFromName(integrationName string) (string, error) {
+	integration, _, err := authApi.ListIntegrations().Name(integrationName).Execute()
+	if err != nil {
+		return "", fmt.Errorf("failed to get integration by name %s: %w", integrationName, err)
+	}
+
+	integrationData := integration.GetData()
+
+	if len(integrationData) == 0 {
+		return "", fmt.Errorf("no integrations found with name: %s%s", integrationName, "\n")
+	}
+
+	return integrationData[0].GetInfo().Id, nil
+}
+
 func (a *AuthApiClient) CreateXClusterDr(clusterId string) ybmclient.ApiCreateXClusterDrRequest {
 	return a.ApiClient.XclusterDrApi.CreateXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
