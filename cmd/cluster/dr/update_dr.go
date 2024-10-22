@@ -41,7 +41,6 @@ var updateDrCmd = &cobra.Command{
 
 		drName, _ := cmd.Flags().GetString("dr-name")
 		databases, _ := cmd.Flags().GetStringArray("databases")
-		fmt.Println(databases)
 		clusterId, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
@@ -59,11 +58,9 @@ var updateDrCmd = &cobra.Command{
 		for _, namespace := range namespacesResp.Data {
 			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
 		}
-		fmt.Println(dbNameToIdMap)
 		databaseIds := []string{}
 		for _, databaseString := range databases {
 			for _, database := range strings.Split(databaseString, ",") {
-				fmt.Println(database)
 				if databaseId, exists := dbNameToIdMap[database]; exists {
 					databaseIds = append(databaseIds, databaseId)
 				} else {
