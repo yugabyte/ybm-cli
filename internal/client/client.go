@@ -1682,6 +1682,22 @@ func (a *AuthApiClient) SwitchoverXClusterDr(clusterId string, drId string) ybmc
 	return a.ApiClient.XclusterDrApi.Switchover(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
 }
 
+func (a *AuthApiClient) FailoverXClusterDr(clusterId string, drId string) ybmclient.ApiFailoverRequest {
+	return a.ApiClient.XclusterDrApi.Failover(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
+
+func (a *AuthApiClient) PauseXClusterDr(clusterId string, drId string) ybmclient.ApiPauseRequest {
+	return a.ApiClient.XclusterDrApi.Pause(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
+
+func (a *AuthApiClient) RestartXClusterDr(clusterId string, drId string) ybmclient.ApiRestartRequest {
+	return a.ApiClient.XclusterDrApi.Restart(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
+
+func (a *AuthApiClient) ResumeXClusterDr(clusterId string, drId string) ybmclient.ApiResumeRequest {
+	return a.ApiClient.XclusterDrApi.Resume(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
+
 func (a *AuthApiClient) GetXClusterDr(clusterId string, drId string) ybmclient.ApiGetXClusterDrRequest {
 	return a.ApiClient.XclusterDrApi.GetXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
 }
