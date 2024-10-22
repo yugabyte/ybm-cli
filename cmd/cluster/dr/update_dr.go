@@ -18,6 +18,7 @@ package dr
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -40,6 +41,7 @@ var updateDrCmd = &cobra.Command{
 
 		drName, _ := cmd.Flags().GetString("dr-name")
 		databases, _ := cmd.Flags().GetStringArray("databases")
+		fmt.Println(databases)
 		clusterId, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
@@ -57,14 +59,19 @@ var updateDrCmd = &cobra.Command{
 		for _, namespace := range namespacesResp.Data {
 			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
 		}
+		fmt.Println(dbNameToIdMap)
 		databaseIds := []string{}
-		for _, database := range databases {
-			if databaseId, exists := dbNameToIdMap[database]; exists {
-				databaseIds = append(databaseIds, databaseId)
-			} else {
-				logrus.Fatalf("The database %s doesn't exist", database)
+		for _, databaseString := range databases {
+			for _, database := range strings.Split(databaseString, ",") {
+				fmt.Println(database)
+				if databaseId, exists := dbNameToIdMap[database]; exists {
+					databaseIds = append(databaseIds, databaseId)
+				} else {
+					logrus.Fatalf("The database %s doesn't exist", database)
+				}
 			}
 		}
+
 		updateDrRequest := ybmclient.NewEditXClusterDrRequest(*ybmclient.NewEditXClusterDrSpec(databaseIds))
 		drResp, response, err := authApi.EditXClusterDr(clusterId, drId).EditXClusterDrRequest(*updateDrRequest).Execute()
 		if err != nil {
@@ -72,7 +79,7 @@ var updateDrCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("The DR %s is being created", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The DR %s is being updated", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_EDIT_DR, []string{"FAILED", "SUCCEEDED"}, msg)
@@ -82,7 +89,7 @@ var updateDrCmd = &cobra.Command{
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("The DR %s has been created\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
+			fmt.Printf("The DR %s has been updated\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {

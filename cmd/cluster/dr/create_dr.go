@@ -18,6 +18,7 @@ package dr
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -59,11 +60,13 @@ var createDrCmd = &cobra.Command{
 			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
 		}
 		databaseIds := []string{}
-		for _, database := range databases {
-			if databaseId, exists := dbNameToIdMap[database]; exists {
-				databaseIds = append(databaseIds, databaseId)
-			} else {
-				logrus.Fatalf("The database %s doesn't exist", database)
+		for _, databaseString := range databases {
+			for _, database := range strings.Split(databaseString, ",") {
+				if databaseId, exists := dbNameToIdMap[database]; exists {
+					databaseIds = append(databaseIds, databaseId)
+				} else {
+					logrus.Fatalf("The database %s doesn't exist", database)
+				}
 			}
 		}
 		createDrRequest := ybmclient.NewCreateXClusterDrRequest(*ybmclient.NewXClusterDrSpec(drName, targetClusterId, databaseIds))
