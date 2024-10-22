@@ -43,7 +43,7 @@ var ClusterCmd = &cobra.Command{
 func init() {
 	ClusterCmd.AddCommand(cert.CertCmd)
 
-	ClusterCmd.AddCommand(log_exporter.DbQueryLoggingCmd)
+	util.AddCommandIfFeatureFlag(ClusterCmd, log_exporter.DbQueryLoggingCmd, util.DB_QUERY_LOGS)
 	log_exporter.DbQueryLoggingCmd.PersistentFlags().StringVarP(&log_exporter.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	log_exporter.DbQueryLoggingCmd.MarkPersistentFlagRequired("cluster-name")
 
