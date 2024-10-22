@@ -1674,6 +1674,14 @@ func (a *AuthApiClient) CreateXClusterDr(clusterId string) ybmclient.ApiCreateXC
 	return a.ApiClient.XclusterDrApi.CreateXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) EditXClusterDr(clusterId string, drId string) ybmclient.ApiEditXClusterDrRequest {
+	return a.ApiClient.XclusterDrApi.EditXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
+
+func (a *AuthApiClient) SwitchoverXClusterDr(clusterId string, drId string) ybmclient.ApiSwitchoverRequest {
+	return a.ApiClient.XclusterDrApi.Switchover(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
+}
+
 func (a *AuthApiClient) GetXClusterDr(clusterId string, drId string) ybmclient.ApiGetXClusterDrRequest {
 	return a.ApiClient.XclusterDrApi.GetXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
 }
