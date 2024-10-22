@@ -54,7 +54,7 @@ var switchoverDrCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("Switchover is going on for the DR %s ", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Switchover is in progress for the DR %s ", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_SWITCHOVER, []string{"FAILED", "SUCCEEDED"}, msg)
