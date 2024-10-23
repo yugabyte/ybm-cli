@@ -125,5 +125,5 @@ func init() {
 	DrCmd.AddCommand(failoverDrCmd)
 	failoverDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
 	failoverDrCmd.MarkFlagRequired("dr-name")
-	failoverDrCmd.Flags().StringArray("safetimes", []string{}, "[OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<safe-time-in-min>,<db-name-2>=<safetime-in-min>.")
+	failoverDrCmd.Flags().StringArray("safetimes", []string{}, "[OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<epoch-safe-time>,<db-name-2>=<epoch-safe-time>.")
 }
