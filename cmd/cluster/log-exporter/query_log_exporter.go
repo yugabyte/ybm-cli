@@ -222,7 +222,6 @@ var updateLogExporterConfigCmd = &cobra.Command{
 		} else {
 			integrationId = logExporterData.Spec.ExporterId
 			integrationName, err = authApi.GetIntegrationNameFromId(integrationId)
-			fmt.Println("making get call")
 			if err != nil {
 				logrus.Debugf("could not fetch associated name for integration id: %s", integrationId)
 			}
