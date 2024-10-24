@@ -23,8 +23,8 @@ var ClusterName string
 
 var DrCmd = &cobra.Command{
 	Use:   "dr",
-	Short: "Create DR for a cluster.",
-	Long:  "Create DR for a cluster.",
+	Short: "Manage DR for a cluster.",
+	Long:  "Manage DR for a cluster.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

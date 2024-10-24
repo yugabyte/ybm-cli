@@ -28,10 +28,10 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var createDrCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create DR for a cluster",
-	Long:  `Create DR for a cluster`,
+var restartDrCmd = &cobra.Command{
+	Use:   "restart",
+	Short: "Restart DR for a cluster",
+	Long:  `Restart DR for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -40,17 +40,16 @@ var createDrCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		drName, _ := cmd.Flags().GetString("dr-name")
-		targetClusterName, _ := cmd.Flags().GetString("target-cluster-name")
 		databases, _ := cmd.Flags().GetStringArray("databases")
-		sourceClusterId, err := authApi.GetClusterIdByName(ClusterName)
+		clusterId, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		targetClusterId, err := authApi.GetClusterIdByName(targetClusterName)
+		drId, err := authApi.GetDrIdByName(clusterId, drName)
 		if err != nil {
-			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(err)
 		}
-		namespacesResp, r, err := authApi.GetClusterNamespaces(sourceClusterId).Execute()
+		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
@@ -69,52 +68,49 @@ var createDrCmd = &cobra.Command{
 				}
 			}
 		}
-		createDrRequest := ybmclient.NewCreateXClusterDrRequest(*ybmclient.NewXClusterDrSpec(drName, targetClusterId, databaseIds))
-		drResp, response, err := authApi.CreateXClusterDr(sourceClusterId).CreateXClusterDrRequest(*createDrRequest).Execute()
+		restartDrRequest := ybmclient.NewDrRestartRequestWithDefaults()
+		if len(databaseIds) != 0 {
+			restartDrRequest.SetDatabaseIds(databaseIds)
+		}
+		response, err := authApi.RestartXClusterDr(clusterId, drId).DrRestartRequest(*restartDrRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-		drId := drResp.GetData().Info.Id
 
-		msg := fmt.Sprintf("The DR %s is being created", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("DR config %s is being restartd", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(sourceClusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_CREATE_DR, []string{"FAILED", "SUCCEEDED"}, msg)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_RESTART, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("The DR %s has been created\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
+			fmt.Printf("DR config %s is restartd successfully\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
-			drGetResp, r, err := authApi.GetXClusterDr(sourceClusterId, drId).Execute()
+			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
 				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
-			drResp = drGetResp
+			drCtx := formatter.Context{
+				Output: os.Stdout,
+				Format: formatter.NewDrFormat(viper.GetString("output")),
+			}
+
+			formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drGetResp.GetData()}, *authApi)
 		} else {
 			fmt.Println(msg)
 		}
-
-		drCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDrFormat(viper.GetString("output")),
-		}
-
-		formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drResp.GetData()}, *authApi)
 
 	},
 }
 
 func init() {
-	DrCmd.AddCommand(createDrCmd)
-	createDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	createDrCmd.MarkFlagRequired("dr-name")
-	createDrCmd.Flags().String("target-cluster-name", "", "[REQUIRED] Target cluster in the DR configuration.")
-	createDrCmd.MarkFlagRequired("target-cluster-name")
-	createDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated.")
-	createDrCmd.MarkFlagRequired("databases")
+	DrCmd.AddCommand(restartDrCmd)
+	restartDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
+	restartDrCmd.MarkFlagRequired("dr-name")
+	restartDrCmd.Flags().StringArray("databases", []string{}, "[OPTIONAL] Databases to be restarted.")
 }

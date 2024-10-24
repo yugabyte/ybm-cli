@@ -18,6 +18,7 @@ package dr
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -28,10 +29,10 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var createDrCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create DR for a cluster",
-	Long:  `Create DR for a cluster`,
+var failoverDrCmd = &cobra.Command{
+	Use:   "failover",
+	Short: "Failover DR for a cluster",
+	Long:  `Failover DR for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -40,17 +41,16 @@ var createDrCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		drName, _ := cmd.Flags().GetString("dr-name")
-		targetClusterName, _ := cmd.Flags().GetString("target-cluster-name")
-		databases, _ := cmd.Flags().GetStringArray("databases")
-		sourceClusterId, err := authApi.GetClusterIdByName(ClusterName)
+		safetimes, _ := cmd.Flags().GetStringArray("safetimes")
+		clusterId, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		targetClusterId, err := authApi.GetClusterIdByName(targetClusterName)
+		drId, err := authApi.GetDrIdByName(clusterId, drName)
 		if err != nil {
-			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(err)
 		}
-		namespacesResp, r, err := authApi.GetClusterNamespaces(sourceClusterId).Execute()
+		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
@@ -59,62 +59,71 @@ var createDrCmd = &cobra.Command{
 		for _, namespace := range namespacesResp.Data {
 			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
 		}
-		databaseIds := []string{}
-		for _, databaseString := range databases {
-			for _, database := range strings.Split(databaseString, ",") {
+
+		safetimesMap := map[string]int64{}
+		for _, safetimesString := range safetimes {
+			for _, safetime := range strings.Split(safetimesString, ",") {
+				kvp := strings.Split(safetime, "=")
+				if len(kvp) != 2 {
+					logrus.Fatalln("Incorrect format in safetime")
+				}
+				database := kvp[0]
 				if databaseId, exists := dbNameToIdMap[database]; exists {
-					databaseIds = append(databaseIds, databaseId)
+					safetimeInMinString := kvp[1]
+					safetimeInMin, err := strconv.Atoi(safetimeInMinString)
+					if err != nil {
+						logrus.Fatalln("Error:", err)
+					}
+					safetimesMap[databaseId] = int64(safetimeInMin)
 				} else {
 					logrus.Fatalf("The database %s doesn't exist", database)
 				}
 			}
 		}
-		createDrRequest := ybmclient.NewCreateXClusterDrRequest(*ybmclient.NewXClusterDrSpec(drName, targetClusterId, databaseIds))
-		drResp, response, err := authApi.CreateXClusterDr(sourceClusterId).CreateXClusterDrRequest(*createDrRequest).Execute()
+
+		drFailoverRequest := ybmclient.NewDrFailoverRequestWithDefaults()
+		if len(safetimes) != 0 {
+			drFailoverRequest.SetNamespaceSafeTimes(safetimesMap)
+		}
+		response, err := authApi.FailoverXClusterDr(clusterId, drId).DrFailoverRequest(*drFailoverRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-		drId := drResp.GetData().Info.Id
 
-		msg := fmt.Sprintf("The DR %s is being created", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("Failover is in progress for the DR %s ", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(sourceClusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_CREATE_DR, []string{"FAILED", "SUCCEEDED"}, msg)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_FAILOVER, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("The DR %s has been created\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
+			fmt.Printf("Failover for DR config %s is successful\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
-			drGetResp, r, err := authApi.GetXClusterDr(sourceClusterId, drId).Execute()
+			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
 				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
-			drResp = drGetResp
+			drCtx := formatter.Context{
+				Output: os.Stdout,
+				Format: formatter.NewDrFormat(viper.GetString("output")),
+			}
+
+			formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drGetResp.GetData()}, *authApi)
 		} else {
 			fmt.Println(msg)
 		}
-
-		drCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDrFormat(viper.GetString("output")),
-		}
-
-		formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drResp.GetData()}, *authApi)
 
 	},
 }
 
 func init() {
-	DrCmd.AddCommand(createDrCmd)
-	createDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	createDrCmd.MarkFlagRequired("dr-name")
-	createDrCmd.Flags().String("target-cluster-name", "", "[REQUIRED] Target cluster in the DR configuration.")
-	createDrCmd.MarkFlagRequired("target-cluster-name")
-	createDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated.")
-	createDrCmd.MarkFlagRequired("databases")
+	DrCmd.AddCommand(failoverDrCmd)
+	failoverDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
+	failoverDrCmd.MarkFlagRequired("dr-name")
+	failoverDrCmd.Flags().StringArray("safetimes", []string{}, "[OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<epoch-safe-time>,<db-name-2>=<epoch-safe-time>.")
 }

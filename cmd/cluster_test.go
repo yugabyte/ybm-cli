@@ -207,6 +207,7 @@ var _ = Describe("Cluster", func() {
 		})
 		Context("with a valid Api token and default output table", func() {
 			It("should return list of cluster", func() {
+				os.Setenv("YBM_FF_CONNECTION_POOLING", "true")
 				cmd := exec.Command(compiledCLIPath, "cluster", "list")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -219,6 +220,7 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-we
 			})
 
 			It("should return detailed summary of cluster if cluster-name is specified", func() {
+				os.Setenv("YBM_FF_CONNECTION_POOLING", "true")
 				statusCode = 200
 				err := loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
 				Expect(err).ToNot(HaveOccurred())
