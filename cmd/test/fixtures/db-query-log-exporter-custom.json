@@ -12,7 +12,7 @@
           "log_min_error_statement": "ERROR",
           "log_line_prefix": "%m :%r :%u @ %d :[%p] : %a :"
         },
-        "exporter_id": "9e740000-331b-4dec-89b0-4e59b81e9019"
+        "exporter_id": "129f7c97-81ae-47c7-8f9e-40ab4390093f"
       },
       "info": {
         "id": "6ddb35d2-c41d-4ee0-9fa9-6d50cbb2a6f9",
@@ -25,3 +25,4 @@
       }
     }
   }
+

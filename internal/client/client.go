@@ -1670,6 +1670,22 @@ func (authApi *AuthApiClient) GetIntegrationIdFromName(integrationName string) (
 	return integrationData[0].GetInfo().Id, nil
 }
 
+func (authApi *AuthApiClient) GetIntegrationNameFromId(integrationId string) (string, error) {
+	// TODO: Change this to use Get api(once available) instead of List API.
+	integrationList, _, err := authApi.ListIntegrations().Execute()
+	if err != nil {
+		return "", fmt.Errorf("failed to get integration by id %s: %w", integrationId, err)
+	}
+
+	for _, data := range integrationList.GetData() {
+		if integrationId == data.Info.Id {
+			return data.Spec.Name, nil
+		}
+	}
+
+	return "unknown", nil
+}
+
 func (a *AuthApiClient) CreateXClusterDr(clusterId string) ybmclient.ApiCreateXClusterDrRequest {
 	return a.ApiClient.XclusterDrApi.CreateXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }

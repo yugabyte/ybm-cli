@@ -17,63 +17,149 @@ package formatter
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-const defaultDbQueryLoggingConfigListing = "table {{.State}}\t{{.IntegrationID}}\t{{.LogConfig}}"
+const defaultDbQueryLoggingConfigListing = "table {{.State}}\t{{.IntegrationName}}"
+const loggingConfigListing = "table {{.LogConfigKey}}\t{{.LogConfigValue}}"
 
 type DbQueryLoggingContext struct {
 	HeaderContext
 	Context
-	data ybmclient.PgLogExporterConfigData
+	data            ybmclient.PgLogExporterConfigData
+	integrationName string
+}
+
+type LogConfigContext struct {
+	HeaderContext
+	Context
+	configKey string
+	configVal string
 }
 
 func NewDbQueryLoggingFormat() Format {
-	return Format(defaultDbQueryLoggingConfigListing)
+	source := viper.GetString("output")
+	switch source {
+	case "table", "":
+		format := defaultDbQueryLoggingConfigListing
+		return Format(format)
+	default: // custom format or json or pretty
+		return Format(source)
+	}
+}
+
+func NewLogConfigFormat() Format {
+	source := viper.GetString("output")
+	switch source {
+	case "table", "":
+		format := loggingConfigListing
+		return Format(format)
+	default: // custom format or json or pretty
+		return Format(source)
+	}
 }
 
 func NewDbQueryLoggingContext() *DbQueryLoggingContext {
 	DbQueryLoggingContext := DbQueryLoggingContext{}
 	DbQueryLoggingContext.Header = SubHeaderContext{
-		"State":         "State",
-		"IntegrationID": "Integration ID",
-		"LogConfig":     "Log Config",
+		"State":           "State",
+		"IntegrationName": "Integration Name",
 	}
 	return &DbQueryLoggingContext
 }
 
-func DbQueryLoggingWrite(ctx Context, PgLogExporterConfigData []ybmclient.PgLogExporterConfigData) error {
+func NewLogConfigContext() *LogConfigContext {
+	LogConfigContext := LogConfigContext{}
+	LogConfigContext.Header = SubHeaderContext{
+		"LogConfigKey":   "Log Config Key",
+		"LogConfigValue": "Log Config Value",
+	}
+	return &LogConfigContext
+}
+
+func dbLogConfigWrite(ctx Context, PgLogExportConfig ybmclient.PgLogExportConfig) error {
 	render := func(format func(subContext SubContext) error) error {
-		for _, data := range PgLogExporterConfigData {
-			err := format(&DbQueryLoggingContext{data: data})
-			if err != nil {
-				logrus.Debugf("Error rendering Pg Log Exporter config data: %v", err)
-				return err
-			}
+		addRow(format, "debug-print-plan", fmt.Sprintf("%t", PgLogExportConfig.DebugPrintPlan))
+		addRow(format, "log-min-duration-statement", fmt.Sprintf("%d", PgLogExportConfig.LogMinDurationStatement))
+		addRow(format, "log-connections", fmt.Sprintf("%t", PgLogExportConfig.LogConnections))
+		addRow(format, "log-disconnections", fmt.Sprintf("%t", PgLogExportConfig.LogDisconnections))
+		addRow(format, "log-duration", fmt.Sprintf("%t", PgLogExportConfig.LogDuration))
+		addRow(format, "log-error-verbosity", string(PgLogExportConfig.LogErrorVerbosity))
+		addRow(format, "log-statement", string(PgLogExportConfig.LogStatement))
+		addRow(format, "log-min-error-statement", string(PgLogExportConfig.LogMinErrorStatement))
+		addRow(format, "log-line-prefix", PgLogExportConfig.LogLinePrefix)
+		return nil
+	}
+	return ctx.Write(NewLogConfigContext(), render)
+}
+
+func addRow(format func(subContext SubContext) error, key string, value string) {
+	err := format(&LogConfigContext{configKey: key, configVal: value})
+	if err != nil {
+		logrus.Fatal(err)
+	}
+}
+
+func dbQueryLoggingWrite(ctx Context, PgLogExporterConfigData ybmclient.PgLogExporterConfigData, integrationName string) error {
+	render := func(format func(subContext SubContext) error) error {
+		err := format(&DbQueryLoggingContext{data: PgLogExporterConfigData, integrationName: integrationName})
+		if err != nil {
+			logrus.Debugf("Error rendering Pg Log Exporter config data: %v", err)
+			return err
 		}
 		return nil
 	}
 	return ctx.Write(NewDbQueryLoggingContext(), render)
 }
 
+func DbQueryLoggingWriteFull(PgLogExporterConfigData ybmclient.PgLogExporterConfigData, integrationName string) {
+	ctx := Context{
+		Output: os.Stdout,
+		Format: NewDbQueryLoggingFormat(),
+	}
+
+	err := dbQueryLoggingWrite(ctx, PgLogExporterConfigData, integrationName)
+	if err != nil {
+		logrus.Fatal(err.Error())
+	}
+	ctx.Output.Write([]byte("\n"))
+
+	// Only render Log config for table output format
+	if viper.GetString("output") == "table" {
+		ctx = Context{
+			Output: os.Stdout,
+			Format: NewLogConfigFormat(),
+		}
+
+		err = dbLogConfigWrite(ctx, PgLogExporterConfigData.Spec.ExportConfig)
+		if err != nil {
+			logrus.Fatal(err.Error())
+		}
+	}
+
+}
+
 func (context *DbQueryLoggingContext) State() string {
 	return string(context.data.Info.State)
 }
 
-func (context *DbQueryLoggingContext) IntegrationID() string {
-	return string(context.data.Spec.ExporterId)
+func (context *DbQueryLoggingContext) IntegrationName() string {
+	return context.integrationName
 }
 
-func (context *DbQueryLoggingContext) LogConfig() string {
-	x := context.data.GetSpec()
-	y := x.GetExportConfig()
-
-	return convertPgLogConfigToJson(&y)
+func (context *DbQueryLoggingContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(context.data)
 }
 
-func convertPgLogConfigToJson(cfg *ybmclient.PgLogExportConfig) string {
-	jsonConfig, _ := json.Marshal(cfg)
-	return string(jsonConfig)
+func (context *LogConfigContext) LogConfigKey() string {
+	return string(context.configKey)
+}
+
+func (context *LogConfigContext) LogConfigValue() string {
+	return string(context.configVal)
 }

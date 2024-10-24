@@ -53,6 +53,7 @@ var _ = Describe("Cluster", func() {
 		Expect(err).ToNot(HaveOccurred())
 		os.Setenv("YBM_HOST", fmt.Sprintf("http://%s", server.Addr()))
 		os.Setenv("YBM_APIKEY", "test-token")
+		os.Setenv("YBM_FF_CONNECTION_POOLING", "true")
 	})
 
 	Describe("Pausing cluster", func() {
