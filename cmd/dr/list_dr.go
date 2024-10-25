@@ -16,6 +16,7 @@
 package dr
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -23,13 +24,12 @@ import (
 	"github.com/spf13/viper"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
-	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var describeDrCmd = &cobra.Command{
-	Use:   "describe",
-	Short: "Describe DR",
-	Long:  `Describe DR`,
+var listDrCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List DRs for a given cluster",
+	Long:  "List DRs for a given cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -37,32 +37,27 @@ var describeDrCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		drName, _ := cmd.Flags().GetString("dr-name")
-		clusterId, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
-			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(err)
 		}
-		drId, err := authApi.GetDrIdByName(clusterId, drName)
-		if err != nil {
-			logrus.Fatalf("Could not get DR data: %s", ybmAuthClient.GetApiErrorDetails(err))
-		}
-		drResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
+		resp, r, err := authApi.ListXClusterDr().Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		drCtx := formatter.Context{
+		drsCtx := formatter.Context{
 			Output: os.Stdout,
 			Format: formatter.NewDrFormat(viper.GetString("output")),
 		}
-
-		formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drResp.GetData()}, *authApi)
+		if len(resp.GetData()) < 1 {
+			fmt.Println("No DRs found")
+			return
+		}
+		formatter.DrWrite(drsCtx, resp.GetData(), *authApi)
 	},
 }
 
 func init() {
-	DrCmd.AddCommand(describeDrCmd)
-	describeDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR.")
-	describeDrCmd.MarkFlagRequired("dr-name")
+	DrCmd.AddCommand(listDrCmd)
 }

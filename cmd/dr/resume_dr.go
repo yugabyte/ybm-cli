@@ -27,10 +27,10 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var switchoverDrCmd = &cobra.Command{
-	Use:   "switchover",
-	Short: "Switchover DR for a cluster",
-	Long:  `Switchover DR for a cluster`,
+var resumeDrCmd = &cobra.Command{
+	Use:   "resume",
+	Short: "Resume DR for a cluster",
+	Long:  `Resume DR for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -39,32 +39,31 @@ var switchoverDrCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		drName, _ := cmd.Flags().GetString("dr-name")
-		clusterId, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		drId, err := authApi.GetDrIdByName(clusterId, drName)
+		drId, clusterId, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
 
-		response, err := authApi.SwitchoverXClusterDr(clusterId, drId).Execute()
+		response, err := authApi.ResumeXClusterDr(clusterId, drId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("Switchover is in progress for the DR %s ", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("DR config %s is being resumed", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_SWITCHOVER, []string{"FAILED", "SUCCEEDED"}, msg)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_RESUME, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("Switchover for DR config %s is successful\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
+			fmt.Printf("DR config %s is resumed successful\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
@@ -85,7 +84,7 @@ var switchoverDrCmd = &cobra.Command{
 }
 
 func init() {
-	DrCmd.AddCommand(switchoverDrCmd)
-	switchoverDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	switchoverDrCmd.MarkFlagRequired("dr-name")
+	DrCmd.AddCommand(resumeDrCmd)
+	resumeDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
+	resumeDrCmd.MarkFlagRequired("dr-name")
 }

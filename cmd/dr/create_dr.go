@@ -40,9 +40,10 @@ var createDrCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		drName, _ := cmd.Flags().GetString("dr-name")
+		sourceClusterName, _ := cmd.Flags().GetString("source-cluster-name")
 		targetClusterName, _ := cmd.Flags().GetString("target-cluster-name")
 		databases, _ := cmd.Flags().GetStringArray("databases")
-		sourceClusterId, err := authApi.GetClusterIdByName(ClusterName)
+		sourceClusterId, err := authApi.GetClusterIdByName(sourceClusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -113,6 +114,8 @@ func init() {
 	DrCmd.AddCommand(createDrCmd)
 	createDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
 	createDrCmd.MarkFlagRequired("dr-name")
+	createDrCmd.Flags().String("source-cluster-name", "", "[REQUIRED] Target cluster in the DR configuration.")
+	createDrCmd.MarkFlagRequired("source-cluster-name")
 	createDrCmd.Flags().String("target-cluster-name", "", "[REQUIRED] Target cluster in the DR configuration.")
 	createDrCmd.MarkFlagRequired("target-cluster-name")
 	createDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated.")

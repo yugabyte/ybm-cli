@@ -28,10 +28,10 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var restartDrCmd = &cobra.Command{
-	Use:   "restart",
-	Short: "Restart DR for a cluster",
-	Long:  `Restart DR for a cluster`,
+var updateDrCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update DR for a cluster",
+	Long:  `Update DR for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -41,11 +41,10 @@ var restartDrCmd = &cobra.Command{
 
 		drName, _ := cmd.Flags().GetString("dr-name")
 		databases, _ := cmd.Flags().GetStringArray("databases")
-		clusterId, err := authApi.GetClusterIdByName(ClusterName)
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		drId, err := authApi.GetDrIdByName(clusterId, drName)
+		drId, clusterId, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -68,49 +67,50 @@ var restartDrCmd = &cobra.Command{
 				}
 			}
 		}
-		restartDrRequest := ybmclient.NewDrRestartRequestWithDefaults()
-		if len(databaseIds) != 0 {
-			restartDrRequest.SetDatabaseIds(databaseIds)
-		}
-		response, err := authApi.RestartXClusterDr(clusterId, drId).DrRestartRequest(*restartDrRequest).Execute()
+
+		updateDrRequest := ybmclient.NewEditXClusterDrRequest(*ybmclient.NewEditXClusterDrSpec(databaseIds))
+		drResp, response, err := authApi.EditXClusterDr(clusterId, drId).EditXClusterDrRequest(*updateDrRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("DR config %s is being restartd", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("DR config %s is being updated", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_RESTART, []string{"FAILED", "SUCCEEDED"}, msg)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_EDIT_DR, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("DR config %s is restartd successfully\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
+			fmt.Printf("DR config %s has been updated\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
 				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 			}
-			drCtx := formatter.Context{
-				Output: os.Stdout,
-				Format: formatter.NewDrFormat(viper.GetString("output")),
-			}
-
-			formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drGetResp.GetData()}, *authApi)
+			drResp = drGetResp
 		} else {
 			fmt.Println(msg)
 		}
+
+		drCtx := formatter.Context{
+			Output: os.Stdout,
+			Format: formatter.NewDrFormat(viper.GetString("output")),
+		}
+
+		formatter.DrWrite(drCtx, []ybmclient.XClusterDrData{drResp.GetData()}, *authApi)
 
 	},
 }
 
 func init() {
-	DrCmd.AddCommand(restartDrCmd)
-	restartDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	restartDrCmd.MarkFlagRequired("dr-name")
-	restartDrCmd.Flags().StringArray("databases", []string{}, "[OPTIONAL] Databases to be restarted.")
+	DrCmd.AddCommand(updateDrCmd)
+	updateDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
+	updateDrCmd.MarkFlagRequired("dr-name")
+	updateDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated.")
+	updateDrCmd.MarkFlagRequired("databases")
 }

@@ -18,7 +18,6 @@ package dr
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -29,10 +28,10 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var failoverDrCmd = &cobra.Command{
-	Use:   "failover",
-	Short: "Failover DR for a cluster",
-	Long:  `Failover DR for a cluster`,
+var restartDrCmd = &cobra.Command{
+	Use:   "restart",
+	Short: "Restart DR for a cluster",
+	Long:  `Restart DR for a cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -41,12 +40,11 @@ var failoverDrCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		drName, _ := cmd.Flags().GetString("dr-name")
-		safetimes, _ := cmd.Flags().GetStringArray("safetimes")
-		clusterId, err := authApi.GetClusterIdByName(ClusterName)
+		databases, _ := cmd.Flags().GetStringArray("databases")
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		drId, err := authApi.GetDrIdByName(clusterId, drName)
+		drId, clusterId, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -59,49 +57,37 @@ var failoverDrCmd = &cobra.Command{
 		for _, namespace := range namespacesResp.Data {
 			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
 		}
-
-		safetimesMap := map[string]int64{}
-		for _, safetimesString := range safetimes {
-			for _, safetime := range strings.Split(safetimesString, ",") {
-				kvp := strings.Split(safetime, "=")
-				if len(kvp) != 2 {
-					logrus.Fatalln("Incorrect format in safetime")
-				}
-				database := kvp[0]
+		databaseIds := []string{}
+		for _, databaseString := range databases {
+			for _, database := range strings.Split(databaseString, ",") {
 				if databaseId, exists := dbNameToIdMap[database]; exists {
-					safetimeInMinString := kvp[1]
-					safetimeInMin, err := strconv.Atoi(safetimeInMinString)
-					if err != nil {
-						logrus.Fatalln("Error:", err)
-					}
-					safetimesMap[databaseId] = int64(safetimeInMin)
+					databaseIds = append(databaseIds, databaseId)
 				} else {
 					logrus.Fatalf("The database %s doesn't exist", database)
 				}
 			}
 		}
-
-		drFailoverRequest := ybmclient.NewDrFailoverRequestWithDefaults()
-		if len(safetimes) != 0 {
-			drFailoverRequest.SetNamespaceSafeTimes(safetimesMap)
+		restartDrRequest := ybmclient.NewDrRestartRequestWithDefaults()
+		if len(databaseIds) != 0 {
+			restartDrRequest.SetDatabaseIds(databaseIds)
 		}
-		response, err := authApi.FailoverXClusterDr(clusterId, drId).DrFailoverRequest(*drFailoverRequest).Execute()
+		response, err := authApi.RestartXClusterDr(clusterId, drId).DrRestartRequest(*restartDrRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("Failover is in progress for the DR %s ", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("DR config %s is being restartd", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_FAILOVER, []string{"FAILED", "SUCCEEDED"}, msg)
+			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_RESTART, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("Failover for DR config %s is successful\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
+			fmt.Printf("DR config %s is restartd successfully\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
@@ -122,8 +108,8 @@ var failoverDrCmd = &cobra.Command{
 }
 
 func init() {
-	DrCmd.AddCommand(failoverDrCmd)
-	failoverDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	failoverDrCmd.MarkFlagRequired("dr-name")
-	failoverDrCmd.Flags().StringArray("safetimes", []string{}, "[OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<epoch-safe-time>,<db-name-2>=<epoch-safe-time>.")
+	DrCmd.AddCommand(restartDrCmd)
+	restartDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
+	restartDrCmd.MarkFlagRequired("dr-name")
+	restartDrCmd.Flags().StringArray("databases", []string{}, "[OPTIONAL] Databases to be restarted.")
 }
