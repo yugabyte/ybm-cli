@@ -1718,7 +1718,7 @@ func (a *AuthApiClient) GetXClusterDr(clusterId string, drId string) ybmclient.A
 	return a.ApiClient.XclusterDrApi.GetXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
 }
 
-func (a *AuthApiClient) ListXClusterDr() ybmclient.ApiListXClusterDrRequest {
+func (a *AuthApiClient) ListXClusterDr() ybmclient.ApiListAllXClusterDrInAccountRequest {
 	return a.ApiClient.XclusterDrApi.ListAllXClusterDrInAccount(a.ctx, a.AccountID, a.ProjectID)
 }
 
