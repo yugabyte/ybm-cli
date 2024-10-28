@@ -19,8 +19,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ClusterName string
-
 var DrCmd = &cobra.Command{
 	Use:   "dr",
 	Short: "Manage DR for a cluster.",

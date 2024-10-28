@@ -503,8 +503,8 @@ func (a *AuthApiClient) GetClusterByName(clusterName string) (ybmclient.ClusterD
 	return ybmclient.ClusterData{}, fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
-func (a *AuthApiClient) GetDrByName(clusterId string, drName string) (ybmclient.XClusterDrData, error) {
-	drResp, resp, err := a.ListXClusterDr(clusterId).Execute()
+func (a *AuthApiClient) GetDrByName(drName string) (ybmclient.XClusterDrData, error) {
+	drResp, resp, err := a.ListXClusterDr().Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(string(b))
@@ -587,13 +587,13 @@ func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
 	return "", fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
-func (a *AuthApiClient) GetDrIdByName(clusterId string, drName string) (string, error) {
-	drData, err := a.GetDrByName(clusterId, drName)
+func (a *AuthApiClient) GetDrDetailsByName(drName string) (string, string, error) {
+	drData, err := a.GetDrByName(drName)
 	if err == nil {
-		return drData.Info.GetId(), nil
+		return drData.Info.GetId(), drData.Info.GetSourceClusterId(), nil
 	}
 
-	return "", fmt.Errorf("could not get dr data for dr name: %s", drName)
+	return "", "", fmt.Errorf("could not get dr data for dr name: %s", drName)
 }
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {
@@ -1718,8 +1718,8 @@ func (a *AuthApiClient) GetXClusterDr(clusterId string, drId string) ybmclient.A
 	return a.ApiClient.XclusterDrApi.GetXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId, drId)
 }
 
-func (a *AuthApiClient) ListXClusterDr(clusterId string) ybmclient.ApiListXClusterDrRequest {
-	return a.ApiClient.XclusterDrApi.ListXClusterDr(a.ctx, a.AccountID, a.ProjectID, clusterId)
+func (a *AuthApiClient) ListXClusterDr() ybmclient.ApiListAllXClusterDrInAccountRequest {
+	return a.ApiClient.XclusterDrApi.ListAllXClusterDrInAccount(a.ctx, a.AccountID, a.ProjectID)
 }
 
 func (a *AuthApiClient) DeleteXClusterDr(clusterId string, drId string) ybmclient.ApiDeleteXClusterDrRequest {
