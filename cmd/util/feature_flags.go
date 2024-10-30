@@ -36,7 +36,7 @@ const (
 	CONNECTION_POOLING      FeatureFlag = "CONNECTION_POOLING"
 	GOOGLECLOUD_INTEGRATION FeatureFlag = "GOOGLECLOUD_INTEGRATION"
 	DR                      FeatureFlag = "DR"
-	DB_QUERY_LOGS           FeatureFlag = "DB_QUERY_LOGS"
+	DB_QUERY_LOGS           FeatureFlag = "DB_QUERY_LOGGING"
 )
 
 func (f FeatureFlag) String() string {
