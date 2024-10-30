@@ -77,24 +77,9 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 
 		msg := fmt.Sprintf("The db query logging for cluster %s is being enabled", clusterName)
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_ENABLE_DATABASE_QUERY_LOGGING, []string{"FAILED", "SUCCEEDED"}, msg)
-			if err != nil {
-				logrus.Fatalf("error when getting task status: %s", err)
-			}
-			if returnStatus != "SUCCEEDED" {
-				logrus.Fatalf("Operation failed with error: %s", returnStatus)
-			}
+			waitForDbLoggingTaskCompletion(clusterId, ybmclient.TASKTYPEENUM_ENABLE_DATABASE_QUERY_LOGGING, msg, authApi)
 			fmt.Printf("DB query logging has been enabled for the cluster %v\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
-
-			respC, r, err := authApi.GetDbLoggingConfig(clusterId).Execute()
-			if err != nil {
-				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-			}
-			if len(respC.Data) < 1 {
-				logrus.Fatalf("DB query logging is not enabled for the cluster")
-			}
-			dqlConfig = respC.Data[0]
+			dqlConfig = *getDbLoggingConfig(clusterId, authApi)
 		}
 
 		formatter.DbQueryLoggingWriteFull(dqlConfig, integrationName)
@@ -118,18 +103,7 @@ var describeLogExporterCmd = &cobra.Command{
 			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		resp, r, err := authApi.GetDbLoggingConfig(clusterId).Execute()
-		if err != nil {
-			logrus.Debugf("Full HTTP response for Query Log Exporter Config: %v\n", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		if len(resp.GetData()) < 1 {
-			fmt.Printf("DB query logs are not enabled for cluster: %s\n", clusterName)
-			return
-		}
-
-		pgLogExporterConfigData := resp.GetData()[0]
+		pgLogExporterConfigData := *getDbLoggingConfig(clusterId, authApi)
 		integrationName, integrationId := "", pgLogExporterConfigData.Spec.ExporterId
 
 		integrationName, err = authApi.GetIntegrationNameFromId(integrationId)
@@ -137,7 +111,7 @@ var describeLogExporterCmd = &cobra.Command{
 			logrus.Debugf("could not fetch associated name for integration id: %s", integrationId)
 		}
 
-		formatter.DbQueryLoggingWriteFull(resp.GetData()[0], integrationName)
+		formatter.DbQueryLoggingWriteFull(pgLogExporterConfigData, integrationName)
 	},
 }
 
@@ -171,21 +145,10 @@ var disableLogExporterCmd = &cobra.Command{
 		}
 
 		// Fetch existing log exporter config
-		resp, r, err := authApi.GetDbLoggingConfig(clusterId).Execute()
-		if err != nil {
-			logrus.Debugf("Full HTTP response for Query Log Exporter Config: %v\n", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		if len(resp.GetData()) < 1 {
-			fmt.Printf("DB query logs are not enabled for cluster: %s\n", clusterName)
-			return
-		}
-
-		logExporterData := resp.GetData()[0]
+		logExporterData := *getDbLoggingConfig(clusterId, authApi)
 		exporterConfigId := logExporterData.Info.Id
 
-		r, err = authApi.RemoveDbQueryLoggingConfig(clusterId, exporterConfigId).Execute()
+		r, err := authApi.RemoveDbQueryLoggingConfig(clusterId, exporterConfigId).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response for disable query logging config: %v\n", r)
@@ -194,13 +157,7 @@ var disableLogExporterCmd = &cobra.Command{
 
 		msg := fmt.Sprintf("The db query logging for cluster %s is being disabled", clusterName)
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DISABLE_DATABASE_QUERY_LOGGING, []string{"FAILED", "SUCCEEDED"}, msg)
-			if err != nil {
-				logrus.Fatalf("error when getting task status: %s", err)
-			}
-			if returnStatus != "SUCCEEDED" {
-				logrus.Fatalf("Operation failed with error: %s", returnStatus)
-			}
+			waitForDbLoggingTaskCompletion(clusterId, ybmclient.TASKTYPEENUM_DISABLE_DATABASE_QUERY_LOGGING, msg, authApi)
 			fmt.Printf("DB query logging has been disabled for the cluster %v\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 		} else {
 			fmt.Printf(`Request submitted to disable DB query logging for the cluster, this may take a few minutes...
@@ -231,18 +188,7 @@ var updateLogExporterConfigCmd = &cobra.Command{
 		}
 
 		// Fetch existing log exporter config
-		resp, r, err := authApi.GetDbLoggingConfig(clusterId).Execute()
-		if err != nil {
-			logrus.Debugf("Full HTTP response for Query Log Exporter Config: %v\n", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-		}
-
-		if len(resp.GetData()) < 1 {
-			fmt.Printf("DB query logs are not enabled for cluster: %s\n", clusterName)
-			return
-		}
-
-		logExporterData := resp.GetData()[0]
+		logExporterData := *getDbLoggingConfig(clusterId, authApi)
 		exporterConfigId := logExporterData.Info.Id
 
 		var integrationId string = ""
@@ -266,7 +212,7 @@ var updateLogExporterConfigCmd = &cobra.Command{
 		newExportConfig := BuildNewPgExportConfigFromExistingConfig(cmd, existingExportConfig)
 
 		var pgLogExporterConfigResponse ybmclient.PgLogExporterConfigResponse
-		pgLogExporterConfigResponse, r, err = authApi.EditDbQueryLoggingConfig(clusterId, exporterConfigId).PgLogExporterConfigSpec(
+		pgLogExporterConfigResponse, r, err := authApi.EditDbQueryLoggingConfig(clusterId, exporterConfigId).PgLogExporterConfigSpec(
 			ybmclient.PgLogExporterConfigSpec{ExportConfig: newExportConfig, ExporterId: integrationId}).Execute()
 
 		if err != nil {
@@ -278,30 +224,40 @@ var updateLogExporterConfigCmd = &cobra.Command{
 
 		msg := fmt.Sprintf("The db query logging config for cluster %s is being updated", clusterName)
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_EDIT_DATABASE_QUERY_LOGGING, []string{"FAILED", "SUCCEEDED"}, msg)
-			if err != nil {
-				logrus.Fatalf("error when getting task status: %s", err)
-			}
-			if returnStatus != "SUCCEEDED" {
-				logrus.Fatalf("Operation failed with error: %s", returnStatus)
-			}
+			waitForDbLoggingTaskCompletion(clusterId, ybmclient.TASKTYPEENUM_EDIT_DATABASE_QUERY_LOGGING, msg, authApi)
 			fmt.Printf("DB query logging config has been updated for the cluster %v\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
-			respC, r, err := authApi.GetDbLoggingConfig(clusterId).Execute()
-			if err != nil {
-				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-			}
-			if len(respC.Data) < 1 {
-				logrus.Fatalf("DB query logging is not enabled for the cluster")
-			}
-			dqlConfig = respC.Data[0]
+			dqlConfig = *getDbLoggingConfig(clusterId, authApi)
 		} else {
 			fmt.Println("Request submitted to edit DB query log config for the cluster, this may take a few minutes...")
 		}
 
 		formatter.DbQueryLoggingWriteFull(dqlConfig, integrationName)
 	},
+}
+
+func getDbLoggingConfig(clusterId string, authApi *ybmAuthClient.AuthApiClient) *ybmclient.PgLogExporterConfigData {
+	respC, r, err := authApi.GetDbLoggingConfig(clusterId).Execute()
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		logrus.Fatalf("could not fetch DB query logging config " + ybmAuthClient.GetApiErrorDetails(err))
+	}
+	if len(respC.Data) < 1 {
+		logrus.Fatalf("DB query logging is not enabled for the cluster")
+	}
+	return &respC.Data[0]
+}
+
+func waitForDbLoggingTaskCompletion(clusterId string, taskType ybmclient.TaskTypeEnum,
+	message string, authApi *ybmAuthClient.AuthApiClient) {
+	completionStatus := []string{"FAILED", "SUCCEEDED"}
+	returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, taskType, completionStatus, message)
+	if err != nil {
+		logrus.Fatalf("error when getting task status: %s", err)
+	}
+	if returnStatus != "SUCCEEDED" {
+		logrus.Fatalf("Operation failed with error: %s", returnStatus)
+	}
 }
 
 func init() {
