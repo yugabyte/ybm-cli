@@ -114,7 +114,7 @@ func init() {
 	DrCmd.AddCommand(createDrCmd)
 	createDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
 	createDrCmd.MarkFlagRequired("dr-name")
-	createDrCmd.Flags().String("source-cluster-name", "", "[REQUIRED] Target cluster in the DR configuration.")
+	createDrCmd.Flags().String("source-cluster-name", "", "[REQUIRED] Source cluster in the DR configuration.")
 	createDrCmd.MarkFlagRequired("source-cluster-name")
 	createDrCmd.Flags().String("target-cluster-name", "", "[REQUIRED] Target cluster in the DR configuration.")
 	createDrCmd.MarkFlagRequired("target-cluster-name")
