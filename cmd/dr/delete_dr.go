@@ -81,7 +81,7 @@ var deleteDrCmd = &cobra.Command{
 
 func init() {
 	DrCmd.AddCommand(deleteDrCmd)
-	deleteDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR")
+	deleteDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration")
 	deleteDrCmd.MarkFlagRequired("dr-name")
 
 }

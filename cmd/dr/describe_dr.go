@@ -43,7 +43,7 @@ var describeDrCmd = &cobra.Command{
 		}
 		drId, clusterId, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
-			logrus.Fatalf("Could not get DR data: %s", ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(err)
 		}
 		drResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 		if err != nil {
@@ -62,6 +62,6 @@ var describeDrCmd = &cobra.Command{
 
 func init() {
 	DrCmd.AddCommand(describeDrCmd)
-	describeDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR.")
+	describeDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
 	describeDrCmd.MarkFlagRequired("dr-name")
 }

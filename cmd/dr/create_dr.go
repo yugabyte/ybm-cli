@@ -118,6 +118,6 @@ func init() {
 	createDrCmd.MarkFlagRequired("source-cluster-name")
 	createDrCmd.Flags().String("target-cluster-name", "", "[REQUIRED] Target cluster in the DR configuration.")
 	createDrCmd.MarkFlagRequired("target-cluster-name")
-	createDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated.")
+	createDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.")
 	createDrCmd.MarkFlagRequired("databases")
 }

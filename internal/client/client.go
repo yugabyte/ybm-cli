@@ -518,7 +518,7 @@ func (a *AuthApiClient) GetDrByName(drName string) (ybmclient.XClusterDrData, er
 		}
 	}
 
-	return ybmclient.XClusterDrData{}, fmt.Errorf("could not get dr data for dr name: %s", drName)
+	return ybmclient.XClusterDrData{}, fmt.Errorf("Could not get data for the DR config %s", drName)
 }
 
 func (a *AuthApiClient) ExtractProviderFromClusterName(clusterId string) ([]string, error) {
@@ -593,7 +593,7 @@ func (a *AuthApiClient) GetDrDetailsByName(drName string) (string, string, error
 		return drData.Info.GetId(), drData.Info.GetSourceClusterId(), nil
 	}
 
-	return "", "", fmt.Errorf("could not get dr data for dr name: %s", drName)
+	return "", "", fmt.Errorf("Could not get data for the DR config %s", drName)
 }
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {

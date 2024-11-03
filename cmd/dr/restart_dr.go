@@ -77,7 +77,7 @@ var restartDrCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("DR config %s is being restartd", formatter.Colorize(drName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("DR config %s is being restarted", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
 			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_RESTART, []string{"FAILED", "SUCCEEDED"}, msg)
@@ -87,7 +87,7 @@ var restartDrCmd = &cobra.Command{
 			if returnStatus != "SUCCEEDED" {
 				logrus.Fatalf("Operation failed with error: %s", returnStatus)
 			}
-			fmt.Printf("DR config %s is restartd successfully\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
+			fmt.Printf("DR config %s is restarted successfully\n", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
@@ -111,5 +111,5 @@ func init() {
 	DrCmd.AddCommand(restartDrCmd)
 	restartDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
 	restartDrCmd.MarkFlagRequired("dr-name")
-	restartDrCmd.Flags().StringArray("databases", []string{}, "[OPTIONAL] Databases to be restarted.")
+	restartDrCmd.Flags().StringArray("databases", []string{}, "[OPTIONAL] Databases to be restarted. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.")
 }
