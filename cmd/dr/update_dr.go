@@ -111,6 +111,6 @@ func init() {
 	DrCmd.AddCommand(updateDrCmd)
 	updateDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
 	updateDrCmd.MarkFlagRequired("dr-name")
-	updateDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated.")
+	updateDrCmd.Flags().StringArray("databases", []string{}, "[REQUIRED] Databases to be replicated. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.")
 	updateDrCmd.MarkFlagRequired("databases")
 }
