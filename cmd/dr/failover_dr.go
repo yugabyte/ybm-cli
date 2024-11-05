@@ -50,6 +50,7 @@ var failoverDrCmd = &cobra.Command{
 			logrus.Fatal(err)
 		}
 		drId := drInfo.GetId()
+		sourceClusterId := drInfo.GetSourceClusterId()
 		clusterId := drInfo.GetTargetClusterId()
 		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterId).Execute()
 		if err != nil {
@@ -95,7 +96,7 @@ var failoverDrCmd = &cobra.Command{
 		msg := fmt.Sprintf("Failover is in progress for the DR %s ", formatter.Colorize(drName, formatter.GREEN_COLOR))
 
 		if viper.GetBool("wait") {
-			returnStatus, err := authApi.WaitForTaskCompletion(clusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_FAILOVER, []string{"FAILED", "SUCCEEDED"}, msg)
+			returnStatus, err := authApi.WaitForTaskCompletion(sourceClusterId, ybmclient.ENTITYTYPEENUM_CLUSTER, ybmclient.TASKTYPEENUM_DR_FAILOVER, []string{"FAILED", "SUCCEEDED"}, msg)
 			if err != nil {
 				logrus.Fatalf("error when getting task status: %s", err)
 			}
