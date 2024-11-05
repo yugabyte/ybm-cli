@@ -42,10 +42,12 @@ var switchoverDrCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		drId, clusterId, err := authApi.GetDrDetailsByName(drName)
+		drInfo, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
+		drId := drInfo.GetId()
+		clusterId := drInfo.GetSourceClusterId()
 
 		response, err := authApi.SwitchoverXClusterDr(clusterId, drId).Execute()
 		if err != nil {

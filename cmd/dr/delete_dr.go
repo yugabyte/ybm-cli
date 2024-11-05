@@ -51,10 +51,12 @@ var deleteDrCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatal(err)
 		}
-		drId, clusterId, err := authApi.GetDrDetailsByName(drName)
+		drInfo, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
+		drId := drInfo.GetId()
+		clusterId := drInfo.GetSourceClusterId()
 
 		r, err := authApi.DeleteXClusterDr(clusterId, drId).Execute()
 		if err != nil {
