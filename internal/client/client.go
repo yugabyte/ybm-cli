@@ -587,13 +587,13 @@ func (a *AuthApiClient) GetClusterIdByName(clusterName string) (string, error) {
 	return "", fmt.Errorf("could not get cluster data for cluster name: %s", clusterName)
 }
 
-func (a *AuthApiClient) GetDrDetailsByName(drName string) (string, string, error) {
+func (a *AuthApiClient) GetDrDetailsByName(drName string) (ybmclient.XClusterDrInfo, error) {
 	drData, err := a.GetDrByName(drName)
 	if err == nil {
-		return drData.Info.GetId(), drData.Info.GetSourceClusterId(), nil
+		return drData.GetInfo(), nil
 	}
 
-	return "", "", fmt.Errorf("Could not get data for the DR config %s", drName)
+	return ybmclient.XClusterDrInfo{}, fmt.Errorf("Could not get data for the DR config %s", drName)
 }
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {

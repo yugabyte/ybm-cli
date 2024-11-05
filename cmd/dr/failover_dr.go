@@ -45,10 +45,12 @@ var failoverDrCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
-		drId, clusterId, err := authApi.GetDrDetailsByName(drName)
+		drInfo, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
 			logrus.Fatal(err)
 		}
+		drId := drInfo.GetId()
+		clusterId := drInfo.GetTargetClusterId()
 		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
