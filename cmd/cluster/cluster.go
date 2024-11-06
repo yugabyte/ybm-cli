@@ -17,6 +17,7 @@ package cluster
 
 import (
 	"github.com/spf13/cobra"
+	audit_log_exporter "github.com/yugabyte/ybm-cli/cmd/cluster/audit-log-exporter"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
 	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
@@ -45,6 +46,10 @@ func init() {
 	util.AddCommandIfFeatureFlag(ClusterCmd, log_exporter.DbQueryLoggingCmd, util.DB_QUERY_LOGS)
 	log_exporter.DbQueryLoggingCmd.PersistentFlags().StringVarP(&log_exporter.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	log_exporter.DbQueryLoggingCmd.MarkPersistentFlagRequired("cluster-name")
+
+	util.AddCommandIfFeatureFlag(ClusterCmd, audit_log_exporter.DbAuditLoggingCmd, util.DB_AUDIT_LOGGING)
+	audit_log_exporter.DbAuditLoggingCmd.PersistentFlags().StringVarP(&audit_log_exporter.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
+	audit_log_exporter.DbAuditLoggingCmd.MarkPersistentFlagRequired("cluster-name")
 
 	ClusterCmd.AddCommand(network.NetworkCmd)
 	network.NetworkCmd.PersistentFlags().StringVarP(&network.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")

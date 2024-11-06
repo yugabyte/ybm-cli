@@ -75,7 +75,7 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("The db query logging for cluster %s is being enabled", clusterName)
+		msg := fmt.Sprintf("DB query logging is being enabled for cluster %s", clusterName)
 		if viper.GetBool("wait") {
 			waitForDbLoggingTaskCompletion(clusterId, ybmclient.TASKTYPEENUM_ENABLE_DATABASE_QUERY_LOGGING, msg, authApi)
 			fmt.Printf("DB query logging has been enabled for the cluster %v\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
@@ -155,7 +155,7 @@ var disableLogExporterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		msg := fmt.Sprintf("The db query logging for cluster %s is being disabled", clusterName)
+		msg := fmt.Sprintf("DB query logging is being disabled for cluster %s", clusterName)
 		if viper.GetBool("wait") {
 			waitForDbLoggingTaskCompletion(clusterId, ybmclient.TASKTYPEENUM_DISABLE_DATABASE_QUERY_LOGGING, msg, authApi)
 			fmt.Printf("DB query logging has been disabled for the cluster %v\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
@@ -222,10 +222,10 @@ var updateLogExporterConfigCmd = &cobra.Command{
 
 		dqlConfig := pgLogExporterConfigResponse.Data
 
-		msg := fmt.Sprintf("The db query logging config for cluster %s is being updated", clusterName)
+		msg := fmt.Sprintf("The db query logging configuration is being updated for cluster %s", clusterName)
 		if viper.GetBool("wait") {
 			waitForDbLoggingTaskCompletion(clusterId, ybmclient.TASKTYPEENUM_EDIT_DATABASE_QUERY_LOGGING, msg, authApi)
-			fmt.Printf("DB query logging config has been updated for the cluster %v\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+			fmt.Printf("DB query logging configuration has been updated for the cluster %v\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
 			dqlConfig = *getDbLoggingConfig(clusterId, authApi)
 		} else {
