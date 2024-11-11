@@ -143,8 +143,8 @@ func (c *DrContext) Databases() string {
 }
 
 func (c *DrContext) State() string {
-	if v, ok := c.c.Info.GetStateOk(); ok {
-		return *v
+	if _, ok := c.c.Info.GetStateOk(); ok {
+		return string(*c.c.Info.State)
 	}
 	return ""
 }

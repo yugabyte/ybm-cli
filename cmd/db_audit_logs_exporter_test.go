@@ -29,7 +29,7 @@ import (
 	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-var _ = Describe("Db Audit", func() {
+var _ = Describe("DB Audit Logging", func() {
 
 	var (
 		server                  *ghttp.Server
@@ -51,7 +51,7 @@ var _ = Describe("Db Audit", func() {
 		Expect(err).ToNot(HaveOccurred())
 		os.Setenv("YBM_HOST", fmt.Sprintf("http://%s", server.Addr()))
 		os.Setenv("YBM_APIKEY", "test-token")
-		os.Setenv("YBM_FF_DB_AUDIT_LOGS", "true")
+		os.Setenv("YBM_FF_DB_AUDIT_LOGGING", "true")
 		statusCode = 200
 		err = loadJson("./test/fixtures/list-clusters.json", &responseListClusters)
 		Expect(err).ToNot(HaveOccurred())
@@ -63,8 +63,8 @@ var _ = Describe("Db Audit", func() {
 		)
 	})
 
-	Context("When associating DB Audit config", func() {
-		It("should associate cluster with DB Audit", func() {
+	Context("When enabling DB Audit logging", func() {
+		It("should enable DB Audit Logging successfully on cluster", func() {
 			statusCode = 200
 			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
 			Expect(err).ToNot(HaveOccurred())
@@ -82,11 +82,11 @@ var _ = Describe("Db Audit", func() {
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "enable", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`The db audit exporter config 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being created
+			Expect(session.Out).Should(gbytes.Say(`Db audit logging is being enabled for cluster stunning-sole
 ID                                     Date Created               Cluster ID                             Integration ID                         State     Ysql Config
 9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":true,\"log_client\":true,\"log_level\":\"LOG\",\"log_parameter\":false,\"log_relation\":false,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
 			session.Kill()
@@ -109,7 +109,7 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "enable")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -134,7 +134,7 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "assign", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "enable", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -143,8 +143,8 @@ ID                                     Date Created               Cluster ID    
 		})
 	})
 
-	Context("When listing db audit exporter config", func() {
-		It("should return the list of config", func() {
+	Context("When describing db audit logging configuration of a cluster", func() {
+		It("should return the db audit logging configuration of the cluster", func() {
 			statusCode = 200
 			err := loadJson("./test/fixtures/list-db-audit.json", &responseDbAuditList)
 			Expect(err).ToNot(HaveOccurred())
@@ -154,7 +154,7 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAuditList),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "list", "--cluster-name", "stunning-sole")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "describe", "--cluster-name", "stunning-sole")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -172,7 +172,7 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "list")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "describe")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -182,8 +182,8 @@ ID                                     Date Created               Cluster ID    
 
 	})
 
-	Context("When removing db audit exporter config", func() {
-		It("should delete the config", func() {
+	Context("When disabling DB Audit Logging from a cluster", func() {
+		It("should disable db audit logging", func() {
 			statusCode = 200
 
 			err := loadJson("./test/fixtures/list-db-audit.json", &responseDbAuditList)
@@ -204,16 +204,16 @@ ID                                     Date Created               Cluster ID    
 				),
 			)
 
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "unassign", "--cluster-name", "stunning-sole", "--force")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "disable", "--cluster-name", "stunning-sole", "--force")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Request submitted to remove Db Audit Logging 9e3fabbc-849c-4a77-bdb2-9422e712e7dc`))
+			Expect(session.Out).Should(gbytes.Say(`DB Audit Logging is being disabled for cluster stunning-sole`))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
 
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "unassign", "--force")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "disable", "--force")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			exec.Command(compiledCLIPath, "y")
 			Expect(err).NotTo(HaveOccurred())
@@ -224,8 +224,8 @@ ID                                     Date Created               Cluster ID    
 
 	})
 
-	Context("When updating DB Audit config for a cluster", func() {
-		It("should update cluster DB Audit config", func() {
+	Context("When updating DB Audit logging config for a cluster", func() {
+		It("should update cluster DB Audit logging config", func() {
 			statusCode = 200
 
 			err := loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
@@ -254,17 +254,17 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAudit),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=false,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=true", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=false,log_client=true,log_level=NOTICE,log_parameter=false,log_statement_once=false,log_relation=true", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`The db audit exporter config 9e3fabbc-849c-4a77-bdb2-9422e712e7dc is being updated
+			Expect(session.Out).Should(gbytes.Say(`DB audit logging configuration is being updated for cluster stunning-sole
 ID                                     Date Created               Cluster ID                             Integration ID                         State     Ysql Config
 9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":false,\"log_client\":true,\"log_level\":\"NOTICE\",\"log_parameter\":false,\"log_relation\":true,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "update")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -281,7 +281,7 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false", "--statement_classes", "READ,WRITE")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
@@ -298,7 +298,7 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "db-audit-logs-exporter", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false")
+			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "update", "--cluster-name", "stunning-sole", "--integration-name", "datadog-tp", "--ysql-config", "log_catalog=true,log_client=true,log_level=NOTICE,log_parameter=false,log_relation=false")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
