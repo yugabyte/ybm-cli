@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -86,9 +87,20 @@ var _ = Describe("DB Audit Logging", func() {
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Db audit logging is being enabled for cluster stunning-sole
-ID                                     Date Created               Cluster ID                             Integration ID                         State     Ysql Config
-9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":true,\"log_client\":true,\"log_level\":\"LOG\",\"log_parameter\":false,\"log_relation\":false,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
+
+			Expect(session.Out).Should(gbytes.Say(regexp.QuoteMeta(`Db audit logging is being enabled for cluster stunning-sole
+State     Integration Name
+ACTIVE    datadog-tp
+
+Ysql Config Key      Ysql Config Value
+statement-classes    [READ, WRITE]
+log-catalog          true
+log-client           true
+log-level            LOG
+log-parameter        false
+log-relation         false
+log-statement-once   false`)))
+
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
@@ -154,12 +166,29 @@ ID                                     Date Created               Cluster ID    
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseDbAuditList),
 				),
 			)
+			err = loadJson("./test/fixtures/list-telemetry-provider.json", &responseIntegrationList)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegrationList),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "cluster", "db-audit-logging", "describe", "--cluster-name", "stunning-sole")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`ID                                     Date Created               Cluster ID                             Integration ID                         State     Ysql Config
-9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":true,\"log_client\":true,\"log_level\":\"LOG\",\"log_parameter\":false,\"log_relation\":false,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
+			Expect(session.Out).Should(gbytes.Say(regexp.QuoteMeta(`State     Integration Name
+ACTIVE    datadog-tp
+
+Ysql Config Key      Ysql Config Value
+statement-classes    [READ, WRITE]
+log-catalog          true
+log-client           true
+log-level            LOG
+log-parameter        false
+log-relation         false
+log-statement-once   false`)))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
@@ -258,9 +287,18 @@ ID                                     Date Created               Cluster ID    
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`DB audit logging configuration is being updated for cluster stunning-sole
-ID                                     Date Created               Cluster ID                             Integration ID                         State     Ysql Config
-9e3fabbc-849c-4a77-bdb2-9422e712e7dc   2024-02-27T06:30:51.304Z   5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8   7c07c103-e3b2-48b6-ac30-764e9b5275e1   ACTIVE    {\"log_settings\":{\"log_catalog\":false,\"log_client\":true,\"log_level\":\"NOTICE\",\"log_parameter\":false,\"log_relation\":true,\"log_statement_once\":false},\"statement_classes\":\[\"READ\",\"WRITE\"]}`))
+			Expect(session.Out).Should(gbytes.Say(regexp.QuoteMeta(`DB audit logging configuration is being updated for cluster stunning-sole
+State     Integration Name
+ACTIVE    datadog-tp
+
+Ysql Config Key      Ysql Config Value
+statement-classes    [READ, WRITE]
+log-catalog          false
+log-client           true
+log-level            NOTICE
+log-parameter        false
+log-relation         true
+log-statement-once   false`)))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {

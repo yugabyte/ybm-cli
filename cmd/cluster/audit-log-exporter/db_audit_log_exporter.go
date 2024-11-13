@@ -17,7 +17,6 @@ package audit_log_exporter
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -27,7 +26,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
-	openapi "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -106,12 +105,7 @@ var enableDbAuditLoggingCmd = &cobra.Command{
 			fmt.Println(msg)
 		}
 
-		dbAuditLogsExporterCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDbAuditLogsExporterFormat(viper.GetString("output")),
-		}
-
-		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, []openapi.DbAuditExporterConfigurationData{respData})
+		formatter.DbAuditLoggingWriteFull(respData, integrationName)
 	},
 }
 
@@ -179,13 +173,7 @@ var updateDbAuditLoggingCmd = &cobra.Command{
 		} else {
 			fmt.Println(msg)
 		}
-
-		dbAuditLogsExporterCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDbAuditLogsExporterFormat(viper.GetString("output")),
-		}
-
-		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, []openapi.DbAuditExporterConfigurationData{respData})
+		formatter.DbAuditLoggingWriteFull(respData, integrationName)
 	},
 }
 
@@ -214,17 +202,18 @@ var describeDbAuditLoggingCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		dbAuditLogsExporterCtx := formatter.Context{
-			Output: os.Stdout,
-			Format: formatter.NewDbAuditLogsExporterFormat(viper.GetString("output")),
-		}
-
 		if len(resp.GetData()) < 1 {
 			fmt.Println("No DB Audit Logs Exporter found")
 			return
 		}
 
-		formatter.DbAuditLogsExporterWrite(dbAuditLogsExporterCtx, resp.GetData())
+		integrationId := resp.GetData()[0].Spec.ExporterId
+		integrationName, err := authApi.GetIntegrationNameFromId(integrationId)
+		if err != nil {
+			logrus.Debugf("could not fetch associated name for integration id: %s", integrationId)
+		}
+
+		formatter.DbAuditLoggingWriteFull(resp.GetData()[0], integrationName)
 	},
 }
 
