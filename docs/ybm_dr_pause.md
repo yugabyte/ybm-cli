@@ -13,7 +13,7 @@ ybm dr pause [flags]
 ### Options
 
 ```
-      --dr-name string   [REQUIRED] Name of the DR configuration.
+      --config string    [REQUIRED] Name of the DR configuration.
       --duration int32   [OPTIONAL] Duration in minutes. (default 60)
   -h, --help             help for pause
 ```
@@ -22,7 +22,6 @@ ybm dr pause [flags]
 
 ```
   -a, --apiKey string      YugabyteDB Aeon account API key
-      --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false

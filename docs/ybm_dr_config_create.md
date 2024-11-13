@@ -1,4 +1,4 @@
-## ybm dr create
+## ybm dr config create
 
 Create DR for a cluster
 
@@ -7,17 +7,17 @@ Create DR for a cluster
 Create DR for a cluster
 
 ```
-ybm dr create [flags]
+ybm dr config create [flags]
 ```
 
 ### Options
 
 ```
-      --databases stringArray        [REQUIRED] Databases to be replicated. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.
-      --dr-name string               [REQUIRED] Name of the DR configuration.
-  -h, --help                         help for create
-      --source-cluster-name string   [REQUIRED] Source cluster in the DR configuration.
-      --target-cluster-name string   [REQUIRED] Target cluster in the DR configuration.
+      --databases stringArray   [REQUIRED] Databases to be replicated. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.
+  -h, --help                    help for create
+      --name string             [REQUIRED] Name of the DR configuration.
+      --source-cluster string   [REQUIRED] Source cluster in the DR configuration.
+      --target-cluster string   [REQUIRED] Target cluster in the DR configuration.
 ```
 
 ### Options inherited from parent commands
@@ -35,5 +35,5 @@ ybm dr create [flags]
 
 ### SEE ALSO
 
-* [ybm dr](ybm_dr.md)	 - Manage DR for a cluster.
+* [ybm dr config](ybm_dr_config.md)	 - Manage DR config
 

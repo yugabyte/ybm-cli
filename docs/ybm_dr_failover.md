@@ -13,7 +13,7 @@ ybm dr failover [flags]
 ### Options
 
 ```
-      --dr-name string          [REQUIRED] Name of the DR configuration.
+      --config string           [REQUIRED] Name of the DR configuration.
   -h, --help                    help for failover
       --safetimes stringArray   [OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<epoch-safe-time>,<db-name-2>=<epoch-safe-time>.
 ```
@@ -22,7 +22,6 @@ ybm dr failover [flags]
 
 ```
   -a, --apiKey string      YugabyteDB Aeon account API key
-      --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false

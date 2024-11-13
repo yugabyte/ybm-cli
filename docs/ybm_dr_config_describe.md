@@ -1,28 +1,26 @@
-## ybm dr update
+## ybm dr config describe
 
-Update DR for a cluster
+Describe DR
 
 ### Synopsis
 
-Update DR for a cluster
+Describe DR
 
 ```
-ybm dr update [flags]
+ybm dr config describe [flags]
 ```
 
 ### Options
 
 ```
-      --databases stringArray   [REQUIRED] Databases to be replicated. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.
-      --dr-name string          [REQUIRED] Name of the DR configuration.
-  -h, --help                    help for update
+      --config string   [REQUIRED] Name of the DR configuration.
+  -h, --help            help for describe
 ```
 
 ### Options inherited from parent commands
 
 ```
   -a, --apiKey string      YugabyteDB Aeon account API key
-      --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
@@ -33,5 +31,5 @@ ybm dr update [flags]
 
 ### SEE ALSO
 
-* [ybm dr](ybm_dr.md)	 - Manage DR for a cluster.
+* [ybm dr config](ybm_dr_config.md)	 - Manage DR config
 
