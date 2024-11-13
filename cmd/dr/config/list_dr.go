@@ -13,7 +13,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package dr
+package config
 
 import (
 	"fmt"
@@ -59,5 +59,5 @@ var listDrCmd = &cobra.Command{
 }
 
 func init() {
-	DrCmd.AddCommand(listDrCmd)
+	ConfigCmd.AddCommand(listDrCmd)
 }

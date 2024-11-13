@@ -39,7 +39,7 @@ var restartDrCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		drName, _ := cmd.Flags().GetString("dr-name")
+		drName, _ := cmd.Flags().GetString("config")
 		databases, _ := cmd.Flags().GetStringArray("databases")
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
@@ -111,7 +111,7 @@ var restartDrCmd = &cobra.Command{
 
 func init() {
 	DrCmd.AddCommand(restartDrCmd)
-	restartDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	restartDrCmd.MarkFlagRequired("dr-name")
+	restartDrCmd.Flags().String("config", "", "[REQUIRED] Name of the DR configuration.")
+	restartDrCmd.MarkFlagRequired("config")
 	restartDrCmd.Flags().StringArray("databases", []string{}, "[OPTIONAL] Databases to be restarted. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.")
 }

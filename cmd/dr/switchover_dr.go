@@ -38,7 +38,7 @@ var switchoverDrCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		drName, _ := cmd.Flags().GetString("dr-name")
+		drName, _ := cmd.Flags().GetString("config")
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -87,6 +87,6 @@ var switchoverDrCmd = &cobra.Command{
 
 func init() {
 	DrCmd.AddCommand(switchoverDrCmd)
-	switchoverDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	switchoverDrCmd.MarkFlagRequired("dr-name")
+	switchoverDrCmd.Flags().String("config", "", "[REQUIRED] Name of the DR configuration.")
+	switchoverDrCmd.MarkFlagRequired("config")
 }

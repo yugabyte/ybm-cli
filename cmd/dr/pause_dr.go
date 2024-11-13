@@ -38,7 +38,7 @@ var pauseDrCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		drName, _ := cmd.Flags().GetString("dr-name")
+		drName, _ := cmd.Flags().GetString("config")
 		durationInMin, _ := cmd.Flags().GetInt32("duration")
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
@@ -90,7 +90,7 @@ var pauseDrCmd = &cobra.Command{
 
 func init() {
 	DrCmd.AddCommand(pauseDrCmd)
-	pauseDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	pauseDrCmd.MarkFlagRequired("dr-name")
+	pauseDrCmd.Flags().String("config", "", "[REQUIRED] Name of the DR configuration.")
+	pauseDrCmd.MarkFlagRequired("config")
 	pauseDrCmd.Flags().Int32("duration", 60, "[OPTIONAL] Duration in minutes.")
 }

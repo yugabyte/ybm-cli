@@ -13,22 +13,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package dr
+package config
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/yugabyte/ybm-cli/cmd/dr/config"
 )
 
-var DrCmd = &cobra.Command{
-	Use:   "dr",
-	Short: "Manage DR for a cluster.",
-	Long:  "Manage DR for a cluster.",
+var ConfigCmd = &cobra.Command{
+	Use:   "config",
+	Short: "Manage DR config",
+	Long:  "Manage DR config",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
 }
 
 func init() {
-	DrCmd.AddCommand(config.ConfigCmd)
+	ConfigCmd.AddCommand()
 }
