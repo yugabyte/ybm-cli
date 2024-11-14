@@ -38,7 +38,7 @@ var resumeDrCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		drName, _ := cmd.Flags().GetString("dr-name")
+		drName, _ := cmd.Flags().GetString("config")
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
 		}
@@ -87,6 +87,6 @@ var resumeDrCmd = &cobra.Command{
 
 func init() {
 	DrCmd.AddCommand(resumeDrCmd)
-	resumeDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	resumeDrCmd.MarkFlagRequired("dr-name")
+	resumeDrCmd.Flags().String("config", "", "[REQUIRED] Name of the DR configuration.")
+	resumeDrCmd.MarkFlagRequired("config")
 }

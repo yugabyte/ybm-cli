@@ -1,27 +1,26 @@
-## ybm dr restart
+## ybm dr config list
 
-Restart DR for a cluster
+List DRs for a given cluster
 
 ### Synopsis
 
-Restart DR for a cluster
+List DRs for a given cluster
 
 ```
-ybm dr restart [flags]
+ybm dr config list [flags]
 ```
 
 ### Options
 
 ```
-      --config string           [REQUIRED] Name of the DR configuration.
-      --databases stringArray   [OPTIONAL] Databases to be restarted. Please provide a comma separated list of database names <db-name-1>,<db-name-2>.
-  -h, --help                    help for restart
+  -h, --help   help for list
 ```
 
 ### Options inherited from parent commands
 
 ```
   -a, --apiKey string      YugabyteDB Aeon account API key
+      --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
@@ -32,5 +31,5 @@ ybm dr restart [flags]
 
 ### SEE ALSO
 
-* [ybm dr](ybm_dr.md)	 - Manage DR for a cluster.
+* [ybm dr config](ybm_dr_config.md)	 - Manage DR config
 

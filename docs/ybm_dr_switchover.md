@@ -13,15 +13,14 @@ ybm dr switchover [flags]
 ### Options
 
 ```
-      --dr-name string   [REQUIRED] Name of the DR configuration.
-  -h, --help             help for switchover
+      --config string   [REQUIRED] Name of the DR configuration.
+  -h, --help            help for switchover
 ```
 
 ### Options inherited from parent commands
 
 ```
   -a, --apiKey string      YugabyteDB Aeon account API key
-      --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false

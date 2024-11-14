@@ -40,7 +40,7 @@ var failoverDrCmd = &cobra.Command{
 		}
 		authApi.GetInfo("", "")
 
-		drName, _ := cmd.Flags().GetString("dr-name")
+		drName, _ := cmd.Flags().GetString("config")
 		safetimes, _ := cmd.Flags().GetStringArray("safetimes")
 		if err != nil {
 			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
@@ -125,7 +125,7 @@ var failoverDrCmd = &cobra.Command{
 
 func init() {
 	DrCmd.AddCommand(failoverDrCmd)
-	failoverDrCmd.Flags().String("dr-name", "", "[REQUIRED] Name of the DR configuration.")
-	failoverDrCmd.MarkFlagRequired("dr-name")
+	failoverDrCmd.Flags().String("config", "", "[REQUIRED] Name of the DR configuration.")
+	failoverDrCmd.MarkFlagRequired("config")
 	failoverDrCmd.Flags().StringArray("safetimes", []string{}, "[OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<epoch-safe-time>,<db-name-2>=<epoch-safe-time>.")
 }

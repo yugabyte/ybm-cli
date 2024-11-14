@@ -1,4 +1,4 @@
-## ybm dr delete
+## ybm dr config delete
 
 Delete DR
 
@@ -7,21 +7,20 @@ Delete DR
 Delete DR
 
 ```
-ybm dr delete [flags]
+ybm dr config delete [flags]
 ```
 
 ### Options
 
 ```
-      --dr-name string   [REQUIRED] Name of the DR configuration
-  -h, --help             help for delete
+      --config string   [REQUIRED] Name of the DR configuration
+  -h, --help            help for delete
 ```
 
 ### Options inherited from parent commands
 
 ```
   -a, --apiKey string      YugabyteDB Aeon account API key
-      --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
@@ -32,5 +31,5 @@ ybm dr delete [flags]
 
 ### SEE ALSO
 
-* [ybm dr](ybm_dr.md)	 - Manage DR for a cluster.
+* [ybm dr config](ybm_dr_config.md)	 - Manage DR config
 

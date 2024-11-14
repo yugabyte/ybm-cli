@@ -1,20 +1,19 @@
-## ybm dr describe
+## ybm dr config
 
-Describe DR
+Manage DR config
 
 ### Synopsis
 
-Describe DR
+Manage DR config
 
 ```
-ybm dr describe [flags]
+ybm dr config [flags]
 ```
 
 ### Options
 
 ```
-      --dr-name string   [REQUIRED] Name of the DR configuration.
-  -h, --help             help for describe
+  -h, --help   help for config
 ```
 
 ### Options inherited from parent commands
@@ -33,4 +32,9 @@ ybm dr describe [flags]
 ### SEE ALSO
 
 * [ybm dr](ybm_dr.md)	 - Manage DR for a cluster.
+* [ybm dr config create](ybm_dr_config_create.md)	 - Create DR for a cluster
+* [ybm dr config delete](ybm_dr_config_delete.md)	 - Delete DR
+* [ybm dr config describe](ybm_dr_config_describe.md)	 - Describe DR
+* [ybm dr config list](ybm_dr_config_list.md)	 - List DRs for a given cluster
+* [ybm dr config update](ybm_dr_config_update.md)	 - Update DR for a cluster
 

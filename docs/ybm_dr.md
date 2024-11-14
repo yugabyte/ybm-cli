@@ -32,14 +32,10 @@ ybm dr [flags]
 ### SEE ALSO
 
 * [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
-* [ybm dr create](ybm_dr_create.md)	 - Create DR for a cluster
-* [ybm dr delete](ybm_dr_delete.md)	 - Delete DR
-* [ybm dr describe](ybm_dr_describe.md)	 - Describe DR
+* [ybm dr config](ybm_dr_config.md)	 - Manage DR config
 * [ybm dr failover](ybm_dr_failover.md)	 - Failover DR for a cluster
-* [ybm dr list](ybm_dr_list.md)	 - List DRs for a given cluster
 * [ybm dr pause](ybm_dr_pause.md)	 - Pause DR for a cluster
 * [ybm dr restart](ybm_dr_restart.md)	 - Restart DR for a cluster
 * [ybm dr resume](ybm_dr_resume.md)	 - Resume DR for a cluster
 * [ybm dr switchover](ybm_dr_switchover.md)	 - Switchover DR for a cluster
-* [ybm dr update](ybm_dr_update.md)	 - Update DR for a cluster
 
