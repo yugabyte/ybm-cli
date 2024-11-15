@@ -33,6 +33,7 @@ const (
 	ENTERPRISE_SECURITY     FeatureFlag = "ENTERPRISE_SECURITY"
 	DB_AUDIT_LOGGING        FeatureFlag = "DB_AUDIT_LOGGING"
 	PITR_CONFIG             FeatureFlag = "PITR_CONFIG"
+	PITR_RESTORE            FeatureFlag = "PITR_RESTORE"
 	CONNECTION_POOLING      FeatureFlag = "CONNECTION_POOLING"
 	GOOGLECLOUD_INTEGRATION FeatureFlag = "GOOGLECLOUD_INTEGRATION"
 	DR                      FeatureFlag = "DR"

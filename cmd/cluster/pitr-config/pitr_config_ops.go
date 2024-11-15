@@ -317,7 +317,7 @@ func init() {
 	createPitrConfigCmd.Flags().Int32("retention-period-in-days", 2, "[REQUIRED] The time duration in days to retain a snapshot for.")
 	createPitrConfigCmd.MarkFlagRequired("retention-period-in-days")
 
-	util.AddCommandIfFeatureFlag(PitrConfigCmd, restorePitrConfigCmd, util.PITR_CONFIG)
+	util.AddCommandIfFeatureFlag(PitrConfigCmd, restorePitrConfigCmd, util.PITR_RESTORE)
 	restorePitrConfigCmd.Flags().SortFlags = false
 	restorePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be restored via PITR Config.")
 	restorePitrConfigCmd.MarkFlagRequired("namespace-name")

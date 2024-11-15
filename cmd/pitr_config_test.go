@@ -117,6 +117,7 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 
 	var _ = Describe("Restore cluster namespace via PITR config", func() {
 		It("Should successfully restore YSQL namespace via PITR Config", func() {
+			os.Setenv("YBM_FF_PITR_RESTORE", "true")
 			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
@@ -143,6 +144,7 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should successfully restore YCQL namespace via PITR Config", func() {
+			os.Setenv("YBM_FF_PITR_RESTORE", "true")
 			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
@@ -169,6 +171,7 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should fail if invalid namespace name and type combination is provided", func() {
+			os.Setenv("YBM_FF_PITR_RESTORE", "true")
 			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
