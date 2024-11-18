@@ -29,7 +29,12 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
+	"encoding/base64"
 )
+
+func encodeBase64(s string) string {
+	return base64.StdEncoding.EncodeToString([]byte(s))
+}
 
 // createClusterCmd represents the cluster command
 var createClusterCmd = &cobra.Command{
@@ -139,11 +144,12 @@ var createClusterCmd = &cobra.Command{
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		dbCredentials := ybmclient.NewCreateClusterRequestDbCredentialsWithDefaults()
-		dbCredentials.Ycql = *ybmclient.NewDBCredentials(username, password)
-		dbCredentials.Ysql = *ybmclient.NewDBCredentials(username, password)
+		dbCredentials := ybmclient.NewCreateClusterRequestEncryptedDbCredentialsWithDefaults()
+		dbCredentials.Ycql = *ybmclient.NewEncryptedDBCredentials(encodeBase64(username), encodeBase64(password))
+		dbCredentials.Ysql = *ybmclient.NewEncryptedDBCredentials(encodeBase64(username), encodeBase64(password))
 
-		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec, *dbCredentials)
+		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec)
+		createClusterRequest.SetEncryptedDbCredentials(*dbCredentials)
 
 		if cmkSpec != nil {
 			logrus.Debug("Setting up CMK spec for cluster creation")
