@@ -1,0 +1,19 @@
+{
+    "data": {
+        "spec": {
+            "name": "test",
+            "type": "PROMETHEUS",
+            "prometheus_spec": {
+                "endpoint": "http://prometheus.yourcompany.com/api/v1/otlp"
+            }
+        },
+        "info": {
+            "id": "9e3fabbc-849c-4a77-bdb2-9422e712e7dc",
+            "cluster_ids": [],
+            "metadata": {
+                "created_on": "2023-08-24T06:41:16.145Z",
+                "updated_on": "2023-08-24T06:41:16.145Z"
+            }
+        }
+    }
+}

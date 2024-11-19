@@ -171,6 +171,9 @@ func init() {
 	createIntegrationCmd.Flags().StringToString("sumologic-spec", nil, `Configuration for sumologic. 
 	Please provide key value pairs as follows: 
 	access-key=<your-sumologic-access-key>,access-id=<your-sumologic-access-id>,installation-token=<your-sumologic-installation-token>`)
+	createIntegrationCmd.Flags().StringToString("prometheus-spec", nil, `Configuration for prometheus. 
+	Please provide key value pairs as follows: 
+	endpoint=<prometheus-otlp-endpoint-url>`)
 
 	if util.IsFeatureFlagEnabled(util.GOOGLECLOUD_INTEGRATION) {
 		createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
@@ -186,7 +189,7 @@ func init() {
 }
 
 func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sinkTypeEnum ybmclient.TelemetryProviderTypeEnum) (*ybmclient.TelemetryProviderSpec, error) {
-	// We initialise this one here, even if we error out later
+	// We initialize this one here, even if we error out later
 	IntegrationSpec := ybmclient.NewTelemetryProviderSpec(IntegrationName, sinkTypeEnum)
 
 	switch sinkTypeEnum {
@@ -205,6 +208,17 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		}
 		datadogSpec := ybmclient.NewDatadogTelemetryProviderSpec(apiKey, site)
 		IntegrationSpec.SetDatadogSpec(*datadogSpec)
+	case ybmclient.TELEMETRYPROVIDERTYPEENUM_PROMETHEUS:
+		if !cmd.Flags().Changed("prometheus-spec") {
+			return nil, fmt.Errorf("prometheus-spec is required for prometheus sink")
+		}
+		prometheusSpecs, _ := cmd.Flags().GetStringToString("prometheus-spec")
+		endpoint := prometheusSpecs["endpoint"]
+		if len(endpoint) < 1 {
+			return nil, fmt.Errorf("endpoint is a required field for prometheus-spec")
+		}
+		prometheusSpec := ybmclient.NewPrometheusTelemetryProviderSpec(endpoint)
+		IntegrationSpec.SetPrometheusSpec(*prometheusSpec)
 	case ybmclient.TELEMETRYPROVIDERTYPEENUM_GRAFANA:
 		if !cmd.Flags().Changed("grafana-spec") {
 			return nil, fmt.Errorf("grafana-spec is required for grafana sink")
@@ -232,7 +246,6 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 	case ybmclient.TELEMETRYPROVIDERTYPEENUM_SUMOLOGIC:
 		if !cmd.Flags().Changed("sumologic-spec") {
 			return nil, fmt.Errorf("sumologic-spec is required for sumologic sink")
-
 		}
 		sumoLogicSpecString, _ := cmd.Flags().GetStringToString("sumologic-spec")
 		accessKey := sumoLogicSpecString["access-key"]

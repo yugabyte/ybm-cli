@@ -25,6 +25,7 @@ import (
 
 const defaultIntegrationListing = "table {{.ID}}\t{{.Name}}\t{{.Type}}"
 const defaultIntegrationDataDog = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
+const defaultIntegrationPrometheus = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Endpoint}}"
 const defaultIntegrationGrafana = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Zone}}\t{{.AccessTokenPolicy}}\t{{.InstanceId}}\t{{.OrgSlug}}"
 const defaultIntegrationSumologic = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.AccessKey}}\t{{.AccessID}}\t{{.InstallationToken}}"
 
@@ -41,6 +42,8 @@ func NewIntegrationFormat(source string, providerType string) Format {
 	switch providerType {
 	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_DATADOG):
 		format = defaultIntegrationDataDog
+	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_PROMETHEUS):
+		format = defaultIntegrationPrometheus
 	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_GRAFANA):
 		format = defaultIntegrationGrafana
 	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_SUMOLOGIC):
@@ -70,6 +73,7 @@ func NewIntegrationContext() *IntegrationContext {
 		"InstallationToken": "InstallationToken",
 		"AccessID":          "Access ID",
 		"AccessKey":         "Access Key",
+		"Endpoint":          "Endpoint",
 	}
 	return &IntegrationCtx
 }
@@ -148,4 +152,9 @@ func IntegrationShortenKey(key string, stringLen int) string {
 		return fmt.Sprintf("%s%s%s", key[:12], "...", key[len(key)-17:])
 	}
 	return key
+}
+
+// Prometheus
+func (tp *IntegrationContext) Endpoint() string {
+	return tp.tp.Spec.GetPrometheusSpec().Endpoint
 }

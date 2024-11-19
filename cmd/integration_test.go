@@ -91,6 +91,45 @@ ID                                     Name      Type      Site      ApiKey
 		})
 
 	})
+	Context("When type is Prometheus", func() {
+		It("should create the config", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-prom.json", &responseIntegration)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegration),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "prometheus", "--prometheus-spec", "endpoint=http://prometheus.yourcompany.com")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
+ID                                     Name      Type         Endpoint
+9e3fabbc-849c-4a77-bdb2-9422e712e7dc   test      PROMETHEUS   http://prometheus.yourcompany.com/api/v1/otlp`))
+			session.Kill()
+		})
+		It("should return error when arg prometheus-spec not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "prometheus")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("prometheus-spec is required for prometheus sink"))
+			session.Kill()
+		})
+		It("should return error when field endpoint not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "prometheus", "--prometheus-spec", "invalid-key=val")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:endpoint is a required field for prometheus-spec$)"))
+			session.Kill()
+		})
+
+	})
+
 	Context("When type is Grafana", func() {
 		It("should create the config", func() {
 			statusCode = 200
