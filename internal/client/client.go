@@ -792,7 +792,7 @@ func (a *AuthApiClient) DeleteNetworkAllowList(allowListId string) ybmclient.Api
 	return a.ApiClient.NetworkApi.DeleteNetworkAllowList(a.ctx, a.AccountID, a.ProjectID, allowListId)
 }
 func (a *AuthApiClient) ListNetworkAllowLists() ybmclient.ApiListNetworkAllowListsRequest {
-	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID)
+	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID).Limit(100)
 }
 
 func (a *AuthApiClient) GetBackup(backupID string) ybmclient.ApiGetBackupRequest {
@@ -800,19 +800,33 @@ func (a *AuthApiClient) GetBackup(backupID string) ybmclient.ApiGetBackupRequest
 }
 
 func (a *AuthApiClient) GetNetworkAllowListIdByName(networkAllowListName string) (string, error) {
-	nalResp, resp, err := a.ListNetworkAllowLists().Execute()
-	if err != nil {
-		b, _ := httputil.DumpResponse(resp, true)
-		logrus.Debug(string(b))
-		return "", err
-	}
-	nalData, err := util.FindNetworkAllowList(nalResp.Data, networkAllowListName)
 
-	if err != nil {
-		return "", err
+	var continuationToken string
+
+	for {
+		request := a.ListNetworkAllowLists()
+		if continuationToken != "" {
+			request = request.ContinuationToken(continuationToken)
+		}
+
+		nalResp, resp, err := request.Execute()
+		if err != nil {
+			b, _ := httputil.DumpResponse(resp, true)
+			logrus.Debug(string(b))
+			return "", fmt.Errorf("failed to list network allow lists: %w", err)
+		}
+
+		if nalData, err := util.FindNetworkAllowList(nalResp.Data, networkAllowListName); err == nil {
+			return nalData.Info.GetId(), nil
+		}
+
+		continuationToken = nalResp.Metadata.GetContinuationToken()
+		if continuationToken == "" {
+			break
+		}
 	}
 
-	return nalData.Info.GetId(), nil
+	return "", fmt.Errorf("network allow list not found: %s", networkAllowListName)
 
 }
 
