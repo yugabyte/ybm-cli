@@ -25,7 +25,8 @@ import (
 
 const defaultIntegrationListing = "table {{.ID}}\t{{.Name}}\t{{.Type}}"
 const defaultIntegrationDataDog = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
-const defaultIntegrationPrometheus = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Endpoint}}"
+const defaultIntegrationPrometheus = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.PrometheusEndpoint}}"
+const defaultIntegrationVictoriaMetrics = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.VictoriaMetricsEndpoint}}"
 const defaultIntegrationGrafana = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Zone}}\t{{.AccessTokenPolicy}}\t{{.InstanceId}}\t{{.OrgSlug}}"
 const defaultIntegrationSumologic = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.AccessKey}}\t{{.AccessID}}\t{{.InstallationToken}}"
 
@@ -44,6 +45,8 @@ func NewIntegrationFormat(source string, providerType string) Format {
 		format = defaultIntegrationDataDog
 	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_PROMETHEUS):
 		format = defaultIntegrationPrometheus
+	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_VICTORIAMETRICS):
+		format = defaultIntegrationVictoriaMetrics
 	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_GRAFANA):
 		format = defaultIntegrationGrafana
 	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_SUMOLOGIC):
@@ -61,19 +64,20 @@ func NewIntegrationFormat(source string, providerType string) Format {
 func NewIntegrationContext() *IntegrationContext {
 	IntegrationCtx := IntegrationContext{}
 	IntegrationCtx.Header = SubHeaderContext{
-		"Name":              nameHeader,
-		"ID":                "ID",
-		"Type":              "Type",
-		"Site":              "Site",
-		"ApiKey":            "ApiKey",
-		"InstanceId":        "InstanceId",
-		"OrgSlug":           "OrgSlug",
-		"AccessTokenPolicy": "Access Token Policy",
-		"Zone":              "Zone",
-		"InstallationToken": "InstallationToken",
-		"AccessID":          "Access ID",
-		"AccessKey":         "Access Key",
-		"Endpoint":          "Endpoint",
+		"Name":                    nameHeader,
+		"ID":                      "ID",
+		"Type":                    "Type",
+		"Site":                    "Site",
+		"ApiKey":                  "ApiKey",
+		"InstanceId":              "InstanceId",
+		"OrgSlug":                 "OrgSlug",
+		"AccessTokenPolicy":       "Access Token Policy",
+		"Zone":                    "Zone",
+		"InstallationToken":       "InstallationToken",
+		"AccessID":                "Access ID",
+		"AccessKey":               "Access Key",
+		"PrometheusEndpoint":      "Endpoint",
+		"VictoriaMetricsEndpoint": "Endpoint",
 	}
 	return &IntegrationCtx
 }
@@ -155,6 +159,11 @@ func IntegrationShortenKey(key string, stringLen int) string {
 }
 
 // Prometheus
-func (tp *IntegrationContext) Endpoint() string {
+func (tp *IntegrationContext) PrometheusEndpoint() string {
 	return tp.tp.Spec.GetPrometheusSpec().Endpoint
+}
+
+// Victoria Metrics
+func (tp *IntegrationContext) VictoriaMetricsEndpoint() string {
+	return tp.tp.Spec.GetVictoriametricsSpec().Endpoint
 }

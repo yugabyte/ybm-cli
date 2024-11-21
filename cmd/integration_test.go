@@ -130,6 +130,45 @@ ID                                     Name      Type         Endpoint
 
 	})
 
+	Context("When type is VictoriaMetrics", func() {
+		It("should create the config", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-victoriametrics.json", &responseIntegration)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegration),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "victoriametrics", "--victoriametrics-spec", "endpoint=http://victoriametrics.yourcompany.com")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
+ID                                     Name      Type              Endpoint
+9e3fabbc-849c-4a77-bdb2-9422e712e7dc   test      VICTORIAMETRICS   http://victoriametrics.yourcompany.com`))
+			session.Kill()
+		})
+		It("should return error when arg victoriametrics-spec not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "victoriametrics")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("victoriametrics-spec is required for victoriametrics sink"))
+			session.Kill()
+		})
+		It("should return error when field endpoint not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "victoriametrics", "--victoriametrics-spec", "invalid-key=val")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:endpoint is a required field for victoriametrics-spec$)"))
+			session.Kill()
+		})
+
+	})
+
 	Context("When type is Grafana", func() {
 		It("should create the config", func() {
 			statusCode = 200

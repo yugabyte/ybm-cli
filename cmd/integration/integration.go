@@ -174,6 +174,9 @@ func init() {
 	createIntegrationCmd.Flags().StringToString("prometheus-spec", nil, `Configuration for prometheus. 
 	Please provide key value pairs as follows: 
 	endpoint=<prometheus-otlp-endpoint-url>`)
+	createIntegrationCmd.Flags().StringToString("victoriametrics-spec", nil, `Configuration for victoriametrics. 
+	Please provide key value pairs as follows: 
+	endpoint=<victoriametrics-otlp-endpoint-url>`)
 
 	if util.IsFeatureFlagEnabled(util.GOOGLECLOUD_INTEGRATION) {
 		createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
@@ -219,6 +222,17 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		}
 		prometheusSpec := ybmclient.NewPrometheusTelemetryProviderSpec(endpoint)
 		IntegrationSpec.SetPrometheusSpec(*prometheusSpec)
+	case ybmclient.TELEMETRYPROVIDERTYPEENUM_VICTORIAMETRICS:
+		if !cmd.Flags().Changed("victoriametrics-spec") {
+			return nil, fmt.Errorf("victoriametrics-spec is required for victoriametrics sink")
+		}
+		victoriametricsSpecs, _ := cmd.Flags().GetStringToString("victoriametrics-spec")
+		endpoint := victoriametricsSpecs["endpoint"]
+		if len(endpoint) < 1 {
+			return nil, fmt.Errorf("endpoint is a required field for victoriametrics-spec")
+		}
+		victoriametricsSpec := ybmclient.NewVictoriaMetricsTelemetryProviderSpec(endpoint)
+		IntegrationSpec.SetVictoriametricsSpec(*victoriametricsSpec)
 	case ybmclient.TELEMETRYPROVIDERTYPEENUM_GRAFANA:
 		if !cmd.Flags().Changed("grafana-spec") {
 			return nil, fmt.Errorf("grafana-spec is required for grafana sink")
