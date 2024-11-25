@@ -38,7 +38,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// AuthApiClient is a auth YugabyteDB Aeon Client
+// AuthApiClient is an auth YugabyteDB Aeon Client
 
 var cliVersion = "v0.1.0"
 
@@ -57,9 +57,9 @@ func GetVersion() string {
 	return cliVersion
 }
 
-// NewAuthClient function is returning a new AuthApiClient Client
+// NewAuthApiClient NewAuthClient function is returning a new AuthApiClient Client
 func NewAuthApiClient() (*AuthApiClient, error) {
-	url, err := ParseURL(viper.GetString("host"))
+	parseURL, err := ParseURL(viper.GetString("host"))
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -71,7 +71,7 @@ func NewAuthApiClient() (*AuthApiClient, error) {
 		logrus.Fatalln("No valid API key detected. Please run `ybm auth` to authenticate with YugabyteDB Aeon.")
 	}
 
-	return NewAuthApiClientCustomUrlKey(url, apiKey)
+	return NewAuthApiClientCustomUrlKey(parseURL, apiKey)
 }
 
 func NewAuthApiClientCustomUrlKey(url *url.URL, apiKey string) (*AuthApiClient, error) {
@@ -148,15 +148,11 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 
 func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string, regionNodeConfigsMap map[string][]ybmclient.NodeConfigurationResponseItem) (*ybmclient.ClusterSpec, error) {
 
-	var diskSizeGb int32
-	var diskIops int32
-	var memoryMb int32
 	var trackId string
 	var trackName string
-	var regionInfoProvided bool
 	var err error
 
-	clusterRegionInfo := []ybmclient.ClusterRegionInfo{}
+	var clusterRegionInfo []ybmclient.ClusterRegionInfo
 	totalNodes := 0
 	regionNodeInfoMap := map[string]*ybmclient.OptionalClusterNodeInfo{}
 	for _, regionInfo := range regionInfoList {
@@ -174,7 +170,7 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 			cloudInfo.SetCode(ybmclient.CloudEnum(cloudProvider))
 		}
 		info := *ybmclient.NewClusterRegionInfo(
-			*ybmclient.NewPlacementInfo(cloudInfo, int32(regionNodes)),
+			*ybmclient.NewPlacementInfo(cloudInfo, regionNodes),
 		)
 		if vpcName, ok := regionInfo["vpc"]; ok {
 			vpcID, err := a.GetVpcIdByName(vpcName)
@@ -218,15 +214,13 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		regionNodeInfoMap[region] = regionNodeInfo
 	}
 
-	// This is to populate region in top level cloud info
-	region := ""
 	regionCount := len(clusterRegionInfo)
 	if regionCount > 0 {
-		regionInfoProvided = true
-		region = clusterRegionInfo[0].PlacementInfo.CloudInfo.Region
 		if regionCount == 1 {
 			clusterRegionInfo[0].SetIsDefault(true)
 		}
+	} else {
+		return nil, fmt.Errorf("region info must be provided")
 	}
 
 	// For the default tier which is FREE, isProduction has to be false
@@ -236,13 +230,10 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 	if cmd.Flags().Changed("new-name") {
 		clusterName, _ = cmd.Flags().GetString("new-name")
 	}
-	cloudInfo := *ybmclient.NewCloudInfoWithDefaults()
+	cloud := ""
 	if cmd.Flags().Changed("cloud-provider") {
 		cloudProvider, _ := cmd.Flags().GetString("cloud-provider")
-		cloudInfo.SetCode(ybmclient.CloudEnum(cloudProvider))
-	}
-	if regionInfoProvided {
-		cloudInfo.SetRegion(region)
+		cloud = cloudProvider
 	}
 
 	clusterInfo := *ybmclient.NewClusterInfoWithDefaults()
@@ -267,7 +258,7 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 	}
 	if cmd.Flags().Changed("preferred-region") {
 		preferredRegion, _ := cmd.Flags().GetString("preferred-region")
-		if clusterInfo.GetFaultTolerance() != ybmclient.ClusterFaultTolerance("REGION") {
+		if clusterInfo.GetFaultTolerance() != "REGION" {
 			return nil, fmt.Errorf("preferred region is allowed only for regional level fault tolerance")
 		}
 
@@ -302,115 +293,78 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		clusterInfo.SetClusterType(ybmclient.ClusterType(clusterType))
 	}
 
-	cloud := string(cloudInfo.GetCode())
 	tier := string(clusterInfo.GetClusterTier())
 
-	if regionInfoProvided {
-		geoPartitioned := clusterInfo.GetClusterType() == "GEO_PARTITIONED"
-		clusterNodeInfoWithDefaults := *ybmclient.NewClusterNodeInfoWithDefaults()
-		// Create slice of desired regions.
-		regions := make([]string, 0, len(regionNodeInfoMap))
-		for k, _ := range regionNodeInfoMap {
-			regions = append(regions, k)
-		}
+	geoPartitioned := clusterInfo.GetClusterType() == "GEO_PARTITIONED"
+	clusterNodeInfoWithDefaults := *ybmclient.NewClusterNodeInfoWithDefaults()
+	// Create slice of desired regions.
+	regions := make([]string, 0, len(regionNodeInfoMap))
+	for k := range regionNodeInfoMap {
+		regions = append(regions, k)
+	}
 
-		if regionNodeConfigsMap == nil {
-			// Grab available node configurations by region.
-			regionNodeConfigsMap = a.GetSupportedNodeConfigurationsV2(cloud, tier, regions, geoPartitioned)
-		}
+	if regionNodeConfigsMap == nil {
+		// Grab available node configurations by region.
+		regionNodeConfigsMap = a.GetSupportedNodeConfigurationsV2(cloud, tier, regions, geoPartitioned)
+	}
 
-		// Create slice of region keys of node configurations response.
-		nodeConfigurationsRegions := make([]string, 0, len(regionNodeConfigsMap))
-		for k, _ := range regionNodeConfigsMap {
-			nodeConfigurationsRegions = append(nodeConfigurationsRegions, k)
+	// Create slice of region keys of node configurations response.
+	nodeConfigurationsRegions := make([]string, 0, len(regionNodeConfigsMap))
+	for k := range regionNodeConfigsMap {
+		nodeConfigurationsRegions = append(nodeConfigurationsRegions, k)
+	}
+	// For each desired region, grab appropriate node configuration and set node info.
+	for _, r := range regions {
+		var nodeConfigs []ybmclient.NodeConfigurationResponseItem
+		if slices.Contains(nodeConfigurationsRegions, r) {
+			nodeConfigs = regionNodeConfigsMap[r]
+		} else {
+			// Requested region not found in node configurations map.
+			// In this case, the map key is a string of all (comma-separated) regions,
+			// and the value is a list of node configurations that are available in all regions.
+			// So, we just use look through the first map value to find a node configuration to use.
+			nodeConfigs = regionNodeConfigsMap[nodeConfigurationsRegions[0]]
 		}
-		// For each desired region, grab appropriate node configuration and set node info.
-		for _, r := range regions {
-			nodeConfigs := []ybmclient.NodeConfigurationResponseItem{}
-			if slices.Contains(nodeConfigurationsRegions, r) {
-				nodeConfigs = regionNodeConfigsMap[r]
-			} else {
-				// Requested region not found in node configurations map.
-				// In this case, the map key is a string of all (comma-separated) regions,
-				// and the value is a list of node configurations that are available in all regions.
-				// So, we just use look through the first map value to find a node configuration to use.
-				nodeConfigs = regionNodeConfigsMap[nodeConfigurationsRegions[0]]
-			}
-			requestedNodeInfo := regionNodeInfoMap[r]
-			requestedNumCores := requestedNodeInfo.GetNumCores()
-			userProvidedNumCores := requestedNumCores != 0
+		requestedNodeInfo := regionNodeInfoMap[r]
+		requestedNumCores := requestedNodeInfo.GetNumCores()
+		userProvidedNumCores := requestedNumCores != 0
 
-			var nodeConfig *ybmclient.NodeConfigurationResponseItem = nil
-			if !userProvidedNumCores {
-				requestedNumCores = clusterNodeInfoWithDefaults.GetNumCores()
-			}
-			for i, nc := range nodeConfigs {
-				if nc.GetNumCores() == requestedNumCores {
-					nodeConfig = &nodeConfigs[i]
-					break
-				}
-			}
-			if nodeConfig == nil {
-				logrus.Fatalf("No instance type found with %d cores in region %s\n", requestedNumCores, r)
-			}
-			regionNodeInfoMap[r].SetNumCores(nodeConfig.GetNumCores())
-			regionNodeInfoMap[r].SetMemoryMb(nodeConfig.GetMemoryMb())
-			if requestedNodeInfo.GetDiskSizeGb() == 0 {
-				// User did not specify a disk size. Default to included disk size.
-				regionNodeInfoMap[r].SetDiskSizeGb(nodeConfig.GetIncludedDiskSizeGb())
+		var nodeConfig *ybmclient.NodeConfigurationResponseItem = nil
+		if !userProvidedNumCores {
+			requestedNumCores = clusterNodeInfoWithDefaults.GetNumCores()
+		}
+		for i, nc := range nodeConfigs {
+			if nc.GetNumCores() == requestedNumCores {
+				nodeConfig = &nodeConfigs[i]
+				break
 			}
 		}
-		// Set per-region node info and cluster node info.
-		var currRegionNodeInfo *ybmclient.OptionalClusterNodeInfo = nil
-		for i, regionInfo := range clusterRegionInfo {
-			r := regionInfo.GetPlacementInfo().CloudInfo.Region
-			clusterRegionInfo[i].SetNodeInfo(*regionNodeInfoMap[r])
-			logrus.Debugf("region=%s, node-info=%v\n", r, clusterRegionInfo[i].GetNodeInfo())
-			if currRegionNodeInfo != nil && !geoPartitioned && *currRegionNodeInfo != clusterRegionInfo[i].GetNodeInfo() {
-				// Asymmetric node configurations are only allowed for geo-partitioned clusters.
-				logrus.Fatalln("Synchronous cluster regions must have identical node configurations")
-			}
-			currRegionNodeInfo = (&clusterRegionInfo[i]).NodeInfo.Get()
+		if nodeConfig == nil {
+			logrus.Fatalf("No instance type found with %d cores in region %s\n", requestedNumCores, r)
 		}
-		clusterInfo.SetNodeInfo(ToClusterNodeInfo(regionNodeInfoMap[regions[0]]))
-	} else {
-		clusterInfo.SetNodeInfo(*ybmclient.NewClusterNodeInfoWithDefaults())
-		if cmd.Flags().Changed("node-config") {
-			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-			numCores := nodeConfig["num-cores"]
-			clusterInfo.NodeInfo.Get().SetNumCores(int32(numCores))
-			if diskSize, ok := nodeConfig["disk-size-gb"]; ok {
-				diskSizeGb = int32(diskSize)
-			}
-			if diskIopsInt, ok := nodeConfig["disk-iops"]; ok {
-				diskIops = int32(diskIopsInt)
-			}
+		regionNodeInfoMap[r].SetNumCores(nodeConfig.GetNumCores())
+		regionNodeInfoMap[r].SetMemoryMb(nodeConfig.GetMemoryMb())
+		if requestedNodeInfo.GetDiskSizeGb() == 0 {
+			// User did not specify a disk size. Default to included disk size.
+			regionNodeInfoMap[r].SetDiskSizeGb(nodeConfig.GetIncludedDiskSizeGb())
 		}
-		region = cloudInfo.GetRegion()
-		numCores := clusterInfo.NodeInfo.Get().GetNumCores()
-		memoryMb, err = a.GetFromInstanceType("memory", cloud, tier, region, numCores)
-		if err != nil {
-			return nil, err
+	}
+	// Set per-region node info and cluster node info.
+	var currRegionNodeInfo *ybmclient.OptionalClusterNodeInfo = nil
+	for i, regionInfo := range clusterRegionInfo {
+		r := regionInfo.GetPlacementInfo().CloudInfo.Region
+		clusterRegionInfo[i].SetNodeInfo(*regionNodeInfoMap[r])
+		logrus.Debugf("region=%s, node-info=%v\n", r, clusterRegionInfo[i].GetNodeInfo())
+		if currRegionNodeInfo != nil && !geoPartitioned && *currRegionNodeInfo != clusterRegionInfo[i].GetNodeInfo() {
+			// Asymmetric node configurations are only allowed for geo-partitioned clusters.
+			logrus.Fatalln("Synchronous cluster regions must have identical node configurations")
 		}
-		clusterInfo.NodeInfo.Get().SetMemoryMb(memoryMb)
-
-		// Computing the default disk size if it is not provided
-		if diskSizeGb == 0 {
-			diskSizeGb, err = a.GetFromInstanceType("disk", cloud, tier, region, numCores)
-			if err != nil {
-				return nil, err
-			}
-		}
-		clusterInfo.NodeInfo.Get().SetDiskSizeGb(diskSizeGb)
-
-		if diskIops > 0 {
-			clusterInfo.NodeInfo.Get().SetDiskIops(diskIops)
-		}
+		currRegionNodeInfo = (&clusterRegionInfo[i]).NodeInfo.Get()
 	}
 
 	if cmd.Flags().Changed("default-region") {
 		defaultRegion, _ := cmd.Flags().GetString("default-region")
-		if clusterInfo.GetClusterType() != ybmclient.ClusterType("GEO_PARTITIONED") {
+		if clusterInfo.GetClusterType() != "GEO_PARTITIONED" {
 			return nil, fmt.Errorf("default region is allowed only for geo partitioned clusters")
 		}
 
@@ -440,10 +394,7 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		clusterName,
 		clusterInfo,
 		softwareInfo)
-	clusterSpec.SetCloudInfo(cloudInfo)
-	if regionInfoProvided {
-		clusterSpec.SetClusterRegionInfo(clusterRegionInfo)
-	}
+	clusterSpec.SetClusterRegionInfo(clusterRegionInfo)
 
 	return clusterSpec, nil
 }
@@ -460,17 +411,6 @@ func (a *AuthApiClient) EditClusterSpec(cmd *cobra.Command, regionInfoList []map
 	}
 	regionNodeConfigsMap := a.GetSupportedNodeConfigurationsForEdit(clusterID, regions)
 	return a.buildClusterSpec(cmd, regionInfoList, regionNodeConfigsMap)
-}
-
-func ToClusterNodeInfo(opt *ybmclient.OptionalClusterNodeInfo) ybmclient.ClusterNodeInfo {
-	clusterNodeInfo := *ybmclient.NewClusterNodeInfoWithDefaults()
-	clusterNodeInfo.SetNumCores(opt.GetNumCores())
-	clusterNodeInfo.SetMemoryMb(opt.GetMemoryMb())
-	clusterNodeInfo.SetDiskSizeGb(opt.GetDiskSizeGb())
-	if iops, _ := opt.GetDiskIopsOk(); iops != nil {
-		clusterNodeInfo.SetDiskIops(*iops)
-	}
-	return clusterNodeInfo
 }
 
 func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID string) {
@@ -518,13 +458,13 @@ func (a *AuthApiClient) GetDrByName(drName string) (ybmclient.XClusterDrData, er
 		}
 	}
 
-	return ybmclient.XClusterDrData{}, fmt.Errorf("Could not get data for the DR config %s", drName)
+	return ybmclient.XClusterDrData{}, fmt.Errorf("could not get data for the DR config %s", drName)
 }
 
 func (a *AuthApiClient) ExtractProviderFromClusterName(clusterId string) ([]string, error) {
 	clusterResp, _, err := a.GetCluster(clusterId).Execute()
 	clusterData := clusterResp.GetData()
-	providers := []string{}
+	var providers []string
 	if err != nil {
 		return nil, err
 	}
@@ -593,7 +533,7 @@ func (a *AuthApiClient) GetDrDetailsByName(drName string) (ybmclient.XClusterDrI
 		return drData.GetInfo(), nil
 	}
 
-	return ybmclient.XClusterDrInfo{}, fmt.Errorf("Could not get data for the DR config %s", drName)
+	return ybmclient.XClusterDrInfo{}, fmt.Errorf("could not get data for the DR config %s", drName)
 }
 
 func (a *AuthApiClient) CreateCluster() ybmclient.ApiCreateClusterRequest {
@@ -682,7 +622,7 @@ func (a *AuthApiClient) UpdateDbAuditExporterConfig(clusterId string, integratio
 }
 
 func (a *AuthApiClient) CreatePrivateServiceEndpointRegionSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointRegionSpec {
-	pseSpecs := []ybmclient.PrivateServiceEndpointRegionSpec{}
+	var pseSpecs []ybmclient.PrivateServiceEndpointRegionSpec
 
 	for regionId, arnList := range regionArnMap {
 		local := *ybmclient.NewPrivateServiceEndpointRegionSpec(arnList)
@@ -693,7 +633,7 @@ func (a *AuthApiClient) CreatePrivateServiceEndpointRegionSpec(regionArnMap map[
 }
 
 func (a *AuthApiClient) CreatePrivateServiceEndpointSpec(regionArnMap map[string][]string) []ybmclient.PrivateServiceEndpointSpec {
-	pseSpecs := []ybmclient.PrivateServiceEndpointSpec{}
+	var pseSpecs []ybmclient.PrivateServiceEndpointSpec
 
 	for regionId, arnList := range regionArnMap {
 		regionSpec := *ybmclient.NewPrivateServiceEndpointRegionSpec(arnList)
@@ -1072,9 +1012,9 @@ func (a *AuthApiClient) ListSystemRbacRolesWithPermissions() ybmclient.ApiListRb
 
 func (a *AuthApiClient) CreateRoleSpec(cmd *cobra.Command, name string, permissionsMap map[string][]string) (*ybmclient.RoleSpec, error) {
 
-	rolePermissions := []ybmclient.ResourcePermissionInfo{}
+	var rolePermissions []ybmclient.ResourcePermissionInfo
 	for resource, ops := range permissionsMap {
-		operationGroups := []ybmclient.ResourceOperationGroup{}
+		var operationGroups []ybmclient.ResourceOperationGroup
 		for _, op := range ops {
 			operationGroups = append(operationGroups, *ybmclient.NewResourceOperationGroup(ybmclient.ResourceOperationGroupEnum(op)))
 
@@ -1272,7 +1212,7 @@ func (a *AuthApiClient) ListAccountUsers() ybmclient.ApiListAccountUsersRequest 
 }
 
 func (a *AuthApiClient) CreateBatchInviteUserSpec(email string, roleId string) (*ybmclient.BatchInviteUserSpec, error) {
-	users := []ybmclient.InviteUserSpec{}
+	var users []ybmclient.InviteUserSpec
 	user := *ybmclient.NewInviteUserSpecWithDefaults()
 	user.SetEmail(email)
 
@@ -1350,7 +1290,7 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmc
 			return "", fmt.Errorf("receive interrupt signal, operation could still be on-going")
 		case <-checkEveryInSec:
 			apiRequest := a.ListTasks().TaskType(taskType).ProjectId(a.ProjectID).EntityId(entityId).Limit(1)
-			//Sometime the api do not need any entity type, for example VPC, VPC_PEERING
+			//Sometimes the api do not need any entity type, for example VPC, VPC_PEERING
 			if len(entityType) > 0 {
 				apiRequest.EntityType(entityType)
 			}
@@ -1416,7 +1356,7 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType yb
 			return "", fmt.Errorf("receive interrupt signal, operation could still be on-going")
 		case <-checkEveryInSec:
 			apiRequest := a.ListTasks().TaskType(taskType).ProjectId(a.ProjectID).EntityId(entityId).Limit(1)
-			//Sometime the api do not need any entity type, for example VPC, VPC_PEERING
+			//Sometimes the api do not need any entity type, for example VPC, VPC_PEERING
 			if len(entityType) > 0 {
 				apiRequest.EntityType(entityType)
 			}

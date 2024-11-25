@@ -18,9 +18,9 @@ package cluster
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
+	"encoding/base64"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,7 +29,6 @@ import (
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
-	"encoding/base64"
 )
 
 func encodeBase64(s string) string {
@@ -55,25 +54,6 @@ var createClusterCmd = &cobra.Command{
 		password := credentials["password"]
 		regionInfoMapList := []map[string]string{}
 		changedRegionInfo := cmd.Flags().Changed("region-info")
-		changedNodeInfo := cmd.Flags().Changed("node-config")
-
-		defaultNumCores := 0
-		defaultDiskSizeGb := 0
-		defaultDiskIops := 0
-		if changedNodeInfo {
-			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-			numCores, ok := nodeConfig["num-cores"]
-
-			if ok {
-				defaultNumCores = numCores
-			}
-			if diskSizeGb, ok := nodeConfig["disk-size-gb"]; ok {
-				defaultDiskSizeGb = diskSizeGb
-			}
-			if diskIops, ok := nodeConfig["disk-iops"]; ok {
-				defaultDiskIops = diskIops
-			}
-		}
 
 		if changedRegionInfo {
 			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
@@ -120,14 +100,11 @@ var createClusterCmd = &cobra.Command{
 				if _, ok := regionInfoMap["num-nodes"]; !ok {
 					logrus.Fatalln("Number of nodes not specified in region info")
 				}
-				if _, ok := regionInfoMap["num-cores"]; !ok && defaultNumCores > 0 {
-					regionInfoMap["num-cores"] = strconv.Itoa(defaultNumCores)
+				if _, ok := regionInfoMap["num-cores"]; !ok {
+					logrus.Fatalln("Number of cores not specified in region info")
 				}
-				if _, ok := regionInfoMap["disk-size-gb"]; !ok && defaultDiskSizeGb > 0 {
-					regionInfoMap["disk-size-gb"] = strconv.Itoa(defaultDiskSizeGb)
-				}
-				if _, ok := regionInfoMap["disk-iops"]; !ok && defaultDiskIops > 0 {
-					regionInfoMap["disk-iops"] = strconv.Itoa(defaultDiskIops)
+				if _, ok := regionInfoMap["disk-size-gb"]; !ok {
+					logrus.Fatalln("Disk size not specified in region info")
 				}
 
 				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
@@ -231,9 +208,8 @@ func init() {
 	If specified, all parameters for that provider are mandatory.`)
 	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
 	createClusterCmd.Flags().Int32("num-faults-to-tolerate", 0, "[OPTIONAL] The number of domain faults to tolerate for the level specified. The possible values are 0 for NONE, 1 for ZONE and [1-3] for anything else. Defaults to 0 for NONE, 1 otherwise.")
-	createClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Number of vCPUs and disk size per node for the cluster, provided as key-value pairs. Arguments are num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). num-cores is required.")
-	createClusterCmd.Flags().MarkDeprecated("node-config", "use --region-info to specify num-cores, disk-size-gb, and disk-iops")
 	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
+	createClusterCmd.MarkFlagRequired("region-info")
 	createClusterCmd.Flags().String("preferred-region", "", "[OPTIONAL] The preferred region in a multi region cluster. The preferred region handles all read and write requests from clients.")
 	createClusterCmd.Flags().String("default-region", "", "[OPTIONAL] The primary region in a partition-by-region cluster. The primary region is where all the tables not created in a tablespace reside.")
 }

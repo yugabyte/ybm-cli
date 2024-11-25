@@ -38,3 +38,6 @@ update-cli:
 
 clean:
 	rm -rf ybm
+
+fmt:
+	go fmt ./...
