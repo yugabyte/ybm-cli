@@ -42,6 +42,8 @@ var createMetricsExporterCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create Metrics Exporter Config",
 	Long:  "Create Metrics Exporter Config",
+	Deprecated: "use \"integration create\" instead." +
+		"\nThis command was deprecated 2024-11-30 and will be supported until 2025-2-28.\n",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		metricsExporterName, _ := cmd.Flags().GetString("config-name")
@@ -90,6 +92,8 @@ var listMetricsExporterCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List Metrics Exporter Config",
 	Long:  "List Metrics Exporter Config",
+	Deprecated: "use \"integration list\" instead." +
+		"\nThis command was deprecated 2024-11-30 and will be supported until 2025-2-28.\n",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -122,6 +126,8 @@ var describeMetricsExporterCmd = &cobra.Command{
 	Use:   "describe",
 	Short: "Describe Metrics Exporter Config",
 	Long:  "Describe Metrics Exporter Config",
+	Deprecated: "refer to \"integration\"." +
+		"\nThis command was deprecated 2024-11-30 and will be supported until 2025-2-28.\n",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
@@ -146,6 +152,8 @@ var deleteMetricsExporterCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete Metrics Exporter Config",
 	Long:  "Delete Metrics Exporter Config",
+	Deprecated: "use \"integration delete\" instead." +
+		"\nThis command was deprecated 2024-11-30 and will be supported until 2025-2-28.\n",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
 		configName, _ := cmd.Flags().GetString("config-name")
@@ -277,6 +285,8 @@ var updateMetricsExporterCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update Metrics Exporter Config",
 	Long:  "Update Metrics Exporter Config",
+	Deprecated: "refer to \"integration\"." +
+		"\nThis command was deprecated 2024-11-30 and will be supported until 2025-2-28.\n",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
