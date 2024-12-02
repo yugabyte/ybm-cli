@@ -68,8 +68,8 @@ var _ = Describe("Integration", func() {
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
-ID                                     Name      Type      Site      ApiKey
-9e3fabbc-849c-4a77-bdb2-9422e712e7dc   ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
+Name      Type      Site      ApiKey
+ff        DATADOG   test      c4XXXXXXXXXXXXXXXXXXXXXXXXXXXX3d`))
 			session.Kill()
 		})
 		It("should return required field name and type when not set", func() {
@@ -107,8 +107,8 @@ ID                                     Name      Type      Site      ApiKey
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
-ID                                     Name      Type         Endpoint
-9e3fabbc-849c-4a77-bdb2-9422e712e7dc   test      PROMETHEUS   http://prometheus.yourcompany.com/api/v1/otlp`))
+Name      Type         Endpoint
+test      PROMETHEUS   http://prometheus.yourcompany.com/api/v1/otlp`))
 			session.Kill()
 		})
 		It("should return error when arg prometheus-spec not set", func() {
@@ -146,8 +146,8 @@ ID                                     Name      Type         Endpoint
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
-ID                                     Name      Type              Endpoint
-9e3fabbc-849c-4a77-bdb2-9422e712e7dc   test      VICTORIAMETRICS   http://victoriametrics.yourcompany.com`))
+Name      Type              Endpoint
+test      VICTORIAMETRICS   http://victoriametrics.yourcompany.com`))
 			session.Kill()
 		})
 		It("should return error when arg victoriametrics-spec not set", func() {
@@ -185,8 +185,8 @@ ID                                     Name      Type              Endpoint
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
-ID                                     Name      Type      Zone        Access Token Policy                InstanceId   OrgSlug
-92ceaa26-bac7-4842-9b3c-831a18a4f813   grafana   GRAFANA   test-zone   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
+Name      Type      Zone        Access Token Policy                InstanceId   OrgSlug
+grafana   GRAFANA   test-zone   glXXXXXXXXXX...XXXXXXXXXXXXXXX==   1234456      ybmclitest`))
 			session.Kill()
 		})
 		It("should return required field", func() {
@@ -214,8 +214,8 @@ ID                                     Name      Type      Zone        Access To
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`ID                                     Name         Type        Access Key                         Access ID        InstallationToken
-4021aa44-b22d-4bb6-a7d3-0a1099a4f206   gwenn-sumo   SUMOLOGIC   FqXXXXXXXXXX...XXXXXXXXXXXXXXX9p   suXXXXXXXXXXJ9   U1XXXXXXXXXX...XXXXXXXXXXXXXXX==`))
+			Expect(session.Out).Should(gbytes.Say(`Name         Type        Access Key                         Access ID        InstallationToken
+gwenn-sumo   SUMOLOGIC   FqXXXXXXXXXX...XXXXXXXXXXXXXXX9p   suXXXXXXXXXXJ9   U1XXXXXXXXXX...XXXXXXXXXXXXXXX==`))
 			session.Kill()
 		})
 		It("should return required field", func() {
@@ -244,8 +244,8 @@ ID                                     Name      Type      Zone        Access To
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Out).Should(gbytes.Say(`The Integration testgcp has been created
-ID                                     Name      Type
-7913c052-fcd0-4b37-8a90-b0e47320190b   ddd       GOOGLECLOUD`))
+Name      Type
+ddd       GOOGLECLOUD`))
 			session.Kill()
 		})
 		It("should return filepath error", func() {
@@ -300,10 +300,10 @@ ID                                     Name      Type
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`ID                                     Name         Type
-129f7c97-81ae-47c7-8f9e-40ab4390093f   ff           DATADOG
-92ceaa26-bac7-4842-9b3c-831a18a4f813   grafana      GRAFANA
-4021aa44-b22d-4bb6-a7d3-0a1099a4f206   gwenn-sumo   SUMOLOGIC`))
+			Expect(session.Out).Should(gbytes.Say(`Name         Type
+ff           DATADOG
+grafana      GRAFANA
+gwenn-sumo   SUMOLOGIC`))
 			session.Kill()
 		})
 

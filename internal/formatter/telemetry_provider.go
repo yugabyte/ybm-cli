@@ -23,12 +23,12 @@ import (
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
-const defaultIntegrationListing = "table {{.ID}}\t{{.Name}}\t{{.Type}}"
-const defaultIntegrationDataDog = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
-const defaultIntegrationPrometheus = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.PrometheusEndpoint}}"
-const defaultIntegrationVictoriaMetrics = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.VictoriaMetricsEndpoint}}"
-const defaultIntegrationGrafana = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.Zone}}\t{{.AccessTokenPolicy}}\t{{.InstanceId}}\t{{.OrgSlug}}"
-const defaultIntegrationSumologic = "table {{.ID}}\t{{.Name}}\t{{.Type}}\t{{.AccessKey}}\t{{.AccessID}}\t{{.InstallationToken}}"
+const defaultIntegrationListing = "table {{.Name}}\t{{.Type}}"
+const defaultIntegrationDataDog = "table {{.Name}}\t{{.Type}}\t{{.Site}}\t{{.ApiKey}}"
+const defaultIntegrationPrometheus = "table {{.Name}}\t{{.Type}}\t{{.PrometheusEndpoint}}"
+const defaultIntegrationVictoriaMetrics = "table {{.Name}}\t{{.Type}}\t{{.VictoriaMetricsEndpoint}}"
+const defaultIntegrationGrafana = "table {{.Name}}\t{{.Type}}\t{{.Zone}}\t{{.AccessTokenPolicy}}\t{{.InstanceId}}\t{{.OrgSlug}}"
+const defaultIntegrationSumologic = "table {{.Name}}\t{{.Type}}\t{{.AccessKey}}\t{{.AccessID}}\t{{.InstallationToken}}"
 
 type IntegrationContext struct {
 	HeaderContext
@@ -94,10 +94,6 @@ func IntegrationWrite(ctx Context, Integrations []ybmclient.TelemetryProviderDat
 		return nil
 	}
 	return ctx.Write(NewIntegrationContext(), render)
-}
-
-func (tp *IntegrationContext) ID() string {
-	return tp.tp.Info.Id
 }
 
 func (tp *IntegrationContext) Name() string {
