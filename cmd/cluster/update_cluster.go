@@ -63,25 +63,6 @@ var updateClusterCmd = &cobra.Command{
 
 		regionInfoMapList := []map[string]string{}
 		changedRegionInfo := cmd.Flags().Changed("region-info")
-		changedNodeInfo := cmd.Flags().Changed("node-config")
-
-		defaultNumCores := 0
-		defaultDiskSizeGb := 0
-		defaultDiskIops := 0
-		if changedNodeInfo {
-			nodeConfig, _ := cmd.Flags().GetStringToInt("node-config")
-			numCores, ok := nodeConfig["num-cores"]
-
-			if ok {
-				defaultNumCores = numCores
-			}
-			if diskSizeGb, ok := nodeConfig["disk-size-gb"]; ok {
-				defaultDiskSizeGb = diskSizeGb
-			}
-			if diskIops, ok := nodeConfig["disk-iops"]; ok {
-				defaultDiskIops = diskIops
-			}
-		}
 
 		if changedRegionInfo {
 			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
@@ -128,14 +109,11 @@ var updateClusterCmd = &cobra.Command{
 				if _, ok := regionInfoMap["num-nodes"]; !ok {
 					logrus.Fatalln("Number of nodes not specified in region info")
 				}
-				if _, ok := regionInfoMap["num-cores"]; !ok && defaultNumCores > 0 {
-					regionInfoMap["num-cores"] = strconv.Itoa(defaultNumCores)
+				if _, ok := regionInfoMap["num-cores"]; !ok {
+					logrus.Fatalln("Number of cores not specified in region info")
 				}
-				if _, ok := regionInfoMap["disk-size-gb"]; !ok && defaultDiskSizeGb > 0 {
-					regionInfoMap["disk-size-gb"] = strconv.Itoa(defaultDiskSizeGb)
-				}
-				if _, ok := regionInfoMap["disk-iops"]; !ok && defaultDiskIops > 0 {
-					regionInfoMap["disk-iops"] = strconv.Itoa(defaultDiskIops)
+				if _, ok := regionInfoMap["disk-size-gb"]; !ok {
+					logrus.Fatalln("Disk size not specified in region info")
 				}
 
 				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
@@ -205,9 +183,8 @@ func init() {
 	updateClusterCmd.Flags().String("new-name", "", "[OPTIONAL] The new name to be given to the cluster.")
 	updateClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
-	updateClusterCmd.Flags().StringToInt("node-config", nil, "[OPTIONAL] Number of vCPUs and disk size per node for the cluster, provided as key-value pairs. Arguments are num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). num-cores is required.")
-	updateClusterCmd.Flags().MarkDeprecated("node-config", "use --region-info to specify num-cores, disk-size-gb, and disk-iops.")
 	updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
+	updateClusterCmd.MarkFlagRequired("region-info")
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
 	updateClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Production, Innovation, Preview, or 'Early Access'.")
@@ -216,7 +193,7 @@ func init() {
 
 func isNameUpdateOnly(cmd *cobra.Command) bool {
 	return !cmd.Flags().Changed("cloud-provider") && !cmd.Flags().Changed("cluster-type") && !cmd.Flags().Changed("cluster-tier") &&
-		!cmd.Flags().Changed("fault-tolerance") && !cmd.Flags().Changed("database-version") && !cmd.Flags().Changed("node-config") &&
+		!cmd.Flags().Changed("fault-tolerance") && !cmd.Flags().Changed("database-version") &&
 		!cmd.Flags().Changed("region-info") && cmd.Flags().Changed("new-name")
 }
 
@@ -245,27 +222,6 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 	if !cmd.Flags().Changed("database-version") {
 		cmd.Flag("database-version").Value.Set(trackName)
 		cmd.Flag("database-version").Changed = true
-	}
-	if !cmd.Flags().Changed("node-config") {
-		nodeConfig := ""
-		if diskSizeGb, ok := originalSpec.ClusterInfo.NodeInfo.Get().GetDiskSizeGbOk(); ok {
-			nodeConfig += "disk-size-gb=" + strconv.Itoa(int(*diskSizeGb))
-		}
-		if diskIops, ok := originalSpec.ClusterInfo.NodeInfo.Get().GetDiskIopsOk(); ok && diskIops != nil {
-			if nodeConfig != "" {
-				nodeConfig += ","
-			}
-			nodeConfig += "disk-iops=" + strconv.Itoa(int(*diskIops))
-		}
-		if numCores, ok := originalSpec.ClusterInfo.NodeInfo.Get().GetNumCoresOk(); ok {
-			if nodeConfig != "" {
-				nodeConfig += ","
-			}
-			nodeConfig += "num-cores=" + strconv.Itoa(int(*numCores))
-		}
-		cmd.Flag("node-config").Value.Set(nodeConfig)
-		cmd.Flag("node-config").Changed = true
-
 	}
 	regionInfoList := []string{}
 	if !cmd.Flags().Changed("region-info") {
