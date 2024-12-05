@@ -43,6 +43,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/vpc"
 
 	"github.com/yugabyte/ybm-cli/internal/log"
+	"github.com/yugabyte/ybm-cli/internal/releases"
 )
 
 var (
@@ -65,7 +66,7 @@ var rootCmd = &cobra.Command{
 		if strings.HasPrefix(cmd.CommandPath(), "ybm completion") {
 			return
 		}
-		//releases.PrintUpgradeMessageIfNeeded()
+		releases.PrintUpgradeMessageIfNeeded()
 
 	},
 }
