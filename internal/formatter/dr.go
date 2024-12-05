@@ -133,7 +133,7 @@ func (c *DrContext) Databases() string {
 				if databaseName, exists := dbIdToNameMap[databaseId]; exists {
 					databaseNames = append(databaseNames, databaseName)
 				} else {
-					return ""
+					continue
 				}
 			}
 			return strings.Join(databaseNames, ",")
