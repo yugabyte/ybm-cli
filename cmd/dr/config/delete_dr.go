@@ -85,5 +85,6 @@ func init() {
 	ConfigCmd.AddCommand(deleteDrCmd)
 	deleteDrCmd.Flags().String("config", "", "[REQUIRED] Name of the DR configuration")
 	deleteDrCmd.MarkFlagRequired("config")
+	deleteDrCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 }
