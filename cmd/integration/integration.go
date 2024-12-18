@@ -347,7 +347,7 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		googlecloudSpec := ybmclient.NewGCPServiceAccount(credType, projectId, privateKey, privateKeyId, clientEmail, clientId, authUri, tokenUri, authProviderX509CertUrl, clientX509CertUrl)
 		IntegrationSpec.SetGooglecloudSpec(*googlecloudSpec)
 	default:
-		return nil, fmt.Errorf("only datadog, grafana, googlecloud or sumologic are accepted as third party sink for now")
+		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics or sumologic are accepted as third party sink for now")
 	}
 	return IntegrationSpec, nil
 }
