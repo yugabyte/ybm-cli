@@ -31,7 +31,6 @@ const (
 	TOOLS                   FeatureFlag = "TOOLS"
 	AZURE_CIDR_ALLOWED      FeatureFlag = "AZURE_CIDR_ALLOWED"
 	ENTERPRISE_SECURITY     FeatureFlag = "ENTERPRISE_SECURITY"
-	DB_AUDIT_LOGGING        FeatureFlag = "DB_AUDIT_LOGGING"
 	PITR_CONFIG             FeatureFlag = "PITR_CONFIG"
 	PITR_RESTORE            FeatureFlag = "PITR_RESTORE"
 	CONNECTION_POOLING      FeatureFlag = "CONNECTION_POOLING"

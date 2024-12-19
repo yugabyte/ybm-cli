@@ -47,7 +47,7 @@ func init() {
 	log_exporter.DbQueryLoggingCmd.PersistentFlags().StringVarP(&log_exporter.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	log_exporter.DbQueryLoggingCmd.MarkPersistentFlagRequired("cluster-name")
 
-	util.AddCommandIfFeatureFlag(ClusterCmd, audit_log_exporter.DbAuditLoggingCmd, util.DB_AUDIT_LOGGING)
+	ClusterCmd.AddCommand(audit_log_exporter.DbAuditLoggingCmd)
 	audit_log_exporter.DbAuditLoggingCmd.PersistentFlags().StringVarP(&audit_log_exporter.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	audit_log_exporter.DbAuditLoggingCmd.MarkPersistentFlagRequired("cluster-name")
 
