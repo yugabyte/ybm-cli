@@ -1549,9 +1549,10 @@ func (a *AuthApiClient) ListClusterPitrConfigs(clusterId string) ybmclient.ApiLi
 	return a.ApiClient.ClusterApi.ListClusterPitrConfigs(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) CreatePitrConfigSpec(databaseName string, databaseType string, retentionPeriodInDays int32) (*ybmclient.DatabasePitrConfigSpec, error) {
-	pitrConfigSpec := ybmclient.NewDatabasePitrConfigSpec(ybmclient.YbApiEnum(databaseType), databaseName, retentionPeriodInDays)
-	return pitrConfigSpec, nil
+func (a *AuthApiClient) CreateBulkPitrConfigSpec(specs []ybmclient.DatabasePitrConfigSpec) (*ybmclient.BulkCreateDatabasePitrConfigSpec, error) {
+	bulkPitrConfigSpec := ybmclient.NewBulkCreateDatabasePitrConfigSpec()
+	bulkPitrConfigSpec.SetPitrConfigSpecs(specs)
+	return bulkPitrConfigSpec, nil
 }
 
 func (a *AuthApiClient) CreatePitrConfig(clusterId string) ybmclient.ApiCreateDatabasePitrConfigRequest {
