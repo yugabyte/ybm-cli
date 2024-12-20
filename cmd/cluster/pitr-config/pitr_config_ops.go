@@ -17,7 +17,10 @@ package pitrconfig
 
 import (
 	"fmt"
+	"math"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -29,6 +32,7 @@ import (
 )
 
 var ClusterName string
+var allPitrConfigSpecs []string
 
 var listPitrConfigCmd = &cobra.Command{
 	Use:   "list",
@@ -116,45 +120,111 @@ var createPitrConfigCmd = &cobra.Command{
 			logrus.Fatal(err)
 		}
 
-		namespaceName, _ := cmd.Flags().GetString("namespace-name")
-		namespaceType, _ := cmd.Flags().GetString("namespace-type")
-		validateNamespaceNameType(namespaceName, namespaceType)
-		retentionPeriod, _ := cmd.Flags().GetInt32("retention-period-in-days")
+		pitrConfigSpecs, err := ParsePitrConfigSpecs(authApi, allPitrConfigSpecs)
+		if err != nil {
+			logrus.Fatalf("Error while parsing PITR Config specs: %s", ybmAuthClient.GetApiErrorDetails(err))
+			return
+		}
 
-		pitrConfigSpec, err := authApi.CreatePitrConfigSpec(namespaceName, namespaceType, retentionPeriod)
+		bulkPitrConfigSpec, err := authApi.CreateBulkPitrConfigSpec(pitrConfigSpecs)
 		if err != nil {
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
-		resp, r, err := authApi.CreatePitrConfig(clusterID).DatabasePitrConfigSpec(*pitrConfigSpec).Execute()
+		resp, r, err := authApi.CreatePitrConfig(clusterID).BulkCreateDatabasePitrConfigSpec(*bulkPitrConfigSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-		pitrConfigId := resp.Data.Info.Id
+		pitrConfigsData := resp.GetData()
 
-		msg := fmt.Sprintf("The PITR Configuration for %s namespace %s in cluster %s is being created\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
+		msg := fmt.Sprintf("The requested PITR Configurations are being created\n\n")
 
 		if viper.GetBool("wait") {
-			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_ENABLE_DB_PITR)
-			fmt.Printf("Successfully created PITR configuration.\n\n")
-
-			getConfigResp, r, err := authApi.GetPitrConfig(clusterID, *pitrConfigId).Execute()
-			if err != nil {
-				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_BULK_ENABLE_DB_PITR)
+			fmt.Printf("Successfully created PITR configurations.\n\n")
+			createdConfigsData := []ybmclient.DatabasePitrConfigData{}
+			for _, configData := range pitrConfigsData {
+				configId := configData.Info.Id
+				getConfigResp, r, err := authApi.GetPitrConfig(clusterID, *configId).Execute()
+				if err != nil {
+					logrus.Debugf("Full HTTP response: %v", r)
+					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				}
+				createdConfigsData = append(createdConfigsData, getConfigResp.GetData())
 			}
-			pitrConfigData := getConfigResp.GetData()
+
 			pitrConfigCtx := formatter.Context{
 				Output: os.Stdout,
 				Format: formatter.NewPitrConfigFormat(viper.GetString("output")),
 			}
 
-			formatter.SinglePitrConfigWrite(pitrConfigCtx, pitrConfigData)
+			formatter.PitrConfigWrite(pitrConfigCtx, createdConfigsData)
 		} else {
 			fmt.Println(msg)
 		}
 	},
+}
+
+// Parse array of PITR config spec string to params
+func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, configSpecs []string) ([]ybmclient.DatabasePitrConfigSpec, error) {
+	var err error
+	pitrConfigSpecs := []ybmclient.DatabasePitrConfigSpec{}
+
+	for _, configSpec := range configSpecs {
+		var namespaceNameProvided bool
+		var namespaceTypeProvided bool
+		var retentionPeriodProvided bool
+		spec := *ybmclient.NewDatabasePitrConfigSpecWithDefaults()
+		configSpec := strings.ReplaceAll(configSpec, " ", "")
+
+		for _, subSpec := range strings.Split(configSpec, ",") {
+			if !strings.Contains(subSpec, "=") {
+				return nil, fmt.Errorf("namespace-name, namespace-type and retention-period-in-days must be provided as key value pairs for each PITR Config to be created")
+			}
+			kvp := strings.Split(subSpec, "=")
+			key := kvp[0]
+			val := kvp[1]
+			n := 0
+			err = nil
+			switch key {
+			case "namespace-name":
+				if len(val) == 0 {
+					return nil, fmt.Errorf("Namespace name must be provided.")
+				}
+				spec.SetDatabaseName(val)
+				namespaceNameProvided = true
+			case "namespace-type":
+				if !(val == "YCQL" || val == "YSQL") {
+					return nil, fmt.Errorf("Only YCQL or YSQL namespace types are allowed.")
+				}
+				spec.SetDatabaseType(ybmclient.YbApiEnum(val))
+				namespaceTypeProvided = true
+			case "retention-period-in-days":
+				n, err = strconv.Atoi(val)
+				if err != nil {
+					return nil, err
+				}
+				if n > 1 && n <= math.MaxInt32 {
+					retentionPeriod := int32(n)
+					spec.SetRetentionPeriod(retentionPeriod)
+					retentionPeriodProvided = true
+				} else {
+					return nil, fmt.Errorf("Minimum retention period is 2 days")
+				}
+			}
+		}
+		if !(namespaceNameProvided && namespaceTypeProvided && retentionPeriodProvided) {
+			return nil, fmt.Errorf("namespace-name, namespace-type and retention-period-in-days must be provided for each PITR Config to be created")
+		}
+		pitrConfigSpecs = append(pitrConfigSpecs, spec)
+	}
+
+	if len(pitrConfigSpecs) == 0 {
+		return nil, fmt.Errorf("namespace-name, namespace-type and retention-period-in-days must be provided for each PITR Config to be created")
+	}
+
+	return pitrConfigSpecs, nil
 }
 
 var restorePitrConfigCmd = &cobra.Command{
@@ -309,13 +379,7 @@ func init() {
 	describePitrConfigCmd.MarkFlagRequired("namespace-type")
 
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, createPitrConfigCmd, util.PITR_CONFIG)
-	createPitrConfigCmd.Flags().SortFlags = false
-	createPitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace for which the PITR Config is to be created.")
-	createPitrConfigCmd.MarkFlagRequired("namespace-name")
-	createPitrConfigCmd.Flags().String("namespace-type", "", "[REQUIRED] The type of the namespace. Available options are YCQL and YSQL")
-	createPitrConfigCmd.MarkFlagRequired("namespace-type")
-	createPitrConfigCmd.Flags().Int32("retention-period-in-days", 2, "[REQUIRED] The time duration in days to retain a snapshot for.")
-	createPitrConfigCmd.MarkFlagRequired("retention-period-in-days")
+	createPitrConfigCmd.Flags().StringArrayVarP(&allPitrConfigSpecs, "pitr-config", "p", []string{}, `[REQUIRED] Information for the PITR Configs to be created. All values are mandatory. Available options for namespace type are YCQL and YSQL. Minimum retention period is 2 days. Please provide key value pairs namespace-name=<namespace-name>,namespace-type=<namespace-type>,retention-period-in-days=<retention-period-in-days>.`)
 
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, restorePitrConfigCmd, util.PITR_RESTORE)
 	restorePitrConfigCmd.Flags().SortFlags = false

@@ -25,7 +25,7 @@ var _ = Describe("PITR Configs Test", func() {
 		responseListCluster          openapi.ClusterListResponse
 		responseListPITRConfig       openapi.ClusterPitrConfigListResponse
 		responseGetPITRConfig        openapi.DatabasePitrConfigResponse
-		responseCreatePITRConfig     openapi.CreateDatabasePitrConfigResponse
+		responseCreatePITRConfig     openapi.BulkCreateDatabasePitrConfigResponse
 		responseRestoreViaPITRConfig openapi.RestoreDatabaseViaPitrResponse
 	)
 
@@ -97,20 +97,65 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCreatePITRConfig),
 				),
 			)
-			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YSQL", "--retention-period-in-days", "5")
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL, retention-period-in-days=5", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`The PITR Configuration for YSQL namespace test_ysql_db in cluster stunning-sole is being created`))
+			Expect(session.Out).Should(gbytes.Say(`The requested PITR Configurations are being created`))
 			session.Kill()
 		})
 
 		It("Should fail if invalid namespace type in PITR Config", func() {
-			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "PGSQL", "--retention-period-in-days", "5")
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=PGSQL, retention-period-in-days=5")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
 			Expect(session.Err).Should(gbytes.Say("Only YCQL or YSQL namespace types are allowed."))
+			session.Kill()
+		})
+
+		It("Should fail if empty namespace name in PITR Config", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=, namespace-type=YSQL, retention-period-in-days=5", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("Namespace name must be provided."))
+			session.Kill()
+		})
+
+		It("Should fail if invalid key value pairs in PITR Config", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name test_ysql_db, namespace-type=YSQL, retention-period-in-days=5", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("namespace-name, namespace-type and retention-period-in-days must be provided as key value pairs for each PITR Config to be created"))
+			session.Kill()
+		})
+
+		It("Should fail if all required params are not in PITR Config", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL ", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("namespace-name, namespace-type and retention-period-in-days must be provided for each PITR Config to be created"))
+			session.Kill()
+		})
+
+		It("Should fail if non int retention period in PITR Config", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL, retention-period-in-days=five", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("invalid syntax"))
+			session.Kill()
+		})
+
+		It("Should fail if less than one day retention period in PITR Config", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL, retention-period-in-days=1", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("Minimum retention period is 2 days"))
 			session.Kill()
 		})
 	})

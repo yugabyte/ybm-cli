@@ -1,19 +1,38 @@
 {
-    "data": {
-      "spec": {
-        "database_type": "YSQL",
-        "database_name": "test_ysql_db",
-        "retention_period": 5
-      },
-      "info": {
-        "id": "3fb11555-b561-4e8f-b0ed-e77b8374cbc3",
-        "cluster_id": "95c522b3-dfd8-4654-ab10-99f59179ad7c",
-        "metadata": {
-          "created_on": "2024-08-07T16:26:08.435Z",
-          "updated_on": "2024-08-07T16:26:08.435Z"
+    "data": [
+      {
+        "spec": {
+          "database_type": "YSQL",
+          "database_name": "test_ysql_db",
+          "retention_period": 5
         },
-        "backup_interval": 86400,
-        "state": "QUEUED"
+        "info": {
+          "id": "3fb11555-b561-4e8f-b0ed-e77b8374cbc3",
+          "cluster_id": "95c522b3-dfd8-4654-ab10-99f59179ad7c",
+          "metadata": {
+            "created_on": "2024-08-07T16:26:08.435Z",
+            "updated_on": "2024-08-07T16:26:08.435Z"
+          },
+          "backup_interval": 86400,
+          "state": "QUEUED"
+        }
+      },
+      {
+        "spec": {
+          "database_type": "YCQL",
+          "database_name": "test_ycql_db",
+          "retention_period": 3
+        },
+        "info": {
+          "id": "249f9bf1-4276-4c60-8ab3-2bf1b2f6f1aa",
+          "cluster_id": "95c522b3-dfd8-4654-ab10-99f59179ad7c",
+          "metadata": {
+            "created_on": "2024-08-03T11:38:10.838Z",
+           "updated_on": "2024-08-03T11:38:10.838Z"
+          },
+          "backup_interval": 86400,
+          "state": "QUEUED"
+        }
       }
-    }
+    ]
   }
