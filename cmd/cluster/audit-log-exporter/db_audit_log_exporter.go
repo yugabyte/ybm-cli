@@ -275,7 +275,7 @@ func init() {
 	enableDbAuditLoggingCmd.Flags().SortFlags = false
 	enableDbAuditLoggingCmd.Flags().String("integration-name", "", "[REQUIRED] Name of the Integration")
 	enableDbAuditLoggingCmd.MarkFlagRequired("integration-name")
-	enableDbAuditLoggingCmd.Flags().StringToString("ysql-config", nil, `[REQUIRED] The ysql config to setup DB auditting
+	enableDbAuditLoggingCmd.Flags().StringToString("ysql-config", nil, `[REQUIRED] The ysql config to setup DB audit logging
 	Please provide key value pairs as follows:
 	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
 	log_relation=<boolean>,log_statement_once=<boolean>`)
@@ -284,32 +284,26 @@ func init() {
 	Please provide key value pairs as follows:
 	statement_classes=READ,WRITE,MISC`)
 	enableDbAuditLoggingCmd.MarkFlagRequired("statement_classes")
-	enableDbAuditLoggingCmd.Flags().String("cluster-name", "", "[REQUIRED] The cluster name to assign DB auditting")
-	enableDbAuditLoggingCmd.MarkFlagRequired("cluster-name")
 
 	DbAuditLoggingCmd.AddCommand(describeDbAuditLoggingCmd)
 	describeDbAuditLoggingCmd.Flags().SortFlags = false
-	describeDbAuditLoggingCmd.Flags().String("cluster-name", "", "[REQUIRED] The cluster name to list DB audit export config")
-	describeDbAuditLoggingCmd.MarkFlagRequired("cluster-name")
 
 	DbAuditLoggingCmd.AddCommand(updateDbAuditLoggingCmd)
 	updateDbAuditLoggingCmd.Flags().SortFlags = false
 	updateDbAuditLoggingCmd.Flags().String("integration-name", "", "[REQUIRED] Name of the Integration")
 	updateDbAuditLoggingCmd.MarkFlagRequired("integration-name")
-	updateDbAuditLoggingCmd.Flags().StringToString("ysql-config", nil, `The ysql config to setup DB auditting
+	updateDbAuditLoggingCmd.Flags().StringToString("ysql-config", nil, `[REQUIRED] The ysql config to setup DB audit logging
 	Please provide key value pairs as follows:
 	log_catalog=<boolean>,log_level=<LOG_LEVEL>,log_client=<boolean>,log_parameter=<boolean>,
 	log_relation=<boolean>,log_statement_once=<boolean>`)
-	updateDbAuditLoggingCmd.Flags().String("statement_classes", "", `The ysql config statement classes
+	updateDbAuditLoggingCmd.MarkFlagRequired("ysql-config")
+	updateDbAuditLoggingCmd.Flags().String("statement_classes", "", `[REQUIRED] The ysql config statement classes
 	Please provide key value pairs as follows:
 	statement_classes=READ,WRITE,MISC`)
-	updateDbAuditLoggingCmd.Flags().String("cluster-name", "", "[REQUIRED] The cluster name to assign DB auditting")
-	updateDbAuditLoggingCmd.MarkFlagRequired("cluster-name")
+	updateDbAuditLoggingCmd.MarkFlagRequired("statement_classes")
 
 	DbAuditLoggingCmd.AddCommand(disableDbAuditLoggingCmd)
 	disableDbAuditLoggingCmd.Flags().SortFlags = false
-	disableDbAuditLoggingCmd.Flags().String("cluster-name", "", "[REQUIRED] The cluster name to assign DB auditting")
-	disableDbAuditLoggingCmd.MarkFlagRequired("cluster-name")
 	disableDbAuditLoggingCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 }
 
