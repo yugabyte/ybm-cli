@@ -177,11 +177,8 @@ func init() {
 	createIntegrationCmd.Flags().StringToString("victoriametrics-spec", nil, `Configuration for victoriametrics. 
 	Please provide key value pairs as follows: 
 	endpoint=<victoriametrics-otlp-endpoint-url>`)
-
-	if util.IsFeatureFlagEnabled(util.GOOGLECLOUD_INTEGRATION) {
-		createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
+	createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
 	Please provide absolute file path`)
-	}
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
 
@@ -277,10 +274,6 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		sumoLogicSpec := ybmclient.NewSumologicTelemetryProviderSpec(installationToken, accessId, accessKey)
 		IntegrationSpec.SetSumologicSpec(*sumoLogicSpec)
 	case ybmclient.TELEMETRYPROVIDERTYPEENUM_GOOGLECLOUD:
-		if !util.IsFeatureFlagEnabled(util.GOOGLECLOUD_INTEGRATION) {
-			return nil, fmt.Errorf("Integration of type GOOGLECLOUD is currently not supported")
-		}
-
 		if !cmd.Flags().Changed("googlecloud-cred-filepath") {
 			return nil, fmt.Errorf("googlecloud-cred-filepath is required for googlecloud sink")
 		}

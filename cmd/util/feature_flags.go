@@ -25,17 +25,16 @@ import (
 type FeatureFlag string
 
 const (
-	CDC                     FeatureFlag = "CDC"
-	CONFIGURE_URL           FeatureFlag = "CONFIGURE_URL"
-	NODE_OP                 FeatureFlag = "NODE_OPS"
-	TOOLS                   FeatureFlag = "TOOLS"
-	AZURE_CIDR_ALLOWED      FeatureFlag = "AZURE_CIDR_ALLOWED"
-	ENTERPRISE_SECURITY     FeatureFlag = "ENTERPRISE_SECURITY"
-	PITR_CONFIG             FeatureFlag = "PITR_CONFIG"
-	PITR_RESTORE            FeatureFlag = "PITR_RESTORE"
-	CONNECTION_POOLING      FeatureFlag = "CONNECTION_POOLING"
-	GOOGLECLOUD_INTEGRATION FeatureFlag = "GOOGLECLOUD_INTEGRATION"
-	DR                      FeatureFlag = "DR"
+	CDC                 FeatureFlag = "CDC"
+	CONFIGURE_URL       FeatureFlag = "CONFIGURE_URL"
+	NODE_OP             FeatureFlag = "NODE_OPS"
+	TOOLS               FeatureFlag = "TOOLS"
+	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
+	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
+	PITR_CONFIG         FeatureFlag = "PITR_CONFIG"
+	PITR_RESTORE        FeatureFlag = "PITR_RESTORE"
+	CONNECTION_POOLING  FeatureFlag = "CONNECTION_POOLING"
+	DR                  FeatureFlag = "DR"
 )
 
 func (f FeatureFlag) String() string {
