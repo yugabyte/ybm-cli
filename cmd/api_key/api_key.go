@@ -56,8 +56,19 @@ var listApiKeysCmd = &cobra.Command{
 			apiKeyListRequest = apiKeyListRequest.ApiKeyName(name)
 		}
 
+		isNameSpecified := cmd.Flags().Changed("name")
+		keyStatus := "ACTIVE"
+		// If --name arg is specified, don't set default filter for key-status
+		// because if an API key is revoked/expired and user do $ ybm api-key list --name <key-name>
+		// it will lead to empty response if we filter key by ACTIVE status.
+		if isNameSpecified {
+			keyStatus = ""
+		}
+
 		// if user filters by key status, add it to the request
-		keyStatus, _ := cmd.Flags().GetString("status")
+		if cmd.Flags().Changed("status") {
+			keyStatus, _ = cmd.Flags().GetString("status")
+		}
 		if keyStatus != "" {
 			validStatus := false
 			for _, v := range GetKeyStatusFilters() {
@@ -88,7 +99,32 @@ var listApiKeysCmd = &cobra.Command{
 			return
 		}
 
-		formatter.ApiKeyWrite(apiKeyCtx, resp.GetData())
+		apiKeyOutputList := make([]formatter.ApiKeyDataAllowListInfo, 0)
+
+		// For each API key, fetch the allow list(s) associated with it
+		for _, apiKey := range resp.GetData() {
+			apiKeyId := apiKey.GetInfo().Id
+			allowListIds := apiKey.GetSpec().AllowListInfo
+			allowListsNames := make([]string, 0)
+
+			if allowListIds != nil && len(*allowListIds) > 0 {
+				apiKeyAllowLists, resp, err := authApi.ListApiKeyNetworkAllowLists(apiKeyId).Execute()
+				if err != nil {
+					logrus.Debugf("Full HTTP response: %v", resp)
+					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				}
+				for _, allowList := range apiKeyAllowLists.GetData() {
+					allowListsNames = append(allowListsNames, allowList.GetSpec().Name)
+				}
+			}
+
+			apiKeyOutputList = append(apiKeyOutputList, formatter.ApiKeyDataAllowListInfo{
+				ApiKey:     &apiKey,
+				AllowLists: allowListsNames,
+			})
+		}
+
+		formatter.ApiKeyWrite(apiKeyCtx, apiKeyOutputList)
 	},
 }
 
@@ -164,6 +200,22 @@ var createApiKeyCmd = &cobra.Command{
 			apiKeySpec.SetRoleId(roleId)
 		}
 
+		if cmd.Flags().Changed("network-allow-lists") {
+			allowLists, _ := cmd.Flags().GetString("network-allow-lists")
+
+			allowListNames := strings.Split(allowLists, ",")
+			allowListIds := make([]string, 0)
+
+			for _, allowList := range allowListNames {
+				allowListId, err := authApi.GetNetworkAllowListIdByName(strings.TrimSpace(allowList))
+				if err != nil {
+					logrus.Fatalln(err)
+				}
+				allowListIds = append(allowListIds, allowListId)
+			}
+			apiKeySpec.SetAllowListInfo(allowListIds)
+		}
+
 		resp, r, err := authApi.CreateApiKey().ApiKeySpec(*apiKeySpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
@@ -233,6 +285,7 @@ func init() {
 	createApiKeyCmd.Flags().String("unit", "", "[REQUIRED] The time units for which the API Key will be valid. Available options are Hours, Days, and Months.")
 	createApiKeyCmd.MarkFlagRequired("unit")
 	createApiKeyCmd.Flags().String("description", "", "[OPTIONAL] Description of the API Key to be created.")
+	createApiKeyCmd.Flags().String("network-allow-lists", "", "[OPTIONAL] The network allow lists(comma separated names) to assign to the API key.")
 	createApiKeyCmd.Flags().String("role-name", "", "[OPTIONAL] The name of the role to be assigned to the API Key. If not provided, an Admin API Key will be generated.")
 	createApiKeyCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 

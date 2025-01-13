@@ -764,6 +764,10 @@ func (a *AuthApiClient) ListClusterNetworkAllowLists(clusterId string) ybmclient
 	return a.ApiClient.ClusterApi.ListClusterNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) ListApiKeyNetworkAllowLists(apiKeyId string) ybmclient.ApiListNetworkAllowListsRequest {
+	return a.ApiClient.NetworkApi.ListNetworkAllowLists(a.ctx, a.AccountID, a.ProjectID).ApiKeyIds([]string{apiKeyId})
+}
+
 func (a *AuthApiClient) GetBillingUsage(startTimestamp string, endTimestamp string, clusterIds []string) ybmclient.ApiGetBillingUsageRequest {
 	return a.ApiClient.BillingApi.GetBillingUsage(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Granularity(ybmclient.GRANULARITYENUM_DAILY).ClusterIds(clusterIds)
 }

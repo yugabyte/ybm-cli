@@ -1,0 +1,100 @@
+{
+    "data": [
+        {
+            "spec": {
+                "name": "apikey-1",
+                "description": "test-key",
+                "expire_after_hours": 0,
+                "role_id": "36ec6789-6dbf-4d12-91b4-243587d6882b",
+                "allow_list_info": ["1eaf5552-e2f3-4a28-b215-106667c05178"]
+            },
+            "info": {
+                "id": "6db78592-bfe2-4ea7-8642-73c5cc06d027",
+                "issuer": "user@yb.com",
+                "metadata": {
+                    "created_on": "2025-01-13T13:55:14.024Z",
+                    "updated_on": "2025-01-13T13:55:14.024Z"
+                },
+                "expiry_time": "2099-12-31T00:00Z",
+                "status": "ACTIVE",
+                "last_used_time": "2025-01-13T14:21:40.713599Z",
+                "usage_count": 42,
+                "account_id": "531af27a-614c-472f-8edb-a0f9322f0838",
+                "revoked_by_user_id": null,
+                "revoked_by_user_email": null,
+                "revoked_by_api_key_id": null,
+                "revoked_by_api_key_name": null,
+                "revoked_at_time": null,
+                "role": {
+                    "spec": {
+                        "name": "account_admin",
+                        "description": "Full access to all operations, including billing and user management",
+                        "permissions": []
+                    },
+                    "info": {
+                        "id": "36ec6789-6dbf-4d12-91b4-243587d6882b",
+                        "metadata": {
+                            "created_on": "2021-10-19T00:00Z",
+                            "updated_on": "2025-01-13T13:54:21.660Z"
+                        },
+                        "is_active": true,
+                        "is_user_defined": false,
+                        "account_id": "531af27a-614c-472f-8edb-a0f9322f0838",
+                        "effective_permissions": [],
+                        "users": null,
+                        "api_keys": null,
+                        "display_name": "Admin"
+                    }
+                }
+            }
+        },
+        {
+            "spec": {
+                "name": "apikey-2",
+                "description": "test-key",
+                "expire_after_hours": 720,
+                "role_id": "36ec6789-6dbf-4d12-91b4-243587d6882b",
+                "allow_list_info": []
+            },
+            "info": {
+                "id": "82862788-6fdf-4fc6-954b-178187e10608",
+                "issuer": "user@yb.com",
+                "metadata": {
+                    "created_on": "2025-01-08T09:06:35.077Z",
+                    "updated_on": "2025-01-08T09:06:35.077Z"
+                },
+                "expiry_time": "2025-02-07T09:06:35.077071Z",
+                "status": "ACTIVE",
+                "last_used_time": "Not yet used",
+                "usage_count": 0,
+                "account_id": "531af27a-614c-472f-8edb-a0f9322f0838",
+                "revoked_by_user_id": null,
+                "revoked_by_user_email": null,
+                "revoked_by_api_key_id": null,
+                "revoked_by_api_key_name": null,
+                "revoked_at_time": null,
+                "role": {
+                    "spec": {
+                        "name": "account_admin",
+                        "description": "Full access to all operations, including billing and user management",
+                        "permissions": []
+                    },
+                    "info": {
+                        "id": "36ec6789-6dbf-4d12-91b4-243587d6882b",
+                        "metadata": {
+                            "created_on": "2021-10-19T00:00Z",
+                            "updated_on": "2025-01-13T13:54:21.660Z"
+                        },
+                        "is_active": true,
+                        "is_user_defined": false,
+                        "account_id": "531af27a-614c-472f-8edb-a0f9322f0838",
+                        "effective_permissions": [],
+                        "users": null,
+                        "api_keys": null,
+                        "display_name": "Admin"
+                    }
+                }
+            }
+        }
+    ]
+}
