@@ -20,11 +20,13 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
-	defaultApiKeyListing = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}\t{{.AllowList}}"
+	defaultApiKeyListing = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}"
+	apiKeyListingV2      = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}\t{{.AllowList}}"
 	createdAtHeader      = "Date Created"
 	expiryTimeHeader     = "Expiration"
 	apiKeyRoleHeader     = "Role"
@@ -32,14 +34,14 @@ const (
 )
 
 type ApiKeyDataAllowListInfo struct {
-	ApiKey *ybmclient.ApiKeyData
+	ApiKey     *ybmclient.ApiKeyData
 	AllowLists []string
 }
 
 type ApiKeyContext struct {
 	HeaderContext
 	Context
-	a ybmclient.ApiKeyData
+	a          ybmclient.ApiKeyData
 	allowLists []string
 }
 
@@ -47,6 +49,9 @@ func NewApiKeyFormat(source string) Format {
 	switch source {
 	case "table", "":
 		format := defaultApiKeyListing
+		if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) {
+			format = apiKeyListingV2
+		}
 		return Format(format)
 	default: // custom format or json or pretty
 		return Format(source)
@@ -62,18 +67,6 @@ func ApiKeyWrite(ctx Context, keys []ApiKeyDataAllowListInfo) error {
 				logrus.Debugf("Error rendering API key: %v", err)
 				return err
 			}
-		}
-		return nil
-	}
-	return ctx.Write(NewApiKeyContext(), render)
-}
-
-func SingleApiKeyWrite(ctx Context, key ybmclient.ApiKeyData) error {
-	render := func(format func(subContext SubContext) error) error {
-		err := format(&ApiKeyContext{a: key})
-		if err != nil {
-			logrus.Debugf("Error rendering API key: %v", err)
-			return err
 		}
 		return nil
 	}

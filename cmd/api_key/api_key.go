@@ -26,6 +26,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 var ApiKeyCmd = &cobra.Command{
@@ -99,14 +100,21 @@ var listApiKeysCmd = &cobra.Command{
 			return
 		}
 
-		apiKeyOutputList := make([]formatter.ApiKeyDataAllowListInfo, 0)
+		apiKeyOutputList := *enrichApiKeyDataWithAllowListInfo(&resp.Data, authApi)
+		formatter.ApiKeyWrite(apiKeyCtx, apiKeyOutputList)
+	},
+}
 
-		// For each API key, fetch the allow list(s) associated with it
-		for _, apiKey := range resp.GetData() {
-			apiKeyId := apiKey.GetInfo().Id
+func enrichApiKeyDataWithAllowListInfo(apiKeys *[]ybmclient.ApiKeyData, authApi *ybmAuthClient.AuthApiClient) *[]formatter.ApiKeyDataAllowListInfo {
+	apiKeyOutputList := make([]formatter.ApiKeyDataAllowListInfo, 0)
+
+	// For each API key, fetch the allow list(s) associated with it
+	for _, apiKey := range *apiKeys {
+		apiKeyId := apiKey.GetInfo().Id
+		allowListsNames := make([]string, 0)
+
+		if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) {
 			allowListIds := apiKey.GetSpec().AllowListInfo
-			allowListsNames := make([]string, 0)
-
 			if allowListIds != nil && len(*allowListIds) > 0 {
 				apiKeyAllowLists, resp, err := authApi.ListApiKeyNetworkAllowLists(apiKeyId).Execute()
 				if err != nil {
@@ -117,15 +125,14 @@ var listApiKeysCmd = &cobra.Command{
 					allowListsNames = append(allowListsNames, allowList.GetSpec().Name)
 				}
 			}
-
-			apiKeyOutputList = append(apiKeyOutputList, formatter.ApiKeyDataAllowListInfo{
-				ApiKey:     &apiKey,
-				AllowLists: allowListsNames,
-			})
 		}
 
-		formatter.ApiKeyWrite(apiKeyCtx, apiKeyOutputList)
-	},
+		apiKeyOutputList = append(apiKeyOutputList, formatter.ApiKeyDataAllowListInfo{
+			ApiKey:     &apiKey,
+			AllowLists: allowListsNames,
+		})
+	}
+	return &apiKeyOutputList
 }
 
 func GetKeyStatusFilters() []string {
@@ -200,7 +207,7 @@ var createApiKeyCmd = &cobra.Command{
 			apiKeySpec.SetRoleId(roleId)
 		}
 
-		if cmd.Flags().Changed("network-allow-lists") {
+		if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) && cmd.Flags().Changed("network-allow-lists") {
 			allowLists, _ := cmd.Flags().GetString("network-allow-lists")
 
 			allowListNames := strings.Split(allowLists, ",")
@@ -227,7 +234,8 @@ var createApiKeyCmd = &cobra.Command{
 			Format: formatter.NewApiKeyFormat(viper.GetString("output")),
 		}
 
-		formatter.SingleApiKeyWrite(apiKeyCtx, resp.GetData())
+		apiKeyOutput := *enrichApiKeyDataWithAllowListInfo(&[]ybmclient.ApiKeyData{resp.GetData()}, authApi)
+		formatter.ApiKeyWrite(apiKeyCtx, apiKeyOutput)
 
 		fmt.Printf("\nAPI Key: %s \n", formatter.Colorize(resp.GetJwt(), formatter.GREEN_COLOR))
 		fmt.Printf("\nThe API key is only shown once after creation. Copy and store it securely.\n")
@@ -285,7 +293,10 @@ func init() {
 	createApiKeyCmd.Flags().String("unit", "", "[REQUIRED] The time units for which the API Key will be valid. Available options are Hours, Days, and Months.")
 	createApiKeyCmd.MarkFlagRequired("unit")
 	createApiKeyCmd.Flags().String("description", "", "[OPTIONAL] Description of the API Key to be created.")
-	createApiKeyCmd.Flags().String("network-allow-lists", "", "[OPTIONAL] The network allow lists(comma separated names) to assign to the API key.")
+
+	if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) {
+		createApiKeyCmd.Flags().String("network-allow-lists", "", "[OPTIONAL] The network allow lists(comma separated names) to assign to the API key.")
+	}
 	createApiKeyCmd.Flags().String("role-name", "", "[OPTIONAL] The name of the role to be assigned to the API Key. If not provided, an Admin API Key will be generated.")
 	createApiKeyCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 

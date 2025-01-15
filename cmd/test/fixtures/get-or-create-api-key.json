@@ -5,7 +5,7 @@
             "description": "",
             "expire_after_hours": 720,
             "role_id": "36ec6789-6dbf-4d12-91b4-243587d6882b",
-            "allow_list_info": []
+            "allow_list_info": ["1eaf5552-e2f3-4a28-b215-106667c05178"]
         },
         "info": {
             "id": "4f32f91e-b5fc-462f-8111-134eb813f6d0",
