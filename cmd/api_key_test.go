@@ -83,10 +83,6 @@ apikey-2   Admin     ACTIVE    user@yb.com   2025-01-08T09:06:35.077Z   Not yet 
 					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/allow-lists"),
 					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
 				),
-				func(w http.ResponseWriter, req *http.Request) {
-					queryParams := req.URL.Query()
-					Expect(queryParams.Get("status")).To(Equal("ACTIVE"))
-				},
 			)
 
 			os.Setenv("YBM_FF_API_KEY_ALLOW_LIST", "true")

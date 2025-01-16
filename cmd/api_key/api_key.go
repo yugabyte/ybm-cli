@@ -57,19 +57,8 @@ var listApiKeysCmd = &cobra.Command{
 			apiKeyListRequest = apiKeyListRequest.ApiKeyName(name)
 		}
 
-		isNameSpecified := cmd.Flags().Changed("name")
-		keyStatus := "ACTIVE"
-		// If --name arg is specified, don't set default filter for key-status
-		// because if an API key is revoked/expired and user do $ ybm api-key list --name <key-name>
-		// it will lead to empty response if we filter key by ACTIVE status.
-		if isNameSpecified {
-			keyStatus = ""
-		}
-
 		// if user filters by key status, add it to the request
-		if cmd.Flags().Changed("status") {
-			keyStatus, _ = cmd.Flags().GetString("status")
-		}
+		keyStatus, _ := cmd.Flags().GetString("status")
 		if keyStatus != "" {
 			validStatus := false
 			for _, v := range GetKeyStatusFilters() {
@@ -100,20 +89,21 @@ var listApiKeysCmd = &cobra.Command{
 			return
 		}
 
-		apiKeyOutputList := *enrichApiKeyDataWithAllowListInfo(&resp.Data, authApi)
+		apiKeyOutputList := *addAllowListNameToApiKeyData(&resp.Data, authApi)
 		formatter.ApiKeyWrite(apiKeyCtx, apiKeyOutputList)
 	},
 }
 
-func enrichApiKeyDataWithAllowListInfo(apiKeys *[]ybmclient.ApiKeyData, authApi *ybmAuthClient.AuthApiClient) *[]formatter.ApiKeyDataAllowListInfo {
+func addAllowListNameToApiKeyData(apiKeys *[]ybmclient.ApiKeyData, authApi *ybmAuthClient.AuthApiClient) *[]formatter.ApiKeyDataAllowListInfo {
 	apiKeyOutputList := make([]formatter.ApiKeyDataAllowListInfo, 0)
 
 	// For each API key, fetch the allow list(s) associated with it
+	isApiKeyAllowListEnabled := util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST)
 	for _, apiKey := range *apiKeys {
 		apiKeyId := apiKey.GetInfo().Id
 		allowListsNames := make([]string, 0)
 
-		if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) {
+		if isApiKeyAllowListEnabled {
 			allowListIds := apiKey.GetSpec().AllowListInfo
 			if allowListIds != nil && len(*allowListIds) > 0 {
 				apiKeyAllowLists, resp, err := authApi.ListApiKeyNetworkAllowLists(apiKeyId).Execute()
@@ -234,7 +224,7 @@ var createApiKeyCmd = &cobra.Command{
 			Format: formatter.NewApiKeyFormat(viper.GetString("output")),
 		}
 
-		apiKeyOutput := *enrichApiKeyDataWithAllowListInfo(&[]ybmclient.ApiKeyData{resp.GetData()}, authApi)
+		apiKeyOutput := *addAllowListNameToApiKeyData(&[]ybmclient.ApiKeyData{resp.GetData()}, authApi)
 		formatter.ApiKeyWrite(apiKeyCtx, apiKeyOutput)
 
 		fmt.Printf("\nAPI Key: %s \n", formatter.Colorize(resp.GetJwt(), formatter.GREEN_COLOR))
