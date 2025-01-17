@@ -17,29 +17,41 @@ package formatter
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/sirupsen/logrus"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
 	defaultApiKeyListing = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}"
+	apiKeyListingV2      = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}\t{{.AllowList}}"
 	createdAtHeader      = "Date Created"
 	expiryTimeHeader     = "Expiration"
 	apiKeyRoleHeader     = "Role"
 	lastUsedHeader       = "Last Used"
 )
 
+type ApiKeyDataAllowListInfo struct {
+	ApiKey     *ybmclient.ApiKeyData
+	AllowLists []string
+}
+
 type ApiKeyContext struct {
 	HeaderContext
 	Context
-	a ybmclient.ApiKeyData
+	a          ybmclient.ApiKeyData
+	allowLists []string
 }
 
 func NewApiKeyFormat(source string) Format {
 	switch source {
 	case "table", "":
 		format := defaultApiKeyListing
+		if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) {
+			format = apiKeyListingV2
+		}
 		return Format(format)
 	default: // custom format or json or pretty
 		return Format(source)
@@ -47,26 +59,14 @@ func NewApiKeyFormat(source string) Format {
 }
 
 // ApiKeyWrite renders the context for a list of API Keys
-func ApiKeyWrite(ctx Context, keys []ybmclient.ApiKeyData) error {
+func ApiKeyWrite(ctx Context, keys []ApiKeyDataAllowListInfo) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, key := range keys {
-			err := format(&ApiKeyContext{a: key})
+			err := format(&ApiKeyContext{a: *key.ApiKey, allowLists: key.AllowLists})
 			if err != nil {
 				logrus.Debugf("Error rendering API key: %v", err)
 				return err
 			}
-		}
-		return nil
-	}
-	return ctx.Write(NewApiKeyContext(), render)
-}
-
-func SingleApiKeyWrite(ctx Context, key ybmclient.ApiKeyData) error {
-	render := func(format func(subContext SubContext) error) error {
-		err := format(&ApiKeyContext{a: key})
-		if err != nil {
-			logrus.Debugf("Error rendering API key: %v", err)
-			return err
 		}
 		return nil
 	}
@@ -85,6 +85,7 @@ func NewApiKeyContext() *ApiKeyContext {
 		"Issuer":       apiKeyIssuerHeader,
 		"LastUsed":     lastUsedHeader,
 		"CreatedAt":    createdAtHeader,
+		"AllowList":    "Allow List",
 	}
 	return &apiKeyCtx
 }
@@ -119,6 +120,13 @@ func (a *ApiKeyContext) LastUsed() string {
 
 func (a *ApiKeyContext) CreatedAt() string {
 	return a.a.Info.Metadata.Get().GetCreatedOn()
+}
+
+func (a *ApiKeyContext) AllowList() string {
+	if len(a.allowLists) == 0 {
+		return "N/A"
+	}
+	return strings.Join(a.allowLists, ", ")
 }
 
 func (a *ApiKeyContext) MarshalJSON() ([]byte, error) {

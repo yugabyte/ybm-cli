@@ -1,0 +1,51 @@
+{
+    "data": {
+        "spec": {
+            "name": "apikey-1",
+            "description": "",
+            "expire_after_hours": 720,
+            "role_id": "36ec6789-6dbf-4d12-91b4-243587d6882b",
+            "allow_list_info": ["1eaf5552-e2f3-4a28-b215-106667c05178"]
+        },
+        "info": {
+            "id": "4f32f91e-b5fc-462f-8111-134eb813f6d0",
+            "issuer": "admin",
+            "metadata": {
+                "created_on": "2025-01-13T15:55:55.825Z",
+                "updated_on": "2025-01-13T15:55:55.825Z"
+            },
+            "expiry_time": "2025-02-12T15:55:55.824833Z",
+            "status": "ACTIVE",
+            "last_used_time": "Not yet used",
+            "usage_count": 0,
+            "account_id": "531af27a-614c-472f-8edb-a0f9322f0838",
+            "revoked_by_user_id": null,
+            "revoked_by_user_email": null,
+            "revoked_by_api_key_id": null,
+            "revoked_by_api_key_name": null,
+            "revoked_at_time": null,
+            "role": {
+                "spec": {
+                    "name": "account_admin",
+                    "description": "Full access to all operations, including billing and user management",
+                    "permissions": []
+                },
+                "info": {
+                    "id": "36ec6789-6dbf-4d12-91b4-243587d6882b",
+                    "metadata": {
+                        "created_on": "2021-10-19T00:00Z",
+                        "updated_on": "2025-01-13T13:54:21.660Z"
+                    },
+                    "is_active": true,
+                    "is_user_defined": false,
+                    "account_id": "531af27a-614c-472f-8edb-a0f9322f0838",
+                    "effective_permissions": [],
+                    "users": null,
+                    "api_keys": null,
+                    "display_name": "Admin"
+                }
+            }
+        }
+    },
+    "jwt": "test-jwt"
+}
