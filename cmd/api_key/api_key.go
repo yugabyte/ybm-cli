@@ -98,22 +98,19 @@ func addAllowListNameToApiKeyData(apiKeys *[]ybmclient.ApiKeyData, authApi *ybmA
 	apiKeyOutputList := make([]formatter.ApiKeyDataAllowListInfo, 0)
 
 	// For each API key, fetch the allow list(s) associated with it
-	isApiKeyAllowListEnabled := util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST)
 	for _, apiKey := range *apiKeys {
 		apiKeyId := apiKey.GetInfo().Id
 		allowListsNames := make([]string, 0)
 
-		if isApiKeyAllowListEnabled {
-			allowListIds := apiKey.GetSpec().AllowListInfo
-			if allowListIds != nil && len(*allowListIds) > 0 {
-				apiKeyAllowLists, resp, err := authApi.ListApiKeyNetworkAllowLists(apiKeyId).Execute()
-				if err != nil {
-					logrus.Debugf("Full HTTP response: %v", resp)
-					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-				}
-				for _, allowList := range apiKeyAllowLists.GetData() {
-					allowListsNames = append(allowListsNames, allowList.GetSpec().Name)
-				}
+		allowListIds := apiKey.GetSpec().AllowListInfo
+		if allowListIds != nil && len(*allowListIds) > 0 {
+			apiKeyAllowLists, resp, err := authApi.ListApiKeyNetworkAllowLists(apiKeyId).Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", resp)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			}
+			for _, allowList := range apiKeyAllowLists.GetData() {
+				allowListsNames = append(allowListsNames, allowList.GetSpec().Name)
 			}
 		}
 
@@ -197,7 +194,7 @@ var createApiKeyCmd = &cobra.Command{
 			apiKeySpec.SetRoleId(roleId)
 		}
 
-		if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) && cmd.Flags().Changed("network-allow-lists") {
+		if cmd.Flags().Changed("network-allow-lists") {
 			allowLists, _ := cmd.Flags().GetString("network-allow-lists")
 
 			allowListNames := strings.Split(allowLists, ",")
@@ -284,9 +281,7 @@ func init() {
 	createApiKeyCmd.MarkFlagRequired("unit")
 	createApiKeyCmd.Flags().String("description", "", "[OPTIONAL] Description of the API Key to be created.")
 
-	if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) {
-		createApiKeyCmd.Flags().String("network-allow-lists", "", "[OPTIONAL] The network allow lists(comma separated names) to assign to the API key.")
-	}
+	createApiKeyCmd.Flags().String("network-allow-lists", "", "[OPTIONAL] The network allow lists(comma separated names) to assign to the API key.")
 	createApiKeyCmd.Flags().String("role-name", "", "[OPTIONAL] The name of the role to be assigned to the API Key. If not provided, an Admin API Key will be generated.")
 	createApiKeyCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 

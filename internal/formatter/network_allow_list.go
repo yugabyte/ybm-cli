@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	defaultNalListing      = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}\t{{.Clusters}}"
+	defaultNalListing      = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}\t{{.Clusters}}\t{{.ApiKeys}}"
 	networkAllowListHeader = "Allow List"
 )
 
@@ -67,6 +67,7 @@ func NewNetworkAllowListContext() *NetworkAllowListContext {
 		"Clusters":    clustersHeader,
 		"Desc":        descriptionHeader,
 		"Name":        nameHeader,
+		"ApiKeys":     "API keys",
 	}
 	return &nalCtx
 }
@@ -89,6 +90,17 @@ func (c *NetworkAllowListContext) Clusters() string {
 	}
 	return strings.Join(clusterNameList, ",")
 }
+
+func (c *NetworkAllowListContext) ApiKeys() string {
+	var apiKeyNames []string
+	for _, apiKey := range c.c.GetInfo().ApiKeyList {
+		if apiKey.Status != nil && *apiKey.Status == ybmclient.APIKEYSTATUSENUM_ACTIVE {
+			apiKeyNames = append(apiKeyNames, apiKey.Name)
+		}
+	}
+	return strings.Join(apiKeyNames, ",")
+}
+
 func (c *NetworkAllowListContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.c)
 }
