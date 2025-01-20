@@ -43,32 +43,8 @@ var _ = Describe("API Key Management", func() {
 		server.Close()
 	})
 
-	Describe("When listing API keys with allow list FF disabled", func() {
-		It("should hide allow list column", func() {
-			err := loadJson("./test/fixtures/list-api-keys.json", &apiKeyListResponse)
-			Expect(err).ToNot(HaveOccurred())
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/api-keys"),
-					ghttp.RespondWithJSONEncodedPtr(&statusCode, apiKeyListResponse),
-				),
-			)
-			os.Setenv("YBM_FF_API_KEY_ALLOW_LIST", "false")
-			cmd := exec.Command(compiledCLIPath, "api-key", "list")
-			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-
-			Expect(err).NotTo(HaveOccurred())
-			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(`Name       Role      Status    Created By    Date Created               Last Used                     Expiration
-apikey-1   Admin     ACTIVE    user@yb.com   2025-01-13T13:55:14.024Z   2025-01-13T14:21:40.713599Z   2099-12-31T00:00Z
-apikey-2   Admin     ACTIVE    user@yb.com   2025-01-08T09:06:35.077Z   Not yet used                  2025-02-07T09:06:35.077071Z`))
-			session.Kill()
-		})
-	})
-
-	Describe("When listing API keys with allow list FF enabled", func() {
-		It("should show allow list column", func() {
+	Describe("When listing API keys", func() {
+		It("should list api keys", func() {
 			err := loadJson("./test/fixtures/list-api-keys-with-allow-list.json", &apiKeyListResponse)
 			Expect(err).ToNot(HaveOccurred())
 			err = loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
@@ -85,7 +61,6 @@ apikey-2   Admin     ACTIVE    user@yb.com   2025-01-08T09:06:35.077Z   Not yet 
 				),
 			)
 
-			os.Setenv("YBM_FF_API_KEY_ALLOW_LIST", "true")
 			cmd := exec.Command(compiledCLIPath, "api-key", "list")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 
@@ -100,80 +75,38 @@ apikey-2   Admin     ACTIVE    user@yb.com   2025-01-08T09:06:35.077Z   Not yet 
 	})
 
 	Describe("When creating an API key", func() {
-		Context("with allow list feature flag disabled", func() {
-			os.Setenv("YBM_FF_API_KEY_ALLOW_LIST", "false")
+		It("should create API key", func() {
+			err := loadJson("./test/fixtures/get-or-create-api-key.json", &apiKeyResponse)
+			Expect(err).ToNot(HaveOccurred())
+			err = loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
+			Expect(err).ToNot(HaveOccurred())
 
-			It("should error when passing allow list flag", func() {
-				os.Setenv("YBM_FF_API_KEY_ALLOW_LIST", "false")
-				cmd := exec.Command(compiledCLIPath, "api-key", "create", "--name", "apikey-1", "--duration", "30", "--unit", "DAYS", "--network-allow-lists", "device-ip")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/allow-lists"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/api-keys"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, apiKeyResponse),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/allow-lists"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
+				),
+			)
 
-				Expect(err).NotTo(HaveOccurred())
-				session.Wait(2)
-				Expect(session.Err).Should(gbytes.Say(`\bError: unknown flag: --network-allow-lists\b`))
-				session.Kill()
-			})
+			cmd := exec.Command(compiledCLIPath, "api-key", "create", "--name", "apikey-1", "--duration", "30", "--unit", "DAYS", "--network-allow-lists", "device-ip-gween")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 
-			It("should create API key", func() {
-				err := loadJson("./test/fixtures/get-or-create-api-key.json", &apiKeyResponse)
-				Expect(err).ToNot(HaveOccurred())
-
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/api-keys"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, apiKeyResponse),
-					),
-				)
-
-				cmd := exec.Command(compiledCLIPath, "api-key", "create", "--name", "apikey-1", "--duration", "30", "--unit", "DAYS")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-
-				Expect(err).NotTo(HaveOccurred())
-				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say(`Name       Role      Status    Created By   Date Created               Last Used      Expiration
-apikey-1   Admin     ACTIVE    admin        2025-01-13T15:55:55.825Z   Not yet used   2025-02-12T15:55:55.824833Z
-
-API Key: test-jwt`))
-				session.Kill()
-			})
-		})
-
-		Context("with allow list feature flag enabled", func() {
-			It("should create API key", func() {
-				err := loadJson("./test/fixtures/get-or-create-api-key.json", &apiKeyResponse)
-				Expect(err).ToNot(HaveOccurred())
-				err = loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
-				Expect(err).ToNot(HaveOccurred())
-
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/allow-lists"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
-					),
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/api-keys"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, apiKeyResponse),
-					),
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/allow-lists"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
-					),
-				)
-
-				os.Setenv("YBM_FF_API_KEY_ALLOW_LIST", "true")
-				cmd := exec.Command(compiledCLIPath, "api-key", "create", "--name", "apikey-1", "--duration", "30", "--unit", "DAYS", "--network-allow-lists", "device-ip-gween")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-
-				Expect(err).NotTo(HaveOccurred())
-				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say(`Name       Role      Status    Created By   Date Created               Last Used      Expiration                    Allow List
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`Name       Role      Status    Created By   Date Created               Last Used      Expiration                    Allow List
 apikey-1   Admin     ACTIVE    admin        2025-01-13T15:55:55.825Z   Not yet used   2025-02-12T15:55:55.824833Z   device-ip-gween
 
 API Key: test-jwt`))
-				session.Kill()
-			})
+			session.Kill()
 		})
-
 	})
 
 	Describe("When revoking an API key", func() {

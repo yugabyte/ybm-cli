@@ -20,13 +20,11 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
 const (
-	defaultApiKeyListing = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}"
-	apiKeyListingV2      = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}\t{{.AllowList}}"
+	defaultApiKeyListing = "table {{.ApiKeyName}}\t{{.ApiKeyRole}}\t{{.ApiKeyStatus}}\t{{.Issuer}}\t{{.CreatedAt}}\t{{.LastUsed}}\t{{.ExpiryTime}}\t{{.AllowList}}"
 	createdAtHeader      = "Date Created"
 	expiryTimeHeader     = "Expiration"
 	apiKeyRoleHeader     = "Role"
@@ -49,9 +47,6 @@ func NewApiKeyFormat(source string) Format {
 	switch source {
 	case "table", "":
 		format := defaultApiKeyListing
-		if util.IsFeatureFlagEnabled(util.API_KEY_ALLOW_LIST) {
-			format = apiKeyListingV2
-		}
 		return Format(format)
 	default: // custom format or json or pretty
 		return Format(source)
