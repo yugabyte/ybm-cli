@@ -62,7 +62,7 @@ func SinglePitrConfigWrite(ctx Context, pitrConfig ybmclient.DatabasePitrConfigD
 func PitrConfigWrite(ctx Context, pitrConfig []ybmclient.DatabasePitrConfigData) error {
 	//Sort by database name
 	sort.Slice(pitrConfig, func(i, j int) bool {
-		return string(pitrConfig[i].Spec.DatabaseName) < string(pitrConfig[j].Spec.DatabaseName)
+		return string(pitrConfig[i].Info.GetDatabaseName()) < string(pitrConfig[j].Info.GetDatabaseName())
 	})
 
 	render := func(format func(subContext SubContext) error) error {
@@ -92,11 +92,11 @@ func NewPitrConfigContext() *PitrConfigContext {
 }
 
 func (d *PitrConfigContext) Namespace() string {
-	return d.d.Spec.DatabaseName
+	return d.d.Info.GetDatabaseName()
 }
 
 func (d *PitrConfigContext) TableType() string {
-	return string(d.d.Spec.DatabaseType)
+	return string(d.d.Info.GetDatabaseType())
 }
 
 func (d *PitrConfigContext) RetentionPeriodInDays() int32 {

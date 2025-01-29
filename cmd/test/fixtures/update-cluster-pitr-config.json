@@ -1,0 +1,23 @@
+{
+  "data": 
+    {
+      "spec": {
+        "database_id": "00004002-0000-3000-8000-000000000000",
+        "retention_period": 6
+      },
+      "info": {
+        "id": "07de8b5e-ce57-4ab5-8e29-97e57b20e76f",
+        "cluster_id": "95c522b3-dfd8-4654-ab10-99f59179ad7c",
+        "database_type": "YSQL",
+        "database_name": "test_ysql_db",
+        "metadata": {
+          "created_on": "2024-08-03T11:34:06.456Z",
+          "updated_on": "2024-08-03T11:34:06.456Z"
+        },
+        "backup_interval": 86400,
+        "state": "QUEUED",
+        "earliest_recovery_time_millis": 654321,
+        "latest_recovery_time_millis": 987654321
+      }
+    }
+}

@@ -1580,6 +1580,14 @@ func (a *AuthApiClient) DeletePitrConfig(clusterId string, pitrConfigId string) 
 	return a.ApiClient.ClusterApi.RemoveDatabasePitrConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, pitrConfigId)
 }
 
+func (a *AuthApiClient) UpdatePitrConfig(clusterId string, pitrConfigId string) ybmclient.ApiUpdateDatabasePitrConfigRequest {
+	return a.ApiClient.ClusterApi.UpdateDatabasePitrConfig(a.ctx, a.AccountID, a.ProjectID, clusterId, pitrConfigId)
+}
+
+func (a *AuthApiClient) CloneViaPitrConfig(clusterId string) ybmclient.ApiCloneDatabaseRequest {
+	return a.ApiClient.ClusterApi.CloneDatabase(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) PerformConnectionPoolingOperation(clusterId string) ybmclient.ApiPerformConnectionPoolingOperationRequest {
 	return a.ApiClient.ClusterApi.PerformConnectionPoolingOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }

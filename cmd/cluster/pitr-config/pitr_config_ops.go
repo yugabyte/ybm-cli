@@ -120,7 +120,7 @@ var createPitrConfigCmd = &cobra.Command{
 			logrus.Fatal(err)
 		}
 
-		pitrConfigSpecs, err := ParsePitrConfigSpecs(authApi, allPitrConfigSpecs)
+		pitrConfigSpecs, err := ParsePitrConfigSpecs(authApi, clusterID, allPitrConfigSpecs)
 		if err != nil {
 			logrus.Fatalf("Error while parsing PITR Config specs: %s", ybmAuthClient.GetApiErrorDetails(err))
 			return
@@ -167,14 +167,21 @@ var createPitrConfigCmd = &cobra.Command{
 }
 
 // Parse array of PITR config spec string to params
-func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, configSpecs []string) ([]ybmclient.DatabasePitrConfigSpec, error) {
+func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, clusterID string, configSpecs []string) ([]ybmclient.DatabasePitrConfigSpec, error) {
 	var err error
 	pitrConfigSpecs := []ybmclient.DatabasePitrConfigSpec{}
+	namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+	}
 
 	for _, configSpec := range configSpecs {
 		var namespaceNameProvided bool
 		var namespaceTypeProvided bool
 		var retentionPeriodProvided bool
+		var namespaceName string
+		var namespaceType string
 		spec := *ybmclient.NewDatabasePitrConfigSpecWithDefaults()
 		configSpec := strings.ReplaceAll(configSpec, " ", "")
 
@@ -192,13 +199,13 @@ func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, configSpecs []st
 				if len(val) == 0 {
 					return nil, fmt.Errorf("Namespace name must be provided.")
 				}
-				spec.SetDatabaseName(val)
+				namespaceName = val
 				namespaceNameProvided = true
 			case "namespace-type":
 				if !(val == "YCQL" || val == "YSQL") {
 					return nil, fmt.Errorf("Only YCQL or YSQL namespace types are allowed.")
 				}
-				spec.SetDatabaseType(ybmclient.YbApiEnum(val))
+				namespaceType = val
 				namespaceTypeProvided = true
 			case "retention-period-in-days":
 				n, err = strconv.Atoi(val)
@@ -217,6 +224,8 @@ func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, configSpecs []st
 		if !(namespaceNameProvided && namespaceTypeProvided && retentionPeriodProvided) {
 			return nil, fmt.Errorf("namespace-name, namespace-type and retention-period-in-days must be provided for each PITR Config to be created")
 		}
+		namespaceId := requireNamespace(authApi, namespacesResp, namespaceName, namespaceType)
+		spec.SetDatabaseId(namespaceId)
 		pitrConfigSpecs = append(pitrConfigSpecs, spec)
 	}
 
@@ -328,6 +337,112 @@ var deletePitrConfigCmd = &cobra.Command{
 	},
 }
 
+var updatePitrConfigCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update PITR Config for a cluster",
+	Long:  "Update PITR Config for a cluster in YugabyteDB Aeon",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		namespaceType, _ := cmd.Flags().GetString("namespace-type")
+		retentionPeriod, _ := cmd.Flags().GetInt32("retention-period-in-days")
+		validateNamespaceNameType(namespaceName, namespaceType)
+		err := util.ConfirmCommand(fmt.Sprintf("Are you sure you want to update PITR Configuration for the %s namespace: %s in cluster: %s to have a retention period of %d days", namespaceType, namespaceName, ClusterName, retentionPeriod), viper.GetBool("force"))
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		namespaceType, _ := cmd.Flags().GetString("namespace-type")
+		retentionPeriod, _ := cmd.Flags().GetInt32("retention-period-in-days")
+		validateNamespaceNameType(namespaceName, namespaceType)
+		if retentionPeriod < 2 {
+			logrus.Fatalln("Minimum retention period is 2 days")
+		}
+		pitrConfigId := requirePitrConfig(authApi, clusterID, namespaceName, namespaceType)
+
+		updatePitrConfigSpec := ybmclient.NewUpdateDatabasePitrConfigSpec(retentionPeriod)
+
+		_, r, err := authApi.UpdatePitrConfig(clusterID, pitrConfigId).UpdateDatabasePitrConfigSpec(*updatePitrConfigSpec).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		msg := fmt.Sprintf("The PITR Configuration for %s namespace %s in cluster %s is being updated.\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_UPDATE_DB_PITR)
+			fmt.Printf("\nSuccessfully updated PITR Configuration for %s namespace %s in cluster %s.\n\n", namespaceType, namespaceName, ClusterName)
+		} else {
+			fmt.Println(msg)
+		}
+	},
+}
+
+var clonePitrConfigCmd = &cobra.Command{
+	Use:   "clone",
+	Short: "Clone namespace via PITR Config for a cluster",
+	Long:  "Clone namespace via PITR Config for a cluster in YugabyteDB Aeon",
+	Run: func(cmd *cobra.Command, args []string) {
+		authApi, err := ybmAuthClient.NewAuthApiClient()
+		if err != nil {
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		authApi.GetInfo("", "")
+		clusterID, err := authApi.GetClusterIdByName(ClusterName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		namespaceName, _ := cmd.Flags().GetString("namespace-name")
+		namespaceType, _ := cmd.Flags().GetString("namespace-type")
+		validateNamespaceNameType(namespaceName, namespaceType)
+		cloneAs, _ := cmd.Flags().GetString("clone-as")
+		cloneSpec := ybmclient.NewDatabaseCloneSpec()
+		if cmd.Flags().Lookup("clone-at-millis").Changed {
+			// We can only clone to PIT if a config is present for the {namespaceName, namespaceType}
+			pitrConfigId := requirePitrConfig(authApi, clusterID, namespaceName, namespaceType)
+			cloneAtMillis, _ := cmd.Flags().GetInt64("clone-at-millis")
+			cloneSpec.SetClonePointInTime(*ybmclient.NewDatabaseClonePITSpec(cloneAtMillis, pitrConfigId, cloneAs))
+		} else {
+			namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
+			if err != nil {
+				logrus.Debugf("Full HTTP response: %v", r)
+				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			}
+			namespaceId := requireNamespace(authApi, namespacesResp, namespaceName, namespaceType)
+			cloneSpec.SetCloneNow(*ybmclient.NewDatabaseCloneNowSpec(namespaceId, cloneAs))
+		}
+
+		_, r, err := authApi.CloneViaPitrConfig(clusterID).DatabaseCloneSpec(*cloneSpec).Execute()
+		if err != nil {
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+
+		msg := fmt.Sprintf("The %s namespace %s in cluster %s is being cloned via PITR Configuration.\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
+
+		if viper.GetBool("wait") {
+			handleTaskCompletion(authApi, clusterID, msg, ybmclient.TASKTYPEENUM_CLONE_DB_PITR)
+			fmt.Printf("\nSuccessfully cloned %s namespace %s in cluster %s.\n\n", namespaceType, namespaceName, ClusterName)
+		} else {
+			fmt.Println(msg)
+		}
+	},
+}
+
 func validateNamespaceNameType(namespaceName string, namespaceType string) {
 	if len(namespaceName) == 0 {
 		logrus.Fatalln("Namespace name must be provided.")
@@ -338,6 +453,13 @@ func validateNamespaceNameType(namespaceName string, namespaceType string) {
 }
 
 func requirePitrConfig(authApi *ybmAuthClient.AuthApiClient, clusterID string, namespaceName string, namespaceType string) string {
+	namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+	}
+	namespaceId := requireNamespace(authApi, namespacesResp, namespaceName, namespaceType)
+
 	var pitrConfigId string
 	listConfigsResp, listConfigsResponse, listConfigsError := authApi.ListClusterPitrConfigs(clusterID).Execute()
 	if listConfigsError != nil {
@@ -346,7 +468,7 @@ func requirePitrConfig(authApi *ybmAuthClient.AuthApiClient, clusterID string, n
 	}
 
 	for _, pitrConfig := range listConfigsResp.GetData() {
-		if pitrConfig.Spec.DatabaseName == namespaceName && pitrConfig.Spec.DatabaseType == ybmclient.YbApiEnum(namespaceType) {
+		if pitrConfig.Spec.DatabaseId == namespaceId {
 			pitrConfigId = *pitrConfig.Info.Id
 			break
 		}
@@ -356,6 +478,27 @@ func requirePitrConfig(authApi *ybmAuthClient.AuthApiClient, clusterID string, n
 		logrus.Fatalf("No PITR Configs found for %s namespace %s in cluster %s.\n", namespaceType, namespaceName, ClusterName)
 	}
 	return pitrConfigId
+}
+
+func requireNamespace(authApi *ybmAuthClient.AuthApiClient, namespacesResp ybmclient.ClusterNamespacesListResponse, namespaceName string, namespaceType string) string {
+	var namespaceId string
+
+	for _, namespace := range namespacesResp.Data {
+		if namespace.GetName() == namespaceName && namespace.GetTableType() == GetNamespaceTypeMap()[namespaceType] {
+			namespaceId = namespace.GetId()
+		}
+	}
+	if len(namespaceId) == 0 {
+		logrus.Fatalf("No %s namespace found with name %s in cluster %s.\n", namespaceType, namespaceName, ClusterName)
+	}
+	return namespaceId
+}
+
+func GetNamespaceTypeMap() map[string]string {
+	return map[string]string{
+		"YSQL": "PGSQL_TABLE_TYPE",
+		"YCQL": "YQL_TABLE_TYPE",
+	}
 }
 
 func handleTaskCompletion(authApi *ybmAuthClient.AuthApiClient, clusterID string, msg string, taskType ybmclient.TaskTypeEnum) {
@@ -399,4 +542,23 @@ func init() {
 	deletePitrConfigCmd.MarkFlagRequired("namespace-type")
 	deletePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
+	util.AddCommandIfFeatureFlag(PitrConfigCmd, updatePitrConfigCmd, util.PITR_CONFIG)
+	updatePitrConfigCmd.Flags().SortFlags = false
+	updatePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be restored via PITR Config.")
+	updatePitrConfigCmd.MarkFlagRequired("namespace-name")
+	updatePitrConfigCmd.Flags().String("namespace-type", "", "[REQUIRED] The type of the namespace. Available options are YCQL and YSQL")
+	updatePitrConfigCmd.MarkFlagRequired("namespace-type")
+	updatePitrConfigCmd.Flags().Int32("retention-period-in-days", 2, "[REQUIRED] The retention period of the snapshots from the PITR Config")
+	updatePitrConfigCmd.MarkFlagRequired("retention-period-in-days")
+	updatePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
+
+	util.AddCommandIfFeatureFlag(PitrConfigCmd, clonePitrConfigCmd, util.PITR_CLONE)
+	clonePitrConfigCmd.Flags().SortFlags = false
+	clonePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be cloned via PITR Config.")
+	clonePitrConfigCmd.MarkFlagRequired("namespace-name")
+	clonePitrConfigCmd.Flags().String("namespace-type", "", "[REQUIRED] The type of the namespace. Available options are YCQL and YSQL")
+	clonePitrConfigCmd.MarkFlagRequired("namespace-type")
+	clonePitrConfigCmd.Flags().String("clone-as", "", "[REQUIRED] The name of the cloned namespace.")
+	clonePitrConfigCmd.MarkFlagRequired("clone-as")
+	clonePitrConfigCmd.Flags().String("clone-at-millis", "", "[OPTIONAL] The time in milliseconds to which the namespace is to be cloned. If not provided, the current state is cloned.")
 }
