@@ -1,0 +1,23 @@
+{
+    "data": {
+      "spec": {
+        "clone_now": null,
+        "clone_point_in_time": {
+            "pitr_config_id": "07de8b5e-ce57-4ab5-8e29-97e57b20e76f",
+            "clone_at_millis": 4567,
+            "clone_as": "test_ysql_db_clone"
+        }
+      },
+      "info": {
+        "cluster_id": "5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8",
+        "metadata": {
+          "updated_on": "2024-08-07T17:26:08.435Z",
+          "created_on": "2024-08-07T17:26:08.435Z"
+        },
+        "database_type": "YSQL",
+        "database_name": "test_ysql_db",
+        "id": "8e74ca8f-331b-4dec-89b0-4e59b81e905d",
+        "state": "QUEUED"
+      }
+    }
+  }

@@ -224,7 +224,7 @@ func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, clusterID string
 		if !(namespaceNameProvided && namespaceTypeProvided && retentionPeriodProvided) {
 			return nil, fmt.Errorf("namespace-name, namespace-type and retention-period-in-days must be provided for each PITR Config to be created")
 		}
-		namespaceId := requireNamespace(authApi, namespacesResp, namespaceName, namespaceType)
+		namespaceId := requireNamespace(namespacesResp, namespaceName, namespaceType)
 		spec.SetDatabaseId(namespaceId)
 		pitrConfigSpecs = append(pitrConfigSpecs, spec)
 	}
@@ -411,25 +411,35 @@ var clonePitrConfigCmd = &cobra.Command{
 		validateNamespaceNameType(namespaceName, namespaceType)
 		cloneAs, _ := cmd.Flags().GetString("clone-as")
 		cloneSpec := ybmclient.NewDatabaseCloneSpec()
-		if cmd.Flags().Lookup("clone-at-millis").Changed {
-			// We can only clone to PIT if a config is present for the {namespaceName, namespaceType}
-			pitrConfigId := requirePitrConfig(authApi, clusterID, namespaceName, namespaceType)
-			cloneAtMillis, _ := cmd.Flags().GetInt64("clone-at-millis")
-			cloneSpec.SetClonePointInTime(*ybmclient.NewDatabaseClonePITSpec(cloneAtMillis, pitrConfigId, cloneAs))
-		} else {
-			namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
-			if err != nil {
-				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-			}
-			namespaceId := requireNamespace(authApi, namespacesResp, namespaceName, namespaceType)
-			cloneSpec.SetCloneNow(*ybmclient.NewDatabaseCloneNowSpec(namespaceId, cloneAs))
-		}
 
-		_, r, err := authApi.CloneViaPitrConfig(clusterID).DatabaseCloneSpec(*cloneSpec).Execute()
+		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		}
+		namespaceId := requireNamespace(namespacesResp, namespaceName, namespaceType)
+		pitrConfigId := checkPitrConfigExists(authApi, clusterID, namespaceId)
+		if len(pitrConfigId) == 0 {
+			// No PITR config exists, so we create one and clone to current time.
+			// "clone-at-millis" argument should not be provided in this case.
+			if cmd.Flags().Lookup("clone-at-millis").Changed {
+				logrus.Fatalf("A PITR Config doesn't exist for %s namespace %s in cluster %s. So clone-at-millis parameter must not be specified\n", namespaceType, namespaceName, ClusterName)
+			}
+			cloneSpec.SetCloneNow(*ybmclient.NewDatabaseCloneNowSpec(namespaceId, cloneAs))
+		} else {
+			// We can only clone to PIT if a config is present for the {namespaceName, namespaceType}
+			if cmd.Flags().Lookup("clone-at-millis").Changed {
+				cloneAtMillis, _ := cmd.Flags().GetInt64("clone-at-millis")
+				cloneSpec.SetClonePointInTime(*ybmclient.NewDatabaseClonePITSpec(cloneAtMillis, pitrConfigId, cloneAs))
+			} else {
+				logrus.Fatalf("clone-at-millis parameter must be specified to clone via existing PITR config for %s namespace %s in cluster %s\n", namespaceType, namespaceName, ClusterName)
+			}
+		}
+
+		_, cloneResp, cloneErr := authApi.CloneViaPitrConfig(clusterID).DatabaseCloneSpec(*cloneSpec).Execute()
+		if cloneErr != nil {
+			logrus.Debugf("Full HTTP response: %v", cloneResp)
+			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(cloneErr))
 		}
 
 		msg := fmt.Sprintf("The %s namespace %s in cluster %s is being cloned via PITR Configuration.\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
@@ -452,14 +462,7 @@ func validateNamespaceNameType(namespaceName string, namespaceType string) {
 	}
 }
 
-func requirePitrConfig(authApi *ybmAuthClient.AuthApiClient, clusterID string, namespaceName string, namespaceType string) string {
-	namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
-	if err != nil {
-		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
-	}
-	namespaceId := requireNamespace(authApi, namespacesResp, namespaceName, namespaceType)
-
+func checkPitrConfigExists(authApi *ybmAuthClient.AuthApiClient, clusterID string, namespaceId string) string {
 	var pitrConfigId string
 	listConfigsResp, listConfigsResponse, listConfigsError := authApi.ListClusterPitrConfigs(clusterID).Execute()
 	if listConfigsError != nil {
@@ -473,14 +476,24 @@ func requirePitrConfig(authApi *ybmAuthClient.AuthApiClient, clusterID string, n
 			break
 		}
 	}
+	return pitrConfigId
+}
 
+func requirePitrConfig(authApi *ybmAuthClient.AuthApiClient, clusterID string, namespaceName string, namespaceType string) string {
+	namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
+	if err != nil {
+		logrus.Debugf("Full HTTP response: %v", r)
+		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+	}
+	namespaceId := requireNamespace(namespacesResp, namespaceName, namespaceType)
+	pitrConfigId := checkPitrConfigExists(authApi, clusterID, namespaceId)
 	if len(pitrConfigId) == 0 {
 		logrus.Fatalf("No PITR Configs found for %s namespace %s in cluster %s.\n", namespaceType, namespaceName, ClusterName)
 	}
 	return pitrConfigId
 }
 
-func requireNamespace(authApi *ybmAuthClient.AuthApiClient, namespacesResp ybmclient.ClusterNamespacesListResponse, namespaceName string, namespaceType string) string {
+func requireNamespace(namespacesResp ybmclient.ClusterNamespacesListResponse, namespaceName string, namespaceType string) string {
 	var namespaceId string
 
 	for _, namespace := range namespacesResp.Data {
