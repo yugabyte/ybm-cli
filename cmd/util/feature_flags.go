@@ -35,6 +35,7 @@ const (
 	PITR_RESTORE        FeatureFlag = "PITR_RESTORE"
 	CONNECTION_POOLING  FeatureFlag = "CONNECTION_POOLING"
 	DR                  FeatureFlag = "DR"
+	PITR_CLONE          FeatureFlag = "PITR_CLONE"
 )
 
 func (f FeatureFlag) String() string {

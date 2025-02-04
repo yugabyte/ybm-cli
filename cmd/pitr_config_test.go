@@ -23,10 +23,13 @@ var _ = Describe("PITR Configs Test", func() {
 		responseAccount              openapi.AccountListResponse
 		responseProject              openapi.AccountListResponse
 		responseListCluster          openapi.ClusterListResponse
+		responseNamespace            openapi.ClusterNamespacesListResponse
 		responseListPITRConfig       openapi.ClusterPitrConfigListResponse
 		responseGetPITRConfig        openapi.DatabasePitrConfigResponse
 		responseCreatePITRConfig     openapi.BulkCreateDatabasePitrConfigResponse
+		responseUpdatePITRConfig     openapi.UpdateDatabasePitrConfigResponse
 		responseRestoreViaPITRConfig openapi.RestoreDatabaseViaPitrResponse
+		responseClone                openapi.DatabaseCloneResponse
 	)
 
 	BeforeEach(func() {
@@ -89,7 +92,15 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 
 	var _ = Describe("Create PITR config", func() {
 		It("Should successfully create PITR config", func() {
-			err := loadJson("./test/fixtures/create-cluster-pitr-config.json", &responseCreatePITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/create-cluster-pitr-config.json", &responseCreatePITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -106,6 +117,14 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should fail if invalid namespace type in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=PGSQL, retention-period-in-days=5")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -115,6 +134,14 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should fail if empty namespace name in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=, namespace-type=YSQL, retention-period-in-days=5", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -124,6 +151,14 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should fail if invalid key value pairs in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name test_ysql_db, namespace-type=YSQL, retention-period-in-days=5", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -133,6 +168,14 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should fail if all required params are not in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL ", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -142,6 +185,14 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should fail if non int retention period in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL, retention-period-in-days=five", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -151,6 +202,14 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should fail if less than one day retention period in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL, retention-period-in-days=1", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -163,7 +222,15 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 	var _ = Describe("Restore cluster namespace via PITR config", func() {
 		It("Should successfully restore YSQL namespace via PITR Config", func() {
 			os.Setenv("YBM_FF_PITR_RESTORE", "true")
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -190,7 +257,15 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 
 		It("Should successfully restore YCQL namespace via PITR Config", func() {
 			os.Setenv("YBM_FF_PITR_RESTORE", "true")
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -217,7 +292,15 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 
 		It("Should fail if invalid namespace name and type combination is provided", func() {
 			os.Setenv("YBM_FF_PITR_RESTORE", "true")
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -229,14 +312,22 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("No PITR Configs found for YCQL namespace test_ysql_db in cluster stunning-sole.\n"))
+			Expect(session.Err).Should(gbytes.Say("No YCQL namespace found with name test_ysql_db in cluster stunning-sole.\n"))
 			session.Kill()
 		})
 	})
 
 	var _ = Describe("Describe Cluster PITR Config", func() {
 		It("Should successfully describe PITR Configs for the YSQL namespace in the cluster", func() {
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -263,7 +354,15 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 		})
 
 		It("Should successfully describe PITR Configs for the YCQL namespace in the cluster", func() {
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -290,6 +389,14 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 		})
 
 		It("should fail if no PITR Configs found for the cluster", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			responseListPITRConfig = *openapi.NewClusterPitrConfigListResponse()
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -301,12 +408,20 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("No PITR Configs found for YCQL namespace different-db in cluster stunning-sole.\n"))
+			Expect(session.Err).Should(gbytes.Say("No YCQL namespace found with name different-db in cluster stunning-sole.\n"))
 			session.Kill()
 		})
 
 		It("Should fail if invalid namespace name and type combination is provided", func() {
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -319,14 +434,22 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("No PITR Configs found for YCQL namespace test_ysql_db in cluster stunning-sole.\n"))
+			Expect(session.Err).Should(gbytes.Say("No YCQL namespace found with name test_ysql_db in cluster stunning-sole.\n"))
 			session.Kill()
 		})
 	})
 
 	var _ = Describe("Delete Cluster PITR Config", func() {
 		It("Should successfully delete PITR Configs for the YSQL namespace in the cluster", func() {
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -351,7 +474,15 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 		})
 
 		It("Should successfully delete PITR Configs for the YCQL namespace in the cluster", func() {
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -376,7 +507,15 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 		})
 
 		It("Should fail if invalid namespace name and type combination is provided", func() {
-			err := loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -389,11 +528,19 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("No PITR Configs found for YCQL namespace test_ysql_db in cluster stunning-sole.\n"))
+			Expect(session.Err).Should(gbytes.Say("No YCQL namespace found with name test_ysql_db in cluster stunning-sole.\n"))
 			session.Kill()
 		})
 
 		It("should fail if no PITR Configs found for the cluster", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
 			responseListPITRConfig = *openapi.NewClusterPitrConfigListResponse()
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -405,7 +552,248 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("No PITR Configs found for YCQL namespace different-db in cluster stunning-sole.\n"))
+			Expect(session.Err).Should(gbytes.Say("No YCQL namespace found with name different-db in cluster stunning-sole.\n"))
+			session.Kill()
+		})
+	})
+
+	var _ = Describe("Update PITR config", func() {
+		It("Should successfully update PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+			err = loadJson("./test/fixtures/update-cluster-pitr-config.json", &responseUpdatePITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs/07de8b5e-ce57-4ab5-8e29-97e57b20e76f"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseUpdatePITRConfig),
+				),
+			)
+
+			ysqlCmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "update", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YSQL", "--retention-period-in-days", "6", "--force")
+			ysqlSession, ysqlErr := gexec.Start(ysqlCmd, GinkgoWriter, GinkgoWriter)
+			Expect(ysqlErr).NotTo(HaveOccurred())
+			ysqlSession.Wait(2)
+			Expect(ysqlSession.Out).Should(gbytes.Say("The PITR Configuration for YSQL namespace test_ysql_db in cluster stunning-sole is being updated."))
+			ysqlSession.Kill()
+		})
+
+		It("Should fail if invalid namespace name and type combination is provided", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "update", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YCQL", "--retention-period-in-days", "6", "--force")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("No YCQL namespace found with name test_ysql_db in cluster stunning-sole.\n"))
+			session.Kill()
+		})
+
+		It("Should fail if less than one day retention period in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "update", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YSQL", "--retention-period-in-days", "1", "--force")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("Minimum retention period is 2 days"))
+			session.Kill()
+		})
+	})
+
+	var _ = Describe("Clone cluster namespace via PITR config", func() {
+		It("Should successfully clone YSQL namespace via pre existing PITR Config", func() {
+			os.Setenv("YBM_FF_PITR_CLONE", "true")
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+			restoreErr := loadJson("./test/fixtures/clone-ysql-database-via-pitr-config.json", &responseClone)
+			Expect(restoreErr).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/clone-database"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseClone),
+				),
+			)
+
+			ysqlCmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "clone", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YSQL", "--clone-as", "test_ysql_db_clone", "--clone-at-millis", "4567")
+			ysqlSession, ysqlErr := gexec.Start(ysqlCmd, GinkgoWriter, GinkgoWriter)
+			Expect(ysqlErr).NotTo(HaveOccurred())
+			ysqlSession.Wait(2)
+			Expect(ysqlSession.Out).Should(gbytes.Say("The YSQL namespace test_ysql_db in cluster stunning-sole is being cloned via PITR Configuration."))
+			ysqlSession.Kill()
+		})
+
+		It("Should fail to clone YSQL namespace via pre existing PITR Config if clone time is not specified", func() {
+			os.Setenv("YBM_FF_PITR_CLONE", "true")
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+
+			ysqlCmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "clone", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YSQL", "--clone-as", "test_ysql_db_clone")
+			ysqlSession, ysqlErr := gexec.Start(ysqlCmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(ysqlErr).NotTo(HaveOccurred())
+			ysqlSession.Wait(2)
+			Expect(ysqlSession.Err).Should(gbytes.Say("clone-at-millis parameter must be specified to clone via existing PITR config for YSQL namespace test_ysql_db in cluster stunning-sole"))
+			ysqlSession.Kill()
+		})
+
+		It("Should successfully clone YSQL namespace to current time with no pre existing PITR Config", func() {
+			os.Setenv("YBM_FF_PITR_CLONE", "true")
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+			restoreErr := loadJson("./test/fixtures/clone-now-ysql-database.json", &responseClone)
+			Expect(restoreErr).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/clone-database"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseClone),
+				),
+			)
+
+			ysqlCmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "clone", "--cluster-name", "stunning-sole", "--namespace-name", "yugabyte", "--namespace-type", "YSQL", "--clone-as", "test_yugabyte_clone")
+			ysqlSession, ysqlErr := gexec.Start(ysqlCmd, GinkgoWriter, GinkgoWriter)
+			Expect(ysqlErr).NotTo(HaveOccurred())
+			ysqlSession.Wait(2)
+			Expect(ysqlSession.Out).Should(gbytes.Say("The YSQL namespace yugabyte in cluster stunning-sole is being cloned via PITR Configuration."))
+			ysqlSession.Kill()
+		})
+
+		It("Should fail to clone YSQL namespace to current time with no pre existing PITR Config if clone time is specified", func() {
+			os.Setenv("YBM_FF_PITR_CLONE", "true")
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+
+			ysqlCmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "clone", "--cluster-name", "stunning-sole", "--namespace-name", "yugabyte", "--namespace-type", "YSQL", "--clone-as", "test_ysql_db_clone", "--clone-at-millis", "4567")
+			ysqlSession, ysqlErr := gexec.Start(ysqlCmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(ysqlErr).NotTo(HaveOccurred())
+			ysqlSession.Wait(2)
+			Expect(ysqlSession.Err).Should(gbytes.Say("A PITR Config doesn't exist for YSQL namespace yugabyte in cluster stunning-sole. So clone-at-millis parameter must not be specified"))
+			ysqlSession.Kill()
+		})
+
+		It("Should fail if invalid namespace name and type combination is provided", func() {
+			os.Setenv("YBM_FF_PITR_CLONE", "true")
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "clone", "--cluster-name", "stunning-sole", "--namespace-name", "yugabyte", "--namespace-type", "YCQL", "--clone-as", "test_yugabyte_clone")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("No YCQL namespace found with name yugabyte in cluster stunning-sole.\n"))
 			session.Kill()
 		})
 	})
