@@ -18,8 +18,6 @@ package dr
 import (
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,10 +39,6 @@ var failoverDrCmd = &cobra.Command{
 		authApi.GetInfo("", "")
 
 		drName, _ := cmd.Flags().GetString("config")
-		safetimes, _ := cmd.Flags().GetStringArray("safetimes")
-		if err != nil {
-			logrus.Fatalf("Could not get cluster data: %s", ybmAuthClient.GetApiErrorDetails(err))
-		}
 		drInfo, err := authApi.GetDrDetailsByName(drName)
 		if err != nil {
 			logrus.Fatal(err)
@@ -62,31 +56,8 @@ var failoverDrCmd = &cobra.Command{
 			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
 		}
 
-		safetimesMap := map[string]int64{}
-		for _, safetimesString := range safetimes {
-			for _, safetime := range strings.Split(safetimesString, ",") {
-				kvp := strings.Split(safetime, "=")
-				if len(kvp) != 2 {
-					logrus.Fatalln("Incorrect format in safetime")
-				}
-				database := kvp[0]
-				if databaseId, exists := dbNameToIdMap[database]; exists {
-					safetimeInMinString := kvp[1]
-					safetimeInMin, err := strconv.Atoi(safetimeInMinString)
-					if err != nil {
-						logrus.Fatalln("Error:", err)
-					}
-					safetimesMap[databaseId] = int64(safetimeInMin)
-				} else {
-					logrus.Fatalf("The database %s doesn't exist", database)
-				}
-			}
-		}
-
 		drFailoverRequest := ybmclient.NewDrFailoverRequestWithDefaults()
-		if len(safetimes) != 0 {
-			drFailoverRequest.SetNamespaceSafeTimes(safetimesMap)
-		}
+
 		response, err := authApi.FailoverXClusterDr(clusterId, drId).DrFailoverRequest(*drFailoverRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
@@ -127,5 +98,4 @@ func init() {
 	DrCmd.AddCommand(failoverDrCmd)
 	failoverDrCmd.Flags().String("config", "", "[REQUIRED] Name of the DR configuration.")
 	failoverDrCmd.MarkFlagRequired("config")
-	failoverDrCmd.Flags().StringArray("safetimes", []string{}, "[OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<epoch-safe-time>,<db-name-2>=<epoch-safe-time>.")
 }

@@ -13,9 +13,8 @@ ybm dr failover [flags]
 ### Options
 
 ```
-      --config string           [REQUIRED] Name of the DR configuration.
-  -h, --help                    help for failover
-      --safetimes stringArray   [OPTIONAL] Safetimes of the DR configuation.  Please provide key value pairs <db-name-1>=<epoch-safe-time>,<db-name-2>=<epoch-safe-time>.
+      --config string   [REQUIRED] Name of the DR configuration.
+  -h, --help            help for failover
 ```
 
 ### Options inherited from parent commands
