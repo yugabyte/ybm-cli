@@ -14,6 +14,7 @@ ybm dr config delete [flags]
 
 ```
       --config string   [REQUIRED] Name of the DR configuration
+  -f, --force           Bypass the prompt for non-interactive usage
   -h, --help            help for delete
 ```
 
