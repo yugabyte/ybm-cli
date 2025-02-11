@@ -56,9 +56,7 @@ var failoverDrCmd = &cobra.Command{
 			dbNameToIdMap[namespace.GetName()] = namespace.GetId()
 		}
 
-		drFailoverRequest := ybmclient.NewDrFailoverRequestWithDefaults()
-
-		response, err := authApi.FailoverXClusterDr(clusterId, drId).DrFailoverRequest(*drFailoverRequest).Execute()
+		response, err := authApi.FailoverXClusterDr(clusterId, drId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
