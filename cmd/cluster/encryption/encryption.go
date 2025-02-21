@@ -121,7 +121,7 @@ var updateCmkState = &cobra.Command{
 			cmkStatusDisplay = "ENABLED"
 		}
 
-		fmt.Printf("Successfully %s encryption spec status for cluster %s\n", formatter.Colorize(cmkStatusDisplay, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("Successfully %s encryption at rest status for cluster %s\n", formatter.Colorize(cmkStatusDisplay, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
@@ -154,7 +154,7 @@ var updateCmk = &cobra.Command{
 			logrus.Debugf("Full HTTP response: %v", res)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
 		}
-		fmt.Printf("Successfully updated encryption spec for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
+		fmt.Printf("Successfully updated encryption at rest for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},
 }
 
