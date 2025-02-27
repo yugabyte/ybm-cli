@@ -146,6 +146,10 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 	return projectData[0].Info.Id, nil
 }
 
+func optionalClusterNodeInfoEquals(left ybmclient.OptionalClusterNodeInfo, right ybmclient.OptionalClusterNodeInfo) bool {
+	return left.MemoryMb == right.MemoryMb && left.NumCores == right.NumCores && left.DiskSizeGb == right.DiskSizeGb && left.HasDiskIops() == right.HasDiskIops() && left.GetDiskIops() == right.GetDiskIops()
+}
+
 func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []map[string]string, regionNodeConfigsMap map[string][]ybmclient.NodeConfigurationResponseItem) (*ybmclient.ClusterSpec, error) {
 
 	var trackId string
@@ -355,7 +359,7 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		r := regionInfo.GetPlacementInfo().CloudInfo.Region
 		clusterRegionInfo[i].SetNodeInfo(*regionNodeInfoMap[r])
 		logrus.Debugf("region=%s, node-info=%v\n", r, clusterRegionInfo[i].GetNodeInfo())
-		if currRegionNodeInfo != nil && !geoPartitioned && *currRegionNodeInfo != clusterRegionInfo[i].GetNodeInfo() {
+		if currRegionNodeInfo != nil && !geoPartitioned && !optionalClusterNodeInfoEquals(*currRegionNodeInfo, clusterRegionInfo[i].GetNodeInfo()) {
 			// Asymmetric node configurations are only allowed for geo-partitioned clusters.
 			logrus.Fatalln("Synchronous cluster regions must have identical node configurations")
 		}
