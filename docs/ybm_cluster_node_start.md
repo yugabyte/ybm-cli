@@ -1,20 +1,21 @@
-## ybm cluster node
+## ybm cluster node start
 
-Manage nodes for a cluster
+start a cluster node
 
 ### Synopsis
 
-Manage nodes for a cluster
+start a cluster node
 
 ```
-ybm cluster node [flags]
+ybm cluster node start [flags]
 ```
 
 ### Options
 
 ```
-  -c, --cluster-name string   [REQUIRED] The name of the cluster.
-  -h, --help                  help for node
+      --cluster-name string   [REQUIRED] The name of the cluster to get details.
+  -h, --help                  help for start
+      --node-name string      [REQUIRED] The name of the node to stop.
 ```
 
 ### Options inherited from parent commands
@@ -32,8 +33,5 @@ ybm cluster node [flags]
 
 ### SEE ALSO
 
-* [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
-* [ybm cluster node list](ybm_cluster_node_list.md)	 - List nodes for a cluster
-* [ybm cluster node start](ybm_cluster_node_start.md)	 - start a cluster node
-* [ybm cluster node stop](ybm_cluster_node_stop.md)	 - Stop a cluster node
+* [ybm cluster node](ybm_cluster_node.md)	 - Manage nodes for a cluster
 
