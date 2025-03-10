@@ -71,8 +71,8 @@ var stopNodeCmd = &cobra.Command{
 
 var startNodeCmd = &cobra.Command{
 	Use:   "start",
-	Short: "start a cluster node",
-	Long:  "start a cluster node",
+	Short: "Start a cluster node",
+	Long:  "Start a cluster node",
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {

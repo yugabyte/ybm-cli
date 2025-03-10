@@ -34,6 +34,6 @@ ybm cluster node [flags]
 
 * [ybm cluster](ybm_cluster.md)	 - Manage cluster operations
 * [ybm cluster node list](ybm_cluster_node_list.md)	 - List nodes for a cluster
-* [ybm cluster node start](ybm_cluster_node_start.md)	 - start a cluster node
+* [ybm cluster node start](ybm_cluster_node_start.md)	 - Start a cluster node
 * [ybm cluster node stop](ybm_cluster_node_stop.md)	 - Stop a cluster node
 

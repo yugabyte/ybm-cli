@@ -1,10 +1,10 @@
 ## ybm cluster node start
 
-start a cluster node
+Start a cluster node
 
 ### Synopsis
 
-start a cluster node
+Start a cluster node
 
 ```
 ybm cluster node start [flags]
