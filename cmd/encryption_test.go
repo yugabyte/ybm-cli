@@ -163,12 +163,12 @@ AZURE      8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b   -              https://test-az
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
-				Expect(session.Out).Should(gbytes.Say("Successfully updated encryption spec for cluster stunning-sole"))
+				Expect(session.Out).Should(gbytes.Say("Successfully updated encryption at rest for cluster stunning-sole"))
 				session.Kill()
 			})
 		}
 
-		It("should fail if invalid cloud provider in encryption spec", func() {
+		It("should fail if invalid cloud provider in encryption at rest", func() {
 			cmd := exec.Command(compiledCLIPath, "cluster", "encryption", "update", "--cluster-name", "stunning-sole", "--encryption-spec", "cloud-provider=TEST_PROVIDER,access-key=<your-access-key>,secret-key=<your-secret-key>")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -177,7 +177,7 @@ AZURE      8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b   -              https://test-az
 			session.Kill()
 		})
 
-		It("should fail if missing parameters in encryption spec", func() {
+		It("should fail if missing parameters in encryption at rest", func() {
 			cmd := exec.Command(compiledCLIPath, "cluster", "encryption", "update", "--cluster-name", "stunning-sole", "--encryption-spec", "cloud-provider=AWS,aws-access-key=<your-access-key>,secret-key=<your-secret-key>")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
@@ -199,7 +199,7 @@ AZURE      8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b   -              https://test-az
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say("Successfully updated encryption spec for cluster stunning-sole"))
+			Expect(session.Out).Should(gbytes.Say("Successfully updated encryption at rest for cluster stunning-sole"))
 			session.Kill()
 		})
 	})
@@ -212,11 +212,11 @@ AZURE      8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5b   -              https://test-az
 		}{
 			{
 				action:   "--enable",
-				expected: "Successfully ENABLED encryption spec status for cluster stunning-sole",
+				expected: "Successfully ENABLED encryption at rest status for cluster stunning-sole",
 			},
 			{
 				action:   "--disable",
-				expected: "Successfully DISABLED encryption spec status for cluster stunning-sole",
+				expected: "Successfully DISABLED encryption at rest status for cluster stunning-sole",
 			},
 		}
 
