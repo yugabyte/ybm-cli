@@ -2,8 +2,8 @@
     "data": {
       "spec": {
         "clone_now": {
-            "database_id": "000033c3-0000-3000-8000-000000000000",
-            "clone_as": "test_yugabyte_clone"
+            "database_id": "00004002-0000-3000-8000-000000000000",
+            "clone_as": "test_ysql_db_clone"
         },
         "clone_point_in_time": null
       },
@@ -14,7 +14,7 @@
           "created_on": "2024-08-07T17:26:08.435Z"
         },
         "database_type": "YSQL",
-        "database_name": "yugabyte",
+        "database_name": "test_ysql_db",
         "id": "8e74ca8f-331b-4dec-89b0-4e59b81e905d",
         "state": "QUEUED"
       }

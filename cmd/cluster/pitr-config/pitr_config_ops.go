@@ -427,12 +427,11 @@ var clonePitrConfigCmd = &cobra.Command{
 			}
 			cloneSpec.SetCloneNow(*ybmclient.NewDatabaseCloneNowSpec(namespaceId, cloneAs))
 		} else {
-			// We can only clone to PIT if a config is present for the {namespaceName, namespaceType}
 			if cmd.Flags().Lookup("clone-at-millis").Changed {
 				cloneAtMillis, _ := cmd.Flags().GetInt64("clone-at-millis")
 				cloneSpec.SetClonePointInTime(*ybmclient.NewDatabaseClonePITSpec(cloneAtMillis, pitrConfigId, cloneAs))
 			} else {
-				logrus.Fatalf("clone-at-millis parameter must be specified to clone via existing PITR config for %s namespace %s in cluster %s\n", namespaceType, namespaceName, ClusterName)
+				cloneSpec.SetCloneNow(*ybmclient.NewDatabaseCloneNowSpec(namespaceId, cloneAs))
 			}
 		}
 
