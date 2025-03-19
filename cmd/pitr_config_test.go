@@ -680,7 +680,7 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 			ysqlSession.Kill()
 		})
 
-		It("Should fail to clone YSQL namespace via pre existing PITR Config if clone time is not specified", func() {
+		It("Should successfully clone YSQL namespace to current time via specified pre existing PITR Config", func() {
 			os.Setenv("YBM_FF_PITR_CLONE", "true")
 			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
 			Expect(err).ToNot(HaveOccurred())
@@ -699,12 +699,21 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 				),
 			)
 
+			restoreErr := loadJson("./test/fixtures/clone-now-ysql-db-existing-pitr.json", &responseClone)
+			Expect(restoreErr).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/clone-database"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseClone),
+				),
+			)
+
 			ysqlCmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "clone", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YSQL", "--clone-as", "test_ysql_db_clone")
 			ysqlSession, ysqlErr := gexec.Start(ysqlCmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(ysqlErr).NotTo(HaveOccurred())
 			ysqlSession.Wait(2)
-			Expect(ysqlSession.Err).Should(gbytes.Say("clone-at-millis parameter must be specified to clone via existing PITR config for YSQL namespace test_ysql_db in cluster stunning-sole"))
+			Expect(ysqlSession.Out).Should(gbytes.Say("The YSQL namespace test_ysql_db in cluster stunning-sole is being cloned via PITR Configuration."))
 			ysqlSession.Kill()
 		})
 
