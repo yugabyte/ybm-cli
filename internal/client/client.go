@@ -903,8 +903,8 @@ func (a *AuthApiClient) GetCdcStreamIDByStreamName(cdcStreamName string) (string
 	return "", fmt.Errorf("couldn't find any cdcStream with the given name")
 }
 
-func (a *AuthApiClient) GetSupportedNodeConfigurations(cloud string, tier string, region string) ybmclient.ApiGetSupportedNodeConfigurationsRequest {
-	return a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions([]string{region})
+func (a *AuthApiClient) GetSupportedNodeConfigurations(cloud string, tier string, region string) ybmclient.ApiGetSupportedNodeConfigurationsByAccountRequest {
+	return a.ApiClient.ClusterApi.GetSupportedNodeConfigurationsByAccount(a.ctx, a.AccountID).Cloud(cloud).Tier(tier).Regions([]string{region})
 }
 
 func (a *AuthApiClient) GetSupportedNodeConfigurationsV2(cloud string, tier string, regions []string, geoPartitioned bool) map[string][]ybmclient.NodeConfigurationResponseItem {
@@ -916,7 +916,7 @@ func (a *AuthApiClient) GetSupportedNodeConfigurationsV2(cloud string, tier stri
 	if len(regions) == 1 || cloud == "AZURE" || (geoPartitioned) {
 		isMultiRegion = false
 	}
-	instanceResp, resp, err := a.ApiClient.ClusterApi.GetSupportedNodeConfigurations(a.ctx).AccountId(a.AccountID).Cloud(cloud).Tier(tier).Regions(regions).IsMultiRegion(isMultiRegion).Execute()
+	instanceResp, resp, err := a.ApiClient.ClusterApi.GetSupportedNodeConfigurationsByAccount(a.ctx, a.AccountID).Cloud(cloud).Tier(tier).Regions(regions).IsMultiRegion(isMultiRegion).Execute()
 	if err != nil {
 		b, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(b)
@@ -995,8 +995,8 @@ func (a *AuthApiClient) PerformNodeOperation(clusterId string) ybmclient.ApiPerf
 	return a.ApiClient.ClusterApi.PerformNodeOperation(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
-func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsRequest {
-	return a.ApiClient.ClusterApi.GetSupportedCloudRegions(a.ctx)
+func (a *AuthApiClient) GetSupportedCloudRegions() ybmclient.ApiGetSupportedCloudRegionsByAccountRequest {
+	return a.ApiClient.ClusterApi.GetSupportedCloudRegionsByAccount(a.ctx, a.AccountID)
 }
 func (a *AuthApiClient) ListTasks() ybmclient.ApiListTasksRequest {
 	return a.ApiClient.TaskApi.ListTasks(a.ctx, a.AccountID)
