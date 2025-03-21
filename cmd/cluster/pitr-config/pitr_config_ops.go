@@ -572,5 +572,5 @@ func init() {
 	clonePitrConfigCmd.MarkFlagRequired("namespace-type")
 	clonePitrConfigCmd.Flags().String("clone-as", "", "[REQUIRED] The name of the cloned namespace.")
 	clonePitrConfigCmd.MarkFlagRequired("clone-as")
-	clonePitrConfigCmd.Flags().String("clone-at-millis", "", "[OPTIONAL] The time in milliseconds to which the namespace is to be cloned. If not provided, the current state is cloned.")
+	clonePitrConfigCmd.Flags().Int64("clone-at-millis", 0, "[OPTIONAL] The time in milliseconds to which the namespace is to be cloned. If not provided, the current state is cloned.")
 }
