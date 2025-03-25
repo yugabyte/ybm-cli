@@ -423,7 +423,7 @@ var clonePitrConfigCmd = &cobra.Command{
 			// No PITR config exists, so we create one and clone to current time.
 			// "clone-at-millis" argument should not be provided in this case.
 			if cmd.Flags().Lookup("clone-at-millis").Changed {
-				logrus.Fatalf("A PITR Config doesn't exist for %s namespace %s in cluster %s. So clone-at-millis parameter must not be specified\n", namespaceType, namespaceName, ClusterName)
+				logrus.Fatalf("No PITR configuration found for %s namespace %s in cluster %s. The 'clone-at-millis' parameter cannot be used unless a valid PITR configuration is set up.\n", namespaceType, namespaceName, ClusterName)
 			}
 			cloneSpec.SetCloneNow(*ybmclient.NewDatabaseCloneNowSpec(namespaceId, cloneAs))
 		} else {

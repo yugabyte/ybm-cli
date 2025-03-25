@@ -776,7 +776,7 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 			Expect(err).NotTo(HaveOccurred())
 			Expect(ysqlErr).NotTo(HaveOccurred())
 			ysqlSession.Wait(2)
-			Expect(ysqlSession.Err).Should(gbytes.Say("A PITR Config doesn't exist for YSQL namespace yugabyte in cluster stunning-sole. So clone-at-millis parameter must not be specified"))
+			Expect(ysqlSession.Err).Should(gbytes.Say("No PITR configuration found for YSQL namespace yugabyte in cluster stunning-sole. The 'clone-at-millis' parameter cannot be used unless a valid PITR configuration is set up"))
 			ysqlSession.Kill()
 		})
 
