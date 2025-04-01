@@ -17,7 +17,6 @@ package pitrconfig
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -212,12 +211,12 @@ func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, clusterID string
 				if err != nil {
 					return nil, err
 				}
-				if n > 1 && n <= math.MaxInt32 {
+				if n >= 2 && n <= 14 {
 					retentionPeriod := int32(n)
 					spec.SetRetentionPeriod(retentionPeriod)
 					retentionPeriodProvided = true
 				} else {
-					return nil, fmt.Errorf("Minimum retention period is 2 days")
+					return nil, fmt.Errorf("Retention period must be between 2 and 14 days.")
 				}
 			}
 		}
@@ -367,8 +366,8 @@ var updatePitrConfigCmd = &cobra.Command{
 		namespaceType, _ := cmd.Flags().GetString("namespace-type")
 		retentionPeriod, _ := cmd.Flags().GetInt32("retention-period-in-days")
 		validateNamespaceNameType(namespaceName, namespaceType)
-		if retentionPeriod < 2 {
-			logrus.Fatalln("Minimum retention period is 2 days")
+		if retentionPeriod < 2 || retentionPeriod > 14 {
+			logrus.Fatalln("Retention period must be between 2 and 14 days.")
 		}
 		pitrConfigId := requirePitrConfig(authApi, clusterID, namespaceName, namespaceType)
 
@@ -534,7 +533,7 @@ func init() {
 	describePitrConfigCmd.MarkFlagRequired("namespace-type")
 
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, createPitrConfigCmd, util.PITR_CONFIG)
-	createPitrConfigCmd.Flags().StringArrayVarP(&allPitrConfigSpecs, "pitr-config", "p", []string{}, `[REQUIRED] Information for the PITR Configs to be created. All values are mandatory. Available options for namespace type are YCQL and YSQL. Minimum retention period is 2 days. Please provide key value pairs namespace-name=<namespace-name>,namespace-type=<namespace-type>,retention-period-in-days=<retention-period-in-days>.`)
+	createPitrConfigCmd.Flags().StringArrayVarP(&allPitrConfigSpecs, "pitr-config", "p", []string{}, `[REQUIRED] Information for the PITR Configs to be created. All values are mandatory. Available options for namespace type are YCQL and YSQL. Retention period must be between 2 and 14 days. Please provide key value pairs namespace-name=<namespace-name>,namespace-type=<namespace-type>,retention-period-in-days=<retention-period-in-days>.`)
 
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, restorePitrConfigCmd, util.PITR_RESTORE)
 	restorePitrConfigCmd.Flags().SortFlags = false
@@ -560,7 +559,7 @@ func init() {
 	updatePitrConfigCmd.MarkFlagRequired("namespace-name")
 	updatePitrConfigCmd.Flags().String("namespace-type", "", "[REQUIRED] The type of the namespace. Available options are YCQL and YSQL")
 	updatePitrConfigCmd.MarkFlagRequired("namespace-type")
-	updatePitrConfigCmd.Flags().Int32("retention-period-in-days", 2, "[REQUIRED] The retention period of the snapshots from the PITR Config")
+	updatePitrConfigCmd.Flags().Int32("retention-period-in-days", 2, "[REQUIRED] The retention period of the snapshots from the PITR Config. Retention period must be between 2 and 14 days.")
 	updatePitrConfigCmd.MarkFlagRequired("retention-period-in-days")
 	updatePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 

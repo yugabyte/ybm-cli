@@ -214,7 +214,24 @@ test_ysql_db   YSQL         5                          QUEUED    654321         
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("Minimum retention period is 2 days"))
+			Expect(session.Err).Should(gbytes.Say("Retention period must be between 2 and 14 days."))
+			session.Kill()
+		})
+
+		It("Should fail if more than 14 days retention period in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "create", "--cluster-name", "stunning-sole", "--pitr-config", "namespace-name=test_ysql_db, namespace-type=YSQL, retention-period-in-days=15", "--pitr-config", "namespace-name=test_ycql_db, namespace-type=YCQL, retention-period-in-days=3")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("Retention period must be between 2 and 14 days."))
 			session.Kill()
 		})
 	})
@@ -639,7 +656,32 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Err).Should(gbytes.Say("Minimum retention period is 2 days"))
+			Expect(session.Err).Should(gbytes.Say("Retention period must be between 2 and 14 days."))
+			session.Kill()
+		})
+
+		It("Should fail if more than 14 days retention period in PITR Config", func() {
+			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/namespaces"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNamespace),
+				),
+			)
+			err = loadJson("./test/fixtures/list-cluster-pitr-configs.json", &responseListPITRConfig)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/pitr-configs"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListPITRConfig),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "cluster", "pitr-config", "update", "--cluster-name", "stunning-sole", "--namespace-name", "test_ysql_db", "--namespace-type", "YSQL", "--retention-period-in-days", "15", "--force")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("Retention period must be between 2 and 14 days."))
 			session.Kill()
 		})
 	})
