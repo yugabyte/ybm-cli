@@ -337,7 +337,12 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 			return nil, fmt.Errorf("client_x509_cert_url is a required field for googlecloud credentials")
 		}
 
+		universeDomain, hasUniverseDomain := googlecloudMap["universe_domain"]
+
 		googlecloudSpec := ybmclient.NewGCPServiceAccount(credType, projectId, privateKey, privateKeyId, clientEmail, clientId, authUri, tokenUri, authProviderX509CertUrl, clientX509CertUrl)
+		if hasUniverseDomain {
+			googlecloudSpec.SetUniverseDomain(universeDomain)
+		}
 		IntegrationSpec.SetGooglecloudSpec(*googlecloudSpec)
 	default:
 		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics or sumologic are accepted as third party sink for now")

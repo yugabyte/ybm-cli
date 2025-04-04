@@ -247,6 +247,25 @@ Name      Type
 ddd       GOOGLECLOUD`))
 			session.Kill()
 		})
+		It("should create the config when universe domain is not provided", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-googlecloud.json", &responseIntegration)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegration),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "testgcp2", "--type", "googlecloud", "--googlecloud-cred-filepath", "./test/fixtures/googlecloud-test-creds2.json")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The Integration testgcp2 has been created
+Name      Type
+ddd       GOOGLECLOUD`))
+			session.Kill()
+		})
 		It("should return filepath error", func() {
 			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "testgcp", "--type", "googlecloud", "--googlecloud-cred-filepath", "./test/fixtures/invalid-filepath.json")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
