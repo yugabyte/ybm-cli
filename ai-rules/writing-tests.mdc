@@ -1,0 +1,13 @@
+---
+description: Used when reading, writing, modifying, debugging or executing unit tests.
+globs: 
+alwaysApply: false
+---
+1. Always look at surrouding tests first before writing new tests.
+2. If tests fail, try to run the actual command e.g. $ make build && ./ybm api-key list. Look at the output
+and then try to do a diff on what's causing the failure.
+3. For failing tests, try to fix the test instead of changing the code. Unless the code has a bug.
+4. If unsure about the failure, then ask the user for clarifying questions.
+5. Only run specific tests when testing new tests written or existing tests modified.
+6. All tests must be executed from <project-root>/cmd directory.
+7. After writing all tests, try to execute them to verify they are working as expected. If fails, ask the user if you can debug and fix them. Do not retry yourself more than 5 times.
