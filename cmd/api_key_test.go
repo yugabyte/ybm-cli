@@ -20,8 +20,8 @@ var _ = Describe("API Key Management", func() {
 		server                   *ghttp.Server
 		statusCode               int
 		args                     []string
-		responseAccount          openapi.AccountListResponse
-		responseProject          openapi.AccountListResponse
+		responseAccount          openapi.AccountResponse
+		responseProject          openapi.AccountResponse
 		apiKeyListResponse       openapi.ApiKeyListResponse
 		apiKeyResponse           openapi.CreateApiKeyResponse
 		responseNetworkAllowList openapi.NetworkAllowListListResponse

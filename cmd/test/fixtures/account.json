@@ -1,7 +1,5 @@
 {
-    "_metadata": {},
-    "data": [
-        {
+    "data": {
             "info": {
                 "id": "340af43a-8a7c-4659-9258-4876fd6a207b",
                 "owner_id": "8bcbac89-b95e-454c-ad4d-c3167bb18462",
@@ -154,6 +152,5 @@
             "spec": {
                 "name": "ybcloud-473359"
             }
-        }
-    ]
+    }
 }

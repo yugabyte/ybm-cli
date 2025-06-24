@@ -34,7 +34,7 @@ var _ = Describe("Auth", func() {
 		responseError.SetError(ApiErr)
 		server.AppendHandlers(
 			ghttp.CombineHandlers(
-				ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts"),
+				ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/account"),
 				ghttp.RespondWithJSONEncodedPtr(&statusCode, responseError),
 				ghttp.VerifyHeaderKV("Authorization", "Bearer test-token"),
 			),

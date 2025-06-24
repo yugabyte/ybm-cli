@@ -86,7 +86,7 @@ var authCmd = &cobra.Command{
 		}
 		logrus.Debugf("Ping response without error")
 
-		_, _, err = authApi.ListAccounts().Execute()
+		_, _, err = authApi.GetAccount().Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
 			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))

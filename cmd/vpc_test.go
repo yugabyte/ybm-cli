@@ -35,8 +35,8 @@ var _ = Describe("VPC", func() {
 		server          *ghttp.Server
 		statusCode      int
 		args            []string
-		responseAccount openapi.AccountListResponse
-		responseProject openapi.AccountListResponse
+		responseAccount openapi.AccountResponse
+		responseProject openapi.AccountResponse
 		responseVPC     openapi.SingleTenantVpcListResponse
 	)
 

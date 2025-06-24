@@ -73,12 +73,12 @@ func newGhttpServer(responseAccount any, responseProject any) (*ghttp.Server, er
 	statusCode := 200
 	server.AppendHandlers(
 		ghttp.CombineHandlers(
-			ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts"),
+			ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/account"),
 			ghttp.RespondWithJSONEncodedPtr(&statusCode, responseAccount),
 			ghttp.VerifyHeaderKV("Authorization", "Bearer test-token"),
 		),
 		ghttp.CombineHandlers(
-			ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts"),
+			ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/account"),
 			ghttp.RespondWithJSONEncodedPtr(&statusCode, responseProject),
 			ghttp.VerifyHeaderKV("Authorization", "Bearer test-token"),
 		),

@@ -94,8 +94,8 @@ func NewAuthApiClientCustomUrlKey(url *url.URL, apiKey string) (*AuthApiClient, 
 	}, nil
 }
 
-func (a *AuthApiClient) ListAccounts() ybmclient.ApiListAccountsRequest {
-	return a.ApiClient.AccountApi.ListAccounts(a.ctx)
+func (a *AuthApiClient) GetAccount() ybmclient.ApiGetCurrentAccountRequest {
+	return a.ApiClient.AccountApi.GetCurrentAccount(a.ctx)
 }
 
 func (a *AuthApiClient) ListProjects() ybmclient.ApiListProjectsRequest {
@@ -111,19 +111,12 @@ func (a *AuthApiClient) GetAccountID(accountID string) (string, error) {
 	if len(accountID) > 0 {
 		return accountID, nil
 	}
-	accountResp, _, err := a.ListAccounts().Execute()
+	accountResp, _, err := a.GetAccount().Execute()
 	if err != nil {
 		return "", err
 	}
 
-	accountData := accountResp.GetData()
-	if len(accountData) == 0 {
-		return "", fmt.Errorf("the user is not associated with any accounts")
-	}
-	if len(accountData) > 1 {
-		return "", fmt.Errorf("the user is associated with multiple accounts, please provide an account ID")
-	}
-	return accountData[0].Info.Id, nil
+	return accountResp.Data.Info.Id, nil
 }
 
 func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
@@ -132,11 +125,11 @@ func (a *AuthApiClient) GetProjectID(projectID string) (string, error) {
 		return projectID, nil
 	}
 
-	accountResp, _, err := a.ListAccounts().Execute()
+	accountResp, _, err := a.GetAccount().Execute()
 	if err != nil {
 		return "", err
 	}
-	projectData := accountResp.GetData()[0].Info.GetProjects()
+	projectData := accountResp.Data.Info.GetProjects()
 	if len(projectData) == 0 {
 		return "", fmt.Errorf("the account is not associated with any projects")
 	}
