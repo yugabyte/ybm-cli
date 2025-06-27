@@ -36,8 +36,8 @@ var _ = Describe("DB Audit Logging", func() {
 		server                  *ghttp.Server
 		statusCode              int
 		args                    []string
-		responseAccount         openapi.AccountListResponse
-		responseProject         openapi.AccountListResponse
+		responseAccount         openapi.AccountResponse
+		responseProject         openapi.AccountResponse
 		responseDbAudit         openapi.DbAuditExporterConfigResponse
 		responseDbAuditList     openapi.DbAuditExporterConfigListResponse
 		responseIntegrationList openapi.TelemetryProviderListResponse

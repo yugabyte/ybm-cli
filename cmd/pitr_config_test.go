@@ -20,8 +20,8 @@ var _ = Describe("PITR Configs Test", func() {
 		server                       *ghttp.Server
 		statusCode                   int
 		args                         []string
-		responseAccount              openapi.AccountListResponse
-		responseProject              openapi.AccountListResponse
+		responseAccount              openapi.AccountResponse
+		responseProject              openapi.AccountResponse
 		responseListCluster          openapi.ClusterListResponse
 		responseNamespace            openapi.ClusterNamespacesListResponse
 		responseListPITRConfig       openapi.ClusterPitrConfigListResponse

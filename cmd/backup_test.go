@@ -36,8 +36,8 @@ var _ = Describe("Backup", func() {
 		server             *ghttp.Server
 		statusCode         int
 		args               []string
-		responseAccount    openapi.AccountListResponse
-		responseProject    openapi.AccountListResponse
+		responseAccount    openapi.AccountResponse
+		responseProject    openapi.AccountResponse
 		responseBackupList openapi.BackupListResponse
 		responseBackup     openapi.BackupResponse
 

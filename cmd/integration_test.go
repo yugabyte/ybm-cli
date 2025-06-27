@@ -35,8 +35,8 @@ var _ = Describe("Integration", func() {
 		server                  *ghttp.Server
 		statusCode              int
 		args                    []string
-		responseAccount         openapi.AccountListResponse
-		responseProject         openapi.AccountListResponse
+		responseAccount         openapi.AccountResponse
+		responseProject         openapi.AccountResponse
 		responseIntegration     openapi.TelemetryProviderResponse
 		responseIntegrationList openapi.TelemetryProviderListResponse
 	)

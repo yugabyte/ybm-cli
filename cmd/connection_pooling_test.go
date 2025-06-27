@@ -34,8 +34,8 @@ var _ = Describe("Connection Pooling", func() {
 	var (
 		server               *ghttp.Server
 		statusCode           int
-		responseAccount      openapi.AccountListResponse
-		responseProject      openapi.AccountListResponse
+		responseAccount      openapi.AccountResponse
+		responseProject      openapi.AccountResponse
 		responseListClusters openapi.ClusterListResponse
 	)
 

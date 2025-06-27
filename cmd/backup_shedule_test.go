@@ -37,8 +37,8 @@ var _ = Describe("BackupSchedules", func() {
 		server                                     *ghttp.Server
 		statusCode                                 int
 		args                                       []string
-		responseAccount                            openapi.AccountListResponse
-		responseProject                            openapi.AccountListResponse
+		responseAccount                            openapi.AccountResponse
+		responseProject                            openapi.AccountResponse
 		responseListIncrementalBackupSchedules     openapi.ScheduleListResponseV2
 		responseListIncrementalCronBackupSchedules openapi.ScheduleListResponseV2
 		responseListBackupSchedules                openapi.ScheduleListResponse

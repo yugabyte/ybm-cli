@@ -35,8 +35,8 @@ var _ = Describe("Metrics Exporter", func() {
 		server              *ghttp.Server
 		statusCode          int
 		args                []string
-		responseAccount     openapi.AccountListResponse
-		responseProject     openapi.AccountListResponse
+		responseAccount     openapi.AccountResponse
+		responseProject     openapi.AccountResponse
 		responseMetrics     openapi.MetricsExporterConfigurationResponse
 		responseMetricsList openapi.MetricsExporterConfigurations
 	)

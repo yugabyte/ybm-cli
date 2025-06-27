@@ -23,8 +23,8 @@ var _ = Describe("Spend Tracking", func() {
 		server                *ghttp.Server
 		statusCode            int
 		args                  []string
-		responseAccount       openapi.AccountListResponse
-		responseProject       openapi.AccountListResponse
+		responseAccount       openapi.AccountResponse
+		responseProject       openapi.AccountResponse
 		responseListClusters  openapi.ListClustersByDateRangeResponse
 		responseSpendTracking openapi.BillingUsageResponse
 	)
