@@ -44,6 +44,7 @@ ybm cluster [flags]
 * [ybm cluster network](ybm_cluster_network.md)	 - Manage network operations
 * [ybm cluster node](ybm_cluster_node.md)	 - Manage nodes for a cluster
 * [ybm cluster pause](ybm_cluster_pause.md)	 - Pause a cluster
+* [ybm cluster pitr-config](ybm_cluster_pitr-config.md)	 - Manage Cluster PITR Configs
 * [ybm cluster read-replica](ybm_cluster_read-replica.md)	 - Manage Read Replicas
 * [ybm cluster resume](ybm_cluster_resume.md)	 - Resume a cluster
 * [ybm cluster update](ybm_cluster_update.md)	 - Update a cluster

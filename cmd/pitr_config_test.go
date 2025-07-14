@@ -40,7 +40,6 @@ var _ = Describe("PITR Configs Test", func() {
 		Expect(err).ToNot(HaveOccurred())
 		os.Setenv("YBM_HOST", fmt.Sprintf("http://%s", server.Addr()))
 		os.Setenv("YBM_APIKEY", "test-token")
-		os.Setenv("YBM_FF_PITR_CONFIG", "true")
 
 		statusCode = 200
 		err = loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
@@ -688,7 +687,6 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 
 	var _ = Describe("Clone cluster namespace via PITR config", func() {
 		It("Should successfully clone YSQL namespace via pre existing PITR Config", func() {
-			os.Setenv("YBM_FF_PITR_CLONE", "true")
 			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
@@ -723,7 +721,6 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 		})
 
 		It("Should successfully clone YSQL namespace to current time via specified pre existing PITR Config", func() {
-			os.Setenv("YBM_FF_PITR_CLONE", "true")
 			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
@@ -760,7 +757,6 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 		})
 
 		It("Should successfully clone YSQL namespace to current time with no pre existing PITR Config", func() {
-			os.Setenv("YBM_FF_PITR_CLONE", "true")
 			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
@@ -795,7 +791,6 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 		})
 
 		It("Should fail to clone YSQL namespace to current time with no pre existing PITR Config if clone time is specified", func() {
-			os.Setenv("YBM_FF_PITR_CLONE", "true")
 			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
@@ -823,7 +818,6 @@ test_ycql_db   YCQL         6                          ACTIVE    123456         
 		})
 
 		It("Should fail if invalid namespace name and type combination is provided", func() {
-			os.Setenv("YBM_FF_PITR_CLONE", "true")
 			err := loadJson("./test/fixtures/namespaces.json", &responseNamespace)
 			Expect(err).ToNot(HaveOccurred())
 			server.AppendHandlers(
