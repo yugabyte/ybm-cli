@@ -31,11 +31,9 @@ const (
 	TOOLS               FeatureFlag = "TOOLS"
 	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
-	PITR_CONFIG         FeatureFlag = "PITR_CONFIG"
 	PITR_RESTORE        FeatureFlag = "PITR_RESTORE"
 	CONNECTION_POOLING  FeatureFlag = "CONNECTION_POOLING"
 	DR                  FeatureFlag = "DR"
-	PITR_CLONE          FeatureFlag = "PITR_CLONE"
 )
 
 func (f FeatureFlag) String() string {

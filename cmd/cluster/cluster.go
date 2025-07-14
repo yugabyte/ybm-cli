@@ -71,7 +71,7 @@ func init() {
 	namespace.NamespaceCmd.PersistentFlags().StringP("cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	namespace.NamespaceCmd.MarkPersistentFlagRequired("cluster-name")
 
-	util.AddCommandIfFeatureFlag(ClusterCmd, pitrconfig.PitrConfigCmd, util.PITR_CONFIG)
+	ClusterCmd.AddCommand(pitrconfig.PitrConfigCmd)
 	pitrconfig.PitrConfigCmd.PersistentFlags().StringVarP(&pitrconfig.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	pitrconfig.PitrConfigCmd.MarkPersistentFlagRequired("cluster-name")
 

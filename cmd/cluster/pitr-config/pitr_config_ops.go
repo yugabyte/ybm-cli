@@ -523,16 +523,16 @@ func handleTaskCompletion(authApi *ybmAuthClient.AuthApiClient, clusterID string
 }
 
 func init() {
-	util.AddCommandIfFeatureFlag(PitrConfigCmd, listPitrConfigCmd, util.PITR_CONFIG)
+	PitrConfigCmd.AddCommand(listPitrConfigCmd)
 
-	util.AddCommandIfFeatureFlag(PitrConfigCmd, describePitrConfigCmd, util.PITR_CONFIG)
+	PitrConfigCmd.AddCommand(describePitrConfigCmd)
 	describePitrConfigCmd.Flags().SortFlags = false
 	describePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be restored via PITR Config.")
 	describePitrConfigCmd.MarkFlagRequired("namespace-name")
 	describePitrConfigCmd.Flags().String("namespace-type", "", "[REQUIRED] The type of the namespace. Available options are YCQL and YSQL")
 	describePitrConfigCmd.MarkFlagRequired("namespace-type")
 
-	util.AddCommandIfFeatureFlag(PitrConfigCmd, createPitrConfigCmd, util.PITR_CONFIG)
+	PitrConfigCmd.AddCommand(createPitrConfigCmd)
 	createPitrConfigCmd.Flags().StringArrayVarP(&allPitrConfigSpecs, "pitr-config", "p", []string{}, `[REQUIRED] Information for the PITR Configs to be created. All values are mandatory. Available options for namespace type are YCQL and YSQL. Retention period must be between 2 and 14 days. Please provide key value pairs namespace-name=<namespace-name>,namespace-type=<namespace-type>,retention-period-in-days=<retention-period-in-days>.`)
 
 	util.AddCommandIfFeatureFlag(PitrConfigCmd, restorePitrConfigCmd, util.PITR_RESTORE)
@@ -545,7 +545,7 @@ func init() {
 	restorePitrConfigCmd.MarkFlagRequired("restore-at-millis")
 	restorePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
-	util.AddCommandIfFeatureFlag(PitrConfigCmd, deletePitrConfigCmd, util.PITR_CONFIG)
+	PitrConfigCmd.AddCommand(deletePitrConfigCmd)
 	deletePitrConfigCmd.Flags().SortFlags = false
 	deletePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be restored via PITR Config.")
 	deletePitrConfigCmd.MarkFlagRequired("namespace-name")
@@ -553,7 +553,7 @@ func init() {
 	deletePitrConfigCmd.MarkFlagRequired("namespace-type")
 	deletePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
-	util.AddCommandIfFeatureFlag(PitrConfigCmd, updatePitrConfigCmd, util.PITR_CONFIG)
+	PitrConfigCmd.AddCommand(updatePitrConfigCmd)
 	updatePitrConfigCmd.Flags().SortFlags = false
 	updatePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be restored via PITR Config.")
 	updatePitrConfigCmd.MarkFlagRequired("namespace-name")
@@ -563,7 +563,7 @@ func init() {
 	updatePitrConfigCmd.MarkFlagRequired("retention-period-in-days")
 	updatePitrConfigCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
-	util.AddCommandIfFeatureFlag(PitrConfigCmd, clonePitrConfigCmd, util.PITR_CLONE)
+	PitrConfigCmd.AddCommand(clonePitrConfigCmd)
 	clonePitrConfigCmd.Flags().SortFlags = false
 	clonePitrConfigCmd.Flags().String("namespace-name", "", "[REQUIRED] Namespace to be cloned via PITR Config.")
 	clonePitrConfigCmd.MarkFlagRequired("namespace-name")
