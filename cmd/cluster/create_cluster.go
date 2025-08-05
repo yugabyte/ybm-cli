@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"encoding/base64"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -128,9 +129,28 @@ var createClusterCmd = &cobra.Command{
 		createClusterRequest := ybmclient.NewCreateClusterRequest(*clusterSpec)
 		createClusterRequest.SetEncryptedDbCredentials(*dbCredentials)
 
+		// Enable connection pooling feature if requested
+		enableConnectionPooling, _ := cmd.Flags().GetBool("enable-connection-pooling")
+		if enableConnectionPooling {
+			if !util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
+				logrus.Fatalf("Connection pooling feature is not enabled. Please set YBM_FF_CONNECTION_POOLING=true environment variable")
+			}
+			// Set connection pooling in features array for cluster creation
+			features := []ybmclient.CreateClusterFeatureEnum{ybmclient.CREATECLUSTERFEATUREENUM_ENABLE_CONNECTION_POOLING}
+			createClusterRequest.SetFeatures(features)
+			logrus.Debugf("Features array set to: %v", features)
+			logrus.Info("Connection pooling will be enabled during cluster creation")
+		}
+
 		if cmkSpec != nil {
 			logrus.Debug("Setting up CMK spec for cluster creation")
 			createClusterRequest.SecurityCmkSpec = *ybmclient.NewNullableCMKSpec(cmkSpec)
+		}
+
+		// Debug log the complete request payload
+		logrus.Debugf("Create Cluster Request Payload: %+v", *createClusterRequest)
+		if createClusterRequest.Features != nil {
+			logrus.Debugf("Features in final request: %v", *createClusterRequest.Features)
 		}
 
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
@@ -154,6 +174,8 @@ var createClusterCmd = &cobra.Command{
 			}
 			fmt.Printf("The cluster %s has been created\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 
+			// Connection pooling was enabled during cluster creation if requested
+
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
@@ -162,6 +184,11 @@ var createClusterCmd = &cobra.Command{
 			clusterData = respC.GetData()
 		} else {
 			fmt.Println(msg)
+
+			// Inform user about connection pooling if requested
+			if enableConnectionPooling {
+				fmt.Printf("Note: Connection pooling has been enabled for this cluster.\n")
+			}
 		}
 
 		clustersCtx := formatter.Context{
@@ -212,4 +239,5 @@ func init() {
 	createClusterCmd.MarkFlagRequired("region-info")
 	createClusterCmd.Flags().String("preferred-region", "", "[OPTIONAL] The preferred region in a multi region cluster. The preferred region handles all read and write requests from clients.")
 	createClusterCmd.Flags().String("default-region", "", "[OPTIONAL] The primary region in a partition-by-region cluster. The primary region is where all the tables not created in a tablespace reside.")
+	createClusterCmd.Flags().Bool("enable-connection-pooling", false, "[OPTIONAL] Enable connection pooling for the cluster after creation. Default false. (Requires CONNECTION_POOLING feature flag)")
 }
