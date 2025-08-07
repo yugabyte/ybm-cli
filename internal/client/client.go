@@ -384,6 +384,7 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		if err != nil {
 			return nil, err
 		}
+		logrus.Debugf("Resolved database version '%s' to track ID: %s", trackName, trackId)
 		softwareInfo.SetTrackId(trackId)
 	}
 
