@@ -1,0 +1,68 @@
+{
+    "data": {
+        "spec": {
+            "name": "test-cp-cluster",
+            "cloud_info": {
+                "code": "GCP",
+                "region": "asia-south1"
+            },
+            "cluster_info": {
+                "cluster_tier": "PAID",
+                "cluster_type": "SYNCHRONOUS",
+                "num_nodes": 1,
+                "fault_tolerance": "NONE",
+                "num_faults_to_tolerate": 0,
+                "node_info": {
+                    "num_cores": 2,
+                    "memory_mb": 8192,
+                    "disk_size_gb": 50
+                },
+                "is_production": true,
+                "version": 7
+            },
+            "network_info": {
+                "single_tenant_vpc_id": null
+            },
+            "software_info": {
+                "track_id": "d07a57ca-77ed-458f-bba1-37342d642277"
+            },
+            "cluster_region_info": [
+                {
+                    "placement_info": {
+                        "cloud_info": {
+                            "code": "GCP",
+                            "region": "asia-south1"
+                        },
+                        "num_nodes": 1,
+                        "vpc_id": null,
+                        "multi_zone": false
+                    },
+                    "node_info": {
+                        "num_cores": 2,
+                        "memory_mb": 8192,
+                        "disk_size_gb": 50,
+                        "disk_iops": null
+                    },
+                    "is_default": true,
+                    "is_affinitized": false,
+                    "accessibility_types": [
+                        "PUBLIC"
+                    ]
+                }
+            ]
+        },
+        "info": {
+            "id": "12345678-1234-1234-1234-123456789abc",
+            "metadata": {
+                "created_on": "2024-01-15T10:00:00Z",
+                "created_by": "test@example.com",
+                "updated_on": "2024-01-15T10:00:00Z",
+                "updated_by": "test@example.com",
+                "state": "CREATING",
+                "name": "test-cp-cluster"
+            },
+            "cluster_endpoints": [],
+            "software_version": "2024.1.6.0-b53"
+        }
+    }
+}
