@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yugabyte/ybm-cli/cmd/api_key"
 	"github.com/yugabyte/ybm-cli/cmd/backup"
+	"github.com/yugabyte/ybm-cli/cmd/billing"
 	"github.com/yugabyte/ybm-cli/cmd/cdc"
 	"github.com/yugabyte/ybm-cli/cmd/cluster"
 	"github.com/yugabyte/ybm-cli/cmd/dr"
@@ -138,6 +139,7 @@ func init() {
 	rootCmd.AddCommand(user.UserCmd)
 	rootCmd.AddCommand(metrics_exporter.MetricsExporterCmd)
 	rootCmd.AddCommand(integration.IntegrationCmd)
+	util.AddCommandIfFeatureFlag(rootCmd, billing.BillingCmd, util.BILLING)
 	util.AddCommandIfFeatureFlag(rootCmd, dr.DrCmd, util.DR)
 	util.AddCommandIfFeatureFlag(rootCmd, tools.ToolsCmd, util.TOOLS)
 	util.AddCommandIfFeatureFlag(rootCmd, cdc.CdcCmd, util.CDC)

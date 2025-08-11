@@ -770,6 +770,20 @@ func (a *AuthApiClient) GetBillingUsage(startTimestamp string, endTimestamp stri
 	return a.ApiClient.BillingApi.GetBillingUsage(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Granularity(ybmclient.GRANULARITYENUM_DAILY).ClusterIds(clusterIds)
 }
 
+func (a *AuthApiClient) GetBillingEstimate(startDate string, endDate string, accountNames []string) ybmclient.ApiGetBillingEstimateRequest {
+	request := a.ApiClient.BillingApi.GetBillingEstimate(a.ctx)
+	if startDate != "" {
+		request = request.StartDate(startDate)
+	}
+	if endDate != "" {
+		request = request.EndDate(endDate)
+	}
+	if len(accountNames) > 0 {
+		request = request.AccountNames(accountNames)
+	}
+	return request
+}
+
 func (a *AuthApiClient) ListClustersByDateRange(startTimestamp string, endTimestamp string) ybmclient.ApiListClustersByDateRangeRequest {
 	return a.ApiClient.BillingApi.ListClustersByDateRange(a.ctx, a.AccountID).StartTimestamp(startTimestamp).EndTimestamp(endTimestamp).Tier(ybmclient.CLUSTERTIER_PAID)
 }
