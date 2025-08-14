@@ -1,0 +1,19 @@
+{
+    "data": {
+        "start_date": "2025-01-01",
+        "end_date": "2025-01-31",
+        "total_amount": 245.67,
+        "accounts": [
+            {
+                "account_id": "3b98d883-1b63-40ce-a4d7-8dc2d6e0ba53",
+                "account_name": "account-1",
+                "total_amount": 123.45
+            },
+            {
+                "account_id": "cad5c492-f477-42e8-b597-e74376fa2257",
+                "account_name": "account-2",
+                "total_amount": 122.22
+            }
+        ]
+    }
+}

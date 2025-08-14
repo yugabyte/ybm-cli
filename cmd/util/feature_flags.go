@@ -25,6 +25,7 @@ import (
 type FeatureFlag string
 
 const (
+	BILLING             FeatureFlag = "BILLING"
 	CDC                 FeatureFlag = "CDC"
 	CONFIGURE_URL       FeatureFlag = "CONFIGURE_URL"
 	NODE_OP             FeatureFlag = "NODE_OPS"
