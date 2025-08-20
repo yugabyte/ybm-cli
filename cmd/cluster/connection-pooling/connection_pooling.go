@@ -21,7 +21,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -31,8 +30,8 @@ var ClusterName string
 
 var ConnectionPoolingCmd = &cobra.Command{
 	Use:   "connection-pooling",
-	Short: "Manage Connection Pooling",
-	Long:  "Manage Connection Pooling",
+	Short: "Manage Connection Pooling for a cluster",
+	Long:  "Manage Connection Pooling for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -40,8 +39,8 @@ var ConnectionPoolingCmd = &cobra.Command{
 
 var enableConnectionPoolingCmd = &cobra.Command{
 	Use:   "enable",
-	Short: "Enable Connection Pooling",
-	Long:  "Enable Connection Pooling",
+	Short: "Enable Connection Pooling for a cluster",
+	Long:  "Enable Connection Pooling for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		performConnectionPoolingOperation("enable", cmd, args)
 	},
@@ -49,8 +48,8 @@ var enableConnectionPoolingCmd = &cobra.Command{
 
 var disableConnectionPoolingCmd = &cobra.Command{
 	Use:   "disable",
-	Short: "Disable Connection Pooling",
-	Long:  "Disable Connection Pooling",
+	Short: "Disable Connection Pooling for a cluster",
+	Long:  "Disable Connection Pooling for a cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 		performConnectionPoolingOperation("disable", cmd, args)
 	},
@@ -103,7 +102,7 @@ func performConnectionPoolingOperation(operationName string, cmd *cobra.Command,
 }
 
 func init() {
-	util.AddCommandIfFeatureFlag(ConnectionPoolingCmd, enableConnectionPoolingCmd, util.CONNECTION_POOLING)
-
-	util.AddCommandIfFeatureFlag(ConnectionPoolingCmd, disableConnectionPoolingCmd, util.CONNECTION_POOLING)
+	ConnectionPoolingCmd.AddCommand()
+	ConnectionPoolingCmd.AddCommand(enableConnectionPoolingCmd)
+	ConnectionPoolingCmd.AddCommand(disableConnectionPoolingCmd)
 }
