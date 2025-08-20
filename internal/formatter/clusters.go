@@ -26,20 +26,18 @@ import (
 	"github.com/enescakir/emoji"
 	"github.com/inhies/go-bytesize"
 	"github.com/sirupsen/logrus"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
 const (
-	defaultClusterListing   = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}"
-	defaultClusterListingV2 = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
+	defaultClusterListing   = "table {{.Name}}\t{{.Tier}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}\t{{.Provider}}\t{{.Regions}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
 	numNodesHeader          = "Nodes"
 	nodeInfoHeader          = "Node Res.(Vcpu/Mem/DiskGB/IOPS)"
 	healthStateHeader       = "Health"
 	tierHeader              = "Tier"
-	connectionPoolingHeader = "Connection Pooling Enabled"
+	connectionPoolingHeader = "Connection Pooling"
 )
 
 type ClusterContext struct {
@@ -52,9 +50,6 @@ func NewClusterFormat(source string) Format {
 	switch source {
 	case "table", "":
 		format := defaultClusterListing
-		if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
-			format = defaultClusterListingV2
-		}
 		return Format(format)
 	default: // custom format or json or pretty
 		return Format(source)
@@ -76,34 +71,11 @@ func ClusterWrite(ctx Context, clusters []ybmclient.ClusterData) error {
 
 	clusterContext := NewClusterContext()
 
-	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
-		clusterContext = NewClusterContextV2()
-	}
-
 	return ctx.Write(clusterContext, render)
 }
 
 // NewClusterContext creates a new context for rendering cluster
 func NewClusterContext() *ClusterContext {
-	clusterCtx := ClusterContext{}
-	clusterCtx.Header = SubHeaderContext{
-		"Name":             nameHeader,
-		"ID":               "ID",
-		"Regions":          regionsHeader,
-		"Nodes":            numNodesHeader,
-		"NodesSpec":        nodeInfoHeader,
-		"SoftwareVersion":  softwareVersionHeader,
-		"State":            stateHeader,
-		"HealthState":      healthStateHeader,
-		"Provider":         providerHeader,
-		"FaultTolerance":   faultToleranceHeader,
-		"DataDistribution": dataDistributionHeader,
-		"Tier":             tierHeader,
-	}
-	return &clusterCtx
-}
-
-func NewClusterContextV2() *ClusterContext {
 	clusterCtx := ClusterContext{}
 	clusterCtx.Header = SubHeaderContext{
 		"Name":                    nameHeader,
@@ -162,11 +134,26 @@ func (c *ClusterContext) SoftwareVersion() string {
 	return ""
 }
 
-func (c *ClusterContext) ConnectionPoolingStatus() bool {
+func (c *ClusterContext) ConnectionPoolingStatus() string {
 	if v, ok := c.c.Info.GetIsConnectionPoolingEnabledOk(); ok {
-		return *v
+		return ConnectionPoolingStatusToEmoji(*v)
 	}
-	return false
+	return ConnectionPoolingStatusToEmoji(false)
+}
+
+func ConnectionPoolingStatusToEmoji(cpStatus bool) string {
+	// Windows terminal do not support emoji So we return directly the connection pooling state
+	if runtime.GOOS == "windows" {
+		return fmt.Sprintf("%t", cpStatus)
+	}
+	switch cpStatus {
+	case true:
+		return emoji.Parse(":white_check_mark:")
+	case false:
+		return emoji.CrossMark.String()
+	default:
+		return fmt.Sprintf("%t", cpStatus)
+	}
 }
 
 func (c *ClusterContext) HealthState() string {

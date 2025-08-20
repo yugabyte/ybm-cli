@@ -45,7 +45,6 @@ var _ = Describe("Connection Pooling", func() {
 		Expect(err).ToNot(HaveOccurred())
 		os.Setenv("YBM_HOST", fmt.Sprintf("http://%s", server.Addr()))
 		os.Setenv("YBM_APIKEY", "test-token")
-		os.Setenv("YBM_FF_CONNECTION_POOLING", "true")
 		statusCode = 200
 		err = loadJson("./test/fixtures/list-clusters.json", &responseListClusters)
 		Expect(err).ToNot(HaveOccurred())

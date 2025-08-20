@@ -33,7 +33,6 @@ const (
 	AZURE_CIDR_ALLOWED  FeatureFlag = "AZURE_CIDR_ALLOWED"
 	ENTERPRISE_SECURITY FeatureFlag = "ENTERPRISE_SECURITY"
 	PITR_RESTORE        FeatureFlag = "PITR_RESTORE"
-	CONNECTION_POOLING  FeatureFlag = "CONNECTION_POOLING"
 	DR                  FeatureFlag = "DR"
 )
 

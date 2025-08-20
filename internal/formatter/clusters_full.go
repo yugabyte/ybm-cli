@@ -25,7 +25,6 @@ import (
 
 	"github.com/enescakir/emoji"
 	"github.com/sirupsen/logrus"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/cluster"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -34,8 +33,7 @@ import (
 
 const (
 	defaultFullClusterGeneral       = "table {{.Name}}\t{{.ID}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}"
-	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}"
-	defaultFullClusterGeneral2v2    = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
+	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
 	defaultVPCListingCluster        = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
 	defaultDefaultFullClusterRegion = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
 	defaultFullClusterNalListing    = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
@@ -160,16 +158,9 @@ func (c *FullClusterContext) Write() error {
 
 	clusterContext := NewClusterContext()
 
-	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
-		clusterContext = NewClusterContextV2()
-	}
 	c.postFormat(tmpl, clusterContext)
 
-	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
-		tmpl, err = c.startSubsection(defaultFullClusterGeneral2v2)
-	} else {
-		tmpl, err = c.startSubsection(defaultFullClusterGeneral2)
-	}
+	tmpl, err = c.startSubsection(defaultFullClusterGeneral2)
 
 	if err != nil {
 		return err
@@ -181,9 +172,6 @@ func (c *FullClusterContext) Write() error {
 
 	clusterContext = NewClusterContext()
 
-	if util.IsFeatureFlagEnabled(util.CONNECTION_POOLING) {
-		clusterContext = NewClusterContextV2()
-	}
 	c.postFormat(tmpl, clusterContext)
 
 	//Regions Subsection
