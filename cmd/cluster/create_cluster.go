@@ -178,11 +178,6 @@ var createClusterCmd = &cobra.Command{
 			clusterData = respC.GetData()
 		} else {
 			fmt.Println(msg)
-
-			// Inform user about connection pooling if requested
-			if enableConnectionPooling {
-				fmt.Printf("Note: Connection pooling has been enabled for this cluster.\n")
-			}
 		}
 
 		clustersCtx := formatter.Context{
