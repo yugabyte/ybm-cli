@@ -21,8 +21,15 @@ ybm cluster update [flags]
       --fault-tolerance string    [OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.
   -h, --help                      help for update
       --new-name string           [OPTIONAL] The new name to be given to the cluster.
-      --region-info stringArray   Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.
+      --region-info stringArray   Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only),backup-replication-gcp-target=<gcp-target>. region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.
 ```
+
+> **Note:**  
+> - The `backup-replication-gcp-target=<gcp-target>` sub-flag is available in `--region-info` only if the `BACKUP_REPLICATION_GCP_TARGET` feature flag is enabled.
+>
+> **Use case:**  
+> - To keep backup replication to a GCP target enabled for a region, you must pass the same `backup-replication-gcp-target` value during update.
+> - If you omit this sub-flag for a region, backup replication to the GCP target will be **disabled** for that region.
 
 ### Options inherited from parent commands
 
