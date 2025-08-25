@@ -184,6 +184,10 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 			}
 		}
 		info.SetIsDefault(false)
+
+		if replicationTarget, ok := regionInfo["backup-replication-gcp-target"]; ok {
+			info.SetBackupReplicationGcpTarget(replicationTarget)
+		}
 		clusterRegionInfo = append(clusterRegionInfo, info)
 
 		regionNodeInfo := ybmclient.NewOptionalClusterNodeInfo(0, 0, 0)
