@@ -64,6 +64,7 @@ var updateClusterCmd = &cobra.Command{
 
 		regionInfoMapList := []map[string]string{}
 		changedRegionInfo := cmd.Flags().Changed("region-info")
+		cmdHasBackupReplication := false
 
 		if changedRegionInfo {
 			regionInfoList, _ := cmd.Flags().GetStringArray("region-info")
@@ -105,6 +106,7 @@ var updateClusterCmd = &cobra.Command{
 						if util.IsFeatureFlagEnabled(util.BACKUP_REPLICATION_GCP_TARGET) {
 							if len(strings.TrimSpace(val)) != 0 {
 								regionInfoMap["backup-replication-gcp-target"] = val
+								cmdHasBackupReplication = true
 							}
 						}
 					}
@@ -124,6 +126,24 @@ var updateClusterCmd = &cobra.Command{
 				}
 
 				regionInfoMapList = append(regionInfoMapList, regionInfoMap)
+			}
+		}
+
+		// Check if any originalSpec.ClusterRegionInfo contains backupReplicationGcpTarget
+		originalHasBackupReplication := false
+		for _, clusterRegionInfo := range originalSpec.ClusterRegionInfo {
+			if replicationTarget, ok := clusterRegionInfo.GetBackupReplicationGcpTargetOk(); ok && replicationTarget != nil && *replicationTarget != "" {
+				originalHasBackupReplication = true
+				break
+			}
+		}
+
+		// Only run confirm if original had backupReplicationGcpTarget and new does not
+		if originalHasBackupReplication && !cmdHasBackupReplication {
+			viper.BindPFlag("force", cmd.Flags().Lookup("force"))
+			err := util.ConfirmCommand(fmt.Sprintf("The field 'backup-replication-gcp-target' is not passed for the regions. This will disable backup replication for cluster %s : Are you sure you want to proceed?", clusterName), viper.GetBool("force"))
+			if err != nil {
+				logrus.Fatal(err)
 			}
 		}
 
@@ -199,6 +219,7 @@ func init() {
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
 	updateClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Production, Innovation, Preview, or 'Early Access'.")
+	updateClusterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 }
 
