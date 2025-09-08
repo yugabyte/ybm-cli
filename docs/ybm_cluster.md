@@ -33,6 +33,7 @@ ybm cluster [flags]
 
 * [ybm](ybm.md)	 - ybm - Effortlessly manage your DB infrastructure on YugabyteDB Aeon (DBaaS) from command line!
 * [ybm cluster cert](ybm_cluster_cert.md)	 - Get the root CA certificate
+* [ybm cluster connection-pooling](ybm_cluster_connection-pooling.md)	 - Manage Connection Pooling for a cluster
 * [ybm cluster create](ybm_cluster_create.md)	 - Create a cluster
 * [ybm cluster db-audit-logging](ybm_cluster_db-audit-logging.md)	 - Configure Database Audit Logging for your Cluster.
 * [ybm cluster db-query-logging](ybm_cluster_db-query-logging.md)	 - Configure Database Query Logging for your Cluster.
