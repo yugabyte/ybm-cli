@@ -34,6 +34,7 @@ ybm cluster create [flags]
       --region-info stringArray        Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.
       --preferred-region string        [OPTIONAL] The preferred region in a multi region cluster. The preferred region handles all read and write requests from clients.
       --default-region string          [OPTIONAL] The primary region in a partition-by-region cluster. The primary region is where all the tables not created in a tablespace reside.
+      --enable-connection-pooling      [OPTIONAL] Enable connection pooling for the cluster during creation. Default false.
   -h, --help                           help for create
 ```
 
