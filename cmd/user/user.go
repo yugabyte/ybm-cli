@@ -123,7 +123,8 @@ var inviteUserCmd = &cobra.Command{
 			role := resp.Data.GetUserList()[0].GetInviteUserData().Info.GetRoleList()[0].GetRoles()[0].Info.GetDisplayName()
 			fmt.Printf("The user %s has been successfully invited with role: %s.\n", formatter.Colorize(email, formatter.GREEN_COLOR), formatter.Colorize(role, formatter.GREEN_COLOR))
 		} else {
-			fmt.Printf("%s \n", resp.Data.GetUserList()[0].GetErrorMessage())
+			logrus.Debugf("Full HTTP response: %v", r)
+			logrus.Fatalf("%s \n", resp.Data.GetUserList()[0].GetErrorMessage())
 		}
 
 	},
