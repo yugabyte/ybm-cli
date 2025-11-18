@@ -18,6 +18,7 @@ package cluster
 import (
 	"github.com/spf13/cobra"
 	audit_log_exporter "github.com/yugabyte/ybm-cli/cmd/cluster/audit-log-exporter"
+	backupreplication "github.com/yugabyte/ybm-cli/cmd/cluster/backup-replication"
 	"github.com/yugabyte/ybm-cli/cmd/cluster/cert"
 	connectionpooling "github.com/yugabyte/ybm-cli/cmd/cluster/connection-pooling"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
@@ -27,6 +28,7 @@ import (
 	"github.com/yugabyte/ybm-cli/cmd/cluster/node"
 	pitrconfig "github.com/yugabyte/ybm-cli/cmd/cluster/pitr-config"
 	readreplica "github.com/yugabyte/ybm-cli/cmd/cluster/read-replica"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 )
 
 // getCmd represents the list command
@@ -77,4 +79,6 @@ func init() {
 	ClusterCmd.AddCommand(connectionpooling.ConnectionPoolingCmd)
 	connectionpooling.ConnectionPoolingCmd.PersistentFlags().StringVarP(&connectionpooling.ClusterName, "cluster-name", "c", "", "[REQUIRED] The name of the cluster.")
 	connectionpooling.ConnectionPoolingCmd.MarkPersistentFlagRequired("cluster-name")
+
+	util.AddCommandIfFeatureFlag(ClusterCmd, backupreplication.BackupReplicationCmd, util.BACKUP_REPLICATION_GCP_TARGET)
 }
