@@ -846,6 +846,10 @@ func (a *AuthApiClient) GetGcpBackupReplicationConfig(clusterId string) ybmclien
 	return a.ApiClient.BackupReplicationApi.GetGcpBackupReplicationConfig(a.ctx, a.AccountID, a.ProjectID, clusterId)
 }
 
+func (a *AuthApiClient) ModifyGcpBackupReplication(clusterId string) ybmclient.ApiModifyGcpBackupReplicationRequest {
+	return a.ApiClient.BackupReplicationApi.ModifyGcpBackupReplication(a.ctx, a.AccountID, a.ProjectID, clusterId)
+}
+
 func (a *AuthApiClient) GetTrack(trackId string) ybmclient.ApiGetTrackRequest {
 	return a.ApiClient.SoftwareReleaseApi.GetTrack(a.ctx, a.AccountID, trackId)
 }

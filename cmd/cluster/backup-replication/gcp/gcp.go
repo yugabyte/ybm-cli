@@ -37,4 +37,7 @@ func init() {
 
 	GcpCmd.AddCommand(describeGcpCmd)
 	describeGcpCmd.Flags().BoolVar(&showAll, "show-all", false, "Show all configurations including scheduled for expiry and removed regions")
+
+	GcpCmd.AddCommand(enableGcpCmd)
+	GcpCmd.AddCommand(updateGcpCmd)
 }
