@@ -32,6 +32,9 @@ ybm integration create [flags]
                                               	endpoint=<victoriametrics-otlp-endpoint-url> (default [])
       --googlecloud-cred-filepath string      Filepath for Google Cloud service account credentials. 
                                               	Please provide absolute file path
+      --newrelic-spec stringToString          Configuration for New Relic.
+                                              	Please provide key value pairs as follows:
+                                              	endpoint=<your-new-relic-endpoint-url>,license-key=<your-new-relic-license-key> (default [])
   -h, --help                                  help for create
 ```
 
