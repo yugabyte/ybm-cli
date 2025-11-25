@@ -731,6 +731,78 @@ var _ = Describe("Backup Replication", func() {
 		})
 	})
 
+	Describe("When syncing GCP backup replication", func() {
+		BeforeEach(func() {
+			statusCode = 200
+		})
+
+		Context("with cluster-name not set", func() {
+			It("should throw error, cluster-name not set", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "sync")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`Error: required flag\(s\)`))
+				Expect(session.Err).Should(gbytes.Say(`"cluster-name"`))
+				session.Kill()
+			})
+		})
+
+		Context("with valid cluster-name", func() {
+			It("should trigger resync successfully", func() {
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{}`),
+						ghttp.RespondWith(statusCode, nil),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "sync",
+					"--cluster-name", "stunning-sole",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`Resync triggered for all backup replication configs in cluster stunning-sole`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(4))
+				session.Kill()
+			})
+		})
+
+		Context("with API error", func() {
+			It("should handle API error", func() {
+				errorStatusCode := 400
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{}`),
+						ghttp.RespondWithJSONEncoded(errorStatusCode, map[string]interface{}{
+							"error": map[string]interface{}{
+								"detail": "Invalid request",
+								"status": 400,
+							},
+						}),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "sync",
+					"--cluster-name", "stunning-sole",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`Invalid request`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(4))
+				session.Kill()
+			})
+		})
+	})
+
 	AfterEach(func() {
 		os.Args = args
 		server.Close()
