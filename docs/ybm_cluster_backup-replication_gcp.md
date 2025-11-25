@@ -37,5 +37,6 @@ ybm cluster backup-replication gcp [flags]
 * [ybm cluster backup-replication gcp describe](ybm_cluster_backup-replication_gcp_describe.md)	 - Describe the current GCP backup replication configuration
 * [ybm cluster backup-replication gcp disable](ybm_cluster_backup-replication_gcp_disable.md)	 - Disable GCP backup replication for a cluster
 * [ybm cluster backup-replication gcp enable](ybm_cluster_backup-replication_gcp_enable.md)	 - Enable GCP backup replication for a cluster
+* [ybm cluster backup-replication gcp sync](ybm_cluster_backup-replication_gcp_sync.md)	 - Trigger resync of GCP backup replication for a cluster
 * [ybm cluster backup-replication gcp update](ybm_cluster_backup-replication_gcp_update.md)	 - Update GCP backup replication configuration for a cluster
 
