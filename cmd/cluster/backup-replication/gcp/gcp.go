@@ -40,4 +40,5 @@ func init() {
 
 	GcpCmd.AddCommand(enableGcpCmd)
 	GcpCmd.AddCommand(updateGcpCmd)
+	GcpCmd.AddCommand(disableGcpCmd)
 }
