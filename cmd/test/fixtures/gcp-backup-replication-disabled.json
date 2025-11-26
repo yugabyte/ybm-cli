@@ -1,0 +1,34 @@
+{
+  "data": {
+    "spec": {
+      "regional_targets": [
+        {
+          "region": "us-west1",
+          "target": "backup-bucket-us-west1"
+        }
+      ]
+    },
+    "info": {
+      "state": "DISABLED",
+      "region_configs": [
+        {
+          "region": "us-west1",
+          "reports": [
+            {
+              "id": "config-id-1",
+              "config_state": "DISABLED",
+              "target": "backup-bucket-us-west1",
+              "transfer_job_details": null,
+              "metadata": {
+                "created_on": "2024-01-01T00:00:00Z",
+                "updated_on": "2024-01-15T09:30:00Z",
+                "expiry_on": "2024-01-15T09:30:00Z"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+

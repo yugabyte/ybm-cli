@@ -1,0 +1,102 @@
+{
+  "data": {
+    "spec": {
+      "regional_targets": [
+        {
+          "region": "us-west1",
+          "target": "backup-bucket-us-west1"
+        },
+        {
+          "region": "us-east1",
+          "target": "backup-bucket-us-east1"
+        }
+      ]
+    },
+    "info": {
+      "state": "ENABLED",
+      "region_configs": [
+        {
+          "region": "us-west1",
+          "reports": [
+            {
+              "id": "config-id-1",
+              "config_state": "ENABLED",
+              "target": "backup-bucket-us-west1",
+              "transfer_job_details": {
+                "state": "ENABLED",
+                "next_transfer_operation_time": "2024-01-15T10:00:00Z",
+                "latest_transfer_operation_details": {
+                  "status": "SUCCESS",
+                  "start_time": "2024-01-15T09:00:00Z",
+                  "end_time": "2024-01-15T09:30:00Z",
+                  "objects_copied": 100,
+                  "bytes_copied": 1024000,
+                  "objects_from_source_failed": 0,
+                  "bytes_from_source_failed": 0,
+                  "percent_bytes_copied": 100.0
+                }
+              },
+              "metadata": {
+                "created_on": "2024-01-01T00:00:00Z",
+                "updated_on": "2024-01-15T09:30:00Z",
+                "expiry_on": null
+              }
+            },
+            {
+              "id": "config-id-1-disabled",
+              "config_state": "DISABLED",
+              "target": "backup-bucket-us-west1",
+              "transfer_job_details": null,
+              "metadata": {
+                "created_on": "2024-01-01T00:00:00Z",
+                "updated_on": "2024-01-15T08:00:00Z",
+                "expiry_on": "2024-01-15T08:00:00Z"
+              }
+            }
+          ]
+        },
+        {
+          "region": "us-east1",
+          "reports": [
+            {
+              "id": "config-id-2",
+              "config_state": "ENABLED",
+              "target": "backup-bucket-us-east1",
+              "transfer_job_details": {
+                "state": "ENABLED",
+                "next_transfer_operation_time": "2024-01-15T11:00:00Z",
+                "latest_transfer_operation_details": {
+                  "status": "IN_PROGRESS",
+                  "start_time": "2024-01-15T10:00:00Z",
+                  "end_time": null,
+                  "objects_copied": 50,
+                  "bytes_copied": 512000,
+                  "objects_from_source_failed": 0,
+                  "bytes_from_source_failed": 0,
+                  "percent_bytes_copied": 50.0
+                }
+              },
+              "metadata": {
+                "created_on": "2024-01-01T00:00:00Z",
+                "updated_on": "2024-01-15T10:00:00Z",
+                "expiry_on": null
+              }
+            },
+            {
+              "id": "config-id-2-disabled",
+              "config_state": "DISABLED",
+              "target": "backup-bucket-us-east1",
+              "transfer_job_details": null,
+              "metadata": {
+                "created_on": "2024-01-01T00:00:00Z",
+                "updated_on": "2024-01-15T09:00:00Z",
+                "expiry_on": "2024-01-15T09:00:00Z"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
