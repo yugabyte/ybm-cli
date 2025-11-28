@@ -53,7 +53,8 @@
                 "cluster_region_info_details": [
                     {
                         "region": "us-west-2",
-                        "id": "dc35fede-02f2-45e4-b763-f8ea24b74cf9"
+                        "id": "dc35fede-02f2-45e4-b763-f8ea24b74cf9",
+                        "backup_region": true
                     }
                 ],
                 "endpoints": {

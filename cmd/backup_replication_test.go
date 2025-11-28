@@ -315,6 +315,422 @@ var _ = Describe("Backup Replication", func() {
 		})
 	})
 
+	Describe("When enabling GCP backup replication", func() {
+		var responseCluster openapi.ClusterResponse
+
+		BeforeEach(func() {
+			err := loadJson("./test/fixtures/one-cluster.json", &responseCluster)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
+				),
+			)
+		})
+
+		Context("with cluster-name not set", func() {
+			It("should throw error, cluster-name not set", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`Error: required flag\(s\)`))
+				Expect(session.Err).Should(gbytes.Say(`"cluster-name"`))
+				session.Kill()
+			})
+		})
+
+		Context("with region-target not set", func() {
+			It("should throw error, region-target not set", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`Error: required flag\(s\) "region-target" not set`))
+				session.Kill()
+			})
+		})
+
+		Context("with invalid format in region-target", func() {
+			It("should throw error for incorrect format", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "invalid-format",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`incorrect format in region target`))
+				session.Kill()
+			})
+		})
+
+		Context("with region not specified in region-target", func() {
+			It("should throw error for missing region", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "bucket-name=my-bucket",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`region not specified in region target`))
+				session.Kill()
+			})
+		})
+
+		Context("with bucket-name not specified in region-target", func() {
+			It("should throw error for missing bucket-name", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "region=us-west-2",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`bucket name not specified in region target`))
+				session.Kill()
+			})
+		})
+
+		Context("with region not in cluster", func() {
+			It("should throw error for invalid region", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "region=invalid-region,bucket-name=my-bucket",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`region 'invalid-region' is not a backup region in cluster stunning-sole`))
+				session.Kill()
+			})
+		})
+
+		Context("with duplicate region target", func() {
+			It("should throw error for duplicate region", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "region=us-west-2,bucket-name=bucket1",
+					"--region-target", "region=us-west-2,bucket-name=bucket2",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`duplicate region target provided for region 'us-west-2'`))
+				session.Kill()
+			})
+		})
+
+		Context("with valid region-target", func() {
+			It("should enable backup replication in table format", func() {
+				err := loadJson("./test/fixtures/gcp-backup-replication.json", &responseBackupReplication)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{"regional_targets":[{"region":"us-west-2","target":"my-bucket"}]}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "region=us-west-2,bucket-name=my-bucket",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`GCP backup replication for cluster stunning-sole is being enabled`))
+				Expect(session.Out).Should(gbytes.Say(`Overall State: ENABLED`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+
+			It("should enable backup replication in json format", func() {
+				err := loadJson("./test/fixtures/gcp-backup-replication.json", &responseBackupReplication)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{"regional_targets":[{"region":"us-west-2","target":"my-bucket"}]}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "region=us-west-2,bucket-name=my-bucket",
+					"--output", "json",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`"info"`))
+				Expect(session.Out).Should(gbytes.Say(`"region_configs"`))
+				Expect(session.Out).Should(gbytes.Say(`"state":"ENABLED"`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+
+			It("should enable backup replication in pretty format", func() {
+				err := loadJson("./test/fixtures/gcp-backup-replication.json", &responseBackupReplication)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{"regional_targets":[{"region":"us-west-2","target":"my-bucket"}]}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "region=us-west-2,bucket-name=my-bucket",
+					"--output", "pretty",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`"info"`))
+				Expect(session.Out).Should(gbytes.Say(`"region_configs"`))
+				Expect(session.Out).Should(gbytes.Say(`"state": "ENABLED"`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+
+			It("should handle spaces in region-target", func() {
+				err := loadJson("./test/fixtures/gcp-backup-replication.json", &responseBackupReplication)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{"regional_targets":[{"region":"us-west-2","target":"my-bucket"}]}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplication),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "enable",
+					"--cluster-name", "stunning-sole",
+					"--region-target", "region=us-west-2, bucket-name=my-bucket",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`GCP backup replication for cluster stunning-sole is being enabled`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+		})
+	})
+
+	Describe("When disabling GCP backup replication", func() {
+		var responseCluster openapi.ClusterResponse
+
+		BeforeEach(func() {
+			err := loadJson("./test/fixtures/one-cluster.json", &responseCluster)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
+				),
+			)
+		})
+
+		Context("with cluster-name not set", func() {
+			It("should throw error, cluster-name not set", func() {
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "disable", "--force")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Err).Should(gbytes.Say(`Error: required flag\(s\)`))
+				Expect(session.Err).Should(gbytes.Say(`"cluster-name"`))
+				session.Kill()
+			})
+		})
+
+		Context("with valid cluster-name and --force flag", func() {
+			It("should disable backup replication in table format", func() {
+				err := loadJson("./test/fixtures/gcp-backup-replication-disabled.json", &responseBackupReplicationDisabled)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{"regional_targets":[{"region":"us-west-2"}]}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplicationDisabled),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplicationDisabled),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "disable",
+					"--cluster-name", "stunning-sole",
+					"--force",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`GCP backup replication for cluster stunning-sole is being disabled`))
+				Expect(session.Out).Should(gbytes.Say(`Overall State: DISABLED`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+
+			It("should disable backup replication in json format", func() {
+				err := loadJson("./test/fixtures/gcp-backup-replication-disabled.json", &responseBackupReplicationDisabled)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{"regional_targets":[{"region":"us-west-2"}]}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplicationDisabled),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplicationDisabled),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "disable",
+					"--cluster-name", "stunning-sole",
+					"--force",
+					"--output", "json",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`"info"`))
+				Expect(session.Out).Should(gbytes.Say(`"region_configs"`))
+				Expect(session.Out).Should(gbytes.Say(`"state":"DISABLED"`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+
+			It("should disable backup replication in pretty format", func() {
+				err := loadJson("./test/fixtures/gcp-backup-replication-disabled.json", &responseBackupReplicationDisabled)
+				Expect(err).ToNot(HaveOccurred())
+
+				statusCode = 200
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodPut, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.VerifyJSON(`{"regional_targets":[{"region":"us-west-2"}]}`),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplicationDisabled),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/backup-replication/gcp"),
+						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseBackupReplicationDisabled),
+					),
+				)
+
+				cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "disable",
+					"--cluster-name", "stunning-sole",
+					"--force",
+					"--output", "pretty",
+				)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				Expect(session.Out).Should(gbytes.Say(`"info"`))
+				Expect(session.Out).Should(gbytes.Say(`"region_configs"`))
+				Expect(session.Out).Should(gbytes.Say(`"state": "DISABLED"`))
+				Expect(server.ReceivedRequests()).Should(HaveLen(6))
+				session.Kill()
+			})
+		})
+
+	})
+
+	Describe("When disabling GCP backup replication with cluster having no backup regions", func() {
+		BeforeEach(func() {
+			var responseClusterNoBackupRegions openapi.ClusterResponse
+			err := loadJson("./test/fixtures/one-cluster.json", &responseClusterNoBackupRegions)
+			Expect(err).ToNot(HaveOccurred())
+
+			clusterDataPtr, ok := responseClusterNoBackupRegions.GetDataOk()
+			Expect(ok).To(BeTrue())
+			clusterInfo := clusterDataPtr.GetInfo()
+			clusterInfo.ClusterRegionInfoDetails = []openapi.ClusterRegionInfoDetails{
+				{
+					Region:       "us-west-2",
+					Id:           "dc35fede-02f2-45e4-b763-f8ea24b74cf9",
+					BackupRegion: false,
+				},
+			}
+			clusterDataPtr.SetInfo(clusterInfo)
+
+			statusCode = 200
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseClusterNoBackupRegions),
+				),
+			)
+		})
+
+		It("should throw error for no backup regions found", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "backup-replication", "gcp", "disable",
+				"--cluster-name", "stunning-sole",
+				"--force",
+			)
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say(`no backup regions found for cluster stunning-sole`))
+			session.Kill()
+		})
+	})
+
 	AfterEach(func() {
 		os.Args = args
 		server.Close()
