@@ -179,6 +179,11 @@ func init() {
 	endpoint=<victoriametrics-otlp-endpoint-url>`)
 	createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
 	Please provide absolute file path`)
+	if util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
+		createIntegrationCmd.Flags().StringToString("s3-spec", nil, `Configuration for AWS S3. 
+	Please provide key value pairs as follows: 
+	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<optional-path-prefix>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>`)
+	}
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
 
@@ -344,8 +349,46 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 			googlecloudSpec.SetUniverseDomain(universeDomain)
 		}
 		IntegrationSpec.SetGooglecloudSpec(*googlecloudSpec)
+	case ybmclient.TELEMETRYPROVIDERTYPEENUM_AWS_S3:
+		if !util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
+			return nil, fmt.Errorf("s3 integration is not enabled")
+		}
+		if !cmd.Flags().Changed("s3-spec") {
+			return nil, fmt.Errorf("s3-spec is required for s3 sink")
+		}
+		s3SpecString, _ := cmd.Flags().GetStringToString("s3-spec")
+		bucket := s3SpecString["bucket"]
+		region := s3SpecString["region"]
+		accessKeyId := s3SpecString["access-key-id"]
+		secretAccessKey := s3SpecString["secret-access-key"]
+		pathPrefix := s3SpecString["path-prefix"]
+		filePrefix := s3SpecString["file-prefix"]
+		partitionStrategy := s3SpecString["partition-strategy"]
+		if len(bucket) < 1 {
+			return nil, fmt.Errorf("bucket is a required field for s3-spec")
+		}
+		if len(region) < 1 {
+			return nil, fmt.Errorf("region is a required field for s3-spec")
+		}
+		if len(accessKeyId) < 1 {
+			return nil, fmt.Errorf("access-key-id is a required field for s3-spec")
+		}
+		if len(secretAccessKey) < 1 {
+			return nil, fmt.Errorf("secret-access-key is a required field for s3-spec")
+		}
+		s3Spec := ybmclient.NewS3TelemetryProviderSpec(bucket, region, accessKeyId, secretAccessKey)
+		if len(pathPrefix) > 0 {
+			s3Spec.SetPathPrefix(pathPrefix)
+		}
+		if len(filePrefix) > 0 {
+			s3Spec.SetFilePrefix(filePrefix)
+		}
+		if len(partitionStrategy) > 0 {
+			s3Spec.SetPartitionStrategy(partitionStrategy)
+		}
+		IntegrationSpec.SetAwsS3Spec(*s3Spec)
 	default:
-		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics or sumologic are accepted as third party sink for now")
+		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics, or sumologic are accepted as third party sink for now")
 	}
 	return IntegrationSpec, nil
 }
