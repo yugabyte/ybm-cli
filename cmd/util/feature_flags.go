@@ -35,6 +35,7 @@ const (
 	PITR_RESTORE                  FeatureFlag = "PITR_RESTORE"
 	DR                            FeatureFlag = "DR"
 	BACKUP_REPLICATION_GCP_TARGET FeatureFlag = "BACKUP_REPLICATION_GCP_TARGET"
+	S3_INTEGRATION                FeatureFlag = "S3_INTEGRATION"
 )
 
 func (f FeatureFlag) String() string {
