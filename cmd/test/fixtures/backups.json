@@ -5,7 +5,8 @@
           "cluster_id": "d6954ca7-fc4f-4454-9ce2-8c2e10ed9deb",
           "retention_period_in_days": 8,
           "backup_type": "INCREMENTAL",
-          "description": "Backup of the cluster XYZ"
+          "description": "Backup of the cluster XYZ",
+          "use_roles": true
         },
         "info": {
           "id": "c7742a97-cee0-449d-9c7c-4b934d9cf940",
@@ -41,7 +42,8 @@
           "cluster_id": "d6954ca7-fc4f-4454-9ce2-8c2e10ed9deb",
           "retention_period_in_days": 1,
           "backup_type": "FULL",
-          "description": null
+          "description": null,
+          "use_roles": false
         },
         "info": {
           "id": "faaca956-b542-49ee-92a8-9f1e138d1311",
