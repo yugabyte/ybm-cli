@@ -21,7 +21,52 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/yugabyte/ybm-cli/cmd/util"
+	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
+
+// UseRolesSetter is an interface for specs that support the UseRoles field
+type UseRolesSetter interface {
+	SetUseRoles(v bool)
+}
+
+// SetUseRolesFromFlag checks the --include-roles flag and sets UseRoles on the spec if enabled
+// Returns true if the flag was set, false otherwise
+func SetUseRolesFromFlag(cmd *cobra.Command, spec UseRolesSetter) bool {
+	if !util.IsFeatureFlagEnabled(util.INCLUDE_ROLES_DURING_BACKUP_RESTORE) {
+		return false
+	}
+	if cmd.Flags().Changed("include-roles") {
+		includeRoles, _ := cmd.Flags().GetBool("include-roles")
+		spec.SetUseRoles(includeRoles)
+		return true
+	}
+	return false
+}
+
+// AddIncludeRolesFlag adds the --include-roles flag to a command if the feature flag is enabled
+func AddIncludeRolesFlag(cmd *cobra.Command, description string) {
+	if util.IsFeatureFlagEnabled(util.INCLUDE_ROLES_DURING_BACKUP_RESTORE) {
+		cmd.Flags().Bool("include-roles", false, description)
+	}
+}
+
+// SetBackupSpecUseRoles sets UseRoles on a BackupSpec from the command flag
+func SetBackupSpecUseRoles(cmd *cobra.Command, spec *ybmclient.BackupSpec) {
+	SetUseRolesFromFlag(cmd, spec)
+}
+
+// SetRestoreSpecUseRoles sets UseRoles on a RestoreSpec from the command flag
+func SetRestoreSpecUseRoles(cmd *cobra.Command, spec *ybmclient.RestoreSpec) {
+	SetUseRolesFromFlag(cmd, spec)
+}
+
+// SetScheduleSpecV2UseRoles sets UseRoles on a ScheduleSpecV2 from the command flag
+func SetScheduleSpecV2UseRoles(cmd *cobra.Command, spec *ybmclient.ScheduleSpecV2) {
+	SetUseRolesFromFlag(cmd, spec)
+}
 
 // Map weekdays to cron format
 var dayMapping = map[string]string{

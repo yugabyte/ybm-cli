@@ -4,7 +4,8 @@
         "cluster_id": "d6954ca7-fc4f-4454-9ce2-8c2e10ed9deb",
         "retention_period_in_days": 1,
         "backup_type": "FULL",
-        "description": null
+        "description": null,
+        "use_roles": true
       },
       "info": {
         "id": "5574d58f-68f1-4762-baa1-c2421cdb38b0",

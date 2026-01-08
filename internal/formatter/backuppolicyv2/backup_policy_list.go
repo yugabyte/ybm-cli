@@ -26,12 +26,13 @@ import (
 )
 
 const (
-	defaultBackupPolicyListing    = "table {{.TimeInterval}}\t{{.IncrementalTimeInterval}}\t{{.DaysOfTheWeek}}\t{{.BackupStartTime}}\t{{.RetentionPeriod}}\t{{.State}}"
+	defaultBackupPolicyListing    = "table {{.TimeInterval}}\t{{.IncrementalTimeInterval}}\t{{.DaysOfTheWeek}}\t{{.BackupStartTime}}\t{{.RetentionPeriod}}\t{{.IncludeRoles}}\t{{.State}}"
 	timeIntervalHeader            = "Time Interval(days)"
 	incrementalTimeIntervalHeader = "Incr. Interval(mins)"
 	daysOfTheWeekHeader           = "Days of the Week"
 	backupStartTimeHeader         = "Backup Start Time"
 	retentionPeriodInDays         = "Retention Period(days)"
+	includeRolesHeader            = "Roles & Grants"
 	state                         = "State"
 )
 
@@ -75,6 +76,7 @@ func NewBackupPolicyContext() *BackupPolicyContext {
 		"DaysOfTheWeek":           daysOfTheWeekHeader,
 		"BackupStartTime":         backupStartTimeHeader,
 		"RetentionPeriod":         retentionPeriodInDays,
+		"IncludeRoles":            includeRolesHeader,
 		"State":                   state,
 	}
 	return &backupPolicyCtx
@@ -119,6 +121,13 @@ func (c *BackupPolicyContext) BackupStartTime() string {
 		return util.GetLocalTime(cronExpression)
 	}
 	return "NA"
+}
+
+func (c *BackupPolicyContext) IncludeRoles() string {
+	if c.c.Spec.GetUseRoles() {
+		return "Included"
+	}
+	return "Not Included"
 }
 
 func (c *BackupPolicyContext) MarshalJSON() ([]byte, error) {
