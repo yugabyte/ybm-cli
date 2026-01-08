@@ -27,7 +27,7 @@ import (
 
 const (
 	backupGeneral1  = "table {{.Id}}\t{{.CreatedOn}}\t{{.Incremental}}\t{{.ClusterName}}\t{{.BackupState}}"
-	backupGeneral2  = "table {{.BackupType}}\t{{.Size}}\t{{.ExpireOn}}\t{{.Duration}}"
+	backupGeneral2  = "table {{.BackupType}}\t{{.Size}}\t{{.ExpireOn}}\t{{.Duration}}\t{{.IncludeRoles}}"
 	databaseListing = "table {{.Db}}\t{{.ApiType}}"
 	dbHeader        = "Database/Keyspace"
 	apiTypeHeader   = "API Type"
@@ -55,6 +55,7 @@ func NewFullBackupContext() *FullBackupContext {
 		"Incremental":  incrementalHeader,
 		"Size":         sizeHeader,
 		"Duration":     durationHeader,
+		"IncludeRoles": includeRolesHeader,
 	}
 	return &backupCtx
 }

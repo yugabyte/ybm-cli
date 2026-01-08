@@ -25,17 +25,18 @@ import (
 type FeatureFlag string
 
 const (
-	BILLING                       FeatureFlag = "BILLING"
-	CDC                           FeatureFlag = "CDC"
-	CONFIGURE_URL                 FeatureFlag = "CONFIGURE_URL"
-	NODE_OP                       FeatureFlag = "NODE_OPS"
-	TOOLS                         FeatureFlag = "TOOLS"
-	AZURE_CIDR_ALLOWED            FeatureFlag = "AZURE_CIDR_ALLOWED"
-	ENTERPRISE_SECURITY           FeatureFlag = "ENTERPRISE_SECURITY"
-	PITR_RESTORE                  FeatureFlag = "PITR_RESTORE"
-	DR                            FeatureFlag = "DR"
-	BACKUP_REPLICATION_GCP_TARGET FeatureFlag = "BACKUP_REPLICATION_GCP_TARGET"
-	S3_INTEGRATION                FeatureFlag = "S3_INTEGRATION"
+	BILLING                             FeatureFlag = "BILLING"
+	CDC                                 FeatureFlag = "CDC"
+	CONFIGURE_URL                       FeatureFlag = "CONFIGURE_URL"
+	NODE_OP                             FeatureFlag = "NODE_OPS"
+	TOOLS                               FeatureFlag = "TOOLS"
+	AZURE_CIDR_ALLOWED                  FeatureFlag = "AZURE_CIDR_ALLOWED"
+	ENTERPRISE_SECURITY                 FeatureFlag = "ENTERPRISE_SECURITY"
+	PITR_RESTORE                        FeatureFlag = "PITR_RESTORE"
+	DR                                  FeatureFlag = "DR"
+	BACKUP_REPLICATION_GCP_TARGET       FeatureFlag = "BACKUP_REPLICATION_GCP_TARGET"
+	S3_INTEGRATION                      FeatureFlag = "S3_INTEGRATION"
+	INCLUDE_ROLES_DURING_BACKUP_RESTORE FeatureFlag = "INCLUDE_ROLES_DURING_BACKUP_RESTORE"
 )
 
 func (f FeatureFlag) String() string {

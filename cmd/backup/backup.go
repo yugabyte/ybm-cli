@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yugabyte/ybm-cli/cmd/backup/policyv2"
+	backupUtil "github.com/yugabyte/ybm-cli/cmd/backup/util"
 	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
@@ -94,6 +95,7 @@ var restoreBackupCmd = &cobra.Command{
 		restoreSpec := ybmclient.NewRestoreSpec()
 		restoreSpec.SetBackupId(backupID)
 		restoreSpec.SetClusterId(clusterID)
+		backupUtil.SetRestoreSpecUseRoles(cmd, restoreSpec)
 
 		_, r, err := authApi.RestoreBackup().RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
@@ -149,6 +151,7 @@ var createBackupCmd = &cobra.Command{
 			description, _ := cmd.Flags().GetString("description")
 			createBackupSpec.SetDescription(description)
 		}
+		backupUtil.SetBackupSpecUseRoles(cmd, &createBackupSpec)
 
 		backupResp, response, err := authApi.CreateBackup().BackupSpec(createBackupSpec).Execute()
 		if err != nil {
@@ -264,12 +267,14 @@ func init() {
 	restoreBackupCmd.MarkFlagRequired("cluster-name")
 	restoreBackupCmd.Flags().String("backup-id", "", "[REQUIRED] ID of the backup to be restored.")
 	restoreBackupCmd.MarkFlagRequired("backup-id")
+	backupUtil.AddIncludeRolesFlag(restoreBackupCmd, "[OPTIONAL] Restore global YSQL roles and permissions from the backup. (Default: false)")
 
 	BackupCmd.AddCommand(createBackupCmd)
 	createBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name for the cluster.")
 	createBackupCmd.MarkFlagRequired("cluster-name")
 	createBackupCmd.Flags().Int32("retention-period", 0, "[OPTIONAL] Retention period of the backup in days. (Default: 1)")
 	createBackupCmd.Flags().String("description", "", "[OPTIONAL] Description of the backup.")
+	backupUtil.AddIncludeRolesFlag(createBackupCmd, "[OPTIONAL] Include global YSQL roles and permissions in the backup. (Default: false)")
 
 	BackupCmd.AddCommand(deleteBackupCmd)
 	deleteBackupCmd.Flags().String("backup-id", "", "[REQUIRED] The backup ID.")

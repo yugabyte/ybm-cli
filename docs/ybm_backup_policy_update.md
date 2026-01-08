@@ -18,6 +18,7 @@ ybm backup policy update [flags]
       --full-backup-schedule-days-of-week string        [OPTIONAL] Days of the week when the backup has to run. A comma separated list of the first two letters of the days of the week. Eg: 'Mo,Tu,Sa'
       --full-backup-schedule-time string                [OPTIONAL] Time of the day at which the backup has to run. Please specify local time in 24 hr HH:MM format. Eg: 15:04
   -h, --help                                            help for update
+      --include-roles                                   [OPTIONAL] Include global YSQL roles and permissions in scheduled backups. (Default: false)
       --incremental-backup-frequency-in-minutes int32   [OPTIONAL] Frequency of incremental backup in minutes. (default 60)
       --retention-period-in-days int32                  [REQUIRED] Retention period of the backup in days. (default 1)
 ```
@@ -28,6 +29,7 @@ ybm backup policy update [flags]
   -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
+      --host string        YugabyteDB Aeon Api hostname
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
   -o, --output string      Select the desired output format (table, json, pretty). Default to table

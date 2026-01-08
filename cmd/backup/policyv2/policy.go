@@ -105,6 +105,7 @@ var enablePolicyCmd = &cobra.Command{
 			logrus.Fatalf("The backup policy is already enabled for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 		}
 		backupScheduleSpec.SetState(ybmclient.SCHEDULESTATEENUM_ACTIVE)
+		util.SetScheduleSpecV2UseRoles(cmd, &backupScheduleSpec)
 		info := resp.GetData()[0].GetInfo()
 		scheduleId := info.GetId()
 
@@ -233,6 +234,8 @@ var updatePolicyCmd = &cobra.Command{
 			backupScheduleSpec.UnsetIncrementalIntervalInMinutes()
 		}
 
+		util.SetScheduleSpecV2UseRoles(cmd, &backupScheduleSpec)
+
 		_, r, err = authApi.UpdateBackupPolicyV2(clusterId, scheduleId).ScheduleSpecV2(backupScheduleSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
@@ -255,6 +258,7 @@ func init() {
 
 	enablePolicyCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster to enable backup policies.")
 	enablePolicyCmd.MarkFlagRequired("cluster-name")
+	util.AddIncludeRolesFlag(enablePolicyCmd, "[OPTIONAL] Include global YSQL roles and permissions in scheduled backups. (Default: false)")
 
 	disablePolicyCmd.Flags().String("cluster-name", "", "[REQUIRED] Name of the cluster to disable backup policies.")
 	disablePolicyCmd.MarkFlagRequired("cluster-name")
@@ -267,6 +271,7 @@ func init() {
 	updatePolicyCmd.Flags().Int32("incremental-backup-frequency-in-minutes", 60, "[OPTIONAL] Frequency of incremental backup in minutes.")
 	updatePolicyCmd.Flags().String("full-backup-schedule-days-of-week", "", "[OPTIONAL] Days of the week when the backup has to run. A comma separated list of the first two letters of the days of the week. Eg: 'Mo,Tu,Sa'")
 	updatePolicyCmd.Flags().String("full-backup-schedule-time", "", "[OPTIONAL] Time of the day at which the backup has to run. Please specify local time in 24 hr HH:MM format. Eg: 15:04")
+	util.AddIncludeRolesFlag(updatePolicyCmd, "[OPTIONAL] Include global YSQL roles and permissions in scheduled backups. (Default: false)")
 	updatePolicyCmd.MarkFlagsRequiredTogether("full-backup-schedule-days-of-week", "full-backup-schedule-time")
 	updatePolicyCmd.MarkFlagsOneRequired("full-backup-frequency-in-days", "full-backup-schedule-days-of-week", "full-backup-schedule-time")
 	updatePolicyCmd.MarkFlagsMutuallyExclusive("full-backup-frequency-in-days", "full-backup-schedule-days-of-week")
