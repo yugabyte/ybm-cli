@@ -90,8 +90,8 @@ var _ = Describe("BackupSchedules", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   State
-1                     60                     NA                 NA                  8                        PAUSED` + "\n"
+				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   Roles & Grants   State
+1                     60                     NA                 NA                  8                        Not Included     PAUSED` + "\n"
 				Expect(o).Should(Equal(expected))
 				session.Kill()
 			})
@@ -107,8 +107,8 @@ var _ = Describe("BackupSchedules", func() {
 				Expect(err).NotTo(HaveOccurred())
 				session.Wait(2)
 				o := string(session.Out.Contents()[:])
-				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   State
-NA                    NA                     Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        ACTIVE` + "\n"
+				expected := `Time Interval(days)   Incr. Interval(mins)   Days of the Week   Backup Start Time   Retention Period(days)   Roles & Grants   State
+NA                    NA                     Su,We,Fr           ` + getLocalTime("2 3 * * *") + `               8                        Included         ACTIVE` + "\n"
 				Expect(o).Should(Equal(expected))
 
 				session.Kill()
