@@ -179,6 +179,9 @@ func init() {
 	endpoint=<victoriametrics-otlp-endpoint-url>`)
 	createIntegrationCmd.Flags().String("googlecloud-cred-filepath", "", `Filepath for Google Cloud service account credentials. 
 	Please provide absolute file path`)
+	createIntegrationCmd.Flags().StringToString("newrelic-spec", nil, `Configuration for New Relic.
+	Please provide key value pairs as follows:
+	endpoint=<your-new-relic-endpoint-url>,license-key=<your-new-relic-license-key>`)
 	if util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
 		createIntegrationCmd.Flags().StringToString("s3-spec", nil, `Configuration for AWS S3. 
 	Please provide key value pairs as follows: 
@@ -349,6 +352,21 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 			googlecloudSpec.SetUniverseDomain(universeDomain)
 		}
 		IntegrationSpec.SetGooglecloudSpec(*googlecloudSpec)
+	case ybmclient.TELEMETRYPROVIDERTYPEENUM_NEWRELIC:
+		if !cmd.Flags().Changed("newrelic-spec") {
+			return nil, fmt.Errorf("newrelic-spec is required for newrelic sink")
+		}
+		newrelicSpecString, _ := cmd.Flags().GetStringToString("newrelic-spec")
+		endpoint := newrelicSpecString["endpoint"]
+		licenseKey := newrelicSpecString["license-key"]
+		if len(endpoint) < 1 {
+			return nil, fmt.Errorf("endpoint is a required field for newrelic-spec")
+		}
+		if len(licenseKey) < 1 {
+			return nil, fmt.Errorf("license-key is a required field for newrelic-spec")
+		}
+		newrelicSpec := ybmclient.NewNewrelicTelemetryProviderSpec(licenseKey, endpoint)
+		IntegrationSpec.SetNewrelicSpec(*newrelicSpec)
 	case ybmclient.TELEMETRYPROVIDERTYPEENUM_AWS_S3:
 		if !util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
 			return nil, fmt.Errorf("s3 integration is not enabled")
@@ -388,7 +406,7 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		}
 		IntegrationSpec.SetAwsS3Spec(*s3Spec)
 	default:
-		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics, or sumologic are accepted as third party sink for now")
+		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics, sumologic, googlecloud or newrelic are accepted as third party sink for now")
 	}
 	return IntegrationSpec, nil
 }
