@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	defaultBackupListing   = "table {{.Id}}\t{{.CreatedOn}}\t{{.Incremental}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.BackupState}}\t{{.BackupType}}"
+	defaultBackupListing   = "table {{.Id}}\t{{.CreatedOn}}\t{{.Incremental}}\t{{.ExpireOn}}\t{{.ClusterName}}\t{{.BackupState}}\t{{.BackupType}}\t{{.IncludeRoles}}"
 	incrementalHeader      = "Inc"
 	backupIdCreateOnHeader = "Created On"
 	backupIdExpireOnHeader = "Expire On"
@@ -35,6 +35,7 @@ const (
 	backupTypeHeader       = "Type"
 	retainInDaysHeader     = "Retains(day)"
 	sizeHeader             = "Size(bytes)"
+	includeRolesHeader     = "Roles & Grants"
 )
 
 type BackupContext struct {
@@ -82,6 +83,7 @@ func NewBackupContext() *BackupContext {
 		"RetainInDays": retainInDaysHeader,
 		"Incremental":  incrementalHeader,
 		"Size":         sizeHeader,
+		"IncludeRoles": includeRolesHeader,
 	}
 	return &BackupCtx
 }
@@ -169,6 +171,13 @@ func (c *BackupContext) Duration() string {
 		return "NA"
 	}
 	return duration
+}
+
+func (c *BackupContext) IncludeRoles() string {
+	if c.c.Spec.GetUseRoles() {
+		return "Included"
+	}
+	return "Not Included"
 }
 
 func (c *BackupContext) MarshalJSON() ([]byte, error) {

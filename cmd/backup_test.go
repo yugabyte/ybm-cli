@@ -70,9 +70,9 @@ var _ = Describe("Backup", func() {
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 			session.Wait(2)
-			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(`ID                                     Created On         Inc       Expire On          Clusters        State     Type
-c7742a97-cee0-449d-9c7c-4b934d9cf940   %s   🍕        %s   mirthful-mole   ✅        🧑
-faaca956-b542-49ee-92a8-9f1e138d1311   %s   🟡        %s   mirthful-mole   ✅        🧑`, formatter.FormatDate("2024-03-05T03:33:23.532Z"), formatter.FormatDateAndAddDays("2024-03-05T03:33:23.532Z", 8), formatter.FormatDate("2024-03-04T20:28:32.982Z"), formatter.FormatDateAndAddDays("2024-03-04T20:28:32.982Z", 1))))
+			Expect(session.Out).Should(gbytes.Say(fmt.Sprintf(`ID                                     Created On         Inc       Expire On          Clusters        State     Type      Roles & Grants
+c7742a97-cee0-449d-9c7c-4b934d9cf940   %s   🍕        %s   mirthful-mole   ✅        🧑        Included
+faaca956-b542-49ee-92a8-9f1e138d1311   %s   🟡        %s   mirthful-mole   ✅        🧑        Not Included`, formatter.FormatDate("2024-03-05T03:33:23.532Z"), formatter.FormatDateAndAddDays("2024-03-05T03:33:23.532Z", 8), formatter.FormatDate("2024-03-04T20:28:32.982Z"), formatter.FormatDateAndAddDays("2024-03-04T20:28:32.982Z", 1))))
 			session.Kill()
 		})
 
@@ -94,8 +94,8 @@ faaca956-b542-49ee-92a8-9f1e138d1311   %s   🟡        %s   mirthful-mole   ✅
 ID                                     Created On         Inc       Clusters        State
 5574d58f-68f1-4762-baa1-c2421cdb38b0   %s   🟡        mirthful-mole   ✅
 
-Type      Size(bytes)   Expire On          Duration
-🧑        1176035       %s   2 mins
+Type      Size(bytes)   Expire On          Duration   Roles & Grants
+🧑        1176035       %s   2 mins     Included
 
 
 Databases/Keyspaces
