@@ -5,16 +5,16 @@ A CLI implementation for YugabyteDB Aeon.
 
 `brew install yugabyte/tap/ybm`
 
-Find more details on installation and configuration [here](https://docs.yugabyte.com/preview/yugabyte-cloud/managed-automation/managed-cli/managed-cli-overview/)
+For details on installation and configuration, see [YugabyteDB Aeon CLI](https://docs.yugabyte.com/stable/yugabyte-cloud/managed-automation/managed-cli/) in the YugabyteDB Aeon documentation.
 
 ## Commands list
 
-You can find all the commands documented [here](https://docs.yugabyte.com/preview/yugabyte-cloud/managed-automation/managed-cli/managed-cli-reference/)
-
+The command reference is in the [docs](https://github.com/yugabyte/ybm-cli/tree/main/docs/ybm.md) directory of this repository.
 
 ## Example workflows 
 
-You can find the example workflows documented [here](https://docs.yugabyte.com/preview/yugabyte-cloud/managed-automation/managed-cli/managed-cli-examples/)
+- [Create cluster](https://docs.yugabyte.com/stable/yugabyte-cloud/managed-automation/managed-cli/managed-cli-example-create/)
+- [Other short examples](https://docs.yugabyte.com/stable/yugabyte-cloud/managed-automation/managed-cli/managed-cli-example-quick/)
 
 ## Running unit tests locally:
 This project uses [GinkGo](https://onsi.github.io/ginkgo/) for testing.
