@@ -44,7 +44,7 @@ var createClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -119,7 +119,7 @@ var createClusterCmd = &cobra.Command{
 
 		clusterSpec, err := authApi.CreateClusterSpec(cmd, regionInfoMapList)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		dbCredentials := ybmclient.NewCreateClusterRequestEncryptedDbCredentialsWithDefaults()
@@ -152,7 +152,7 @@ var createClusterCmd = &cobra.Command{
 		resp, r, err := authApi.CreateCluster().CreateClusterRequest(*createClusterRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		clusterID := resp.GetData().Info.Id
@@ -173,7 +173,7 @@ var createClusterCmd = &cobra.Command{
 			respC, r, err := authApi.ListClusters().Name(clusterName).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			clusterData = respC.GetData()
 		} else {

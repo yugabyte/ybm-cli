@@ -34,7 +34,7 @@ var resumeDrCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -52,7 +52,7 @@ var resumeDrCmd = &cobra.Command{
 		response, err := authApi.ResumeXClusterDr(clusterId, drId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("DR config %s is being resumed", formatter.Colorize(drName, formatter.GREEN_COLOR))
@@ -70,7 +70,7 @@ var resumeDrCmd = &cobra.Command{
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			drCtx := formatter.Context{
 				Output: os.Stdout,

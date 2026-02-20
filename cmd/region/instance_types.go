@@ -42,7 +42,7 @@ var getInstanceTypesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -57,7 +57,7 @@ var getInstanceTypesCmd = &cobra.Command{
 		instanceTypesResp, resp, err := authApi.GetSupportedNodeConfigurations(cloudProvider, tier, cloudRegion).ShowDisabled(showDisabled).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		instanceTypeData := instanceTypesResp.GetData()[cloudRegion]

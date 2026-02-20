@@ -35,7 +35,7 @@ var restartDrCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -53,7 +53,7 @@ var restartDrCmd = &cobra.Command{
 		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		dbNameToIdMap := map[string]string{}
 		for _, namespace := range namespacesResp.Data {
@@ -76,7 +76,7 @@ var restartDrCmd = &cobra.Command{
 		response, err := authApi.RestartXClusterDr(clusterId, drId).DrRestartRequest(*restartDrRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("DR config %s is being restarted", formatter.Colorize(drName, formatter.GREEN_COLOR))
@@ -94,7 +94,7 @@ var restartDrCmd = &cobra.Command{
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			drCtx := formatter.Context{
 				Output: os.Stdout,

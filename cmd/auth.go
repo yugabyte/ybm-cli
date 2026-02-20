@@ -82,14 +82,14 @@ var authCmd = &cobra.Command{
 		_, r, err := authApi.Ping().Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		logrus.Debugf("Ping response without error")
 
 		_, _, err = authApi.GetAccount().Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		logrus.Debugf("ListAccounts response without error")
 

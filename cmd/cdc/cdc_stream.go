@@ -52,7 +52,7 @@ var listCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		cdcStreamRequest := authApi.ListCdcStreamsForAccount()
@@ -72,7 +72,7 @@ var listCdcStreamCmd = &cobra.Command{
 		resp, r, err := cdcStreamRequest.Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		printCdcStreamOutput(resp.GetData())
 	},
@@ -87,7 +87,7 @@ var createCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -120,7 +120,7 @@ var createCdcStreamCmd = &cobra.Command{
 		resp, r, err := authApi.CreateCdcStream(clusterID).CdcStreamSpec(cdcStreamSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being created", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -149,7 +149,7 @@ var editCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -178,7 +178,7 @@ var editCdcStreamCmd = &cobra.Command{
 		resp, r, err := authApi.EditCdcStream(cdcStreamID, clusterID).EditCdcStreamRequest(*editCdcStreamRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being updated", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))
@@ -214,7 +214,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -232,7 +232,7 @@ var deleteCdcStreamCmd = &cobra.Command{
 		resp, err := authApi.DeleteCdcStream(cdcStreamID, clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The CDC stream %s is being deleted", formatter.Colorize(cdcStreamName, formatter.GREEN_COLOR))

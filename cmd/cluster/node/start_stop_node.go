@@ -34,7 +34,7 @@ var stopNodeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -49,7 +49,7 @@ var stopNodeCmd = &cobra.Command{
 		resp, err := authApi.PerformNodeOperation(clusterId).NodeOpRequest(*nodeOpRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The node %s is being stopped", formatter.Colorize(nodeName, formatter.GREEN_COLOR))
@@ -76,7 +76,7 @@ var startNodeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -91,7 +91,7 @@ var startNodeCmd = &cobra.Command{
 		resp, err := authApi.PerformNodeOperation(clusterId).NodeOpRequest(*nodeOpRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The node %s is being started", formatter.Colorize(nodeName, formatter.GREEN_COLOR))

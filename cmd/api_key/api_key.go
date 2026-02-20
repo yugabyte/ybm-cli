@@ -45,7 +45,7 @@ var listApiKeysCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -76,7 +76,7 @@ var listApiKeysCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		apiKeyCtx := formatter.Context{
@@ -107,7 +107,7 @@ func addAllowListNameToApiKeyData(apiKeys *[]ybmclient.ApiKeyData, authApi *ybmA
 			apiKeyAllowLists, resp, err := authApi.ListApiKeyNetworkAllowLists(apiKeyId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", resp)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			for _, allowList := range apiKeyAllowLists.GetData() {
 				allowListsNames = append(allowListsNames, allowList.GetSpec().Name)
@@ -141,7 +141,7 @@ var createApiKeyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -163,7 +163,7 @@ var createApiKeyCmd = &cobra.Command{
 
 		apiKeySpec, err := authApi.CreateApiKeySpec(name, expiryHours)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		if cmd.Flags().Changed("description") {
@@ -213,7 +213,7 @@ var createApiKeyCmd = &cobra.Command{
 		resp, r, err := authApi.CreateApiKey().ApiKeySpec(*apiKeySpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		apiKeyCtx := formatter.Context{
@@ -244,7 +244,7 @@ var revokeApiKeyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -258,7 +258,7 @@ var revokeApiKeyCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("The API key %s has been successfully revoked.\n", formatter.Colorize(name, formatter.GREEN_COLOR))

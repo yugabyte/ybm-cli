@@ -52,15 +52,15 @@ var createMetricsExporterCmd = &cobra.Command{
 		//We initialise here, even if we error out later
 		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(strings.ToUpper(metricsSinkType))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		metricsExporterConfigSpec, err := setMetricsExporterConfiguration(cmd, metricsExporterName, *metricsSinkTypeEnum)
 		if err != nil {
-			logrus.Fatalf(err.Error())
+			logrus.Fatal(err.Error())
 		}
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -68,7 +68,7 @@ var createMetricsExporterCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		metricsExporterId := resp.GetData().Info.Id
@@ -97,7 +97,7 @@ var listMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -105,7 +105,7 @@ var listMetricsExporterCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		metricsExporterCtx := formatter.Context{
@@ -131,13 +131,13 @@ var describeMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		metricsExporterName, _ := cmd.Flags().GetString("config-name")
 		config, err := authApi.GetConfigByName(metricsExporterName)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		metricsExporterCtx := formatter.Context{
 			Output: os.Stdout,
@@ -165,21 +165,21 @@ var deleteMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		configName, _ := cmd.Flags().GetString("config-name")
 
 		config, err := authApi.GetConfigByName(configName)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		r1, err := authApi.DeleteMetricsExporterConfig(config.GetInfo().Id).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r1)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("Deleting Metrics Exporter Config %s\n", formatter.Colorize(configName, formatter.GREEN_COLOR))
@@ -194,7 +194,7 @@ var removeMetricsExporterFromClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -208,7 +208,7 @@ var removeMetricsExporterFromClusterCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("Unassigning associated Metrics Exporter Config from cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
@@ -223,7 +223,7 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -237,7 +237,7 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 
 		config, err := authApi.GetConfigByName(configName)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		metricsExporterClusterConfigSpec := ybmclient.NewMetricsExporterClusterConfigurationSpec(config.GetInfo().Id)
@@ -246,7 +246,7 @@ var associateMetricsExporterWithClusterCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("Assigning Metrics Exporter Config %s with cluster %s\n", formatter.Colorize(configName, formatter.GREEN_COLOR), formatter.Colorize(clusterName, formatter.GREEN_COLOR))
@@ -260,7 +260,7 @@ var stopMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -274,7 +274,7 @@ var stopMetricsExporterCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("Stopping Metrics Exporter for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
@@ -290,7 +290,7 @@ var updateMetricsExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -299,7 +299,7 @@ var updateMetricsExporterCmd = &cobra.Command{
 
 		metricsSinkTypeEnum, err := ybmclient.NewMetricsExporterConfigTypeEnumFromValue(strings.ToUpper(metricsSinkType))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		oldname := metricsExporterName
@@ -309,19 +309,19 @@ var updateMetricsExporterCmd = &cobra.Command{
 		//We initialise this one here, even if we error out later
 		metricsExporterConfigSpec, err := setMetricsExporterConfiguration(cmd, metricsExporterName, *metricsSinkTypeEnum)
 		if err != nil {
-			logrus.Fatalf(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		config, err := authApi.GetConfigByName(oldname)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		resp, r, err := authApi.UpdateMetricsExporterConfig(config.GetInfo().Id).MetricsExporterConfigurationSpec(*metricsExporterConfigSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The metrics exporter config %s is being updated", formatter.Colorize(config.GetInfo().Id, formatter.GREEN_COLOR))

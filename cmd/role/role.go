@@ -44,7 +44,7 @@ var listRolesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		roleListRequest := authApi.ListAllRbacRoles()
@@ -82,13 +82,13 @@ var listRolesCmd = &cobra.Command{
 
 				if systemRoleErr != nil {
 					logrus.Debugf("Full HTTP response: %v", systemRoleResp)
-					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(systemRoleErr))
+					logrus.Fatal(ybmAuthClient.GetApiErrorDetails(systemRoleErr))
 				} else {
 					roleResponse = systemRoleResponse
 				}
 			} else {
 				logrus.Debugf("Full HTTP response: %v", roleResp)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(roleErr))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(roleErr))
 			}
 		}
 
@@ -118,7 +118,7 @@ var describeRoleCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -136,13 +136,13 @@ var describeRoleCmd = &cobra.Command{
 
 				if systemRoleErr != nil {
 					logrus.Debugf("Full HTTP response: %v", systemRoleResp)
-					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(systemRoleErr))
+					logrus.Fatal(ybmAuthClient.GetApiErrorDetails(systemRoleErr))
 				} else {
 					roleResponse = systemRoleResponse
 				}
 			} else {
 				logrus.Debugf("Full HTTP response: %v", roleResp)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(roleErr))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(roleErr))
 			}
 		}
 
@@ -177,7 +177,7 @@ var createRoleCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -202,13 +202,13 @@ var createRoleCmd = &cobra.Command{
 
 		roleSpec, err := authApi.CreateRoleSpec(cmd, roleName, permissionsMap)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		resp, r, err := authApi.CreateRole().RoleSpec(*roleSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		if viper.GetString("output") == "table" {
@@ -281,7 +281,7 @@ var updateRoleCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -311,7 +311,7 @@ var updateRoleCmd = &cobra.Command{
 
 		roleSpec, err := authApi.CreateRoleSpec(cmd, roleName, permissionsMap)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		if cmd.Flags().Lookup("new-name").Changed {
@@ -322,7 +322,7 @@ var updateRoleCmd = &cobra.Command{
 		updatedResp, r, err := authApi.UpdateRole(roleId).RoleSpec(*roleSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		if viper.GetString("output") == "table" {
@@ -358,7 +358,7 @@ var deleteRoleCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		roleName, _ := cmd.Flags().GetString("role-name")
@@ -372,7 +372,7 @@ var deleteRoleCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("The role %s has been successfully deleted.\n", formatter.Colorize(roleName, formatter.GREEN_COLOR))

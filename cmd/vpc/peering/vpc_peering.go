@@ -54,14 +54,14 @@ var listVpcPeeringCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
 		resp, r, err := authApi.ListVpcPeerings().Execute()
 		if err != nil {
 			logrus.Errorf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		vpcPeeringCtx := formatter.Context{
@@ -152,7 +152,7 @@ var createVpcPeeringCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -164,7 +164,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		ybVpcResp, resp, err := authApi.GetSingleTenantVpc(ybVpcId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		ybVpcCloud := string(ybVpcResp.Data.Spec.GetCloud())
 
@@ -177,7 +177,7 @@ var createVpcPeeringCmd = &cobra.Command{
 		vpcPeeringResp, response, err := authApi.CreateVpcPeering().VpcPeeringSpec(vpcPeeringSpec).Execute()
 		if err != nil {
 			logrus.Errorf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		vpcPeeringID := vpcPeeringResp.GetData().Info.Id
@@ -197,7 +197,7 @@ var createVpcPeeringCmd = &cobra.Command{
 			vpcPeeringResp, response, err = authApi.GetVpcPeering(vpcPeeringID).Execute()
 			if err != nil {
 				logrus.Errorf("Full HTTP response: %v", response)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 
 		} else {
@@ -230,14 +230,14 @@ var deleteVpcPeeringCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
 		resp, r, err := authApi.ListVpcPeerings().Execute()
 		if err != nil {
 			logrus.Errorf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		// check vpcPeeringName exists
@@ -251,7 +251,7 @@ var deleteVpcPeeringCmd = &cobra.Command{
 		response, err := authApi.DeleteVpcPeering(vpcPeeringId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("VPC peering %s is being terminated", formatter.Colorize(vpcPeeringName, formatter.GREEN_COLOR))
 

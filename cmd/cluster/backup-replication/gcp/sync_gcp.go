@@ -32,7 +32,7 @@ var syncGcpCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -46,7 +46,7 @@ var syncGcpCmd = &cobra.Command{
 		r, err := authApi.TriggerGcpBackupReplicationResync(clusterId).ResyncGcpBackupReplicationSpec(*spec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("Resync triggered for all backup replication configs in cluster %s\n", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))

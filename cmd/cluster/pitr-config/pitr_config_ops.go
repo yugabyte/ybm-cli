@@ -40,7 +40,7 @@ var listPitrConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -50,7 +50,7 @@ var listPitrConfigCmd = &cobra.Command{
 		resp, r, err := authApi.ListClusterPitrConfigs(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		if len(resp.GetData()) < 1 {
@@ -75,7 +75,7 @@ var describePitrConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -91,7 +91,7 @@ var describePitrConfigCmd = &cobra.Command{
 		resp, r, err := authApi.GetPitrConfig(clusterID, pitrConfigId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		pitrConfigCtx := formatter.Context{
@@ -111,7 +111,7 @@ var createPitrConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -127,13 +127,13 @@ var createPitrConfigCmd = &cobra.Command{
 
 		bulkPitrConfigSpec, err := authApi.CreateBulkPitrConfigSpec(pitrConfigSpecs)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		resp, r, err := authApi.CreatePitrConfig(clusterID).BulkCreateDatabasePitrConfigSpec(*bulkPitrConfigSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		pitrConfigsData := resp.GetData()
 
@@ -148,7 +148,7 @@ var createPitrConfigCmd = &cobra.Command{
 				getConfigResp, r, err := authApi.GetPitrConfig(clusterID, *configId).Execute()
 				if err != nil {
 					logrus.Debugf("Full HTTP response: %v", r)
-					logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+					logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 				}
 				createdConfigsData = append(createdConfigsData, getConfigResp.GetData())
 			}
@@ -172,7 +172,7 @@ func ParsePitrConfigSpecs(authApi *ybmAuthClient.AuthApiClient, clusterID string
 	namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 	}
 
 	for _, configSpec := range configSpecs {
@@ -253,7 +253,7 @@ var restorePitrConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -269,13 +269,13 @@ var restorePitrConfigCmd = &cobra.Command{
 
 		restoreViaPitrConfigSpec, err := authApi.CreateRestoreViaPitrConfigSpec(restoreAtMilis)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		_, r, err := authApi.RestoreViaPitrConfig(clusterID, pitrConfigId).DatabaseRestoreViaPitrSpec(*restoreViaPitrConfigSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The %s namespace %s in cluster %s is being restored via PITR Configuration.\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
@@ -306,7 +306,7 @@ var deletePitrConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -322,7 +322,7 @@ var deletePitrConfigCmd = &cobra.Command{
 		r, err := authApi.DeletePitrConfig(clusterID, pitrConfigId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The PITR Configuration for %s namespace %s in cluster %s is being removed.\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
@@ -354,7 +354,7 @@ var updatePitrConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -376,7 +376,7 @@ var updatePitrConfigCmd = &cobra.Command{
 		_, r, err := authApi.UpdatePitrConfig(clusterID, pitrConfigId).UpdateDatabasePitrConfigSpec(*updatePitrConfigSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The PITR Configuration for %s namespace %s in cluster %s is being updated.\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
@@ -397,7 +397,7 @@ var clonePitrConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -414,7 +414,7 @@ var clonePitrConfigCmd = &cobra.Command{
 		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		namespaceId := requireNamespace(namespacesResp, namespaceName, namespaceType)
 		pitrConfigId := checkPitrConfigExists(authApi, clusterID, namespaceId)
@@ -437,7 +437,7 @@ var clonePitrConfigCmd = &cobra.Command{
 		_, cloneResp, cloneErr := authApi.CloneViaPitrConfig(clusterID).DatabaseCloneSpec(*cloneSpec).Execute()
 		if cloneErr != nil {
 			logrus.Debugf("Full HTTP response: %v", cloneResp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(cloneErr))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(cloneErr))
 		}
 
 		msg := fmt.Sprintf("The %s namespace %s in cluster %s is being cloned via PITR Configuration.\n\n", namespaceType, formatter.Colorize(namespaceName, formatter.GREEN_COLOR), formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
@@ -465,7 +465,7 @@ func checkPitrConfigExists(authApi *ybmAuthClient.AuthApiClient, clusterID strin
 	listConfigsResp, listConfigsResponse, listConfigsError := authApi.ListClusterPitrConfigs(clusterID).Execute()
 	if listConfigsError != nil {
 		logrus.Debugf("Full HTTP response: %v", listConfigsResponse)
-		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(listConfigsError))
+		logrus.Fatal(ybmAuthClient.GetApiErrorDetails(listConfigsError))
 	}
 
 	for _, pitrConfig := range listConfigsResp.GetData() {
@@ -481,7 +481,7 @@ func requirePitrConfig(authApi *ybmAuthClient.AuthApiClient, clusterID string, n
 	namespacesResp, r, err := authApi.GetClusterNamespaces(clusterID).Execute()
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 	}
 	namespaceId := requireNamespace(namespacesResp, namespaceName, namespaceType)
 	pitrConfigId := checkPitrConfigExists(authApi, clusterID, namespaceId)

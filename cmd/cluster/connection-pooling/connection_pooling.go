@@ -58,7 +58,7 @@ var disableConnectionPoolingCmd = &cobra.Command{
 func performConnectionPoolingOperation(operationName string, cmd *cobra.Command, args []string) {
 	authApi, err := ybmAuthClient.NewAuthApiClient()
 	if err != nil {
-		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 	}
 	authApi.GetInfo("", "")
 
@@ -83,7 +83,7 @@ func performConnectionPoolingOperation(operationName string, cmd *cobra.Command,
 
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", resp)
-		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 	}
 
 	msg := fmt.Sprintf("Connection Pooling for cluster %s is being %sd", formatter.Colorize(clusterName, formatter.GREEN_COLOR), operationName)

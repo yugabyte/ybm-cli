@@ -53,15 +53,15 @@ var createIntegrationCmd = &cobra.Command{
 		//We initialise here, even if we error out later
 		sinkTypeEnum, err := ybmclient.NewTelemetryProviderTypeEnumFromValue(strings.ToUpper(sinkType))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		IntegrationSpec, err := setIntegrationConfiguration(cmd, IntegrationName, *sinkTypeEnum)
 		if err != nil {
-			logrus.Fatalf(err.Error())
+			logrus.Fatal(err.Error())
 		}
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -69,7 +69,7 @@ var createIntegrationCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The Integration %s has been created", formatter.Colorize(IntegrationName, formatter.GREEN_COLOR))
@@ -94,7 +94,7 @@ var listIntegrationCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -102,7 +102,7 @@ var listIntegrationCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		IntegrationCtx := formatter.Context{
@@ -134,21 +134,21 @@ var deleteIntegrationCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		configName, _ := cmd.Flags().GetString("config-name")
 
 		config, err := authApi.GetIntegrationByName(configName)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		r1, err := authApi.DeleteIntegration(config.GetInfo().Id).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r1)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("The Integration %s has been deleted\n", formatter.Colorize(configName, formatter.GREEN_COLOR))
@@ -185,7 +185,8 @@ func init() {
 	if util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
 		createIntegrationCmd.Flags().StringToString("s3-spec", nil, `Configuration for AWS S3. 
 	Please provide key value pairs as follows: 
-	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<optional-path-prefix>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>`)
+	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<path-prefix-ending-with-slash>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>
+	Note: path-prefix is required and must end with '/'. Use '/' for root.`)
 	}
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
@@ -394,10 +395,13 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		if len(secretAccessKey) < 1 {
 			return nil, fmt.Errorf("secret-access-key is a required field for s3-spec")
 		}
-		s3Spec := ybmclient.NewS3TelemetryProviderSpec(bucket, region, accessKeyId, secretAccessKey)
-		if len(pathPrefix) > 0 {
-			s3Spec.SetPathPrefix(pathPrefix)
+		if len(pathPrefix) < 1 {
+			return nil, fmt.Errorf("path-prefix is a required field for s3-spec")
 		}
+		if !strings.HasSuffix(pathPrefix, "/") {
+			return nil, fmt.Errorf("path-prefix must end with '/'. Use '/' for root")
+		}
+		s3Spec := ybmclient.NewS3TelemetryProviderSpec(bucket, region, accessKeyId, secretAccessKey, pathPrefix)
 		if len(filePrefix) > 0 {
 			s3Spec.SetFilePrefix(filePrefix)
 		}

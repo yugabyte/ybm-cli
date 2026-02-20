@@ -34,7 +34,7 @@ var failoverDrCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -49,7 +49,7 @@ var failoverDrCmd = &cobra.Command{
 		namespacesResp, r, err := authApi.GetClusterNamespaces(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		dbNameToIdMap := map[string]string{}
 		for _, namespace := range namespacesResp.Data {
@@ -59,7 +59,7 @@ var failoverDrCmd = &cobra.Command{
 		response, err := authApi.FailoverXClusterDr(clusterId, drId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("Failover is in progress for the DR %s ", formatter.Colorize(drName, formatter.GREEN_COLOR))
@@ -77,7 +77,7 @@ var failoverDrCmd = &cobra.Command{
 			drGetResp, r, err := authApi.GetXClusterDr(clusterId, drId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			drCtx := formatter.Context{
 				Output: os.Stdout,

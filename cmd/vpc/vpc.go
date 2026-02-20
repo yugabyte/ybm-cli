@@ -46,7 +46,7 @@ var listVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		vpcName, _ := cmd.Flags().GetString("name")
@@ -56,7 +56,7 @@ var listVpcCmd = &cobra.Command{
 		resp, r, err := vpcListRequest.Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		// response from `ListClusters`: ClusterListResponse
 		vpcCtx := formatter.Context{
@@ -145,13 +145,13 @@ var createVpcCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		resp, r, err := authApi.CreateVpc().SingleTenantVpcRequest(vpcRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		vpcID := resp.Data.GetInfo().Id
 		vpcData := []ybmclient.SingleTenantVpcDataResponse{resp.GetData()}
@@ -172,7 +172,7 @@ var createVpcCmd = &cobra.Command{
 			respC, r, err := vpcListRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			vpcData = respC.GetData()
 		} else {
@@ -202,7 +202,7 @@ var deleteVpcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		vpcName, _ := cmd.Flags().GetString("name")
@@ -216,7 +216,7 @@ var deleteVpcCmd = &cobra.Command{
 		r, err := authApi.DeleteVpc(vpcId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The VPC %s is being deleted", formatter.Colorize(vpcName, formatter.GREEN_COLOR))
