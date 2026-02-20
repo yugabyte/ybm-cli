@@ -96,6 +96,9 @@ var restoreBackupCmd = &cobra.Command{
 		restoreSpec.SetBackupId(backupID)
 		restoreSpec.SetClusterId(clusterID)
 		backupUtil.SetRestoreSpecUseRoles(cmd, restoreSpec)
+		if err := backupUtil.SetSelectiveRestoreAndKeyspaceUpdateSpec(cmd, restoreSpec); err != nil {
+			logrus.Fatal(err)
+		}
 
 		_, r, err := authApi.RestoreBackup().RestoreSpec(*restoreSpec).Execute()
 		if err != nil {
@@ -268,6 +271,10 @@ func init() {
 	restoreBackupCmd.Flags().String("backup-id", "", "[REQUIRED] ID of the backup to be restored.")
 	restoreBackupCmd.MarkFlagRequired("backup-id")
 	backupUtil.AddIncludeRolesFlag(restoreBackupCmd, "[OPTIONAL] Restore global YSQL roles and permissions from the backup. (Default: false)")
+	restoreBackupCmd.Flags().String("ysql-keyspaces", "", "[OPTIONAL] Comma-separated YSQL keyspaces to restore (e.g. db1,db2,db3).")
+	restoreBackupCmd.Flags().String("ycql-keyspaces", "", "[OPTIONAL] Comma-separated YCQL keyspaces to restore (e.g. db4,db5).")
+	restoreBackupCmd.Flags().String("ysql-keyspaces-rename", "", "[OPTIONAL] Comma-separated YSQL rename pairs backup_keyspace=restore_keyspace (e.g. db1=newdb1,db2=newdb2).")
+	restoreBackupCmd.Flags().String("ycql-keyspaces-rename", "", "[OPTIONAL] Comma-separated YCQL rename pairs backup_keyspace=restore_keyspace (e.g. db4=newdb4).")
 
 	BackupCmd.AddCommand(createBackupCmd)
 	createBackupCmd.Flags().String("cluster-name", "", "[REQUIRED] Name for the cluster.")

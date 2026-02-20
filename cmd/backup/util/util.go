@@ -68,6 +68,82 @@ func SetScheduleSpecV2UseRoles(cmd *cobra.Command, spec *ybmclient.ScheduleSpecV
 	SetUseRolesFromFlag(cmd, spec)
 }
 
+func parseCommaSeparatedStrings(s string) []string {
+	if s == "" {
+		return nil
+	}
+	parts := strings.Split(s, ",")
+	var out []string
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func parseKeyspaceRenamePairs(s string, tableType ybmclient.YbApiEnum) ([]ybmclient.KeyspaceRenameSpec, error) {
+	if s == "" {
+		return nil, nil
+	}
+	pairs := parseCommaSeparatedStrings(s)
+	if len(pairs) == 0 {
+		return nil, nil
+	}
+	var specs []ybmclient.KeyspaceRenameSpec
+	for _, pair := range pairs {
+		parts := strings.Split(strings.TrimSpace(pair), "=")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid %s keyspace rename pair %q: expected backup_keyspace=restore_keyspace (exactly one '=', no empty values)", tableType, pair)
+		}
+		backupName := strings.TrimSpace(parts[0])
+		restoreName := strings.TrimSpace(parts[1])
+		if backupName == "" || restoreName == "" {
+			return nil, fmt.Errorf("invalid %s keyspace rename pair %q: backup_keyspace and restore_keyspace must be non-empty", tableType, pair)
+		}
+		specs = append(specs, *ybmclient.NewKeyspaceRenameSpec(backupName, restoreName))
+	}
+	return specs, nil
+}
+
+func SetSelectiveRestoreAndKeyspaceUpdateSpec(cmd *cobra.Command, spec *ybmclient.RestoreSpec) error {
+	if cmd.Flags().Changed("ysql-keyspaces") || cmd.Flags().Changed("ycql-keyspaces") {
+		selectiveRestoreSpec := ybmclient.NewSelectiveRestoreSpec()
+		if cmd.Flags().Changed("ysql-keyspaces") {
+			s, _ := cmd.Flags().GetString("ysql-keyspaces")
+			selectiveRestoreSpec.SetYsqlKeyspaces(parseCommaSeparatedStrings(s))
+		}
+		if cmd.Flags().Changed("ycql-keyspaces") {
+			s, _ := cmd.Flags().GetString("ycql-keyspaces")
+			selectiveRestoreSpec.SetYcqlKeyspaces(parseCommaSeparatedStrings(s))
+		}
+		spec.SetSelectiveRestoreSpec(*selectiveRestoreSpec)
+	}
+
+	if cmd.Flags().Changed("ysql-keyspaces-rename") || cmd.Flags().Changed("ycql-keyspaces-rename") {
+		keyspaceUpdateSpec := ybmclient.NewKeyspaceUpdateSpec()
+		if cmd.Flags().Changed("ysql-keyspaces-rename") {
+			s, _ := cmd.Flags().GetString("ysql-keyspaces-rename")
+			ysqlSpecs, err := parseKeyspaceRenamePairs(s, ybmclient.YBAPIENUM_YSQL)
+			if err != nil {
+				return err
+			}
+			keyspaceUpdateSpec.SetYsql(ysqlSpecs)
+		}
+		if cmd.Flags().Changed("ycql-keyspaces-rename") {
+			s, _ := cmd.Flags().GetString("ycql-keyspaces-rename")
+			ycqlSpecs, err := parseKeyspaceRenamePairs(s, ybmclient.YBAPIENUM_YCQL)
+			if err != nil {
+				return err
+			}
+			keyspaceUpdateSpec.SetYcql(ycqlSpecs)
+		}
+		spec.SetKeyspaceUpdateSpec(*keyspaceUpdateSpec)
+	}
+	return nil
+}
+
 // Map weekdays to cron format
 var dayMapping = map[string]string{
 	"su": "0",
