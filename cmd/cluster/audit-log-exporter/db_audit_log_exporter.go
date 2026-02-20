@@ -49,7 +49,7 @@ var enableDbAuditLoggingCmd = &cobra.Command{
 
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -63,7 +63,7 @@ var enableDbAuditLoggingCmd = &cobra.Command{
 
 		integrationId, err := authApi.GetIntegrationIdFromName(integrationName)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		ysqlConfig, _ := cmd.Flags().GetStringToString("ysql-config")
@@ -72,14 +72,14 @@ var enableDbAuditLoggingCmd = &cobra.Command{
 		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, integrationId)
 
 		if err != nil {
-			logrus.Fatalf(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		resp, r, err := authApi.AssignDbAuditLogsExporterConfig(clusterId).DbAuditExporterConfigSpec(*dbAuditLogsExporterSpec).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		respData := resp.GetData()
 
@@ -98,7 +98,7 @@ var enableDbAuditLoggingCmd = &cobra.Command{
 			respC, r, err := authApi.ListDbAuditExporterConfig(clusterId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			respData = respC.GetData()[0]
 		} else {
@@ -116,7 +116,7 @@ var updateDbAuditLoggingCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -133,12 +133,12 @@ var updateDbAuditLoggingCmd = &cobra.Command{
 		integrationId, err := getIntegrationIdFromName(integrationName, authApi)
 
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		dbAuditLogsExporterSpec, err := setDbAuditLogsExporterSpec(ysqlConfig, statement_classes, integrationId)
 		if err != nil {
-			logrus.Fatalf(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		exportConfigId := getDbAuditExportConfigIdForCluster(authApi, clusterId)
@@ -147,7 +147,7 @@ var updateDbAuditLoggingCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		respData := resp.GetData()
@@ -167,7 +167,7 @@ var updateDbAuditLoggingCmd = &cobra.Command{
 			respC, r, err := authApi.ListDbAuditExporterConfig(clusterId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			respData = respC.GetData()[0]
 		} else {
@@ -184,7 +184,7 @@ var describeDbAuditLoggingCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -199,7 +199,7 @@ var describeDbAuditLoggingCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		if len(resp.GetData()) < 1 {
@@ -232,7 +232,7 @@ var disableDbAuditLoggingCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -249,7 +249,7 @@ var disableDbAuditLoggingCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", resp)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("DB Audit Logging is being disabled for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
@@ -421,7 +421,7 @@ func getDbAuditExportConfigIdForCluster(authApi *ybmAuthClient.AuthApiClient, cl
 	listResp, r, err := authApi.ListDbAuditExporterConfig(clusterId).Execute()
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+		logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 	}
 
 	if len(listResp.GetData()) < 1 {

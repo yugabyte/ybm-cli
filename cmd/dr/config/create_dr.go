@@ -35,7 +35,7 @@ var createDrCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -54,7 +54,7 @@ var createDrCmd = &cobra.Command{
 		namespacesResp, r, err := authApi.GetClusterNamespaces(sourceClusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		dbNameToIdMap := map[string]string{}
 		for _, namespace := range namespacesResp.Data {
@@ -74,7 +74,7 @@ var createDrCmd = &cobra.Command{
 		drResp, response, err := authApi.CreateXClusterDr(sourceClusterId).CreateXClusterDrRequest(*createDrRequest).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", response)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		drId := drResp.GetData().Info.Id
 
@@ -93,7 +93,7 @@ var createDrCmd = &cobra.Command{
 			drGetResp, r, err := authApi.GetXClusterDr(sourceClusterId, drId).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			drResp = drGetResp
 		} else {

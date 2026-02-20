@@ -42,7 +42,7 @@ var listCmk = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -55,7 +55,7 @@ var listCmk = &cobra.Command{
 		resp, r, err := authApi.ListClusterCMKs(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		if resp.Data == nil {
@@ -77,7 +77,7 @@ var updateCmkState = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterName, _ := cmd.Flags().GetString("cluster-name")
@@ -89,7 +89,7 @@ var updateCmkState = &cobra.Command{
 		resp, r, err := authApi.ListClusterCMKs(clusterId).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		enableFlag, _ := cmd.Flags().GetBool("enable")
 		disableFlag, _ := cmd.Flags().GetBool("disable")
@@ -113,7 +113,7 @@ var updateCmkState = &cobra.Command{
 		resp, r, err = authApi.UpdateClusterCmkState(clusterId, cmkId).UpdateCMKStateSpec(*updateCMKStateSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		cmkStatusDisplay := "DISABLED"
@@ -133,7 +133,7 @@ var updateCmk = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -152,7 +152,7 @@ var updateCmk = &cobra.Command{
 		_, res, err := authApi.EditClusterCMKs(clusterId).CMKSpec(*cmkSpec).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", res)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		fmt.Printf("Successfully updated encryption at rest for cluster %s\n", formatter.Colorize(clusterName, formatter.GREEN_COLOR))
 	},

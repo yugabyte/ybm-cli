@@ -419,12 +419,12 @@ func (a *AuthApiClient) GetInfo(providedAccountID string, providedProjectID stri
 	var err error
 	a.AccountID, err = a.GetAccountID(providedAccountID)
 	if err != nil {
-		logrus.Errorf(GetApiErrorDetails(err))
+		logrus.Errorf("%s", GetApiErrorDetails(err))
 		os.Exit(1)
 	}
 	a.ProjectID, err = a.GetProjectID(providedProjectID)
 	if err != nil {
-		logrus.Errorf(GetApiErrorDetails(err))
+		logrus.Errorf("%s", GetApiErrorDetails(err))
 		os.Exit(1)
 	}
 }
@@ -1329,7 +1329,7 @@ func (a *AuthApiClient) WaitForTaskCompletionCI(entityId string, entityType ybmc
 			taskList, resp, err = apiRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", resp)
-				return "", fmt.Errorf(GetApiErrorDetails(err))
+				return "", fmt.Errorf("%s", GetApiErrorDetails(err))
 			}
 
 			if v, ok := taskList.GetDataOk(); ok && v != nil {
@@ -1395,7 +1395,7 @@ func (a *AuthApiClient) WaitForTaskCompletionFull(entityId string, entityType yb
 			taskList, resp, err = apiRequest.Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", resp)
-				return "", fmt.Errorf(GetApiErrorDetails(err))
+				return "", fmt.Errorf("%s", GetApiErrorDetails(err))
 			}
 
 			if v, ok := taskList.GetDataOk(); ok && v != nil {

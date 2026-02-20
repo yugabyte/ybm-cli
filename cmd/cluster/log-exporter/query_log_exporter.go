@@ -47,7 +47,7 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -61,7 +61,7 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 
 		integrationId, err := authApi.GetIntegrationIdFromName(integrationName)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		exportConfig := BuildNewPgExportConfig(cmd)
@@ -72,7 +72,7 @@ var enableDbQueryLoggingCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v\n", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("DB query logging is being enabled for cluster %s", clusterName)
@@ -93,7 +93,7 @@ var describeLogExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -130,7 +130,7 @@ var disableLogExporterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -152,7 +152,7 @@ var disableLogExporterCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response for disable query logging config: %v\n", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("DB query logging is being disabled for cluster %s", clusterName)
@@ -173,7 +173,7 @@ var updateLogExporterConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -198,7 +198,7 @@ var updateLogExporterConfigCmd = &cobra.Command{
 			integrationName, _ = cmd.Flags().GetString("integration-name")
 			integrationId, err = authApi.GetIntegrationIdFromName(integrationName)
 			if err != nil {
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 		} else {
 			integrationId = logExporterData.Spec.ExporterId
@@ -217,7 +217,7 @@ var updateLogExporterConfigCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response for update DB Query logging config: %v\n", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		dqlConfig := pgLogExporterConfigResponse.Data
@@ -240,7 +240,7 @@ func getDbLoggingConfig(clusterId string, authApi *ybmAuthClient.AuthApiClient) 
 	respC, r, err := authApi.GetDbLoggingConfig(clusterId).Execute()
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", r)
-		logrus.Fatalf("could not fetch DB query logging config " + ybmAuthClient.GetApiErrorDetails(err))
+		logrus.Fatalf("%s", "could not fetch DB query logging config "+ybmAuthClient.GetApiErrorDetails(err))
 	}
 	if len(respC.Data) < 1 {
 		logrus.Fatalf("DB query logging is not enabled for the cluster")
@@ -316,7 +316,7 @@ func BuildNewPgExportConfig(cmd *cobra.Command) ybmclient.PgLogExportConfig {
 	if logErrorVerbosity, _ := cmd.Flags().GetString("log-error-verbosity"); logErrorVerbosity != "" {
 		logErrorVerbosityEnum, err := ybmclient.NewLogErrorVerbosityEnumFromValue(strings.ToUpper(logErrorVerbosity))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		config.LogErrorVerbosity = *logErrorVerbosityEnum
 	}
@@ -324,7 +324,7 @@ func BuildNewPgExportConfig(cmd *cobra.Command) ybmclient.PgLogExportConfig {
 	if logStatement, _ := cmd.Flags().GetString("log-statement"); logStatement != "" {
 		logStatementEnum, err := ybmclient.NewLogStatementEnumFromValue(strings.ToUpper(logStatement))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		config.LogStatement = *logStatementEnum
 	}
@@ -332,7 +332,7 @@ func BuildNewPgExportConfig(cmd *cobra.Command) ybmclient.PgLogExportConfig {
 	if logMinErrorStatement, _ := cmd.Flags().GetString("log-min-error-statement"); logMinErrorStatement != "" {
 		logMinErrorStatementEnum, err := ybmclient.NewLogMinErrorStatementEnumFromValue(strings.ToUpper(logMinErrorStatement))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		config.LogMinErrorStatement = *logMinErrorStatementEnum
 	}
@@ -383,7 +383,7 @@ func BuildNewPgExportConfigFromExistingConfig(cmd *cobra.Command, existingConfig
 		logErrorVerbosity, _ := cmd.Flags().GetString("log-error-verbosity")
 		logErrorVerbosityEnum, err := ybmclient.NewLogErrorVerbosityEnumFromValue(strings.ToUpper(logErrorVerbosity))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		newConfig.LogErrorVerbosity = *logErrorVerbosityEnum
 	}
@@ -392,7 +392,7 @@ func BuildNewPgExportConfigFromExistingConfig(cmd *cobra.Command, existingConfig
 		logStatement, _ := cmd.Flags().GetString("log-statement")
 		logStatementEnum, err := ybmclient.NewLogStatementEnumFromValue(strings.ToUpper(logStatement))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		newConfig.LogStatement = *logStatementEnum
 	}
@@ -401,7 +401,7 @@ func BuildNewPgExportConfigFromExistingConfig(cmd *cobra.Command, existingConfig
 		logMinErrorStatement, _ := cmd.Flags().GetString("log-min-error-statement")
 		logMinErrorStatementEnum, err := ybmclient.NewLogMinErrorStatementEnumFromValue(strings.ToUpper(logMinErrorStatement))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		newConfig.LogMinErrorStatement = *logMinErrorStatementEnum
 	}

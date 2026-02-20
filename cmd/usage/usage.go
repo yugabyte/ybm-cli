@@ -48,7 +48,7 @@ var getCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		startDate, _ := cmd.Flags().GetString("start")
@@ -81,7 +81,7 @@ var getCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		handleOutput(resp, combinedFilename, fileExtension, selectedClusterNames)
@@ -111,7 +111,7 @@ func getSelectedUUIDs(startDate, endDate string, clusters []string, authApi *ybm
 	respC, r, err := authApi.ListClustersByDateRange(startDate, endDate).Execute()
 	if err != nil {
 		logrus.Debugf("Full HTTP response: %v", r)
-		return nil, nil, fmt.Errorf(ybmAuthClient.GetApiErrorDetails(err))
+		return nil, nil, fmt.Errorf("%s", ybmAuthClient.GetApiErrorDetails(err))
 	}
 
 	clusterData := respC.Data.GetClusters()

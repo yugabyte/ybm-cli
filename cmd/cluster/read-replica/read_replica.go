@@ -193,7 +193,7 @@ var listReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -203,7 +203,7 @@ var listReadReplicaCmd = &cobra.Command{
 		resp, r, err := authApi.ListReadReplicas(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		printReadReplicaOutput(resp)
@@ -218,7 +218,7 @@ var createReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -248,7 +248,7 @@ var createReadReplicaCmd = &cobra.Command{
 		resp, r, err := authApi.CreateReadReplica(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("Read Replica is being created for cluster %s", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
@@ -266,7 +266,7 @@ var createReadReplicaCmd = &cobra.Command{
 			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 		} else {
 			fmt.Println(msg)
@@ -282,7 +282,7 @@ var updateReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -312,7 +312,7 @@ var updateReadReplicaCmd = &cobra.Command{
 		resp, r, err := authApi.EditReadReplicas(clusterID).ReadReplicaSpec(readReplicaSpecs).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("Read Replica is being updated for cluster %s", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 
@@ -329,7 +329,7 @@ var updateReadReplicaCmd = &cobra.Command{
 			resp, r, err = authApi.ListReadReplicas(clusterID).Execute()
 			if err != nil {
 				logrus.Debugf("Full HTTP response: %v", r)
-				logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+				logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 			}
 		} else {
 			fmt.Println(msg)
@@ -353,7 +353,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		clusterID, err := authApi.GetClusterIdByName(ClusterName)
@@ -363,7 +363,7 @@ var deleteReadReplicaCmd = &cobra.Command{
 		r, err := authApi.DeleteReadReplica(clusterID).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatalf("%s", ybmAuthClient.GetApiErrorDetails(err))
 		}
 		msg := fmt.Sprintf("Read Replica is being deleted for cluster %s", formatter.Colorize(ClusterName, formatter.GREEN_COLOR))
 

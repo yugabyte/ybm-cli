@@ -59,7 +59,7 @@ func (f *FullCluster) SetCMK(authApi ybmAuthClient.AuthApiClient) {
 			logrus.Debugf("Failed to get CMK spec because cluster %s is not ready yet", f.Cluster.Info.Id)
 		} else {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 	}
 	if _, ok := resp.GetDataOk(); ok {
@@ -93,7 +93,7 @@ func (f *FullCluster) SetVPCs(authApi ybmAuthClient.AuthApiClient) {
 		resp, r, err := authApi.ListSingleTenantVpcs().Ids(VpcIds).Execute()
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		if _, ok := resp.GetDataOk(); ok {
 			for _, v := range resp.GetData() {
@@ -110,7 +110,7 @@ func (f *FullCluster) SetAllowLists(authApi ybmAuthClient.AuthApiClient) {
 			logrus.Debugf("Failed to get allow lists because cluster %s is not ready yet", f.Cluster.Info.Id)
 		} else {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 	}
 	if _, ok := resp.GetDataOk(); ok {
@@ -125,7 +125,7 @@ func (f *FullCluster) SetNodes(authApi ybmAuthClient.AuthApiClient) {
 			logrus.Debugf("Failed to get allow lists because cluster %s is not ready yet", f.Cluster.Info.Id)
 		} else {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 	}
 	if _, ok := resp.GetDataOk(); ok {

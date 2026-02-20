@@ -53,15 +53,15 @@ var createIntegrationCmd = &cobra.Command{
 		//We initialise here, even if we error out later
 		sinkTypeEnum, err := ybmclient.NewTelemetryProviderTypeEnumFromValue(strings.ToUpper(sinkType))
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		IntegrationSpec, err := setIntegrationConfiguration(cmd, IntegrationName, *sinkTypeEnum)
 		if err != nil {
-			logrus.Fatalf(err.Error())
+			logrus.Fatal(err.Error())
 		}
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -69,7 +69,7 @@ var createIntegrationCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		msg := fmt.Sprintf("The Integration %s has been created", formatter.Colorize(IntegrationName, formatter.GREEN_COLOR))
@@ -94,7 +94,7 @@ var listIntegrationCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 
@@ -102,7 +102,7 @@ var listIntegrationCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		IntegrationCtx := formatter.Context{
@@ -134,21 +134,21 @@ var deleteIntegrationCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		authApi, err := ybmAuthClient.NewAuthApiClient()
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 		authApi.GetInfo("", "")
 		configName, _ := cmd.Flags().GetString("config-name")
 
 		config, err := authApi.GetIntegrationByName(configName)
 		if err != nil {
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		r1, err := authApi.DeleteIntegration(config.GetInfo().Id).Execute()
 
 		if err != nil {
 			logrus.Debugf("Full HTTP response: %v", r1)
-			logrus.Fatalf(ybmAuthClient.GetApiErrorDetails(err))
+			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
 
 		fmt.Printf("The Integration %s has been deleted\n", formatter.Colorize(configName, formatter.GREEN_COLOR))
