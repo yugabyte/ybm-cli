@@ -185,7 +185,8 @@ func init() {
 	if util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
 		createIntegrationCmd.Flags().StringToString("s3-spec", nil, `Configuration for AWS S3. 
 	Please provide key value pairs as follows: 
-	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<optional-path-prefix>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>`)
+	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<path-prefix-ending-with-slash>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>
+	Note: path-prefix is required and must end with '/'. Use '/' for root.`)
 	}
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
@@ -394,10 +395,13 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		if len(secretAccessKey) < 1 {
 			return nil, fmt.Errorf("secret-access-key is a required field for s3-spec")
 		}
-		s3Spec := ybmclient.NewS3TelemetryProviderSpec(bucket, region, accessKeyId, secretAccessKey)
-		if len(pathPrefix) > 0 {
-			s3Spec.SetPathPrefix(pathPrefix)
+		if len(pathPrefix) < 1 {
+			return nil, fmt.Errorf("path-prefix is a required field for s3-spec")
 		}
+		if !strings.HasSuffix(pathPrefix, "/") {
+			return nil, fmt.Errorf("path-prefix must end with '/'. Use '/' for root")
+		}
+		s3Spec := ybmclient.NewS3TelemetryProviderSpec(bucket, region, accessKeyId, secretAccessKey, pathPrefix)
 		if len(filePrefix) > 0 {
 			s3Spec.SetFilePrefix(filePrefix)
 		}
