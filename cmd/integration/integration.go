@@ -182,12 +182,10 @@ func init() {
 	createIntegrationCmd.Flags().StringToString("newrelic-spec", nil, `Configuration for New Relic.
 	Please provide key value pairs as follows:
 	endpoint=<your-new-relic-endpoint-url>,license-key=<your-new-relic-license-key>`)
-	if util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
-		createIntegrationCmd.Flags().StringToString("s3-spec", nil, `Configuration for AWS S3. 
+	createIntegrationCmd.Flags().StringToString("s3-spec", nil, `Configuration for AWS S3. 
 	Please provide key value pairs as follows: 
 	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<path-prefix-ending-with-slash>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>
 	Note: path-prefix is required and must end with '/'. Use '/' for root.`)
-	}
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
 
@@ -369,9 +367,6 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 		newrelicSpec := ybmclient.NewNewrelicTelemetryProviderSpec(licenseKey, endpoint)
 		IntegrationSpec.SetNewrelicSpec(*newrelicSpec)
 	case ybmclient.TELEMETRYPROVIDERTYPEENUM_AWS_S3:
-		if !util.IsFeatureFlagEnabled(util.S3_INTEGRATION) {
-			return nil, fmt.Errorf("s3 integration is not enabled")
-		}
 		if !cmd.Flags().Changed("s3-spec") {
 			return nil, fmt.Errorf("s3-spec is required for s3 sink")
 		}

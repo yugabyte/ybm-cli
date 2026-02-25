@@ -16,7 +16,6 @@ ybm backup restore [flags]
       --backup-id string               [REQUIRED] ID of the backup to be restored.
       --cluster-name string            [REQUIRED] Name of the cluster to restore backups.
   -h, --help                           help for restore
-      --include-roles                  [OPTIONAL] Restore global YSQL roles and permissions from the backup. (Default: false)
       --ycql-keyspaces string          [OPTIONAL] Comma-separated YCQL keyspaces to restore (e.g. db4,db5).
       --ycql-keyspaces-rename string   [OPTIONAL] Comma-separated YCQL rename pairs backup_keyspace=restore_keyspace (e.g. db4=newdb4).
       --ysql-keyspaces string          [OPTIONAL] Comma-separated YSQL keyspaces to restore (e.g. db1,db2,db3).
@@ -29,7 +28,6 @@ ybm backup restore [flags]
   -a, --apiKey string      YugabyteDB Aeon account API key
       --config string      config file (default is $HOME/.ybm-cli.yaml)
       --debug              Use debug mode, same as --logLevel debug
-      --host string        YugabyteDB Aeon Api hostname
   -l, --logLevel string    Select the desired log level format(info). Default to info
       --no-color           Disable colors in output , default to false
   -o, --output string      Select the desired output format (table, json, pretty). Default to table
