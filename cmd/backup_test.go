@@ -33,15 +33,15 @@ import (
 var _ = Describe("Backup", func() {
 
 	var (
-		server             *ghttp.Server
-		statusCode         int
-		args               []string
-		responseAccount    openapi.AccountResponse
-		responseProject    openapi.AccountResponse
-		responseBackupList openapi.BackupListResponse
-		responseBackup     openapi.BackupResponse
-
-		//cbr        *cobra.Command
+		server              *ghttp.Server
+		statusCode          int
+		args                []string
+		responseAccount     openapi.AccountResponse
+		responseProject     openapi.AccountResponse
+		responseBackupList  openapi.BackupListResponse
+		responseBackup      openapi.BackupResponse
+		responseListCluster openapi.ClusterListResponse
+		responseRestore     openapi.RestoreResponse
 	)
 
 	BeforeEach(func() {
@@ -108,6 +108,163 @@ my_keyspace         YCQL
 			Expect(o).Should(Equal(expected))
 			session.Kill()
 
+		})
+	})
+
+	Context("Backup restore", func() {
+		It("should restore backup with backup-id and cluster-name", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			responseRestore = *openapi.NewRestoreResponse()
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/restore"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseRestore),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "restore", "--backup-id", "bkp-123", "--cluster-name", "stunning-sole")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say("is being restored onto the cluster"))
+			Expect(session.Out).Should(gbytes.Say("stunning-sole"))
+			session.Kill()
+		})
+
+		It("should restore with ysql-keyspaces and ycql-keyspaces flags", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			responseRestore = *openapi.NewRestoreResponse()
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/restore"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseRestore),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "restore", "--backup-id", "bkp-456", "--cluster-name", "stunning-sole",
+				"--ysql-keyspaces", "db1,db2", "--ycql-keyspaces", "db4")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say("is being restored onto the cluster"))
+			session.Kill()
+		})
+
+		It("should restore with valid ysql-keyspaces-rename and ycql-keyspaces-rename", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			responseRestore = *openapi.NewRestoreResponse()
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/restore"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseRestore),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "restore", "--backup-id", "bkp-789", "--cluster-name", "stunning-sole",
+				"--ysql-keyspaces-rename", "db1=newdb1,db2=newdb2", "--ycql-keyspaces-rename", "db4=newdb4")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say("is being restored onto the cluster"))
+			session.Kill()
+		})
+
+		It("should fail when ysql-keyspaces-rename has invalid pair (missing backup name)", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "restore", "--backup-id", "bkp-123", "--cluster-name", "stunning-sole",
+				"--ysql-keyspaces-rename", "=newdb1")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.ExitCode()).NotTo(Equal(0))
+			Expect(session.Err).Should(gbytes.Say("invalid YSQL keyspace rename pair"))
+			Expect(session.Err).Should(gbytes.Say("backup_keyspace and restore_keyspace must be non-empty"))
+			session.Kill()
+		})
+
+		It("should fail when ysql-keyspaces-rename has invalid pair (missing restore name)", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "restore", "--backup-id", "bkp-123", "--cluster-name", "stunning-sole",
+				"--ysql-keyspaces-rename", "db1=")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.ExitCode()).NotTo(Equal(0))
+			Expect(session.Err).Should(gbytes.Say("invalid YSQL keyspace rename pair"))
+			session.Kill()
+		})
+
+		It("should fail when ycql-keyspaces-rename has invalid pair (no equals sign)", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "restore", "--backup-id", "bkp-123", "--cluster-name", "stunning-sole",
+				"--ycql-keyspaces-rename", "db4newdb4")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.ExitCode()).NotTo(Equal(0))
+			Expect(session.Err).Should(gbytes.Say("invalid YCQL keyspace rename pair"))
+			Expect(session.Err).Should(gbytes.Say("expected backup_keyspace=restore_keyspace"))
+			session.Kill()
+		})
+
+		It("should fail when ysql-keyspaces-rename has invalid pair (multiple equals signs)", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "backup", "restore", "--backup-id", "bkp-123", "--cluster-name", "stunning-sole",
+				"--ysql-keyspaces-rename", "ks1=ks2=ks3")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.ExitCode()).NotTo(Equal(0))
+			Expect(session.Err).Should(gbytes.Say("invalid YSQL keyspace rename pair"))
+			Expect(session.Err).Should(gbytes.Say("expected backup_keyspace=restore_keyspace"))
+			session.Kill()
 		})
 	})
 
