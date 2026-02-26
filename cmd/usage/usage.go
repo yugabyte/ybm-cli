@@ -138,7 +138,7 @@ func getSelectedUUIDs(startDate, endDate string, clusters []string, authApi *ybm
 			}
 		}
 	} else { // By default select all clusters
-		for clusterName, _ := range clusterUUIDMap {
+		for clusterName := range clusterUUIDMap {
 			selectedClusterNames = append(selectedClusterNames, clusterName)
 		}
 	}

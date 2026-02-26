@@ -35,6 +35,10 @@ ybm integration create [flags]
       --newrelic-spec stringToString          Configuration for New Relic.
                                               	Please provide key value pairs as follows:
                                               	endpoint=<your-new-relic-endpoint-url>,license-key=<your-new-relic-license-key> (default [])
+      --s3-spec stringToString                Configuration for AWS S3. 
+                                              	Please provide key value pairs as follows: 
+                                              	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<path-prefix-ending-with-slash>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>
+                                              	Note: path-prefix is required and must end with '/'. Use '/' for root. (default [])
   -h, --help                                  help for create
 ```
 

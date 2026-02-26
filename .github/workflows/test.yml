@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           cache: true
       - run: |
           eval `ssh-agent -s`
@@ -33,3 +33,19 @@ jobs:
           make build
           make clean
         name: Build CLI
+      - run: |
+          make doc OS_ARCH=linux_amd64
+          git status -s
+          if [[ -n $(git status -s) ]]; then
+            echo "The documentation is not proper. Please ensure that your run 'make doc'"                                                                   
+            exit 1                                                                          
+          fi
+        name: Check documentation
+      - run: |
+          make fmt-check
+          git status -s
+          if [[ -n $(git status -s) ]]; then
+            echo "The formatting is not proper. Please ensure that your run 'make fmt'"                                                                   
+            exit 1                                                                          
+          fi
+        name: Check formatting

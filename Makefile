@@ -41,3 +41,7 @@ clean:
 
 fmt:
 	go fmt ./...
+
+fmt-check:
+	@echo "Verifying formatting, failures can be fixed with 'make fmt'"
+	@!(gofmt -l -s -d . | grep '[a-z]')

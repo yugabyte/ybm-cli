@@ -270,7 +270,7 @@ func init() {
 	restoreBackupCmd.MarkFlagRequired("cluster-name")
 	restoreBackupCmd.Flags().String("backup-id", "", "[REQUIRED] ID of the backup to be restored.")
 	restoreBackupCmd.MarkFlagRequired("backup-id")
-	backupUtil.AddIncludeRolesFlag(restoreBackupCmd, "[OPTIONAL] Restore global YSQL roles and permissions from the backup. (Default: false)")
+	restoreBackupCmd.Flags().Bool("include-roles", false, "[OPTIONAL] Restore global YSQL roles and permissions from the backup. (Default: false)")
 	restoreBackupCmd.Flags().String("ysql-keyspaces", "", "[OPTIONAL] Comma-separated YSQL keyspaces to restore (e.g. db1,db2,db3).")
 	restoreBackupCmd.Flags().String("ycql-keyspaces", "", "[OPTIONAL] Comma-separated YCQL keyspaces to restore (e.g. db4,db5).")
 	restoreBackupCmd.Flags().String("ysql-keyspaces-rename", "", "[OPTIONAL] Comma-separated YSQL rename pairs backup_keyspace=restore_keyspace (e.g. db1=newdb1,db2=newdb2).")
@@ -281,7 +281,7 @@ func init() {
 	createBackupCmd.MarkFlagRequired("cluster-name")
 	createBackupCmd.Flags().Int32("retention-period", 0, "[OPTIONAL] Retention period of the backup in days. (Default: 1)")
 	createBackupCmd.Flags().String("description", "", "[OPTIONAL] Description of the backup.")
-	backupUtil.AddIncludeRolesFlag(createBackupCmd, "[OPTIONAL] Include global YSQL roles and permissions in the backup. (Default: false)")
+	createBackupCmd.Flags().Bool("include-roles", false, "[OPTIONAL] Include global YSQL roles and permissions in the backup. (Default: false)")
 
 	BackupCmd.AddCommand(deleteBackupCmd)
 	deleteBackupCmd.Flags().String("backup-id", "", "[REQUIRED] The backup ID.")
