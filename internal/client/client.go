@@ -281,11 +281,9 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		}
 		clusterInfo.SetNumFaultsToTolerate(numFaultsToTolerate)
 	}
-	if util.IsFeatureFlagEnabled(util.ENTERPRISE_SECURITY) {
-		if cmd.Flags().Changed("enterprise-security") {
-			enterpriseSecurity, _ := cmd.Flags().GetBool("enterprise-security")
-			clusterInfo.SetEnterpriseSecurity(enterpriseSecurity)
-		}
+	if cmd.Flags().Changed("enterprise-security") {
+		enterpriseSecurity, _ := cmd.Flags().GetBool("enterprise-security")
+		clusterInfo.SetEnterpriseSecurity(enterpriseSecurity)
 	}
 	clusterInfo.SetIsProduction(isProduction)
 

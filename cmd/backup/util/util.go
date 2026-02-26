@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
 )
 
@@ -35,22 +34,12 @@ type UseRolesSetter interface {
 // SetUseRolesFromFlag checks the --include-roles flag and sets UseRoles on the spec if enabled
 // Returns true if the flag was set, false otherwise
 func SetUseRolesFromFlag(cmd *cobra.Command, spec UseRolesSetter) bool {
-	if !util.IsFeatureFlagEnabled(util.INCLUDE_ROLES_DURING_BACKUP_RESTORE) {
-		return false
-	}
 	if cmd.Flags().Changed("include-roles") {
 		includeRoles, _ := cmd.Flags().GetBool("include-roles")
 		spec.SetUseRoles(includeRoles)
 		return true
 	}
 	return false
-}
-
-// AddIncludeRolesFlag adds the --include-roles flag to a command if the feature flag is enabled
-func AddIncludeRolesFlag(cmd *cobra.Command, description string) {
-	if util.IsFeatureFlagEnabled(util.INCLUDE_ROLES_DURING_BACKUP_RESTORE) {
-		cmd.Flags().Bool("include-roles", false, description)
-	}
 }
 
 // SetBackupSpecUseRoles sets UseRoles on a BackupSpec from the command flag

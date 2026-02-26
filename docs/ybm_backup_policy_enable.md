@@ -15,6 +15,7 @@ ybm backup policy enable [flags]
 ```
       --cluster-name string   [REQUIRED] Name of the cluster to enable backup policies.
   -h, --help                  help for enable
+      --include-roles         [OPTIONAL] Include global YSQL roles and permissions in scheduled backups. (Default: false)
 ```
 
 ### Options inherited from parent commands

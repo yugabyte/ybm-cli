@@ -16,6 +16,7 @@ ybm backup create [flags]
       --cluster-name string      [REQUIRED] Name for the cluster.
       --description string       [OPTIONAL] Description of the backup.
   -h, --help                     help for create
+      --include-roles            [OPTIONAL] Include global YSQL roles and permissions in the backup. (Default: false)
       --retention-period int32   [OPTIONAL] Retention period of the backup in days. (Default: 1)
 ```
 
