@@ -30,7 +30,7 @@ const (
 type UserContext struct {
 	HeaderContext
 	Context
-	u ybmclient.UserData
+	u ybmclient.UserDataWithRoleInfo
 }
 
 func NewUserFormat(source string) Format {
@@ -44,7 +44,7 @@ func NewUserFormat(source string) Format {
 }
 
 // UserWrite renders the context for a list of users
-func UserWrite(ctx Context, users []ybmclient.UserData) error {
+func UserWrite(ctx Context, users []ybmclient.UserDataWithRoleInfo) error {
 	render := func(format func(subContext SubContext) error) error {
 		for _, user := range users {
 			err := format(&UserContext{u: user})
@@ -71,19 +71,23 @@ func NewUserContext() *UserContext {
 }
 
 func (u *UserContext) UserEmail() string {
-	return u.u.Spec.Email
+	spec := u.u.GetSpec()
+	return spec.Email
 }
 
 func (u *UserContext) UserName() string {
-	return u.u.Spec.GetFirstName() + " " + u.u.Spec.GetLastName()
+	spec := u.u.GetSpec()
+	return spec.GetFirstName() + " " + spec.GetLastName()
 }
 
 func (u *UserContext) UserState() string {
-	return string(u.u.Info.State)
+	info := u.u.GetInfo()
+	return string(info.State)
 }
 
 func (u *UserContext) UserRole() string {
-	return u.u.Info.GetRoleList()[0].GetRoles()[0].Info.GetDisplayName()
+	roleInfo := u.u.GetRoleInfo()
+	return roleInfo[0].GetDisplayName()
 }
 
 func (u *UserContext) MarshalJSON() ([]byte, error) {
