@@ -1277,12 +1277,12 @@ func (a *AuthApiClient) GetUserIdByEmail(email string) (string, error) {
 	return "", fmt.Errorf("could not get user data for email: %s", email)
 }
 
-func (a *AuthApiClient) GetUserByEmail(email string) (ybmclient.UserData, error) {
+func (a *AuthApiClient) GetUserByEmail(email string) (ybmclient.UserDataWithRoleInfo, error) {
 	userResp, resp, err := a.ListAccountUsers().Email(email).Execute()
 	if err != nil {
 		c, _ := httputil.DumpResponse(resp, true)
 		logrus.Debug(c)
-		return ybmclient.UserData{}, err
+		return ybmclient.UserDataWithRoleInfo{}, err
 	}
 
 	userData := userResp.GetData()
@@ -1291,7 +1291,7 @@ func (a *AuthApiClient) GetUserByEmail(email string) (ybmclient.UserData, error)
 		return userData[0], nil
 	}
 
-	return ybmclient.UserData{}, fmt.Errorf("could not get user data for email: %s", email)
+	return ybmclient.UserDataWithRoleInfo{}, fmt.Errorf("could not get user data for email: %s", email)
 }
 
 func (a *AuthApiClient) WaitForTaskCompletion(entityId string, entityType ybmclient.EntityTypeEnum, taskType ybmclient.TaskTypeEnum, completionStatus []string, message string) (string, error) {
