@@ -207,7 +207,7 @@ func init() {
 	createClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP. Default AWS.")
 	createClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.")
 	createClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.")
-	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] The database version of the cluster. Production, Innovation, Preview, or 'Early Access'. Default depends on cluster tier, Sandbox is Preview, Dedicated is Production.")
+	createClusterCmd.Flags().String("database-version", "", "[OPTIONAL] Database software track for the cluster. Supported values: Extended, Rapid.\nNOTE: Deprecated track names are no longer accepted. Production and Innovation were removed in favor of Extended. Preview and Early Access were removed in favor of Rapid.\nDefault when omitted depends on cluster tier: Sandbox uses Rapid, Dedicated uses Extended.")
 	createClusterCmd.Flags().Bool("enterprise-security", false, "[OPTIONAL] The security level of cluster. Advanced security will have security checks for cluster. Default false.")
 	createClusterCmd.Flags().String("encryption-spec", "", `[OPTIONAL] The customer managed key spec for the cluster.
 	Please provide key value pairs as follows:
