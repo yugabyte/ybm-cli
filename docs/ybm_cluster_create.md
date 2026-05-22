@@ -18,7 +18,9 @@ ybm cluster create [flags]
       --cloud-provider string          [OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP. Default AWS.
       --cluster-tier string            [OPTIONAL] The tier of the cluster. Sandbox or Dedicated. Default Sandbox.
       --cluster-type string            [OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED. Default SYNCHRONOUS.
-      --database-version string        [OPTIONAL] The database version of the cluster. Production, Innovation, Preview, or 'Early Access'. Default depends on cluster tier, Sandbox is Preview, Dedicated is Production.
+      --database-version string        [OPTIONAL] Database software track for the cluster. Supported values: Extended, Rapid.
+                                       NOTE: Deprecated track names are no longer accepted. Production and Innovation were removed in favor of Extended. Preview and Early Access were removed in favor of Rapid.
+                                       Default when omitted depends on cluster tier: Sandbox uses Rapid, Dedicated uses Extended.
       --enterprise-security            [OPTIONAL] The security level of cluster. Advanced security will have security checks for cluster. Default false.
       --encryption-spec string         [OPTIONAL] The customer managed key spec for the cluster.
                                        	Please provide key value pairs as follows:

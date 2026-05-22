@@ -880,13 +880,15 @@ func (a *AuthApiClient) GetTrackIdByName(trackName string) (string, error) {
 		return "", err
 	}
 
+	availableTrackNames := make([]string, 0, len(tracksNameResp.GetData()))
 	for _, track := range tracksNameResp.GetData() {
-		// Temporary backwards compatibility between Stable and Production tracks.
-		if track.Spec.GetName() == trackName || (track.Spec.GetName() == "Production" && trackName == "Stable") {
+		availableTrackNames = append(availableTrackNames, track.Spec.GetName())
+		if track.Spec.GetName() == trackName {
 			return track.Info.GetId(), nil
 		}
 	}
-	return "", fmt.Errorf("the database version doesn't exist")
+	sort.Strings(availableTrackNames)
+	return "", fmt.Errorf("database version %q was not found. Available database versions: %s\n", trackName, strings.Join(availableTrackNames, ", "))
 
 }
 func (a *AuthApiClient) CreateCdcStream(clusterId string) ybmclient.ApiCreateCdcStreamRequest {
