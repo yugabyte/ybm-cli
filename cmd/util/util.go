@@ -113,7 +113,7 @@ func ValidateNumFaultsToTolerate(numFaultsToTolerate int32, faultTolerance ybmcl
 	if faultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_REGION && numFaultsToTolerate < 1 {
 		return false, fmt.Errorf("number of faults to tolerate must be greater than 0 for fault tolerance level 'REGION'")
 	}
-	if faultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_ZONE && numFaultsToTolerate != 1 {
+	if faultTolerance == ybmclient.CLUSTERFAULTTOLERANCE_ZONE && numFaultsToTolerate < 1 {
 		return false, fmt.Errorf("number of faults to tolerate must be 1 for fault tolerance level 'ZONE'")
 	}
 

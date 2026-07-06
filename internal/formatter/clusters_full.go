@@ -25,6 +25,7 @@ import (
 
 	"github.com/enescakir/emoji"
 	"github.com/sirupsen/logrus"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	"github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/cluster"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -32,18 +33,20 @@ import (
 )
 
 const (
-	defaultFullClusterGeneral       = "table {{.Name}}\t{{.ID}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}"
-	defaultFullClusterGeneral2      = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
-	defaultVPCListingCluster        = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
-	defaultDefaultFullClusterRegion = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
-	defaultFullClusterNalListing    = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
-	defaultFullClusterCMK           = "table {{.Provider}}\t{{.KeyAlias}}\t{{.LastRotated}}\t{{.SecurityPrincipals}}\t{{.CMKStatus}}"
-	defaultFullClusterEndpoints     = "table {{.Region}}\t{{.Accessibility}}\t{{.State}}\t{{.Host}}"
-	faultToleranceHeader            = "Fault Tolerance"
-	dataDistributionHeader          = "Data Distribution"
-	vcpuByNodeHeader                = "vCPU/Node"
-	memoryByNodeHeader              = "Mem/Node"
-	diskByNodeHeader                = "Disk/Node"
+	defaultFullClusterGeneral            = "table {{.Name}}\t{{.ID}}\t{{.SoftwareVersion}}\t{{.State}}\t{{.HealthState}}"
+	defaultFullClusterGeneral2           = "table {{.Provider}}\t{{.Tier}}\t{{.FaultTolerance}}\t{{.Nodes}}\t{{.NodesSpec}}\t{{.ConnectionPoolingStatus}}"
+	defaultVPCListingCluster             = "table {{.Name}}\t{{.State}}\t{{.Provider}}\t{{.Regions}}\t{{.CIDR}}\t{{.Peerings}}"
+	defaultDefaultFullClusterRegion      = "table {{.Region}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
+	defaultFullClusterRegionWithNumZones = "table {{.Region}}\t{{.NumZones}}\t{{.NumNode}}\t{{.NumCores}}\t{{.MemoryGb}}\t{{.DiskSizeGb}}\t{{.VpcName}}"
+	defaultFullClusterNalListing         = "table {{.Name}}\t{{.Desc}}\t{{.AllowedList}}"
+	defaultFullClusterCMK                = "table {{.Provider}}\t{{.KeyAlias}}\t{{.LastRotated}}\t{{.SecurityPrincipals}}\t{{.CMKStatus}}"
+	defaultFullClusterEndpoints          = "table {{.Region}}\t{{.Accessibility}}\t{{.State}}\t{{.Host}}"
+	faultToleranceHeader                 = "Fault Tolerance"
+	dataDistributionHeader               = "Data Distribution"
+	vcpuByNodeHeader                     = "vCPU/Node"
+	memoryByNodeHeader                   = "Mem/Node"
+	diskByNodeHeader                     = "Disk/Node"
+	numZonesHeader                       = "Availability Zones"
 )
 
 type FullClusterContext struct {
@@ -175,7 +178,9 @@ func (c *FullClusterContext) Write() error {
 	c.postFormat(tmpl, clusterContext)
 
 	//Regions Subsection
-	tmpl, err = c.startSubsection(defaultDefaultFullClusterRegion)
+	showNumZones := util.IsFeatureFlagEnabled(util.MULTI_ZONE_SUPPORT) &&
+		hasNumZones(c.fullCluster.Cluster.GetSpec().ClusterRegionInfo)
+	tmpl, err = c.startSubsection(fullClusterRegionFormat(showNumZones))
 	if err != nil {
 		return err
 	}
@@ -185,7 +190,7 @@ func (c *FullClusterContext) Write() error {
 			return err
 		}
 	}
-	c.postFormat(tmpl, NewClusterInfoRegionsContext())
+	c.postFormat(tmpl, NewClusterInfoRegionsContext(showNumZones))
 
 	// Cluster endpoints
 	if len(fcc.EndpointContext) > 0 {
@@ -286,9 +291,25 @@ type clusterInfoRegionsContext struct {
 	vpcName           string
 }
 
-func NewClusterInfoRegionsContext() *clusterInfoRegionsContext {
+func hasNumZones(regions []ybmclient.ClusterRegionInfo) bool {
+	for _, region := range regions {
+		if numZones, ok := region.PlacementInfo.GetNumZonesOk(); ok && numZones != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func fullClusterRegionFormat(showNumZones bool) string {
+	if showNumZones {
+		return defaultFullClusterRegionWithNumZones
+	}
+	return defaultDefaultFullClusterRegion
+}
+
+func NewClusterInfoRegionsContext(showNumZones bool) *clusterInfoRegionsContext {
 	clusterCtx := clusterInfoRegionsContext{}
-	clusterCtx.Header = SubHeaderContext{
+	header := SubHeaderContext{
 		"Region":     "Region",
 		"NumNode":    numNodesHeader,
 		"NumCores":   vcpuByNodeHeader,
@@ -296,11 +317,23 @@ func NewClusterInfoRegionsContext() *clusterInfoRegionsContext {
 		"DiskSizeGb": diskByNodeHeader,
 		"VpcName":    "VPC",
 	}
+	if showNumZones {
+		header["NumZones"] = numZonesHeader
+	}
+	clusterCtx.Header = header
 	return &clusterCtx
 }
 
 func (c *clusterInfoRegionsContext) NumNode() string {
 	return fmt.Sprintf("%d", c.clusterInfoRegion.GetPlacementInfo().NumNodes)
+}
+
+func (c *clusterInfoRegionsContext) NumZones() string {
+	placementInfo := c.clusterInfoRegion.PlacementInfo
+	if numZones, ok := placementInfo.GetNumZonesOk(); ok && numZones != nil {
+		return fmt.Sprintf("%d", *numZones)
+	}
+	return ""
 }
 
 func (c *clusterInfoRegionsContext) NumCores() string {
