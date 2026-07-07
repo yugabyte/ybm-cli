@@ -169,6 +169,13 @@ func (a *AuthApiClient) buildClusterSpec(cmd *cobra.Command, regionInfoList []ma
 		info := *ybmclient.NewClusterRegionInfo(
 			*ybmclient.NewPlacementInfo(cloudInfo, regionNodes),
 		)
+		if numZonesStr, ok := regionInfo["num-zones"]; ok && strings.TrimSpace(numZonesStr) != "" {
+			numZones, err := strconv.ParseInt(numZonesStr, 10, 32)
+			if err != nil {
+				return nil, err
+			}
+			info.PlacementInfo.SetNumZones(int32(numZones))
+		}
 		if vpcName, ok := regionInfo["vpc"]; ok {
 			vpcID, err := a.GetVpcIdByName(vpcName)
 			if err != nil {

@@ -33,17 +33,14 @@ import (
 var _ = Describe("Cluster", func() {
 
 	var (
-		server                   *ghttp.Server
-		statusCode               int
-		args                     []string
-		responseAccount          openapi.AccountResponse
-		responseProject          openapi.AccountResponse
-		responseListCluster      openapi.ClusterListResponse
-		responseNetworkAllowList openapi.NetworkAllowListListResponse
-		responseError            openapi.ApiError
-		responseCluster          openapi.ClusterData
-		responseNodes            openapi.ClusterNodesResponse
-		responseCMK              openapi.CMKResponse
+		server              *ghttp.Server
+		statusCode          int
+		args                []string
+		responseAccount     openapi.AccountResponse
+		responseProject     openapi.AccountResponse
+		responseListCluster openapi.ClusterListResponse
+		responseError       openapi.ApiError
+		responseCluster     openapi.ClusterData
 	)
 
 	BeforeEach(func() {
@@ -220,32 +217,7 @@ stunning-sole   Dedicated   2.16.0.1-b7   ACTIVE    💚        AWS        us-we
 
 			It("should return detailed summary of cluster if cluster-name is specified", func() {
 				statusCode = 200
-				err := loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
-				Expect(err).ToNot(HaveOccurred())
-				err = loadJson("./test/fixtures/nodes.json", &responseNodes)
-				Expect(err).ToNot(HaveOccurred())
-				err = loadJson("./test/fixtures/aws_cmk.json", &responseCMK)
-				Expect(err).ToNot(HaveOccurred())
-				err = loadJson("./test/fixtures/one-cluster.json", &responseCluster)
-				Expect(err).ToNot(HaveOccurred())
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/allow-lists"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
-					),
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/nodes"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNodes),
-					),
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8/cmks"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCMK),
-					),
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"),
-						ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
-					),
-				)
+				appendDescribeClusterHandlers(server, statusCode)
 				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -287,6 +259,47 @@ test-cli-2-n3   us-west-2[us-west-2c]   💚        ❌        ✅        ❌   
 				Expect(o).Should(Equal(expected))
 				session.Kill()
 			})
+
+			It("should show Availability Zones column when multi zone support is enabled", func() {
+				os.Setenv("YBM_FF_MULTI_ZONE_SUPPORT", "true")
+				statusCode = 200
+				var listWithNumZones openapi.ClusterListResponse
+				err := loadJson("./test/fixtures/list-clusters.json", &listWithNumZones)
+				Expect(err).ToNot(HaveOccurred())
+				listWithNumZones.Data[0].Spec.ClusterRegionInfo[0].PlacementInfo.SetNumZones(3)
+				setListClustersHandler(server, statusCode, listWithNumZones)
+				appendDescribeClusterHandlers(server, statusCode)
+				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				output := string(session.Out.Contents())
+				Expect(output).To(ContainSubstring("Availability Zones"))
+				Expect(output).To(ContainSubstring("us-west-2"))
+				Expect(output).To(MatchRegexp(`\s3\s`))
+				session.Kill()
+			})
+
+			It("should not show Availability Zones column when response has no num_zones even if feature flag is enabled", func() {
+				os.Setenv("YBM_FF_MULTI_ZONE_SUPPORT", "true")
+				statusCode = 200
+				var listWithoutNumZones openapi.ClusterListResponse
+				err := loadJson("./test/fixtures/list-clusters.json", &listWithoutNumZones)
+				Expect(err).ToNot(HaveOccurred())
+				listWithoutNumZones.Data[0].Spec.ClusterRegionInfo[0].PlacementInfo.UnsetNumZones()
+				setListClustersHandler(server, statusCode, listWithoutNumZones)
+				appendDescribeClusterHandlers(server, statusCode)
+				cmd := exec.Command(compiledCLIPath, "cluster", "describe", "--cluster-name", "stunning-sole")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).NotTo(HaveOccurred())
+				session.Wait(2)
+				output := string(session.Out.Contents())
+				Expect(output).NotTo(ContainSubstring("Availability Zones"))
+				Expect(output).To(ContainSubstring("Regions"))
+				Expect(output).To(ContainSubstring("us-west-2"))
+				session.Kill()
+			})
+
 			It("should return no cluster found when cluster-name is wrong", func() {
 				statusCode = 200
 				err := loadJson("./test/fixtures/no-clusters.json", &responseCluster)
@@ -431,9 +444,109 @@ test-cli-2-n3   us-west-2[us-west-2c]   💚        ❌        ✅        ❌   
 		})
 	})
 
+	Describe("Multi zone support", func() {
+		It("should reject num-zones on create when feature flag is disabled", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "create",
+				"--cluster-name", "multi-zone-cluster",
+				"--credentials", "username=admin,password=TestPass123",
+				"--region-info", "region=asia-south1,num-nodes=3,num-cores=4,disk-size-gb=100,num-zones=3",
+				"--cloud-provider", "GCP",
+				"--cluster-tier", "Dedicated",
+			)
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say(`Multi-zone support is not enabled`))
+			session.Kill()
+		})
+
+		It("should reject num-zones on update when feature flag is disabled", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			var clusterResponse openapi.ClusterResponse
+			err = loadJson("./test/fixtures/one-cluster.json", &clusterResponse)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, clusterResponse),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/software-tracks/6981a29d-8bce-45a7-ba95-efc7d3eeff84"),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]interface{}{
+						"data": map[string]interface{}{
+							"spec": map[string]string{"name": "Production"},
+							"info": map[string]string{"id": "6981a29d-8bce-45a7-ba95-efc7d3eeff84"},
+						},
+					}),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "cluster", "update",
+				"--cluster-name", "stunning-sole",
+				"--region-info", "region=us-west-2,num-nodes=1,num-cores=2,disk-size-gb=100,num-zones=3",
+			)
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say(`Multi-zone support is not enabled`))
+			session.Kill()
+		})
+	})
+
 	AfterEach(func() {
 		os.Args = args
 		server.Close()
+		os.Unsetenv("YBM_FF_MULTI_ZONE_SUPPORT")
 	})
 
 })
+
+func setListClustersHandler(server *ghttp.Server, statusCode int, listResponse openapi.ClusterListResponse) {
+	server.SetHandler(2,
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+			ghttp.RespondWithJSONEncodedPtr(&statusCode, listResponse),
+		),
+	)
+}
+
+func appendDescribeClusterHandlers(server *ghttp.Server, statusCode int) {
+	var responseNetworkAllowList openapi.NetworkAllowListListResponse
+	var responseNodes openapi.ClusterNodesResponse
+	var responseCMK openapi.CMKResponse
+	var responseCluster openapi.ClusterResponse
+
+	err := loadJson("./test/fixtures/allow-list.json", &responseNetworkAllowList)
+	Expect(err).ToNot(HaveOccurred())
+	err = loadJson("./test/fixtures/nodes.json", &responseNodes)
+	Expect(err).ToNot(HaveOccurred())
+	err = loadJson("./test/fixtures/aws_cmk.json", &responseCMK)
+	Expect(err).ToNot(HaveOccurred())
+	err = loadJson("./test/fixtures/one-cluster.json", &responseCluster)
+	Expect(err).ToNot(HaveOccurred())
+
+	clusterPath := "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"
+	server.AppendHandlers(
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest(http.MethodGet, clusterPath+"/allow-lists"),
+			ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNetworkAllowList),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest(http.MethodGet, clusterPath+"/nodes"),
+			ghttp.RespondWithJSONEncodedPtr(&statusCode, responseNodes),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest(http.MethodGet, clusterPath+"/cmks"),
+			ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCMK),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest(http.MethodGet, clusterPath),
+			ghttp.RespondWithJSONEncodedPtr(&statusCode, responseCluster),
+		),
+	)
+}

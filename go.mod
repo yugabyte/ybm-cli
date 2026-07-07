@@ -1,8 +1,6 @@
 module github.com/yugabyte/ybm-cli
 
-go 1.24.0
-
-toolchain go1.24.1
+go 1.25.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
@@ -15,7 +13,7 @@ require (
 	github.com/jayco/go-emoji-flag v0.0.0-20190810054606-01604da018da
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/onsi/ginkgo/v2 v2.28.0
-	github.com/onsi/gomega v1.41.0
+	github.com/onsi/gomega v1.42.1
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron v1.2.0
@@ -23,10 +21,10 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
-	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20260520095914-28efb7c08f0d
+	github.com/yugabyte/yugabytedb-managed-go-client-internal v0.0.0-20260702030517-8ec143de288e
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/mod v0.32.0
-	golang.org/x/term v0.39.0
+	golang.org/x/term v0.44.0
 	gotest.tools/v3 v3.4.0
 )
 
@@ -74,11 +72,11 @@ require (
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	golang.org/x/crypto v0.47.0 // indirect
-	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
+	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.36.7 // indirect

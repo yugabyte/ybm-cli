@@ -34,6 +34,7 @@ const (
 	PITR_RESTORE                  FeatureFlag = "PITR_RESTORE"
 	DR                            FeatureFlag = "DR"
 	BACKUP_REPLICATION_GCP_TARGET FeatureFlag = "BACKUP_REPLICATION_GCP_TARGET"
+	MULTI_ZONE_SUPPORT            FeatureFlag = "MULTI_ZONE_SUPPORT"
 )
 
 func (f FeatureFlag) String() string {

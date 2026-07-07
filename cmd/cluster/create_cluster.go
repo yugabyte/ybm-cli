@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	encryption "github.com/yugabyte/ybm-cli/cmd/cluster/encryption"
+	"github.com/yugabyte/ybm-cli/cmd/util"
 	ybmAuthClient "github.com/yugabyte/ybm-cli/internal/client"
 	"github.com/yugabyte/ybm-cli/internal/formatter"
 	ybmclient "github.com/yugabyte/yugabytedb-managed-go-client-internal"
@@ -90,6 +91,14 @@ var createClusterCmd = &cobra.Command{
 					case "disk-iops":
 						if len(strings.TrimSpace(val)) != 0 {
 							regionInfoMap["disk-iops"] = val
+						}
+					case "num-zones":
+						if util.IsFeatureFlagEnabled(util.MULTI_ZONE_SUPPORT) {
+							if len(strings.TrimSpace(val)) != 0 {
+								regionInfoMap["num-zones"] = val
+							}
+						} else {
+							logrus.Fatalln("Multi-zone support is not enabled")
 						}
 					}
 				}
@@ -221,7 +230,7 @@ func init() {
 	If specified, all parameters for that provider are mandatory.`)
 	createClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
 	createClusterCmd.Flags().Int32("num-faults-to-tolerate", 0, "[OPTIONAL] The number of domain faults to tolerate for the level specified. The possible values are 0 for NONE, 1 for ZONE and [1-3] for anything else. Defaults to 0 for NONE, 1 otherwise.")
-	createClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
+	createClusterCmd.Flags().StringArray("region-info", []string{}, regionInfoFlagDescription(false))
 	createClusterCmd.MarkFlagRequired("region-info")
 	createClusterCmd.Flags().String("preferred-region", "", "[OPTIONAL] The preferred region in a multi region cluster. The preferred region handles all read and write requests from clients.")
 	createClusterCmd.Flags().String("default-region", "", "[OPTIONAL] The primary region in a partition-by-region cluster. The primary region is where all the tables not created in a tablespace reside.")

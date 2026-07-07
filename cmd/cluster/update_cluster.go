@@ -109,6 +109,14 @@ var updateClusterCmd = &cobra.Command{
 								cmdHasBackupReplication = true
 							}
 						}
+					case "num-zones":
+						if util.IsFeatureFlagEnabled(util.MULTI_ZONE_SUPPORT) {
+							if len(strings.TrimSpace(val)) != 0 {
+								regionInfoMap["num-zones"] = val
+							}
+						} else {
+							logrus.Fatalln("Multi-zone support is not enabled")
+						}
 					}
 				}
 
@@ -210,11 +218,7 @@ func init() {
 	updateClusterCmd.Flags().String("new-name", "", "[OPTIONAL] The new name to be given to the cluster.")
 	updateClusterCmd.Flags().String("cloud-provider", "", "[OPTIONAL] The cloud provider where database needs to be deployed. AWS, AZURE or GCP.")
 	updateClusterCmd.Flags().String("cluster-type", "", "[OPTIONAL] Cluster replication type. SYNCHRONOUS or GEO_PARTITIONED.")
-	if util.IsFeatureFlagEnabled(util.BACKUP_REPLICATION_GCP_TARGET) {
-		updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only),backup-replication-gcp-target=<gcp-target>. region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
-	} else {
-		updateClusterCmd.Flags().StringArray("region-info", []string{}, `Region information for the cluster, provided as key-value pairs. Arguments are region=<region-name>,num-nodes=<number-of-nodes>,vpc=<vpc-name>,num-cores=<num-cores>,disk-size-gb=<disk-size-gb>,disk-iops=<disk-iops> (AWS only). region, num-nodes, num-cores, disk-size-gb are required. Specify one --region-info flag for each region in the cluster.`)
-	}
+	updateClusterCmd.Flags().StringArray("region-info", []string{}, regionInfoFlagDescription(true))
 	updateClusterCmd.MarkFlagRequired("region-info")
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
@@ -290,6 +294,11 @@ func populateFlags(cmd *cobra.Command, originalSpec ybmclient.ClusterSpec, track
 			if util.IsFeatureFlagEnabled(util.BACKUP_REPLICATION_GCP_TARGET) {
 				if replicationTarget, ok_ := clusterRegionInfo.GetBackupReplicationGcpTargetOk(); ok_ && replicationTarget != nil {
 					regionInfo += ",backup-replication-gcp-target=" + *replicationTarget
+				}
+			}
+			if util.IsFeatureFlagEnabled(util.MULTI_ZONE_SUPPORT) {
+				if numZones, ok_ := clusterRegionInfo.PlacementInfo.GetNumZonesOk(); ok_ && numZones != nil {
+					regionInfo += ",num-zones=" + strconv.Itoa(int(*numZones))
 				}
 			}
 			regionInfoList = append(regionInfoList, regionInfo)
