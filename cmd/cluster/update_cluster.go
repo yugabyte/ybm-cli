@@ -162,6 +162,7 @@ var updateClusterCmd = &cobra.Command{
 
 		clusterVersion := originalSpec.ClusterInfo.GetVersion()
 		clusterSpec.ClusterInfo.SetVersion(clusterVersion)
+		clusterSpec.ClusterInfo.SetEnterpriseSecurity(originalSpec.ClusterInfo.GetEnterpriseSecurity())
 
 		resp, r, err = authApi.EditCluster(clusterID).ClusterSpec(*clusterSpec).Execute()
 		if err != nil {
