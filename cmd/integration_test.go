@@ -168,6 +168,126 @@ test      VICTORIAMETRICS   http://victoriametrics.yourcompany.com`))
 
 	})
 
+	Context("When type is Tsuga", func() {
+		It("should create the config", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-tsuga.json", &responseIntegration)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.VerifyJSON(`{"name":"test","type":"TSUGA","tsuga_spec":{"endpoint":"https://tsuga.yourcompany.com","api_token":"abcdefghijklmnopqrstuvwxyz0123456789"}}`),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegration),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "tsuga", "--tsuga-spec", "endpoint=https://tsuga.yourcompany.com,api-token=abcdefghijklmnopqrstuvwxyz0123456789")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
+Name      Type      Endpoint                        API Token
+test      TSUGA     https://tsuga.yourcompany.com   abcdefghijkl...tuvwxyz0123456789`))
+			session.Kill()
+		})
+		It("should return error when arg tsuga-spec not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "tsuga")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("tsuga-spec is required for tsuga sink"))
+			session.Kill()
+		})
+		It("should return error when field endpoint not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "tsuga", "--tsuga-spec", "api-token=abcdef")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:endpoint is a required field for tsuga-spec$)"))
+			session.Kill()
+		})
+		It("should return error when field api-token not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "tsuga", "--tsuga-spec", "endpoint=https://tsuga.yourcompany.com")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:api-token is a required field for tsuga-spec$)"))
+			session.Kill()
+		})
+	})
+
+	Context("When type is Mimir", func() {
+		It("should create the config with org-id", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-mimir.json", &responseIntegration)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.VerifyJSON(`{"name":"test","type":"MIMIR","mimir_spec":{"endpoint":"https://mimir.yourcompany.com/otlp","api_token":"Bearer abcdefghijklmnopqrstuvwxyz0123456789","org_id":"my-tenant"}}`),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegration),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "mimir", "--mimir-spec", "endpoint=https://mimir.yourcompany.com/otlp,api-token=Bearer abcdefghijklmnopqrstuvwxyz0123456789,org-id=my-tenant")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created
+Name      Type      Endpoint                             Org ID      API Token
+test      MIMIR     https://mimir.yourcompany.com/otlp   my-tenant   Bearer abcde...tuvwxyz0123456789`))
+			session.Kill()
+		})
+		It("should create the config without org-id using Basic auth", func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/metrics-exporter-mimir.json", &responseIntegration)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodPost, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/telemetry-providers"),
+					ghttp.VerifyJSON(`{"name":"test","type":"MIMIR","mimir_spec":{"endpoint":"https://mimir.yourcompany.com/otlp","api_token":"Basic dXNlcjpwYXNz"}}`),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseIntegration),
+				),
+			)
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "mimir", "--mimir-spec", "endpoint=https://mimir.yourcompany.com/otlp,api-token=Basic dXNlcjpwYXNz")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Out).Should(gbytes.Say(`The Integration test has been created`))
+			session.Kill()
+		})
+		It("should return error when arg mimir-spec not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "mimir")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("mimir-spec is required for mimir sink"))
+			session.Kill()
+		})
+		It("should return error when field endpoint not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "mimir", "--mimir-spec", "api-token=Bearer abcdef")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:endpoint is a required field for mimir-spec$)"))
+			session.Kill()
+		})
+		It("should return error when field api-token not set", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "mimir", "--mimir-spec", "endpoint=https://mimir.yourcompany.com/otlp")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say("(?m:api-token is a required field for mimir-spec$)"))
+			session.Kill()
+		})
+		It("should return error when api-token has no Bearer/Basic prefix", func() {
+			cmd := exec.Command(compiledCLIPath, "integration", "create", "--config-name", "test", "--type", "mimir", "--mimir-spec", "endpoint=https://mimir.yourcompany.com/otlp,api-token=abcdefghijkl")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say(`api-token for mimir-spec must start with "Bearer " or "Basic "`))
+			session.Kill()
+		})
+	})
+
 	Context("When type is Grafana", func() {
 		It("should create the config", func() {
 			statusCode = 200
