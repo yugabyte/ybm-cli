@@ -39,6 +39,13 @@ ybm integration create [flags]
                                               	Please provide key value pairs as follows: 
                                               	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<path-prefix-ending-with-slash>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>
                                               	Note: path-prefix is required and must end with '/'. Use '/' for root. (default [])
+      --tsuga-spec stringToString             Configuration for Tsuga.
+                                              	Please provide key value pairs as follows:
+                                              	endpoint=<your-tsuga-endpoint-url>,api-token=<your-tsuga-api-token> (default [])
+      --mimir-spec stringToString             Configuration for Mimir.
+                                              	Please provide key value pairs as follows:
+                                              	endpoint=<your-mimir-otlp-endpoint-url>,api-token=<authorization-header-value>,org-id=<optional-mimir-tenant-org-id>
+                                              	Note: api-token is the full Authorization header value and must start with "Bearer " or "Basic ". (default [])
   -h, --help                                  help for create
 ```
 

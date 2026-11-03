@@ -186,6 +186,13 @@ func init() {
 	Please provide key value pairs as follows: 
 	bucket=<your-s3-bucket>,region=<aws-region>,access-key-id=<aws-access-key-id>,secret-access-key=<aws-secret-access-key>,path-prefix=<path-prefix-ending-with-slash>,file-prefix=<optional-file-prefix>,partition-strategy=<optional-partition-strategy>
 	Note: path-prefix is required and must end with '/'. Use '/' for root.`)
+	createIntegrationCmd.Flags().StringToString("tsuga-spec", nil, `Configuration for Tsuga.
+	Please provide key value pairs as follows:
+	endpoint=<your-tsuga-endpoint-url>,api-token=<your-tsuga-api-token>`)
+	createIntegrationCmd.Flags().StringToString("mimir-spec", nil, `Configuration for Mimir.
+	Please provide key value pairs as follows:
+	endpoint=<your-mimir-otlp-endpoint-url>,api-token=<authorization-header-value>,org-id=<optional-mimir-tenant-org-id>
+	Note: api-token is the full Authorization header value and must start with "Bearer " or "Basic ".`)
 
 	IntegrationCmd.AddCommand(listIntegrationCmd)
 
@@ -404,8 +411,45 @@ func setIntegrationConfiguration(cmd *cobra.Command, IntegrationName string, sin
 			s3Spec.SetPartitionStrategy(partitionStrategy)
 		}
 		IntegrationSpec.SetAwsS3Spec(*s3Spec)
+	case ybmclient.TELEMETRYPROVIDERTYPEENUM_TSUGA:
+		if !cmd.Flags().Changed("tsuga-spec") {
+			return nil, fmt.Errorf("tsuga-spec is required for tsuga sink")
+		}
+		tsugaSpecString, _ := cmd.Flags().GetStringToString("tsuga-spec")
+		endpoint := tsugaSpecString["endpoint"]
+		apiToken := tsugaSpecString["api-token"]
+		if len(endpoint) < 1 {
+			return nil, fmt.Errorf("endpoint is a required field for tsuga-spec")
+		}
+		if len(apiToken) < 1 {
+			return nil, fmt.Errorf("api-token is a required field for tsuga-spec")
+		}
+		tsugaSpec := ybmclient.NewTsugaTelemetryProviderSpec(apiToken, endpoint)
+		IntegrationSpec.SetTsugaSpec(*tsugaSpec)
+	case ybmclient.TELEMETRYPROVIDERTYPEENUM_MIMIR:
+		if !cmd.Flags().Changed("mimir-spec") {
+			return nil, fmt.Errorf("mimir-spec is required for mimir sink")
+		}
+		mimirSpecString, _ := cmd.Flags().GetStringToString("mimir-spec")
+		endpoint := mimirSpecString["endpoint"]
+		apiToken := mimirSpecString["api-token"]
+		orgId := mimirSpecString["org-id"]
+		if len(endpoint) < 1 {
+			return nil, fmt.Errorf("endpoint is a required field for mimir-spec")
+		}
+		if len(apiToken) < 1 {
+			return nil, fmt.Errorf("api-token is a required field for mimir-spec")
+		}
+		if !strings.HasPrefix(apiToken, "Bearer ") && !strings.HasPrefix(apiToken, "Basic ") {
+			return nil, fmt.Errorf("api-token for mimir-spec must start with \"Bearer \" or \"Basic \"")
+		}
+		mimirSpec := ybmclient.NewMimirTelemetryProviderSpec(apiToken, endpoint)
+		if len(orgId) > 0 {
+			mimirSpec.SetOrgId(orgId)
+		}
+		IntegrationSpec.SetMimirSpec(*mimirSpec)
 	default:
-		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics, sumologic, googlecloud or newrelic are accepted as third party sink for now")
+		return nil, fmt.Errorf("only datadog, grafana, googlecloud, prometheus, victoriametrics, sumologic, newrelic, aws_s3, tsuga or mimir are accepted as third party sink for now")
 	}
 	return IntegrationSpec, nil
 }

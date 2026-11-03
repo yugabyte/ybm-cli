@@ -1,0 +1,21 @@
+{
+    "data": {
+        "spec": {
+            "name": "test",
+            "type": "MIMIR",
+            "mimir_spec": {
+                "endpoint": "https://mimir.yourcompany.com/otlp",
+                "api_token": "Bearer abcdefghijklmnopqrstuvwxyz0123456789",
+                "org_id": "my-tenant"
+            }
+        },
+        "info": {
+            "id": "9e3fabbc-849c-4a77-bdb2-9422e712e7de",
+            "cluster_ids": [],
+            "metadata": {
+                "created_on": "2026-11-03T06:41:16.145Z",
+                "updated_on": "2026-11-03T06:41:16.145Z"
+            }
+        }
+    }
+}

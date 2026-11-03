@@ -29,6 +29,8 @@ const defaultIntegrationPrometheus = "table {{.Name}}\t{{.Type}}\t{{.PrometheusE
 const defaultIntegrationVictoriaMetrics = "table {{.Name}}\t{{.Type}}\t{{.VictoriaMetricsEndpoint}}"
 const defaultIntegrationGrafana = "table {{.Name}}\t{{.Type}}\t{{.Zone}}\t{{.AccessTokenPolicy}}\t{{.InstanceId}}\t{{.OrgSlug}}"
 const defaultIntegrationSumologic = "table {{.Name}}\t{{.Type}}\t{{.AccessKey}}\t{{.AccessID}}\t{{.InstallationToken}}"
+const defaultIntegrationTsuga = "table {{.Name}}\t{{.Type}}\t{{.TsugaEndpoint}}\t{{.TsugaApiToken}}"
+const defaultIntegrationMimir = "table {{.Name}}\t{{.Type}}\t{{.MimirEndpoint}}\t{{.MimirOrgId}}\t{{.MimirApiToken}}"
 
 type IntegrationContext struct {
 	HeaderContext
@@ -51,6 +53,10 @@ func NewIntegrationFormat(source string, providerType string) Format {
 		format = defaultIntegrationGrafana
 	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_SUMOLOGIC):
 		format = defaultIntegrationSumologic
+	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_TSUGA):
+		format = defaultIntegrationTsuga
+	case string(ybmclient.TELEMETRYPROVIDERTYPEENUM_MIMIR):
+		format = defaultIntegrationMimir
 	}
 
 	switch source {
@@ -78,6 +84,11 @@ func NewIntegrationContext() *IntegrationContext {
 		"AccessKey":               "Access Key",
 		"PrometheusEndpoint":      "Endpoint",
 		"VictoriaMetricsEndpoint": "Endpoint",
+		"TsugaEndpoint":           "Endpoint",
+		"TsugaApiToken":           "API Token",
+		"MimirEndpoint":           "Endpoint",
+		"MimirApiToken":           "API Token",
+		"MimirOrgId":              "Org ID",
 	}
 	return &IntegrationCtx
 }
@@ -162,4 +173,27 @@ func (tp *IntegrationContext) PrometheusEndpoint() string {
 // Victoria Metrics
 func (tp *IntegrationContext) VictoriaMetricsEndpoint() string {
 	return tp.tp.Spec.GetVictoriametricsSpec().Endpoint
+}
+
+// Tsuga
+func (tp *IntegrationContext) TsugaEndpoint() string {
+	return tp.tp.Spec.GetTsugaSpec().Endpoint
+}
+
+func (tp *IntegrationContext) TsugaApiToken() string {
+	return IntegrationShortenKey(tp.tp.Spec.GetTsugaSpec().ApiToken, 32)
+}
+
+// Mimir
+func (tp *IntegrationContext) MimirEndpoint() string {
+	return tp.tp.Spec.GetMimirSpec().Endpoint
+}
+
+func (tp *IntegrationContext) MimirApiToken() string {
+	return IntegrationShortenKey(tp.tp.Spec.GetMimirSpec().ApiToken, 32)
+}
+
+func (tp *IntegrationContext) MimirOrgId() string {
+	mimirSpec := tp.tp.Spec.GetMimirSpec()
+	return mimirSpec.GetOrgId()
 }
