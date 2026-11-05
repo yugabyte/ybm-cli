@@ -498,6 +498,83 @@ test-cli-2-n3   us-west-2[us-west-2c]   💚        ❌        ✅        ❌   
 		})
 	})
 
+	Describe("Updating cluster database version", func() {
+		BeforeEach(func() {
+			statusCode = 200
+			err := loadJson("./test/fixtures/list-clusters.json", &responseListCluster)
+			Expect(err).ToNot(HaveOccurred())
+			var clusterResponse openapi.ClusterResponse
+			err = loadJson("./test/fixtures/one-cluster.json", &clusterResponse)
+			Expect(err).ToNot(HaveOccurred())
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, responseListCluster),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/projects/78d4459c-0f45-47a5-899a-45ddf43eba6e/clusters/5f80730f-ba3f-4f7e-8c01-f8fa4c90dad8"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, clusterResponse),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/software-tracks/6981a29d-8bce-45a7-ba95-efc7d3eeff84"),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]interface{}{
+						"data": map[string]interface{}{
+							"spec": map[string]string{"name": "Extended"},
+							"info": map[string]string{"id": "6981a29d-8bce-45a7-ba95-efc7d3eeff84"},
+						},
+					}),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(http.MethodGet, "/api/public/v1/accounts/340af43a-8a7c-4659-9258-4876fd6a207b/software-tracks"),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]interface{}{
+						"data": []map[string]interface{}{
+							{
+								"spec": map[string]string{"name": "Extended"},
+								"info": map[string]string{"id": "6981a29d-8bce-45a7-ba95-efc7d3eeff84"},
+							},
+							{
+								"spec": map[string]string{"name": "Rapid"},
+								"info": map[string]string{"id": "9e3fbf3e-6e1b-4ad4-a2f0-0f1d4d0d8f6c"},
+							},
+						},
+					}),
+				),
+			)
+		})
+
+		It("should reject a different database version", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "update",
+				"--cluster-name", "stunning-sole",
+				"--database-version", "Rapid",
+				"--region-info", "region=us-west-2,num-nodes=1,num-cores=2,disk-size-gb=100",
+			)
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			Expect(session.Err).Should(gbytes.Say(`Flag --database-version has been deprecated`))
+			Expect(session.Err).Should(gbytes.Say(`The database version of a cluster can't be changed. Cluster stunning-sole uses database version Extended.`))
+			Expect(session.ExitCode()).ToNot(Equal(0))
+			for _, req := range server.ReceivedRequests() {
+				Expect(req.Method).To(Equal(http.MethodGet))
+			}
+			session.Kill()
+		})
+
+		It("should accept the cluster's current database version", func() {
+			cmd := exec.Command(compiledCLIPath, "cluster", "update",
+				"--cluster-name", "stunning-sole",
+				"--database-version", "Extended",
+				"--region-info", "region=us-west-2,num-nodes=1,num-cores=2,disk-size-gb=100,num-zones=3",
+			)
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+			session.Wait(2)
+			// The update gets past the database version check and stops at the next validation.
+			Expect(session.Err).Should(gbytes.Say(`Multi-zone support is not enabled`))
+			session.Kill()
+		})
+	})
+
 	AfterEach(func() {
 		os.Args = args
 		server.Close()
