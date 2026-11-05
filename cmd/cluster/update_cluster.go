@@ -59,6 +59,16 @@ var updateClusterCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 		}
+		if cmd.Flags().Changed("database-version") {
+			requestedTrackName, _ := cmd.Flags().GetString("database-version")
+			requestedTrackID, err := authApi.GetTrackIdByName(requestedTrackName)
+			if err != nil {
+				logrus.Fatal(err)
+			}
+			if requestedTrackID != trackID {
+				logrus.Fatalf("The database version of a cluster can't be changed. Cluster %s uses database version %s.", clusterName, trackName)
+			}
+		}
 		isNameChange := isNameUpdateOnly(cmd)
 		populateFlags(cmd, originalSpec, trackName, authApi)
 
@@ -223,7 +233,8 @@ func init() {
 	updateClusterCmd.MarkFlagRequired("region-info")
 	updateClusterCmd.Flags().String("cluster-tier", "", "[OPTIONAL] The tier of the cluster. Sandbox or Dedicated.")
 	updateClusterCmd.Flags().String("fault-tolerance", "", "[OPTIONAL] Fault tolerance of the cluster. The possible values are NONE, NODE, ZONE, or REGION. Default NONE.")
-	updateClusterCmd.Flags().String("database-version", "", "[OPTIONAL] Database software track for the cluster. Supported values: Extended, Rapid.\nNOTE: Deprecated track names are no longer accepted. Production and Innovation were removed in favor of Extended. Preview and Early Access were removed in favor of Rapid.")
+	updateClusterCmd.Flags().String("database-version", "", "[DEPRECATED] The database version of a cluster can't be changed. Only the cluster's current database version is accepted.")
+	updateClusterCmd.Flags().MarkDeprecated("database-version", "the database version of a cluster can't be changed.")
 	updateClusterCmd.Flags().BoolP("force", "f", false, "Bypass the prompt for non-interactive usage")
 
 }
