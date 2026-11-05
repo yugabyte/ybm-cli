@@ -63,7 +63,7 @@ var updateClusterCmd = &cobra.Command{
 			requestedTrackName, _ := cmd.Flags().GetString("database-version")
 			requestedTrackID, err := authApi.GetTrackIdByName(requestedTrackName)
 			if err != nil {
-				logrus.Fatal(err)
+				logrus.Fatal(ybmAuthClient.GetApiErrorDetails(err))
 			}
 			if requestedTrackID != trackID {
 				logrus.Fatalf("The database version of a cluster can't be changed. Cluster %s uses database version %s.", clusterName, trackName)
